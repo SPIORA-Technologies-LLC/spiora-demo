@@ -1,8 +1,11 @@
 import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 import { DemoCredentials } from "@/components/auth/DemoCredentials";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
 import { branding, getProductDescription } from "@/config/branding";
+import type { BrandingLocale } from "@/config/branding";
 import { getSession } from "@/lib/auth/session";
 import styles from "./login.module.css";
 
@@ -40,6 +43,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect("/dashboard");
   }
 
+  const locale = (await getLocale()) as BrandingLocale;
   const params = await searchParams;
   const nextPath =
     params.next && params.next.startsWith("/") ? params.next : undefined;
@@ -47,6 +51,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <div className={styles.page} style={pageFallback}>
       <div className={styles.card} style={cardFallback}>
+        <div className={styles.localeRow}>
+          <LanguageSwitcher />
+        </div>
         <div className={styles.logoWrap}>
           <Logo priority size="lg" />
         </div>
@@ -54,7 +61,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           {branding.productName}
         </h1>
         <p className={styles.subtitle} style={{ color: "#cbd5e0" }}>
-          {getProductDescription("ru")}
+          {getProductDescription(locale)}
         </p>
         <LoginForm nextPath={nextPath} />
         {process.env.NODE_ENV !== "production" ? <DemoCredentials /> : null}

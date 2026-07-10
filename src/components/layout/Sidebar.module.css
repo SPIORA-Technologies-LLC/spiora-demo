@@ -101,3 +101,16 @@
   opacity: 0.75;
   flex-shrink: 0;
 }
+
+.mobileLocale {
+  display: none;
+  padding-top: 0.75rem;
+  margin-top: auto;
+}
+
+@media (max-width: 900px) {
+  .mobileLocale {
+    display: flex;
+    justify-content: center;
+  }
+}

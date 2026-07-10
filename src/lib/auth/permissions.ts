@@ -1,16 +1,18 @@
 import type { NavItem } from "@/components/layout/Sidebar";
-import { branding, getDemoCompanySiteLabel } from "@/config/branding";
+import { branding } from "@/config/branding";
 import type { SessionUser, UserRole } from "./types";
 
 const NAV_DASHBOARD: NavItem = {
   href: "/dashboard",
-  label: "Dashboard",
+  labelKey: "dashboard",
+  labelNs: "nav",
   icon: "fa-solid fa-gauge-high",
 };
 
 const NAV_CLIENTS: NavItem = {
   href: "/clients",
-  label: "Клиенты",
+  labelKey: "clients",
+  labelNs: "nav",
   icon: "fa-solid fa-users",
 };
 
@@ -28,31 +30,36 @@ const NAV_NEW_FORMGRID_CLIENTS: NavItem = {
 
 const NAV_AI: NavItem = {
   href: "/ai-workspace",
-  label: "AI Workspace",
+  labelKey: "aiWorkspace",
+  labelNs: "nav",
   icon: "fa-solid fa-wand-magic-sparkles",
 };
 
 const NAV_KB: NavItem = {
   href: "/knowledge-base",
-  label: "Knowledge Base",
+  labelKey: "knowledgeBase",
+  labelNs: "nav",
   icon: "fa-solid fa-book",
 };
 
 const NAV_TASKS: NavItem = {
   href: "/tasks",
-  label: "Задачи",
+  labelKey: "tasks",
+  labelNs: "nav",
   icon: "fa-solid fa-list-check",
 };
 
 const NAV_CALENDAR: NavItem = {
   href: "/calendar",
-  label: "Календарь",
+  labelKey: "calendar",
+  labelNs: "nav",
   icon: "fa-solid fa-calendar-days",
 };
 
 const NAV_TEAM_CHAT: NavItem = {
   href: "/team-chat",
-  label: "Командный чат",
+  labelKey: "teamChat",
+  labelNs: "nav",
   icon: "fa-solid fa-comments",
 };
 
@@ -76,25 +83,29 @@ const NAV_CHECKUPS_EREVAN: NavItem = {
 
 const NAV_ANALYTICS: NavItem = {
   href: "/analytics",
-  label: "Analytics",
+  labelKey: "analytics",
+  labelNs: "nav",
   icon: "fa-solid fa-chart-pie",
 };
 
 const NAV_TEAM: NavItem = {
   href: "/team",
-  label: "Team",
+  labelKey: "team",
+  labelNs: "nav",
   icon: "fa-solid fa-people-group",
 };
 
 const NAV_SETTINGS: NavItem = {
   href: "/settings",
-  label: "Settings",
+  labelKey: "settings",
+  labelNs: "nav",
   icon: "fa-solid fa-gear",
 };
 
 const NAV_WEBSITE: NavItem = {
   href: branding.demoCompanyWebsiteUrl,
-  label: getDemoCompanySiteLabel(),
+  labelKey: "demoCompanySite",
+  labelNs: "shell",
   icon: "fa-solid fa-globe",
   external: true,
 };

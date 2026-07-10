@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "description": "Corporate Digital Workspace — Spiora"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Clients",
+    "tasks": "Tasks",
+    "calendar": "Calendar",
+    "teamChat": "Team Chat",
+    "aiWorkspace": "AI Workspace",
+    "knowledgeBase": "Knowledge Base",
+    "analytics": "Analytics",
+    "team": "Team",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "logout": "Logout"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "close": "Close",
+    "back": "Back",
+    "continue": "Continue",
+    "loading": "Loading",
+    "retry": "Retry",
+    "confirm": "Confirm"
+  },
+  "states": {
+    "noData": "No data",
+    "loading": "Loading",
+    "error": "Something went wrong",
+    "accessDenied": "Access denied",
+    "notFound": "Not found",
+    "savedSuccessfully": "Saved successfully",
+    "deletedSuccessfully": "Deleted successfully"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signOut": "Sign out",
+    "signingIn": "Signing in…",
+    "invalidCredentials": "Invalid email or password.",
+    "missingCredentials": "Please enter email and password.",
+    "emailNotRegistered": "This email is not registered. Contact your platform administrator.",
+    "accountDisabled": "Access for this account is disabled. Contact your administrator.",
+    "demoEnvironment": "Demo environment",
+    "demoAccountsTitle": "Demo accounts (local development)",
+    "demoPasswordHint": "Password is set in AUTH_PASSWORD_* variables in .env.local (not stored in source code). Other emails will not work.",
+    "forgotPasswordHint": "Forgot your password? Contact your platform administrator — they can reset it in Settings."
+  },
+  "shell": {
+    "search": "Search…",
+    "searchAria": "Search",
+    "userFallback": "User",
+    "teamFallback": "Team",
+    "mainNavAria": "Main navigation",
+    "roleOwner": "Owner",
+    "roleManager": "Manager",
+    "demoCompanySite": "Northstar Mobility website"
+  },
+  "notifications": {
+    "ariaLabel": "Notifications",
+    "centerAria": "Notification center",
+    "panelTitle": "Notifications",
+    "loading": "Loading…",
+    "empty": "No new notifications",
+    "markAllRead": "Mark all as read",
+    "clearRead": "Clear viewed",
+    "soundOn": "Sound on",
+    "soundOff": "Sound off",
+    "soundOnTitle": "Disable notification sound",
+    "soundOffTitle": "Enable notification sound",
+    "closeItem": "Close notification"
+  },
+  "language": {
+    "switcherLabel": "Language",
+    "en": "EN",
+    "ru": "RU"
+  }
+}

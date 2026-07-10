@@ -1,6 +1,10 @@
+import createIntlMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
+import { routing } from "@/i18n/config";
 import { canAccessPath } from "@/lib/auth/permissions";
 import { getSessionFromToken } from "@/lib/auth/session";
+
+const intlMiddleware = createIntlMiddleware(routing);
 
 const PUBLIC_PATHS = ["/login", "/join", "/api/webhooks"];
 
@@ -36,7 +40,12 @@ function isProtectedPath(pathname: string) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("ss_session")?.value;
+
+  if (pathname.startsWith("/api/locale")) {
+    return NextResponse.next();
+  }
+
+  const token = request.cookies.get("spiora_session")?.value;
   const session = await getSessionFromToken(token);
 
   if (pathname === "/") {
@@ -51,10 +60,7 @@ export async function middleware(request: NextRequest) {
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
     }
-    return NextResponse.next();
-  }
-
-  if (isProtectedPath(pathname)) {
+  } else if (isProtectedPath(pathname)) {
     if (!session) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -69,7 +75,7 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  return intlMiddleware(request);
 }
 
 export const config = {

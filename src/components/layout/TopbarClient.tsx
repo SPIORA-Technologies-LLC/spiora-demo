@@ -1,6 +1,8 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { signOutAction } from "@/app/login/actions";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import styles from "./Topbar.module.css";
 
@@ -15,12 +17,14 @@ export type TopbarClientProps = {
 
 export function TopbarClient({
   sectionTitle,
-  userName = "Пользователь",
-  userRole = "Команда",
-  searchPlaceholder = "Поиск…",
+  userName,
+  userRole,
+  searchPlaceholder,
   defaultSearchValue,
   onSearchChange,
 }: TopbarClientProps) {
+  const t = useTranslations();
+
   return (
     <header className={styles.topbar}>
       <div className={styles.leading}>
@@ -35,30 +39,39 @@ export function TopbarClient({
         <input
           type="search"
           className={styles.search}
-          placeholder={searchPlaceholder}
+          placeholder={searchPlaceholder ?? t("shell.search")}
           defaultValue={defaultSearchValue}
           onChange={
             onSearchChange
               ? (e) => onSearchChange(e.target.value)
               : undefined
           }
-          aria-label="Поиск"
+          aria-label={t("shell.searchAria")}
         />
       </div>
 
       <div className={styles.user}>
+        <LanguageSwitcher />
         <NotificationBell />
         <div className={styles.avatar} aria-hidden>
           <i className="fa-solid fa-user" />
         </div>
         <div className={styles.userMeta}>
-          <span className={styles.userName}>{userName}</span>
-          <span className={styles.userRole}>{userRole}</span>
+          <span className={styles.userName}>
+            {userName ?? t("shell.userFallback")}
+          </span>
+          <span className={styles.userRole}>
+            {userRole ?? t("shell.teamFallback")}
+          </span>
         </div>
         <form action={signOutAction}>
-          <button type="submit" className={styles.logout} title="Выйти">
+          <button
+            type="submit"
+            className={styles.logout}
+            title={t("nav.logout")}
+          >
             <i className="fa-solid fa-right-from-bracket" aria-hidden />
-            <span className={styles.logoutLabel}>Выйти</span>
+            <span className={styles.logoutLabel}>{t("nav.logout")}</span>
           </button>
         </form>
       </div>

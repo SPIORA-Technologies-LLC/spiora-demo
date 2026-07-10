@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "description": "Корпоративное цифровое пространство — Spiora"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "clients": "Клиенты",
+    "tasks": "Задачи",
+    "calendar": "Календарь",
+    "teamChat": "Командный чат",
+    "aiWorkspace": "AI Workspace",
+    "knowledgeBase": "Knowledge Base",
+    "analytics": "Analytics",
+    "team": "Team",
+    "settings": "Settings",
+    "notifications": "Уведомления",
+    "logout": "Выйти"
+  },
+  "actions": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "create": "Создать",
+    "search": "Поиск",
+    "close": "Закрыть",
+    "back": "Назад",
+    "continue": "Продолжить",
+    "loading": "Загрузка",
+    "retry": "Повторить",
+    "confirm": "Подтвердить"
+  },
+  "states": {
+    "noData": "Нет данных",
+    "loading": "Загрузка",
+    "error": "Произошла ошибка",
+    "accessDenied": "Доступ запрещён",
+    "notFound": "Не найдено",
+    "savedSuccessfully": "Сохранено",
+    "deletedSuccessfully": "Удалено"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Пароль",
+    "signIn": "Войти",
+    "signOut": "Выйти",
+    "signingIn": "Вход…",
+    "invalidCredentials": "Неверный email или пароль.",
+    "missingCredentials": "Введите email и пароль.",
+    "emailNotRegistered": "Этот email не зарегистрирован. Обратитесь к администратору платформы.",
+    "accountDisabled": "Доступ к платформе для этого аккаунта отключён. Обратитесь к администратору.",
+    "demoEnvironment": "Демо-окружение",
+    "demoAccountsTitle": "Демо-учётные записи (локальная разработка)",
+    "demoPasswordHint": "Пароль задаётся в переменных AUTH_PASSWORD_* в .env.local (не хранится в исходном коде). Другие email не подойдут.",
+    "forgotPasswordHint": "Забыли пароль? Напишите администратору платформы — он сбросит его в разделе Settings."
+  },
+  "shell": {
+    "search": "Поиск…",
+    "searchAria": "Поиск",
+    "userFallback": "Пользователь",
+    "teamFallback": "Команда",
+    "mainNavAria": "Основная навигация",
+    "roleOwner": "Владелец",
+    "roleManager": "Менеджер",
+    "demoCompanySite": "Сайт Northstar Mobility"
+  },
+  "notifications": {
+    "ariaLabel": "Уведомления",
+    "centerAria": "Центр уведомлений",
+    "panelTitle": "Уведомления",
+    "loading": "Загрузка…",
+    "empty": "Новых уведомлений нет.",
+    "markAllRead": "Прочитать все",
+    "clearRead": "Очистить просмотренные",
+    "soundOn": "🔔 Звук вкл.",
+    "soundOff": "🔕 Звук выкл.",
+    "soundOnTitle": "Отключить звук уведомлений",
+    "soundOffTitle": "Включить звук уведомлений",
+    "closeItem": "Закрыть уведомление"
+  },
+  "language": {
+    "switcherLabel": "Язык",
+    "en": "EN",
+    "ru": "RU"
+  }
+}

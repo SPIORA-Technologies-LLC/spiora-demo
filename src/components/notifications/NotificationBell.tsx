@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import {
   NOTIFICATION_TYPE_ICONS,
@@ -19,6 +20,7 @@ import styles from "./NotificationBell.module.css";
 
 export function NotificationBell() {
   const router = useRouter();
+  const t = useTranslations("notifications");
   const ctx = useNotificationsOptional();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -78,7 +80,7 @@ export function NotificationBell() {
           void unlockNotificationAudio();
           setOpen((value) => !value);
         }}
-        aria-label="Уведомления"
+        aria-label={t("ariaLabel")}
         aria-expanded={open}
         disabled={!mounted || !ctx}
       >
@@ -92,10 +94,10 @@ export function NotificationBell() {
         <div
           className={styles.panel}
           role="dialog"
-          aria-label="Центр уведомлений"
+          aria-label={t("centerAria")}
         >
           <header className={styles.panelHeader}>
-            <h3 className={styles.panelTitle}>Уведомления</h3>
+            <h3 className={styles.panelTitle}>{t("panelTitle")}</h3>
             <div className={styles.panelActions}>
               <button
                 type="button"
@@ -106,13 +108,9 @@ export function NotificationBell() {
                   setNotificationSoundEnabled(next);
                   if (next) void unlockNotificationAudio();
                 }}
-                title={
-                  soundEnabled
-                    ? "Отключить звук уведомлений"
-                    : "Включить звук уведомлений"
-                }
+                title={soundEnabled ? t("soundOnTitle") : t("soundOffTitle")}
               >
-                {soundEnabled ? "🔔 Звук вкл." : "🔕 Звук выкл."}
+                {soundEnabled ? t("soundOn") : t("soundOff")}
               </button>
               {unread > 0 ? (
                 <button
@@ -120,7 +118,7 @@ export function NotificationBell() {
                   className={styles.markAll}
                   onClick={() => void ctx.markAllRead()}
                 >
-                  Прочитать все
+                  {t("markAllRead")}
                 </button>
               ) : null}
               {hasRead ? (
@@ -129,7 +127,7 @@ export function NotificationBell() {
                   className={styles.clearRead}
                   onClick={() => void ctx.clearRead()}
                 >
-                  Очистить просмотренные
+                  {t("clearRead")}
                 </button>
               ) : null}
             </div>
@@ -137,9 +135,9 @@ export function NotificationBell() {
 
           <div className={styles.list}>
             {loading && unreadNotifications.length === 0 ? (
-              <p className={styles.empty}>Загрузка…</p>
+              <p className={styles.empty}>{t("loading")}</p>
             ) : unreadNotifications.length === 0 ? (
-              <p className={styles.empty}>Новых уведомлений нет.</p>
+              <p className={styles.empty}>{t("empty")}</p>
             ) : (
               unreadNotifications.map((item) => {
                 const isSuccess = isSuccessNotification(item.type);
@@ -190,7 +188,7 @@ export function NotificationBell() {
                     <button
                       type="button"
                       className={styles.closeBtn}
-                      aria-label="Закрыть уведомление"
+                      aria-label={t("closeItem")}
                       onClick={() => void ctx.removeNotification(item.id)}
                     >
                       ×

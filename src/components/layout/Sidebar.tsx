@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
 import { getNavItemsForRole } from "@/lib/auth/permissions";
 import type { UserRole } from "@/lib/auth/types";
@@ -10,7 +12,9 @@ import styles from "./Sidebar.module.css";
 
 export type NavItem = {
   href: string;
-  label: string;
+  label?: string;
+  labelKey?: string;
+  labelNs?: "nav" | "shell";
   icon: string;
   /** Внешняя ссылка (открывается в новой вкладке) */
   external?: boolean;
@@ -23,9 +27,26 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
+function resolveNavLabel(
+  item: NavItem,
+  tNav: ReturnType<typeof useTranslations<"nav">>,
+  tShell: ReturnType<typeof useTranslations<"shell">>,
+): string {
+  if (item.labelKey && item.labelNs === "shell") {
+    return tShell(item.labelKey as "demoCompanySite");
+  }
+  if (item.labelKey) {
+    return tNav(item.labelKey as "dashboard");
+  }
+  return item.label ?? item.href;
+}
+
 export function Sidebar({ role }: { role: UserRole }) {
   const pathname = usePathname();
   const navItems = getNavItemsForRole(role);
+  const tNav = useTranslations("nav");
+  const tShell = useTranslations("shell");
+  const t = useTranslations("shell");
   const [teamChatUnread, setTeamChatUnread] = useState(0);
 
   useEffect(() => {
@@ -69,7 +90,7 @@ export function Sidebar({ role }: { role: UserRole }) {
         className={styles.brand}
       />
 
-      <nav className={styles.nav} aria-label="Основная навигация">
+      <nav className={styles.nav} aria-label={t("shell.mainNavAria")}>
         <ul className={styles.navList}>
           {navItems.map((item) => {
             const active = !item.external && isActive(pathname, item.href);
@@ -81,11 +102,13 @@ export function Sidebar({ role }: { role: UserRole }) {
               .filter(Boolean)
               .join(" ");
 
+            const label = resolveNavLabel(item, tNav, tShell);
+
             const content = (
               <>
                 <i className={[item.icon, styles.icon].join(" ")} aria-hidden />
                 <span className={styles.navLabel}>
-                  {item.label}
+                  {label}
                   {item.href === "/team-chat" && teamChatUnread > 0 ? (
                     <span className={styles.unreadBadge}> ({teamChatUnread})</span>
                   ) : null}
@@ -127,6 +150,10 @@ export function Sidebar({ role }: { role: UserRole }) {
           })}
         </ul>
       </nav>
+
+      <div className={styles.mobileLocale}>
+        <LanguageSwitcher compact />
+      </div>
     </aside>
   );
 }

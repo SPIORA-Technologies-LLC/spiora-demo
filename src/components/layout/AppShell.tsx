@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { ROLE_LABELS } from "@/lib/auth/types";
-import { getSession } from "@/lib/auth/session";
+import { getTranslations } from "next-intl/server";
 import { AppShellNotifications } from "./AppShellNotifications";
 import { Sidebar } from "./Sidebar";
 import { Topbar, type TopbarProps } from "./Topbar";
+import { getSession } from "@/lib/auth/session";
 import styles from "./AppShell.module.css";
 
 export type AppShellProps = Omit<TopbarProps, "userName" | "userRole"> & {
@@ -25,6 +25,8 @@ export async function AppShell({
     redirect("/login");
   }
 
+  const t = await getTranslations("shell");
+
   return (
     <div className={styles.shell}>
       <Sidebar role={session.role} />
@@ -32,8 +34,14 @@ export async function AppShell({
         <div className={styles.main}>
           <Topbar
             sectionTitle={sectionTitle}
-            userName={session?.name ?? "Пользователь"}
-            userRole={session ? ROLE_LABELS[session.role] : ""}
+            userName={session?.name ?? t("userFallback")}
+            userRole={
+              session
+                ? session.role === "owner"
+                  ? t("roleOwner")
+                  : t("roleManager")
+                : ""
+            }
             searchPlaceholder={searchPlaceholder}
             defaultSearchValue={defaultSearchValue}
             onSearchChange={onSearchChange}

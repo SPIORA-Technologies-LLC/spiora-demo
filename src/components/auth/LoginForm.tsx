@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { useTranslations } from "next-intl";
 import { signInAction, type SignInState } from "@/app/login/actions";
 import styles from "@/app/login/login.module.css";
 
@@ -13,6 +14,7 @@ type LoginFormProps = {
 };
 
 export function LoginForm({ nextPath }: LoginFormProps) {
+  const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState(signInAction, initialState);
 
   return (
@@ -24,7 +26,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         </p>
       ) : null}
       <label className={styles.label}>
-        Email
+        {t("email")}
         <input
           type="email"
           name="email"
@@ -37,7 +39,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         />
       </label>
       <label className={styles.label}>
-        Пароль
+        {t("password")}
         <input
           type="password"
           name="password"
@@ -49,12 +51,9 @@ export function LoginForm({ nextPath }: LoginFormProps) {
         />
       </label>
       <button type="submit" className={styles.submit} disabled={pending}>
-        {pending ? "Вход…" : "Войти"}
+        {pending ? t("signingIn") : t("signIn")}
       </button>
-      <p className={styles.forgotHint}>
-        Забыли пароль? Напишите администратору платформы — он сбросит его в
-        разделе Settings.
-      </p>
+      <p className={styles.forgotHint}>{t("forgotPasswordHint")}</p>
     </form>
   );
 }

@@ -18,6 +18,12 @@
   text-align: center;
 }
 
+.localeRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.75rem;
+}
+
 .logoWrap {
   display: flex;
   justify-content: center;

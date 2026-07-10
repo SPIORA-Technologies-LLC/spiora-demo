@@ -1,4 +1,5 @@
 import { getAiRuntimeConfig } from "@/lib/ai/config";
+import { isExternalAiIntegrationEnabled } from "@/lib/demo/integration-policy";
 import {
   assertOpenRouterPayloadSafe,
   redactForLogging,
@@ -103,6 +104,10 @@ export async function createChatCompletion(
   messages: ChatMessage[],
   options?: ChatCompletionOptions,
 ): Promise<string | null> {
+  if (!isExternalAiIntegrationEnabled()) {
+    return null;
+  }
+
   const config = getAiRuntimeConfig();
   if (!config) return null;
 
@@ -170,6 +175,10 @@ export async function* streamChatCompletion(
   messages: ChatMessage[],
   options?: ChatCompletionOptions,
 ): AsyncGenerator<string> {
+  if (!isExternalAiIntegrationEnabled()) {
+    return;
+  }
+
   const config = getAiRuntimeConfig();
   if (!config) return;
 

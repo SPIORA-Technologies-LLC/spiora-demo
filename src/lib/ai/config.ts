@@ -1,3 +1,5 @@
+import { isExternalAiIntegrationEnabled } from "@/lib/demo/integration-policy";
+
 export type AiProvider = "openrouter" | "openai";
 
 export type AiRuntimeConfig = {
@@ -34,6 +36,10 @@ export function getAiRuntimeConfig(): AiRuntimeConfig | null {
 }
 
 export function isAiConfigured(): boolean {
+  if (!isExternalAiIntegrationEnabled()) {
+    return false;
+  }
+
   return getAiRuntimeConfig() !== null;
 }
 

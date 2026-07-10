@@ -2,8 +2,16 @@ import { NextResponse } from "next/server";
 import { WebhookReceiver } from "livekit-server-sdk";
 import { handleLiveKitEgressWebhook } from "@/lib/calendar/meeting-recording-handler";
 import { getLiveKitEnv } from "@/lib/calendar/meeting-token";
+import { areWebhooksIntegrationEnabled } from "@/lib/demo/integration-policy";
 
 export async function POST(request: Request) {
+  if (!areWebhooksIntegrationEnabled()) {
+    return NextResponse.json(
+      { error: "Webhooks disabled in Spiora demo mode" },
+      { status: 503 },
+    );
+  }
+
   const env = getLiveKitEnv();
   if (!env) {
     return NextResponse.json({ error: "Not configured" }, { status: 503 });

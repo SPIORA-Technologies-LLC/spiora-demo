@@ -1,9 +1,14 @@
 import { SignJWT, importPKCS8 } from "jose";
+import { areGoogleIntegrationsEnabled } from "@/lib/demo/integration-policy";
 import { fetchWithTlsFallback } from "@/lib/google-fetch";
 
 let cachedToken: { token: string; expiresAt: number } | null = null;
 
 export function isGoogleSheetsPublicClientsConfigured(): boolean {
+  if (!areGoogleIntegrationsEnabled()) {
+    return false;
+  }
+
   return Boolean(
     process.env.GOOGLE_SHEETS_SPREADSHEET_ID?.trim() &&
       process.env.GOOGLE_SHEETS_PUBLIC_CLIENTS_GID?.trim(),
@@ -11,6 +16,10 @@ export function isGoogleSheetsPublicClientsConfigured(): boolean {
 }
 
 export function isGoogleSheetsConfigured(): boolean {
+  if (!areGoogleIntegrationsEnabled()) {
+    return false;
+  }
+
   return Boolean(
     (process.env.GOOGLE_SHEETS_SPREADSHEET_ID?.trim() &&
       process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim() &&
@@ -48,6 +57,10 @@ async function createSignedJwt(): Promise<string> {
 }
 
 export function isGoogleDriveKbConfigured(): boolean {
+  if (!areGoogleIntegrationsEnabled()) {
+    return false;
+  }
+
   return Boolean(
     isGoogleServiceAccountConfigured() &&
       process.env.GOOGLE_DRIVE_KB_FOLDER_ID?.trim(),
@@ -55,6 +68,10 @@ export function isGoogleDriveKbConfigured(): boolean {
 }
 
 export function isGoogleDriveEmigrantConfigured(): boolean {
+  if (!areGoogleIntegrationsEnabled()) {
+    return false;
+  }
+
   return Boolean(
     isGoogleServiceAccountConfigured() &&
       process.env.GOOGLE_DRIVE_EMIGRANT_FOLDER_ID?.trim(),
@@ -62,6 +79,10 @@ export function isGoogleDriveEmigrantConfigured(): boolean {
 }
 
 export async function getGoogleAccessToken(): Promise<string | null> {
+  if (!areGoogleIntegrationsEnabled()) {
+    return null;
+  }
+
   if (!isGoogleServiceAccountConfigured()) return null;
 
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) {

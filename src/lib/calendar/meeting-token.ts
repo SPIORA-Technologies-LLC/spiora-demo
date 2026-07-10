@@ -1,6 +1,7 @@
 import "server-only";
 
 import { AccessToken } from "livekit-server-sdk";
+import { isLiveKitIntegrationEnabled } from "@/lib/demo/integration-policy";
 import type { SessionUser } from "@/lib/auth/types";
 import { getMeetingRoomName } from "./meeting";
 import { getMeetingAccessWindow } from "./meeting-access";
@@ -13,6 +14,10 @@ export type LiveKitEnv = {
 };
 
 export function getLiveKitEnv(): LiveKitEnv | null {
+  if (!isLiveKitIntegrationEnabled()) {
+    return null;
+  }
+
   const url = process.env.LIVEKIT_URL?.trim();
   const apiKey = process.env.LIVEKIT_API_KEY?.trim();
   const apiSecret = process.env.LIVEKIT_API_SECRET?.trim();

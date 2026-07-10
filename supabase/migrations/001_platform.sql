@@ -1,4 +1,4 @@
--- Sharp & Spice Team Platform — initial schema
+-- Northstar Mobility demo — initial schema
 -- Run in Supabase → SQL Editor → New query → Run
 
 create extension if not exists "pgcrypto";

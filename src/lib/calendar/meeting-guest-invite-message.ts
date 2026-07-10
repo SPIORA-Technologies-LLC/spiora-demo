@@ -51,6 +51,6 @@ export function buildGuestMeetingInviteText(
     guestJoinUrl,
     "",
     "До встречи!",
-    "Команда Sharp & Spice",
+    "Команда Northstar Mobility",
   ].join("\n");
 }

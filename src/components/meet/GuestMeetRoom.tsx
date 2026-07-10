@@ -362,7 +362,7 @@ export function GuestMeetRoom({
     return (
       <div className={styles.lobbyPage}>
         <div className={styles.lobbyCard}>
-          <p className={styles.lobbyBrand}>Sharp & Spice</p>
+          <p className={styles.lobbyBrand}>Northstar Mobility</p>
           <h1 className={styles.lobbyTitle}>Видеовстреча</h1>
           <p className={styles.lobbyEventTitle}>{event.title}</p>
           <p className={styles.lobbyEventTime}>

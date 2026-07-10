@@ -27,11 +27,11 @@ function loadEnvLocal() {
 async function authenticate(context) {
   const env = loadEnvLocal();
   const secret = new TextEncoder().encode(
-    env.AUTH_SECRET?.trim() || "sharp-spice-dev-secret-change-me",
+    env.AUTH_SECRET?.trim() || "northstar-mobility-dev-secret-change-me",
   );
   const token = await new SignJWT({
     id: "manager-1",
-    email: "gujenova220371@gmail.com",
+    email: "daniel@spiora.demo",
     name: "Злата",
     role: "manager",
   })

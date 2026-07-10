@@ -21,9 +21,9 @@ const CRON_MS = REMINDER_CRON_WINDOW_MS;
 function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-1",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "personal",
-    ownerUserId: "manager-1",
+    ownerUserId: "daniel-cooper",
     title: "Meeting",
     description: "",
     eventType: "general",
@@ -34,7 +34,7 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     allDay: false,
     location: "",
     sendReminders: true,
-    createdByUserId: "manager-1",
+    createdByUserId: "daniel-cooper",
     createdByName: "Злата",
     updatedByUserId: null,
     createdAt: "2026-06-20T10:00:00.000Z",
@@ -218,15 +218,15 @@ describe("getReminderDeliveryCandidate", () => {
 });
 
 describe("resolveReminderRecipientIds", () => {
-  const activeUserIds = ["veronika", "manager-1", "manager-2"];
+  const activeUserIds = ["olivia-bennett", "daniel-cooper", "emma-wilson"];
 
   it("returns only owner for personal events", () => {
     assert.deepEqual(
       resolveReminderRecipientIds(
-        event({ scope: "personal", ownerUserId: "manager-1" }),
+        event({ scope: "personal", ownerUserId: "daniel-cooper" }),
         activeUserIds,
       ),
-      ["manager-1"],
+      ["daniel-cooper"],
     );
   });
 
@@ -248,12 +248,12 @@ describe("resolveReminderRecipientIds", () => {
           ownerUserId: null,
           eventType: "video_meeting",
           videoInviteMode: "selected",
-          participantUserIds: ["manager-2"],
-          createdByUserId: "manager-1",
+          participantUserIds: ["emma-wilson"],
+          createdByUserId: "daniel-cooper",
         }),
         activeUserIds,
       ),
-      ["manager-1", "manager-2"],
+      ["daniel-cooper", "emma-wilson"],
     );
   });
 });

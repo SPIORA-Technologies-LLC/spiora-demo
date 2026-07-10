@@ -94,7 +94,7 @@ const NAV_SETTINGS: NavItem = {
 
 const NAV_WEBSITE: NavItem = {
   href: MARKETING_SITE_URL,
-  label: "Сайт Sharp & Spice",
+  label: "Сайт Northstar Mobility",
   icon: "fa-solid fa-globe",
   external: true,
 };

@@ -12,9 +12,9 @@ import {
 function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-1",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "personal",
-    ownerUserId: "manager-1",
+    ownerUserId: "daniel-cooper",
     title: "Meeting",
     description: "Notes",
     eventType: "general",
@@ -23,7 +23,7 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     allDay: false,
     location: "Office",
     sendReminders: true,
-    createdByUserId: "manager-1",
+    createdByUserId: "daniel-cooper",
     createdByName: "Злата",
     updatedByUserId: null,
     createdAt: "2026-06-19T12:00:00.000Z",

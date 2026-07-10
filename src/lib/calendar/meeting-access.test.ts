@@ -14,14 +14,14 @@ import {
 } from "./meeting-access";
 
 const managerA: SessionUser = {
-  id: "manager-1",
+  id: "daniel-cooper",
   name: "Злата",
   email: "manager1@test.com",
   role: "manager",
 };
 
 const managerB: SessionUser = {
-  id: "manager-2",
+  id: "emma-wilson",
   name: "Юля",
   email: "manager2@test.com",
   role: "manager",
@@ -30,7 +30,7 @@ const managerB: SessionUser = {
 function videoEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-video",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "personal",
     ownerUserId: managerA.id,
     title: "Sync",

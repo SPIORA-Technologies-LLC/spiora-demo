@@ -12,7 +12,7 @@ import {
 
 const event: CalendarEvent = {
   id: "evt-video",
-  companyId: "sharp-spice",
+  companyId: "northstar-mobility",
   scope: "company",
   ownerUserId: null,
   title: "Consultation",
@@ -31,7 +31,7 @@ const event: CalendarEvent = {
   allDay: false,
   location: "",
   sendReminders: true,
-  createdByUserId: "manager-1",
+  createdByUserId: "daniel-cooper",
   createdByName: "Злата",
   updatedByUserId: null,
   createdAt: "2026-06-20T10:00:00.000Z",

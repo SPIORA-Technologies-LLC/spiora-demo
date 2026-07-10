@@ -29,10 +29,8 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           type="email"
           name="email"
           className={styles.input}
-          defaultValue={
-            isDev ? "virineya1983@gmail.com" : undefined
-          }
-          placeholder="virineya1983@gmail.com"
+          defaultValue={isDev ? "olivia@spiora.demo" : undefined}
+          placeholder="olivia@spiora.demo"
           autoComplete="email"
           required
           disabled={pending}
@@ -44,8 +42,7 @@ export function LoginForm({ nextPath }: LoginFormProps) {
           type="password"
           name="password"
           className={styles.input}
-          defaultValue={isDev ? "veronika-dev" : undefined}
-          placeholder={isDev ? "veronika-dev" : "••••••••"}
+          placeholder="••••••••"
           autoComplete="current-password"
           required
           disabled={pending}

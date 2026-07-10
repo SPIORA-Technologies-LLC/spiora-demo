@@ -19,59 +19,59 @@ export type CheckupSection = {
   items: CheckupResource[];
 };
 
-/** Сайт о чекапах в Ереване (Gamma) */
+/** Demo placeholder — public checkups overview. */
 export const YEREVAN_CHECKUPS_SITE_URL =
-  "https://gamma.app/docs/-4mc9eehtw41ruwj";
+  "https://example.com/demo/checkups/overview";
 
-/** Личный кабинет «Формула Здоровья» */
+/** Demo placeholder — partner health app login. */
 export const FORMULA_HEALTH_APP_URL =
-  "https://formula-health-six.vercel.app/auth";
+  "https://example.com/demo/checkups/app";
 
-/** Папка с документами по чекапам в Google Drive */
+/** Demo placeholder — shared documents folder. */
 export const YEREVAN_CHECKUPS_DOCS_URL =
-  "https://drive.google.com/drive/folders/1xsSDDLTK-raSARCJ3xuZcOu0N_E--zRc?usp=sharing";
+  "https://example.com/demo/checkups/documents";
 
 export const CHECKUP_SECTIONS: CheckupSection[] = [
   {
     id: "yerevan",
-    title: "Ереван",
-    subtitle: "Сайт, документы команды и приложение для медчекапов",
+    title: "Demo checkups hub",
+    subtitle: "Sample links for wellness program demonstrations",
     items: [
       {
         id: "yerevan-checkups-site",
         type: "website",
-        title: "Сайт о чекапах в Ереване",
+        title: "Demo checkups overview",
         description:
-          "Презентация и информация о программах чекапов в Ереване для клиентов.",
-        location: "Ереван",
-        audience: "Для клиентов",
+          "Placeholder presentation page for corporate wellness checkup programs.",
+        location: "Demo city",
+        audience: "For clients",
         url: YEREVAN_CHECKUPS_SITE_URL,
         icon: "fa-solid fa-book-medical",
-        actionLabel: "Открыть сайт",
+        actionLabel: "Open demo site",
       },
       {
         id: "yerevan-checkups-docs",
         type: "drive",
-        title: "Документы по чекапам",
+        title: "Demo checkups documents",
         description:
-          "Папка со всеми материалами команды: цены, предложения, планы чекапов и сопровождения.",
-        location: "Ереван",
-        audience: "Для команды",
+          "Placeholder folder with sample pricing sheets and program outlines.",
+        location: "Demo city",
+        audience: "For team",
         url: YEREVAN_CHECKUPS_DOCS_URL,
         icon: "fa-solid fa-folder-open",
-        actionLabel: "Открыть папку",
+        actionLabel: "Open demo folder",
       },
       {
         id: "formula-health-app",
         type: "app",
-        title: "Приложение «Формула Здоровья»",
+        title: "Demo partner app",
         description:
-          "Личный кабинет Формулы Здоровья: вход для команды и клиентов по медчекапам.",
-        location: "Ереван",
-        audience: "Кабинет",
+          "Placeholder login page for a third-party wellness partner application.",
+        location: "Demo city",
+        audience: "Demo portal",
         url: FORMULA_HEALTH_APP_URL,
         icon: "fa-solid fa-heart-pulse",
-        actionLabel: "Открыть приложение",
+        actionLabel: "Open demo app",
       },
     ],
   },

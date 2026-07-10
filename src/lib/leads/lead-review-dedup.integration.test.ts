@@ -46,9 +46,9 @@ describe("analyzeLeadDuplicates desk integration", () => {
   it("adds Desk STRONG match as informational hint when case_number equals passport", () => {
     const lead = ctx({
       source: "new_clients",
-      name: "Белоногова Мария Павловна",
+      name: "Demo Client Alpha",
       rowIndex: 7,
-      email: "mary.belonogova.143@gmail.com",
+      email: "demo.client.a@example.com",
     });
 
     const analysis = analyzeLeadDuplicates(
@@ -57,17 +57,17 @@ describe("analyzeLeadDuplicates desk integration", () => {
       [],
       [
         desk({
-          id: "desk-belonogova",
-          lastName: "Белоногова",
-          firstName: "Мария",
-          caseNumber: "777063956",
-          email: "berchukvl@gmail.com",
+          id: "desk-alpha",
+          lastName: "Alpha",
+          firstName: "Demo",
+          caseNumber: "DEMO-P90001",
+          email: "desk.alpha@example.com",
         }),
       ],
       {
-        name: "Белоногова Мария Павловна",
-        passport: "777063956",
-        email: "mary.belonogova.143@gmail.com",
+        name: "Demo Client Alpha",
+        passport: "DEMO-P90001",
+        email: "demo.client.a@example.com",
       },
     );
 
@@ -82,14 +82,14 @@ describe("analyzeLeadDuplicates desk integration", () => {
   it("keeps CRM blocking and Desk informational separate", () => {
     const lead = ctx({
       source: "new_clients",
-      name: "Давлятова Лола Бахтиёровна",
+      name: "Demo Client Beta Full",
       rowIndex: 3,
-      debugRow: { passport: "762762123" },
+      debugRow: { passport: "DEMO-P90010" },
     });
     const crm = ctx({
       source: "clients",
-      name: "Давлятова Лола",
-      debugRow: { passport: "762762123" },
+      name: "Demo Client Beta",
+      debugRow: { passport: "DEMO-P90010" },
     });
 
     const analysis = analyzeLeadDuplicates(
@@ -98,14 +98,14 @@ describe("analyzeLeadDuplicates desk integration", () => {
       [],
       [
         desk({
-          lastName: "Давлятова",
-          firstName: "Лола",
-          caseNumber: "762762123",
+          lastName: "Beta",
+          firstName: "Demo",
+          caseNumber: "DEMO-P90010",
         }),
       ],
       {
-        name: "Давлятова Лола Бахтиёровна",
-        passport: "762762123",
+        name: "Demo Client Beta Full",
+        passport: "DEMO-P90010",
         email: "",
       },
     );
@@ -133,13 +133,13 @@ describe("analyzeLeadDuplicates desk integration", () => {
         desk({
           lastName: "Иванов",
           firstName: "Иван",
-          caseNumber: "100000001",
+          caseNumber: "DEMO-P90011",
           email: "ivan.desk@example.com",
         }),
       ],
       {
         name: "Иванов Иван Иванович",
-        passport: "999999999",
+        passport: "DEMO-P90012",
         email: "ivan.new@example.com",
       },
     );
@@ -154,9 +154,9 @@ describe("analyzeLeadDuplicates desk integration", () => {
   it("classifies clean lead as LOW risk (no blocking or desk hints)", () => {
     const lead = ctx({
       source: "new_clients",
-      name: "Кулешова Леонелла Евгеньевна",
+      name: "Demo Client Delta",
       rowIndex: 10,
-      email: "leonella0123401@gmail.com",
+      email: "demo.client.d@example.com",
     });
 
     const analysis = analyzeLeadDuplicates(
@@ -165,16 +165,16 @@ describe("analyzeLeadDuplicates desk integration", () => {
       [],
       [
         desk({
-          lastName: "Петров",
-          firstName: "Пётр",
-          caseNumber: "123456789",
+          lastName: "Unrelated",
+          firstName: "Client",
+          caseNumber: "DEMO-P90013",
           email: "petrov@example.com",
         }),
       ],
       {
-        name: "Кулешова Леонелла Евгеньевна",
-        passport: "776511478",
-        email: "leonella0123401@gmail.com",
+        name: "Demo Client Delta",
+        passport: "DEMO-P90014",
+        email: "demo.client.d@example.com",
       },
     );
 

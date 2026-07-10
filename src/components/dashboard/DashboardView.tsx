@@ -118,7 +118,7 @@ export function DashboardView({
         <div className={styles.heroInner}>
           <p className={styles.heroEyebrow}>Добро пожаловать, {user.name}</p>
           <h1 id="dashboard-hero-title" className={styles.heroTitle}>
-            Sharp & Spice Workspace
+            Northstar Mobility Workspace
           </h1>
           <p className={styles.heroSubtitle}>
             Единое пространство для клиентов, анкет, AI-аналитики и внутренних

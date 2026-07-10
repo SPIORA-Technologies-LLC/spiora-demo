@@ -690,7 +690,7 @@ export function TeamChatView({
     <div className={styles.wrap}>
       <SectionHeader
         title="Командный чат"
-        subtitle="Внутреннее пространство для общения команды Sharp & Spice"
+        subtitle="Внутреннее пространство для общения команды Northstar Mobility"
         action={
           isOwner ? (
             <Button

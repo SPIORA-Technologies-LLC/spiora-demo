@@ -51,7 +51,7 @@ export function PwaInstallHint() {
   return (
     <div className={styles.banner} role="status">
       <p className={styles.text}>
-        Установите Sharp & Spice как приложение на ноутбук — быстрый доступ с
+        Установите Northstar Mobility как приложение на ноутбук — быстрый доступ с
         рабочего стола.
       </p>
       <div className={styles.actions}>

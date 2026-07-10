@@ -19,7 +19,7 @@ afterEach(() => {
 });
 
 const user: SessionUser = {
-  id: "manager-1",
+  id: "daniel-cooper",
   name: "Злата",
   email: "manager1@test.com",
   role: "manager",
@@ -27,7 +27,7 @@ const user: SessionUser = {
 
 const event: CalendarEvent = {
   id: "evt-video",
-  companyId: "sharp-spice",
+  companyId: "northstar-mobility",
   scope: "company",
   ownerUserId: null,
   title: "Sync",
@@ -38,7 +38,7 @@ const event: CalendarEvent = {
   allDay: false,
   location: "",
   sendReminders: true,
-  createdByUserId: "manager-1",
+  createdByUserId: "daniel-cooper",
   createdByName: "Злата",
   updatedByUserId: null,
   createdAt: "2026-06-20T10:00:00.000Z",
@@ -102,7 +102,7 @@ describe("mintMeetingAccessToken", () => {
       now,
     );
 
-    assert.equal(minted.roomName, "sharp-spice-cal-evt-video");
+    assert.equal(minted.roomName, "northstar-cal-evt-video");
     assert.ok(minted.token.length > 20);
     assert.equal(
       minted.expiresAt,

@@ -28,11 +28,11 @@ function loadEnvLocal() {
 async function authenticate(context) {
   const env = loadEnvLocal();
   const secret = new TextEncoder().encode(
-    env.AUTH_SECRET?.trim() || "sharp-spice-dev-secret-change-me",
+    env.AUTH_SECRET?.trim() || "northstar-mobility-dev-secret-change-me",
   );
   const token = await new SignJWT({
     id: "manager-1",
-    email: "gujenova220371@gmail.com",
+    email: "daniel@spiora.demo",
     name: "Злата",
     role: "manager",
   })
@@ -73,7 +73,7 @@ async function ensureOverflowEvents() {
   const base = store.events.filter((event) => !overflowIds.has(event.id));
   const overflow = Array.from(overflowIds, (id, index) => ({
     id,
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: index % 2 === 0 ? "personal" : "company",
     ownerUserId: index % 2 === 0 ? "manager-1" : null,
     title: `Событие ${index + 1}`,

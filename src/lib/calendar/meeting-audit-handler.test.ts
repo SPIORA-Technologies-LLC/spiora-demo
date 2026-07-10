@@ -15,14 +15,14 @@ import {
 import type { CalendarStoreDeps } from "./handlers";
 
 const managerA: SessionUser = {
-  id: "manager-1",
+  id: "daniel-cooper",
   name: "Злата",
   email: "manager1@test.com",
   role: "manager",
 };
 
 const managerB: SessionUser = {
-  id: "manager-2",
+  id: "emma-wilson",
   name: "Юля",
   email: "manager2@test.com",
   role: "manager",
@@ -31,7 +31,7 @@ const managerB: SessionUser = {
 function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-video",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "personal",
     ownerUserId: managerA.id,
     title: "Sync",
@@ -166,7 +166,7 @@ describe("handleRecordMeetingAudit", () => {
     assert.ok(!("status" in result));
     if ("status" in result) return;
     assert.equal(result.audit.action, "left");
-    assert.equal(result.audit.roomName, "sharp-spice-cal-evt-video");
+    assert.equal(result.audit.roomName, "northstar-cal-evt-video");
     assert.equal(rows.length, 1);
   });
 

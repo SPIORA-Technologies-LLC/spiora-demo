@@ -50,7 +50,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <Logo priority size="lg" />
         </div>
         <h1 className={styles.title} style={{ color: "#fff", margin: 0 }}>
-          Sharp & Spice
+          Northstar Mobility
         </h1>
         <p className={styles.subtitle} style={{ color: "#cbd5e0" }}>
           Вход в корпоративную платформу

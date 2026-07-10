@@ -4,43 +4,43 @@ export type TeamUser = SessionUser & {
   passwordEnvKey: string;
 };
 
-/** Список команды. Новый сотрудник: добавьте запись и AUTH_PASSWORD_* в env на хостинге. */
+/** Demo team roster — fictional accounts only (Northstar Mobility). */
 const TEAM_USERS: TeamUser[] = [
   {
-    id: "veronika",
-    email: "virineya1983@gmail.com",
-    name: "Вероника",
+    id: "olivia-bennett",
+    email: "olivia@spiora.demo",
+    name: "Olivia Bennett",
     role: "owner",
-    passwordEnvKey: "AUTH_PASSWORD_VERONIKA",
+    passwordEnvKey: "AUTH_PASSWORD_OWNER",
   },
   {
-    id: "manager-1",
-    email: "gujenova220371@gmail.com",
-    name: "Злата",
+    id: "daniel-cooper",
+    email: "daniel@spiora.demo",
+    name: "Daniel Cooper",
     role: "manager",
     passwordEnvKey: "AUTH_PASSWORD_MANAGER_1",
   },
   {
-    id: "manager-2",
-    email: "iuliia.zhdanovich@gmail.com",
-    name: "Юля",
+    id: "emma-wilson",
+    email: "emma@spiora.demo",
+    name: "Emma Wilson",
     role: "manager",
     passwordEnvKey: "AUTH_PASSWORD_MANAGER_2",
   },
   {
-    id: "manager-3",
-    email: "selischev.ruslan@gmail.com",
-    name: "Руслан",
+    id: "lucas-martin",
+    email: "lucas@spiora.demo",
+    name: "Lucas Martin",
     role: "manager",
     passwordEnvKey: "AUTH_PASSWORD_MANAGER_3",
   },
 ];
 
 const DEV_DEFAULT_PASSWORDS: Record<string, string> = {
-  veronika: "veronika-dev",
-  "manager-1": "manager1-dev",
-  "manager-2": "manager2-dev",
-  "manager-3": "manager3-dev",
+  "olivia-bennett": "demo-owner-local",
+  "daniel-cooper": "demo-manager-local-1",
+  "emma-wilson": "demo-manager-local-2",
+  "lucas-martin": "demo-manager-local-3",
 };
 
 export function getEnvStoredPassword(user: TeamUser): string | undefined {

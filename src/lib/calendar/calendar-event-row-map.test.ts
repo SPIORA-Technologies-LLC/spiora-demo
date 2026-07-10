@@ -8,7 +8,7 @@ import {
 
 const sampleEvent: CalendarEvent = {
   id: "evt-1",
-  companyId: "sharp-spice",
+  companyId: "northstar-mobility",
   scope: "company",
   ownerUserId: null,
   title: "Team sync",
@@ -27,7 +27,7 @@ const sampleEvent: CalendarEvent = {
   allDay: false,
   location: "",
   sendReminders: false,
-  createdByUserId: "veronika",
+  createdByUserId: "olivia-bennett",
   createdByName: "Вероника",
   updatedByUserId: null,
   createdAt: "2026-06-20T10:00:00.000Z",
@@ -61,9 +61,9 @@ describe("mapCalendarEventToRow / mapCalendarEventRowToEvent", () => {
     assert.equal(row.event_type, "video_meeting");
     assert.equal(row.video_invite_mode, "selected");
 
-    const restored = mapCalendarEventRowToEvent(row, ["manager-1"]);
+    const restored = mapCalendarEventRowToEvent(row, ["daniel-cooper"]);
     assert.equal(restored.eventType, "video_meeting");
-    assert.deepEqual(restored.participantUserIds, ["manager-1"]);
+    assert.deepEqual(restored.participantUserIds, ["daniel-cooper"]);
   });
 
   it("round-trips guest access fields for video meetings", () => {

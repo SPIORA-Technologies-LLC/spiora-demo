@@ -1,6 +1,6 @@
 const TEST_NAME_PATTERN = /(test|тест|demo|демо|asdf?|qwe)/i;
 
-const DEFAULT_PLATFORM_EMAILS = ["virineya1983@gmail.com"];
+const DEFAULT_PLATFORM_EMAILS = ["olivia@spiora.demo"];
 
 function parseEmailList(raw?: string): string[] {
   if (!raw?.trim()) return [];

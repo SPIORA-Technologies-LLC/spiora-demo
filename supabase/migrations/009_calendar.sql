@@ -3,7 +3,7 @@
 
 create table if not exists calendar_events (
   id text primary key,
-  company_id text not null default 'sharp-spice',
+  company_id text not null default 'northstar-mobility',
   scope text not null check (scope in ('personal', 'company')),
   owner_user_id text,
   title text not null,

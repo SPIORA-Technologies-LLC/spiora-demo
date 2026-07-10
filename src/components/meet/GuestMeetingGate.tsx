@@ -74,7 +74,7 @@ export function GuestMeetingGate({
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <p className={styles.brand}>Sharp & Spice</p>
+        <p className={styles.brand}>Northstar Mobility</p>
         <h1 className={styles.title}>{copy.title}</h1>
         {event ? (
           <p className={styles.eventMeta}>

@@ -40,14 +40,14 @@ describe("resolveClientContextAttribution", () => {
       source: "new_clients",
       name: "Давлятова Лола Бахтиёровна",
       rowIndex: 5,
-      email: "loladav1409@gmail.com",
+      email: "demo.client.f@example.com",
       phone: "79099550114",
       debugRow: { passport: "762762123" },
     });
 
     const attribution = resolveClientContextAttribution([crm, form], {
       name: "Давлятова Лола Бахтиёровна",
-      email: "loladav1409@gmail.com",
+      email: "demo.client.f@example.com",
       caseNumber: "765946434",
       currentStatus: "Документы поданы",
       consulate: "",
@@ -163,7 +163,7 @@ describe("formatMergedClientContextWithSources", () => {
       rowIndex: 2,
       name: "Давлятова Лола Бахтиёровна",
       phone: "79099550114",
-      email: "loladav1409@gmail.com",
+      email: "demo.client.f@example.com",
       country: "",
       direction: "Хорватия",
       status: "В работе",
@@ -183,7 +183,7 @@ describe("formatMergedClientContextWithSources", () => {
         ctx({
           source: "new_clients",
           name: "Давлятова Лола Бахтиёровна",
-          email: "loladav1409@gmail.com",
+          email: "demo.client.f@example.com",
           phone: "79099550114",
         }),
       ],
@@ -194,7 +194,7 @@ describe("formatMergedClientContextWithSources", () => {
     const text = formatMergedClientContextWithSources(merged);
     assert.match(text, /✅ CRM/);
     assert.match(text, /✅ Formgrid/);
-    assert.match(text, /Email:\nloladav1409@gmail.com\nИсточник: Formgrid/);
+    assert.match(text, /Email:\ndemo.client.f@example.com\nИсточник: Formgrid/);
     assert.match(text, /Технические блоки по источникам/);
   });
 });

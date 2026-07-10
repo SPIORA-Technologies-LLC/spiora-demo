@@ -16,14 +16,14 @@ afterEach(() => {
 });
 
 const managerA: SessionUser = {
-  id: "manager-1",
+  id: "daniel-cooper",
   name: "Злата",
   email: "manager1@test.com",
   role: "manager",
 };
 
 const managerB: SessionUser = {
-  id: "manager-2",
+  id: "emma-wilson",
   name: "Юля",
   email: "manager2@test.com",
   role: "manager",
@@ -32,7 +32,7 @@ const managerB: SessionUser = {
 function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-video",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "personal",
     ownerUserId: managerA.id,
     title: "Sync",
@@ -179,7 +179,7 @@ describe("handleMintMeetingToken", () => {
     assert.ok(!("status" in result));
     if ("status" in result) return;
     assert.equal(result.wsUrl, "wss://example.livekit.cloud");
-    assert.equal(result.roomName, "sharp-spice-cal-evt-video");
+    assert.equal(result.roomName, "northstar-cal-evt-video");
     assert.ok(result.token.length > 20);
     assert.ok(result.expiresAt.includes("T"));
   });

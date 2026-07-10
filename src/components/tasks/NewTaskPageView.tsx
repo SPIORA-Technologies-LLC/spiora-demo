@@ -43,7 +43,7 @@ export function NewTaskPageView({ teamMembers }: NewTaskPageViewProps) {
     <div className={styles.wrap}>
       <SectionHeader
         title="Новая задача"
-        subtitle="Создайте задачу для всей команды Sharp & Spice"
+        subtitle="Создайте задачу для всей команды Northstar Mobility"
       />
       <Card className={styles.card}>
         <TaskForm

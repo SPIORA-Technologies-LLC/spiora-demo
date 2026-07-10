@@ -163,7 +163,7 @@ export function KnowledgeBaseView() {
                 <tr>
                   <td colSpan={4} className={styles.empty}>
                     Папка пуста. Если файлы есть в Drive — расшарьте папку на{" "}
-                    <code>sharp-spice-platform@project-3bfd25e8-8781-480b-8f9.iam.gserviceaccount.com</code>
+                    <code>demo-sa@demo-project.iam.gserviceaccount.com</code>
                   </td>
                 </tr>
               ) : (

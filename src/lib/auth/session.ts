@@ -11,7 +11,7 @@ function getAuthSecret(): Uint8Array | null {
     return new TextEncoder().encode(secret);
   }
   if (process.env.NODE_ENV !== "production") {
-    return new TextEncoder().encode("sharp-spice-dev-secret-change-me");
+    return new TextEncoder().encode("northstar-mobility-dev-secret-change-me");
   }
   return null;
 }

@@ -5,7 +5,7 @@ import { buildGuestMeetingInviteText } from "./meeting-guest-invite-message";
 
 const event: CalendarEvent = {
   id: "evt-video",
-  companyId: "sharp-spice",
+  companyId: "northstar-mobility",
   scope: "company",
   ownerUserId: null,
   title: "Консультация по релокации",
@@ -24,8 +24,8 @@ const event: CalendarEvent = {
   allDay: false,
   location: "",
   sendReminders: true,
-  createdByUserId: "manager-1",
-  createdByName: "Злата",
+  createdByUserId: "daniel-cooper",
+  createdByName: "Daniel Cooper",
   updatedByUserId: null,
   createdAt: "2026-07-01T10:00:00.000Z",
   updatedAt: "2026-07-01T10:00:00.000Z",
@@ -43,6 +43,6 @@ describe("buildGuestMeetingInviteText", () => {
     assert.match(text, /Консультация по релокации/);
     assert.match(text, /Когда:/);
     assert.match(text, /https:\/\/example\.com\/join\/abc123/);
-    assert.match(text, /Команда Sharp & Spice/);
+    assert.match(text, /Команда Northstar Mobility/);
   });
 });

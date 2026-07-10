@@ -2,8 +2,8 @@ import { fetchWithTlsFallback } from "@/lib/google-fetch";
 import * as https from "node:https";
 import { getCached, setCached } from "./cache";
 
-const DEFAULT_FORMGRID_SPREADSHEET_ID = "1S8Y0VCaAQ78wxg5Rxl8fcFMkwSsvr-X-cLrAlK4nF9Q";
 const DEFAULT_FORMGRID_GID = "0";
+const DEMO_USER_AGENT = "northstar-mobility-demo/1.0";
 
 export type LeadsTableResult = {
   headers: string[];
@@ -11,11 +11,8 @@ export type LeadsTableResult = {
   source: "google_sheets" | "demo";
 };
 
-function getFormgridSpreadsheetId(): string {
-  return (
-    process.env.GOOGLE_SHEETS_FORMGRID_SPREADSHEET_ID?.trim() ||
-    DEFAULT_FORMGRID_SPREADSHEET_ID
-  );
+function getFormgridSpreadsheetId(): string | null {
+  return process.env.GOOGLE_SHEETS_FORMGRID_SPREADSHEET_ID?.trim() || null;
 }
 
 function getFormgridGid(): string {
@@ -32,11 +29,10 @@ function parseCsvRows(text: string): string[][] {
 
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
-    const next = text[i + 1];
 
     if (inQuotes) {
       if (ch === '"') {
-        if (next === '"') {
+        if (text[i + 1] === '"') {
           cell += '"';
           i++;
         } else {
@@ -88,7 +84,7 @@ function fetchTextInsecure(url: string, redirectDepth = 0): Promise<string> {
       url,
       {
         rejectUnauthorized: false,
-        headers: { "User-Agent": "sharp-spice-team-platform/1.0" },
+        headers: { "User-Agent": DEMO_USER_AGENT },
       },
       (res) => {
         const chunks: Buffer[] = [];
@@ -131,6 +127,10 @@ function fetchTextInsecure(url: string, redirectDepth = 0): Promise<string> {
 
 async function fetchFormgridCsv(): Promise<string[][]> {
   const spreadsheetId = getFormgridSpreadsheetId();
+  if (!spreadsheetId) {
+    return [];
+  }
+
   const gid = getFormgridGid();
   const url = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv&gid=${encodeURIComponent(gid)}`;
 
@@ -154,6 +154,11 @@ async function fetchFormgridCsv(): Promise<string[][]> {
 }
 
 export async function getFormgridLeadsTable(): Promise<LeadsTableResult> {
+  const spreadsheetId = getFormgridSpreadsheetId();
+  if (!spreadsheetId) {
+    return { headers: [], rows: [], source: "demo" };
+  }
+
   const cacheKey = "formgrid-leads:table";
   const cached = getCached<LeadsTableResult>(cacheKey);
   if (cached) return cached;

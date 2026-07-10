@@ -6,7 +6,7 @@ import { runCalendarReminderCron } from "./reminders-cron";
 function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-1",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "company",
     ownerUserId: null,
     title: "Company sync",
@@ -17,7 +17,7 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     allDay: false,
     location: "",
     sendReminders: true,
-    createdByUserId: "veronika",
+    createdByUserId: "olivia-bennett",
     createdByName: "Вероника",
     updatedByUserId: null,
     createdAt: "2026-06-20T10:00:00.000Z",
@@ -34,7 +34,7 @@ describe("runCalendarReminderCron", () => {
 
     const deps = {
       listEventsInRange: async () => [event()],
-      listActiveUserIds: async () => ["veronika", "manager-1"],
+      listActiveUserIds: async () => ["olivia-bennett", "daniel-cooper"],
       tryInsertDelivery: async (input) => {
         insertCalls += 1;
         const key = `${input.eventId}:${input.userId}:${input.offsetMinutes}`;
@@ -74,7 +74,7 @@ describe("runCalendarReminderCron", () => {
       now,
       deps: {
         listEventsInRange: async () => [event({ sendReminders: false })],
-        listActiveUserIds: async () => ["veronika"],
+        listActiveUserIds: async () => ["olivia-bennett"],
         tryInsertDelivery: async () => {
           insertCalls += 1;
           return null;
@@ -98,9 +98,9 @@ describe("runCalendarReminderCron", () => {
       now,
       deps: {
         listEventsInRange: async () => [
-          event({ scope: "personal", ownerUserId: "veronika" }),
+          event({ scope: "personal", ownerUserId: "olivia-bennett" }),
         ],
-        listActiveUserIds: async () => ["veronika"],
+        listActiveUserIds: async () => ["olivia-bennett"],
         tryInsertDelivery: async (input) => ({
           id: "delivery-1",
           eventId: input.eventId,
@@ -121,7 +121,7 @@ describe("runCalendarReminderCron", () => {
     });
 
     assert.equal(onDeliveryCalls.length, 1);
-    assert.equal(onDeliveryCalls[0]?.userId, "veronika");
+    assert.equal(onDeliveryCalls[0]?.userId, "olivia-bennett");
     assert.equal(onDeliveryCalls[0]?.offsetMinutes, 60);
   });
 });

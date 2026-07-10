@@ -105,7 +105,7 @@ export function TeamView({ user }: TeamViewProps) {
             const showDelete =
               canDelete &&
               !isSelf &&
-              !(member.id === "veronika" && user.id !== "veronika");
+              !(member.id === "olivia-bennett" && user.id !== "olivia-bennett");
 
             return (
               <li key={member.id}>

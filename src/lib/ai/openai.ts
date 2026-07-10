@@ -63,7 +63,7 @@ function buildRequestHeaders(
       "http://localhost:3000";
     headers["X-OpenRouter-Title"] =
       process.env.OPENROUTER_APP_TITLE?.trim() ||
-      "Sharp & Spice Team Platform";
+      "Northstar Mobility Demo";
   }
 
   return headers;

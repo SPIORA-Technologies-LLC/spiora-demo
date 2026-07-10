@@ -214,7 +214,7 @@ export async function buildEmigrantDeskContextForAi(
 
     const lines = selected.map((client) => formatClientLine(client, detailed));
     const header =
-      `Клиенты Emigrant Croatia Desk (статусы дел в кабинете emigrant-croatia-desk.vercel.app): всего ${clients.length}, в контексте ${lines.length}.`;
+      `Клиенты demo desk (статусы дел во внутреннем demo-кабинете): всего ${clients.length}, в контексте ${lines.length}.`;
 
     return {
       text: `${header}\n${lines.join("\n")}`,

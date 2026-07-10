@@ -27,15 +27,15 @@ describe("checkLeadAgainstDesk", () => {
   it("marks case_number match as STRONG duplicate", () => {
     const check = checkLeadAgainstDesk(
       {
-        name: "Белоногова Мария Павловна",
-        passport: "777063956",
+        name: "Demo Client Alpha",
+        passport: "DEMO-P90001",
         email: "other@example.com",
       },
       desk({
-        lastName: "Белоногова",
-        firstName: "Мария",
-        caseNumber: "777063956",
-        email: "berchukvl@gmail.com",
+        lastName: "Alpha",
+        firstName: "Demo",
+        caseNumber: "DEMO-P90001",
+        email: "demo.client.a@example.com",
       }),
     );
 
@@ -47,15 +47,15 @@ describe("checkLeadAgainstDesk", () => {
   it("marks email match as STRONG duplicate", () => {
     const check = checkLeadAgainstDesk(
       {
-        name: "Бякова Мария Николаевна",
-        passport: "111111111",
-        email: "annushka_80@inbox.ru",
+        name: "Demo Client Beta",
+        passport: "DEMO-P90002",
+        email: "demo.client.b@example.com",
       },
       desk({
-        lastName: "Бякова",
-        firstName: "Мария",
-        caseNumber: "760724050",
-        email: "annushka_80@inbox.ru",
+        lastName: "Beta",
+        firstName: "Demo",
+        caseNumber: "DEMO-P90003",
+        email: "demo.client.b@example.com",
       }),
     );
 
@@ -67,13 +67,13 @@ describe("checkLeadAgainstDesk", () => {
     const check = checkLeadAgainstDesk(
       {
         name: "Иванов Иван Иванович",
-        passport: "999999999",
+        passport: "DEMO-P90004",
         email: "new@example.com",
       },
       desk({
         lastName: "Иванов",
         firstName: "Иван",
-        caseNumber: "111111111",
+        caseNumber: "DEMO-P90005",
         email: "other@example.com",
       }),
     );
@@ -86,14 +86,14 @@ describe("checkLeadAgainstDesk", () => {
   it("returns no match for unrelated client", () => {
     const check = checkLeadAgainstDesk(
       {
-        name: "Кулешова Леонелла Евгеньевна",
-        passport: "776511478",
-        email: "leonella0123401@gmail.com",
+        name: "Demo Client Delta",
+        passport: "DEMO-P90006",
+        email: "demo.client.d@example.com",
       },
       desk({
-        lastName: "Петров",
-        firstName: "Пётр",
-        caseNumber: "123456789",
+        lastName: "Unrelated",
+        firstName: "Client",
+        caseNumber: "DEMO-P90007",
         email: "petrov@example.com",
       }),
     );
@@ -107,8 +107,8 @@ describe("deskFullNameMatches", () => {
   it("matches surname and first name regardless of patronymic", () => {
     assert.equal(
       deskFullNameMatches(
-        "Тайк Филипп Майерович",
-        desk({ lastName: "Тайк", firstName: "Филипп" }),
+        "Сидоров Пётр Петрович",
+        desk({ lastName: "Сидоров", firstName: "Пётр" }),
       ),
       true,
     );

@@ -7,5 +7,5 @@ export function isVideoMeeting(
 }
 
 export function getMeetingRoomName(eventId: string): string {
-  return `sharp-spice-cal-${eventId}`;
+  return `northstar-cal-${eventId}`;
 }

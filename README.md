@@ -1,73 +1,34 @@
-# Sharp & Spice Team Platform
+# Northstar Mobility Demo
 
-Корпоративная платформа Sharp & Spice: AI Workspace, клиенты, задачи, чат и аналитика.
+Демонстрационная корпоративная платформа Northstar Mobility: AI Workspace, CRM, задачи, чат и аналитика.
 
-## Установка Sharp & Spice на ноутбук (PWA)
+> Это sanitized demo-копия. Не содержит production credentials и персональных данных.
 
-Платформа работает как обычный сайт, но её можно установить как приложение на Windows, macOS или Linux.
-
-### Как установить
-
-1. Откройте сайт в **Chrome** или **Edge**.
-2. Войдите в аккаунт как обычно.
-3. Нажмите иконку **Установить** (Install) в адресной строке браузера.
-   - В Chrome: значок монитора со стрелкой справа от адресной строки.
-   - В Edge: значок **+ App** или **Установить приложение**.
-4. Подтвердите установку — нажмите **Install** / **Установить**.
-
-После установки:
-
-- приложение появится на **рабочем столе** и в **меню Пуск** (Windows) или в списке приложений (macOS);
-- откроется в **отдельном окне** без панели браузера;
-- будет отображаться иконка и название **Sharp & Spice**.
-
-### Если иконка на рабочем столе с острыми углами
-
-Chrome при установке на Windows кэширует иконку. После обновления:
-
-1. Удалите старое приложение Sharp & Spice (Пуск → правый клик → Удалить).
-2. Пересоберите иконки: `npm run pwa:icons`
-3. Задеплойте сайт и установите приложение заново.
-
-Иконки делаются со скруглёнными углами под фон рабочего стола Windows.
-
-### Если кнопка установки не видна
-
-- Убедитесь, что сайт открыт по **HTTPS** (на Vercel это по умолчанию).
-- Обновите страницу и подождите несколько секунд — service worker должен зарегистрироваться.
-- В Chrome: меню ⋮ → **Установить Sharp & Spice…**
-- В Edge: меню ⋯ → **Приложения** → **Установить этот сайт как приложение**
-
-### Файлы PWA в проекте
-
-| Файл | Назначение |
-|------|------------|
-| `public/manifest.json` | Манифест приложения (название, цвета, иконки) |
-| `public/sw.js` | Service worker для установки и базового кэша |
-| `public/icons/icon-192x192.png` | Иконка 192×192 (белый фон, слегка скруглённые углы) |
-| `public/icons/icon-512x512.png` | Иконка 512×512 (белый фон, слегка скруглённые углы) |
-| `public/icons/icon-maskable-192x192.png` | Maskable-иконка 192×192 |
-| `public/icons/icon-maskable-512x512.png` | Maskable-иконка 512×512 |
-| `scripts/generate-pwa-icons.mjs` | Скрипт пересборки иконок из `logo_15.jpg` (`npm run pwa:icons`) |
-| `src/components/pwa/ServiceWorkerRegister.tsx` | Регистрация service worker в браузере |
-
-## Разработка
+## Локальный запуск
 
 ```bash
 npm install
+cp .env.example .env.local
+# заполните AUTH_SECRET и AUTH_PASSWORD_* локально
 npm run dev
 ```
 
-Очистка кэша Next.js при проблемах с dev-сервером:
+## Демо-учётные записи
+
+| Роль | Email |
+|------|-------|
+| Owner | `olivia@spiora.demo` |
+| Manager | `daniel@spiora.demo`, `emma@spiora.demo`, `lucas@spiora.demo` |
+
+Пароли задаются только в `.env.local` (`AUTH_PASSWORD_*`).
+
+## PWA
+
+Приложение можно установить как PWA с главной страницы входа. Иконки — нейтральные demo-assets.
+
+## Тесты
 
 ```bash
-npm run dev:clean
+npm test
+npm run build
 ```
-
-## Деплой
-
-Проект деплоится на Vercel. Переменные окружения — см. `.env.example`.
-
-### Видеовстречи календаря (LiveKit)
-
-Go-live checklist, настройка LiveKit Cloud и Vercel ENV: [`INTERNAL_VIDEO_MEETINGS_GO_LIVE.md`](INTERNAL_VIDEO_MEETINGS_GO_LIVE.md).

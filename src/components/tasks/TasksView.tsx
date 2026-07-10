@@ -429,7 +429,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
     <div className={styles.wrap}>
       <SectionHeader
         title="Задачи команды"
-        subtitle="Общий список задач Sharp & Spice"
+        subtitle="Общий список задач Northstar Mobility"
         action={
           <Button type="button" onClick={() => setCreateOpen(true)}>
             ➕ Новая задача

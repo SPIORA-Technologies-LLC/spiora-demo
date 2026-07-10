@@ -1,43 +1,25 @@
+import { listTeamUsers } from "@/lib/auth/users";
 import styles from "./DemoCredentials.module.css";
 
-const DEMO_ACCOUNTS = [
-  {
-    role: "Вероника (owner)",
-    email: "virineya1983@gmail.com",
-    password: "veronika-dev",
-  },
-  {
-    role: "Злата",
-    email: "gujenova220371@gmail.com",
-    password: "manager1-dev",
-  },
-  {
-    role: "Юля",
-    email: "iuliia.zhdanovich@gmail.com",
-    password: "manager2-dev",
-  },
-  {
-    role: "Руслан",
-    email: "selischev.ruslan@gmail.com",
-    password: "manager3-dev",
-  },
-] as const;
-
 export function DemoCredentials() {
+  const accounts = listTeamUsers();
+
   return (
     <aside className={styles.box} aria-label="Демо-доступ для разработки">
-      <p className={styles.title}>Демо-вход (скопируйте точно)</p>
+      <p className={styles.title}>Демо-учётные записи (локальная разработка)</p>
       <ul className={styles.list}>
-        {DEMO_ACCOUNTS.map((account) => (
+        {accounts.map((account) => (
           <li key={account.email} className={styles.item}>
-            <span className={styles.role}>{account.role}</span>
+            <span className={styles.role}>
+              {account.name} ({account.role})
+            </span>
             <code className={styles.code}>{account.email}</code>
-            <code className={styles.code}>{account.password}</code>
           </li>
         ))}
       </ul>
       <p className={styles.hint}>
-        Другие email не подойдут — в системе только эти 4 учётки.
+        Пароль задаётся в переменных AUTH_PASSWORD_* в .env.local (не хранится в
+        исходном коде). Другие email не подойдут.
       </p>
     </aside>
   );

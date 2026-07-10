@@ -15,8 +15,8 @@ const creator: SessionUser = {
 
 const assignee: SessionUser = {
   id: "assignee",
-  name: "Veronika",
-  email: "veronika@test.com",
+  name: "olivia-bennett",
+  email: "olivia@spiora.demo",
   role: "manager",
 };
 

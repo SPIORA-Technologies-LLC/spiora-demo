@@ -16,8 +16,8 @@ describe("validateLeadForCrmCreate test lead guard", () => {
   it("flags lead with test marker in name", () => {
     const errors = validateLeadForCrmCreate({
       name: "Иванов test Иванович",
-      passport: "777063956",
-      phone: "79874362823",
+      passport: "DEMO-P77706",
+      phone: "+000000000002",
       email: "candidate@example.com",
     });
     assert.ok(errors.includes("test_lead_detected"));
@@ -26,41 +26,41 @@ describe("validateLeadForCrmCreate test lead guard", () => {
   it("flags lead with demo marker in name", () => {
     const errors = validateLeadForCrmCreate({
       name: "Петров Демо Петрович",
-      passport: "760724050",
-      phone: "79185548574",
+      passport: "DEMO-P76072",
+      phone: "+000000000003",
       email: "candidate@example.com",
     });
     assert.ok(errors.includes("test_lead_detected"));
   });
 
   it("flags lead when email matches platform service list", () => {
-    process.env.CRM_WRITE_PLATFORM_EMAILS = "team+service@sharp-spice.com";
+    process.env.CRM_WRITE_PLATFORM_EMAILS = "team+service@northstar-mobility.example.com";
     const errors = validateLeadForCrmCreate({
       name: "Сидоров Иван Иванович",
-      passport: "39419221",
-      phone: "79437658423",
-      email: "team+service@sharp-spice.com",
+      passport: "DEMO-P39419",
+      phone: "+000000000004",
+      email: "team+service@northstar-mobility.example.com",
     });
     assert.ok(errors.includes("test_lead_detected"));
   });
 
   it("flags lead when email matches admin email", () => {
-    process.env.CRM_WRITE_ADMIN_EMAIL = "admin@sharp-spice.com";
+    process.env.CRM_WRITE_ADMIN_EMAIL = "admin@northstar-mobility.example.com";
     const errors = validateLeadForCrmCreate({
       name: "Смирнова Анна Ивановна",
-      passport: "772808561",
-      phone: "905556366676",
-      email: "admin@sharp-spice.com",
+      passport: "DEMO-P77280",
+      phone: "+000000000005",
+      email: "admin@northstar-mobility.example.com",
     });
     assert.ok(errors.includes("test_lead_detected"));
   });
 
   it("keeps valid non-test lead clean", () => {
     const errors = validateLeadForCrmCreate({
-      name: "Кулешова Леонелла Евгеньевна",
-      passport: "776511478",
-      phone: "79851657350",
-      email: "leonella0123401@gmail.com",
+      name: "Сидорова Анна Ивановна",
+      passport: "DEMO-P77651",
+      phone: "+000000000006",
+      email: "sidorova.anna@example.com",
     });
     assert.equal(errors.includes("test_lead_detected"), false);
   });

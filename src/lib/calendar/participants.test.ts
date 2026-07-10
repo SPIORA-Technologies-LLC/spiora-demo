@@ -13,20 +13,20 @@ import {
 function videoEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-video",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "company",
     ownerUserId: null,
     title: "Sync",
     description: "",
     eventType: "video_meeting",
     videoInviteMode: "selected",
-    participantUserIds: ["manager-2"],
+    participantUserIds: ["emma-wilson"],
     startAt: "2026-06-25T08:00:00.000Z",
     endAt: "2026-06-25T09:00:00.000Z",
     allDay: false,
     location: "",
     sendReminders: true,
-    createdByUserId: "manager-1",
+    createdByUserId: "daniel-cooper",
     createdByName: "Злата",
     updatedByUserId: null,
     createdAt: "2026-06-20T10:00:00.000Z",
@@ -58,9 +58,9 @@ describe("getEffectiveVideoInviteMode", () => {
 describe("isUserInvitedToVideoMeeting", () => {
   it("allows selected participants and creator", () => {
     const event = videoEvent();
-    assert.equal(isUserInvitedToVideoMeeting("manager-1", event), true);
-    assert.equal(isUserInvitedToVideoMeeting("manager-2", event), true);
-    assert.equal(isUserInvitedToVideoMeeting("manager-3", event), false);
+    assert.equal(isUserInvitedToVideoMeeting("daniel-cooper", event), true);
+    assert.equal(isUserInvitedToVideoMeeting("emma-wilson", event), true);
+    assert.equal(isUserInvitedToVideoMeeting("lucas-martin", event), false);
   });
 
   it("allows all team for company all_team mode", () => {
@@ -68,14 +68,14 @@ describe("isUserInvitedToVideoMeeting", () => {
       videoInviteMode: "all_team",
       participantUserIds: [],
     });
-    assert.equal(isUserInvitedToVideoMeeting("manager-3", event), true);
+    assert.equal(isUserInvitedToVideoMeeting("lucas-martin", event), true);
   });
 });
 
 describe("canViewVideoMeeting", () => {
   it("hides selected company meetings from non-invited users", () => {
     const event = videoEvent();
-    assert.equal(canViewVideoMeeting({ id: "manager-3" }, event), false);
+    assert.equal(canViewVideoMeeting({ id: "lucas-martin" }, event), false);
   });
 });
 
@@ -83,21 +83,21 @@ describe("normalizeParticipantUserIds", () => {
   it("dedupes and excludes creator", () => {
     assert.deepEqual(
       normalizeParticipantUserIds(
-        ["manager-2", "manager-2", "manager-1", "unknown"],
-        "manager-1",
+        ["emma-wilson", "emma-wilson", "daniel-cooper", "unknown"],
+        "daniel-cooper",
       ),
-      ["manager-2"],
+      ["emma-wilson"],
     );
   });
 });
 
 describe("resolveVideoMeetingReminderRecipientIds", () => {
-  const active = ["veronika", "manager-1", "manager-2", "manager-3"];
+  const active = ["olivia-bennett", "daniel-cooper", "emma-wilson", "lucas-martin"];
 
   it("notifies only invited users for selected meetings", () => {
     assert.deepEqual(
       resolveVideoMeetingReminderRecipientIds(videoEvent(), active),
-      ["manager-1", "manager-2"],
+      ["daniel-cooper", "emma-wilson"],
     );
   });
 
@@ -118,8 +118,8 @@ describe("formatParticipantNames", () => {
       formatParticipantNames(
         videoEvent({ videoInviteMode: "all_team", participantUserIds: [] }),
         [
-          { id: "manager-1", name: "Злата" },
-          { id: "manager-2", name: "Юля" },
+          { id: "daniel-cooper", name: "Злата" },
+          { id: "emma-wilson", name: "Юля" },
         ],
       ),
       "Вся команда",

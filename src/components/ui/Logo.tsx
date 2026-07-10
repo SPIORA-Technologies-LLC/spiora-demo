@@ -77,9 +77,7 @@ export function Logo({
   const content = showText ? (
     <>
       {mark}
-      <span className={styles.brandText}>
-        Sharp <span className={styles.brandAmp}>&</span> Spice
-      </span>
+      <span className={styles.brandText}>Northstar Mobility</span>
     </>
   ) : (
     mark

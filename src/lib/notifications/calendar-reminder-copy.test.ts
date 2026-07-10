@@ -13,9 +13,9 @@ import {
 function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-42",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "personal",
-    ownerUserId: "veronika",
+    ownerUserId: "olivia-bennett",
     title: "Созвон с клиентом",
     description: "",
     eventType: "general",
@@ -24,7 +24,7 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     allDay: false,
     location: "",
     sendReminders: true,
-    createdByUserId: "veronika",
+    createdByUserId: "olivia-bennett",
     createdByName: "Вероника",
     updatedByUserId: null,
     createdAt: "2026-06-20T10:00:00.000Z",

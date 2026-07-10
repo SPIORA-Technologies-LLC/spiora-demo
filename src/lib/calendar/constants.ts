@@ -1,4 +1,4 @@
-export const CALENDAR_COMPANY_ID = "sharp-spice";
+export const CALENDAR_COMPANY_ID = "northstar-mobility";
 
 export const CALENDAR_TIMEZONE = "Europe/Zagreb";
 

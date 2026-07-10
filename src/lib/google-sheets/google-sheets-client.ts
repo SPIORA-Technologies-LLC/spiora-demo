@@ -46,7 +46,7 @@ export class GoogleSheetsClient {
         {
           rejectUnauthorized: false,
           headers: {
-            "User-Agent": "sharp-spice-team-platform/1.0",
+            "User-Agent": "northstar-mobility-demo/1.0",
           },
         },
         (res) => {

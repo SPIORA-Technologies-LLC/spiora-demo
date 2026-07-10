@@ -13,7 +13,7 @@ import { handleMintGuestMeetingToken, resolveGuestMeetingPreview } from "./meeti
 import { mintGuestMeetingAccessToken } from "./meeting-token";
 
 const manager: SessionUser = {
-  id: "manager-1",
+  id: "daniel-cooper",
   name: "Злата",
   email: "manager1@test.com",
   role: "manager",
@@ -21,7 +21,7 @@ const manager: SessionUser = {
 
 const event: CalendarEvent = {
   id: "evt-video",
-  companyId: "sharp-spice",
+  companyId: "northstar-mobility",
   scope: "company",
   ownerUserId: null,
   title: "Consultation",
@@ -40,7 +40,7 @@ const event: CalendarEvent = {
   allDay: false,
   location: "",
   sendReminders: true,
-  createdByUserId: "manager-1",
+  createdByUserId: "daniel-cooper",
   createdByName: "Злата",
   updatedByUserId: null,
   createdAt: "2026-06-20T10:00:00.000Z",
@@ -56,7 +56,7 @@ describe("meeting guest invite helpers", () => {
 
   it("detects guest participant ids", () => {
     assert.equal(isGuestParticipantId("guest-abc"), true);
-    assert.equal(isGuestParticipantId("manager-1"), false);
+    assert.equal(isGuestParticipantId("daniel-cooper"), false);
   });
 
   it("builds guest join urls", () => {
@@ -237,7 +237,7 @@ describe("mintGuestMeetingAccessToken", () => {
       new Date("2026-06-25T08:10:00.000Z"),
     );
 
-    assert.equal(minted.roomName, "sharp-spice-cal-evt-video");
+    assert.equal(minted.roomName, "northstar-cal-evt-video");
     assert.ok(minted.token.length > 20);
   });
 });

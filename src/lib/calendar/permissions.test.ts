@@ -10,21 +10,21 @@ import {
 } from "./permissions";
 
 const owner: SessionUser = {
-  id: "veronika",
+  id: "olivia-bennett",
   name: "Вероника",
   email: "owner@test.com",
   role: "owner",
 };
 
 const managerA: SessionUser = {
-  id: "manager-1",
+  id: "daniel-cooper",
   name: "Злата",
   email: "manager1@test.com",
   role: "manager",
 };
 
 const managerB: SessionUser = {
-  id: "manager-2",
+  id: "emma-wilson",
   name: "Юля",
   email: "manager2@test.com",
   role: "manager",
@@ -33,7 +33,7 @@ const managerB: SessionUser = {
 function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
   return {
     id: "evt-1",
-    companyId: "sharp-spice",
+    companyId: "northstar-mobility",
     scope: "personal",
     ownerUserId: managerA.id,
     title: "Test",

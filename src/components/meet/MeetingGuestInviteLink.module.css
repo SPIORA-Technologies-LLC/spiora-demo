@@ -1,0 +1,154 @@
+.section {
+  margin-top: 1rem;
+  padding: 0.9rem;
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.header {
+  margin-bottom: 0.75rem;
+}
+
+.title {
+  margin: 0 0 0.35rem;
+  font-family: Sora, sans-serif;
+  font-size: 0.98rem;
+}
+
+.hint {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.status {
+  margin: 0;
+  color: #cbd5e0;
+  font-size: 0.9rem;
+}
+
+.error {
+  margin: 0;
+  color: #fca5a5;
+  font-size: 0.9rem;
+}
+
+.invitePreview {
+  width: 100%;
+  min-height: 11rem;
+  margin-bottom: 0.65rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  background: rgba(15, 20, 28, 0.55);
+  color: #e2e8f0;
+  font: inherit;
+  font-size: 0.88rem;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.actionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.urlRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.urlInput {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.4rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  background: rgba(15, 20, 28, 0.55);
+  color: #e2e8f0;
+  font-size: 0.82rem;
+}
+
+.copyButton,
+.shareButton,
+.regenerateButton {
+  min-height: 2.4rem;
+  padding: 0 0.85rem;
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  border-radius: var(--radius-sm);
+  background: rgba(99, 102, 241, 0.18);
+  color: #e0e7ff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.copyButton:hover,
+.shareButton:hover,
+.regenerateButton:hover {
+  background: rgba(99, 102, 241, 0.28);
+}
+
+.shareButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.shareButtonWhatsapp {
+  border-color: rgba(37, 211, 102, 0.45);
+  background: rgba(37, 211, 102, 0.14);
+  color: #bbf7d0;
+}
+
+.shareButtonWhatsapp:hover {
+  background: rgba(37, 211, 102, 0.24);
+}
+
+.shareButtonTelegram {
+  border-color: rgba(42, 171, 238, 0.45);
+  background: rgba(42, 171, 238, 0.14);
+  color: #bae6fd;
+}
+
+.shareButtonTelegram:hover {
+  background: rgba(42, 171, 238, 0.24);
+}
+
+.regenerateBlock {
+  margin-top: 0.65rem;
+}
+
+.regenerateButton {
+  background: transparent;
+}
+
+.regenerateHint {
+  margin: 0.45rem 0 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.regenerateButton:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .actionRow {
+    flex-direction: column;
+  }
+
+  .copyButton,
+  .shareButton {
+    width: 100%;
+  }
+}

@@ -1,0 +1,398 @@
+import {
+  formatNormalizedQueryLabel,
+  type NormalizedNameParts,
+} from "@/lib/ai/russian-name-morphology";
+import {
+  isSensitiveFieldKey,
+  redactDebugRow,
+  REDACTED_VALUE,
+} from "@/lib/ai/context-redaction";
+import {
+  formatFormgridRowDetailed,
+  getFormgridClientFields,
+} from "@/lib/google-sheets/formgrid-lookup";
+import { findPossibleDuplicatePairs } from "@/lib/ai/client-deduplication";
+import {
+  buildCrmClientDebugRow,
+  formatClientForAi,
+} from "@/lib/ai/format-client";
+import {
+  type FormatClientContextOptions,
+  formatMergedClientContextWithSources,
+  formatSingleClientContextWithSources,
+} from "@/lib/ai/client-field-sources";
+import { formatPassportPairDebug } from "@/lib/ai/client-passport";
+
+export type { EmigrantDeskContextSlice, FormatClientContextOptions } from "@/lib/ai/client-field-sources";
+import {
+  FORMGRID_LEAD_STATUS,
+  formatStatusForAiContext,
+  logClientStatusDebug,
+  sanitizeCrmClientStatus,
+} from "@/lib/ai/client-status";
+import type { Client } from "@/lib/google-sheets/types";
+
+export type ClientDebugScanHit = {
+  source: string;
+  rowIndex: number;
+  column: string;
+  value: string;
+  matchedToken: string;
+};
+
+export type ClientContextSource = "clients" | "new_clients" | "merged";
+
+export type ClientContext = {
+  source: "clients" | "new_clients";
+  sourceLabel: string;
+  rowIndex: number;
+  name: string;
+  phone: string;
+  email: string;
+  country: string;
+  direction: string;
+  status: string;
+  manager: string;
+  lastActivity: string;
+  surveyData: string;
+  score: number;
+  matchedFields: string[];
+  debugRow: Record<string, string>;
+};
+
+export type MergedClientContext = {
+  source: "merged";
+  sourceLabel: "Объединённый";
+  rowIndex: number;
+  name: string;
+  phone: string;
+  email: string;
+  country: string;
+  direction: string;
+  status: string;
+  manager: string;
+  lastActivity: string;
+  surveyData: string;
+  crmData: string;
+  score: number;
+  matchedFields: string[];
+  mergeReasons: string[];
+  parts: ClientContext[];
+  conflicts: Array<{
+    field: string;
+    values: Array<{ source: string; value: string }>;
+  }>;
+  debugRow: Record<string, string>;
+};
+
+export type ResolvedClientContext = ClientContext | MergedClientContext;
+
+export function isMergedClientContext(
+  client: ResolvedClientContext,
+): client is MergedClientContext {
+  return client.source === "merged";
+}
+
+export function crmClientToContext(
+  client: Client,
+  score: number,
+  matchedFields: string[] = [],
+): ClientContext {
+  const rawStatus = sanitizeCrmClientStatus(client.status);
+  const finalStatus = formatStatusForAiContext(rawStatus, "clients");
+
+  logClientStatusDebug({
+    name: client.name,
+    source: "Клиенты",
+    rawStatus,
+    finalStatus,
+  });
+
+  return {
+    source: "clients",
+    sourceLabel: "Клиенты",
+    rowIndex: client.rowIndex ?? 0,
+    name: client.name,
+    phone: client.phone !== "—" ? client.phone : "",
+    email: client.email !== "—" ? client.email : "",
+    country: client.country !== "—" ? client.country : "",
+    direction: client.direction !== "—" ? client.direction : "",
+    status: finalStatus,
+    manager: client.manager !== "—" ? client.manager : "",
+    lastActivity: client.lastActivity !== "—" ? client.lastActivity : "",
+    surveyData: formatClientForAi(client),
+    score,
+    matchedFields,
+    debugRow: buildCrmClientDebugRow(client),
+  };
+}
+
+export function formgridRowToContext(
+  headers: string[],
+  row: string[],
+  rowIndex: number,
+  score: number,
+  matchedFields: string[] = [],
+): ClientContext {
+  const fields = getFormgridClientFields(headers, row);
+  const debugRow: Record<string, string> = {};
+  headers.forEach((header, index) => {
+    const value = (row[index] ?? "").trim();
+    if (header && value && !isSensitiveFieldKey(header)) {
+      debugRow[header.slice(0, 80)] = value.slice(0, 200);
+    }
+  });
+  if (fields.passport) {
+    debugRow.passport = fields.passport;
+  }
+
+  return {
+    source: "new_clients",
+    sourceLabel: "Новые клиенты",
+    rowIndex: rowIndex + 2,
+    name: fields.name,
+    phone: fields.phone,
+    email: fields.email,
+    country: "",
+    direction: "Хорватия",
+    status: FORMGRID_LEAD_STATUS,
+    manager: "",
+    lastActivity: fields.submittedAt,
+    surveyData: formatFormgridRowDetailed(headers, row),
+    score,
+    matchedFields,
+    debugRow,
+  };
+}
+
+export type ClientCandidateScenario =
+  | "multiple"
+  | "weak"
+  | "not_found"
+  | "structured";
+
+export function formatClientCandidatesForAi(
+  clients: ResolvedClientContext[],
+  scenario: ClientCandidateScenario = "multiple",
+  totalFound?: number,
+): string {
+  const total = totalFound ?? clients.length;
+  const intro =
+    scenario === "not_found"
+      ? "Точного совпадения в таблицах нет. Ближайшие кандидаты (fuzzy-поиск):"
+      : scenario === "weak"
+        ? "Точных совпадений нет. Похожие записи:"
+        : scenario === "structured"
+          ? `Результаты структурированного поиска (найдено ${total}, передано в контекст ${clients.length}):`
+          : "Найдено несколько подходящих клиентов:";
+
+  const countNote =
+    scenario === "structured" && total > clients.length
+      ? `\n\nВ контекст переданы первые ${clients.length} из ${total} найденных.`
+      : "";
+
+  const lines = clients.map((client, index) => {
+    const mergedNote =
+      isMergedClientContext(client) && client.parts.length > 1
+        ? ` (объединено: ${client.parts.map((p) => p.sourceLabel).join(" + ")})`
+        : "";
+    const details = [
+      `${index + 1}. **${client.name}** — ${client.sourceLabel}, строка ${client.rowIndex}${mergedNote}`,
+      client.score ? `   релевантность: ${client.score}` : "",
+      client.email ? `   email: ${client.email}` : "",
+      client.phone ? `   телефон: ${client.phone}` : "",
+      client.status ? `   статус: ${client.status}` : "",
+      client.manager ? `   менеджер: ${client.manager}` : "",
+      client.country ? `   страна: ${client.country}` : "",
+      client.matchedFields.length > 0
+        ? `   совпадения: ${client.matchedFields.slice(0, 4).join("; ")}`
+        : "",
+    ].filter(Boolean);
+    return details.join("\n");
+  });
+
+  return `${intro}${countNote}\n\n${lines.join("\n\n")}`;
+}
+
+export function formatClientContextBlock(
+  client: ResolvedClientContext,
+  options?: FormatClientContextOptions,
+): string {
+  if (isMergedClientContext(client)) {
+    return formatMergedClientContextBlock(client, options);
+  }
+  return formatSingleClientContextWithSources(client, options?.desk);
+}
+
+export function formatMergedClientContextBlock(
+  merged: MergedClientContext,
+  options?: FormatClientContextOptions,
+): string {
+  return formatMergedClientContextWithSources(merged, options?.desk);
+}
+
+export function formatMultipleClientsReply(
+  clients: ResolvedClientContext[],
+): string {
+  const lines = clients.map((client, index) => {
+    const parts =
+      isMergedClientContext(client) && client.parts.length > 1
+        ? ` (объединено: ${client.parts.map((p) => p.sourceLabel).join(" + ")})`
+        : "";
+    return (
+      `${index + 1}. **${client.name}** — ${client.sourceLabel}${parts} — строка ${client.rowIndex}` +
+      (client.score ? ` (score ${client.score})` : "") +
+      (client.email ? `, ${client.email}` : "") +
+      (client.phone ? `, ${client.phone}` : "")
+    );
+  });
+
+  return [
+    `Найдено несколько клиентов:`,
+    ...lines,
+    "",
+    "Уточните, кого выбрать — или напишите **«объединить как одного клиента»**, **«выбери 1»**, **«это один и тот же клиент»**.",
+  ].join("\n");
+}
+
+export function formatWeakMatchesReply(clients: ResolvedClientContext[]): string {
+  const lines = clients.map(
+    (client, index) =>
+      `${index + 1}. **${client.name}** — ${client.sourceLabel} — строка ${client.rowIndex}` +
+      (client.score ? ` (score ${client.score})` : "") +
+      (client.email ? `, ${client.email}` : "") +
+      (client.phone ? `, ${client.phone}` : ""),
+  );
+
+  return [
+    "Точных совпадений нет, но есть похожие:",
+    ...lines,
+    "",
+    "Уточните фамилию, телефон или email — или выберите клиента из списка.",
+  ].join("\n");
+}
+
+export function formatClientNotFoundReply(): string {
+  return "Клиент не найден в таблицах **Клиенты** и **Новые клиенты**.";
+}
+
+export function formatDebugClientReply(
+  query: string,
+  clients: ClientContext[],
+  morphology?: NormalizedNameParts,
+  rawHits: ClientDebugScanHit[] = [],
+  dedupGroups?: Array<{
+    parts: ClientContext[];
+    mergeReasons: string[];
+    mergedName: string;
+  }>,
+): string {
+  const normalizedLabel = morphology
+    ? formatNormalizedQueryLabel(morphology)
+    : null;
+  const candidateName = morphology?.rawTokens.join(" ") ?? query;
+
+  const lines = [
+    `**/debug_client**`,
+    `Исходный запрос: ${query}`,
+    candidateName !== query ? `Candidate name: ${candidateName}` : "",
+    normalizedLabel ? `Нормализовано: ${normalizedLabel}` : "",
+    "",
+  ].filter(Boolean);
+
+  if (rawHits.length > 0) {
+    lines.push("**Raw scan (token in row):**");
+    for (const hit of rawHits.slice(0, 12)) {
+      const displayValue = isSensitiveFieldKey(hit.column)
+        ? REDACTED_VALUE
+        : hit.value.slice(0, 120);
+      lines.push(
+        `- ${hit.source}, строка ${hit.rowIndex}, колонка «${hit.column}»: «${displayValue}» (token: ${hit.matchedToken})`,
+      );
+    }
+    lines.push("");
+  } else {
+    lines.push("Raw scan: совпадений по токенам в строках не найдено.", "");
+  }
+
+  if (clients.length === 0) {
+    lines.push("Scored candidates: нет (score < 35).");
+    return lines.join("\n");
+  }
+
+  lines.push(`Scored candidates: ${clients.length}`, "");
+
+  if (dedupGroups && dedupGroups.length > 0) {
+    lines.push("**Deduplication groups:**");
+    dedupGroups.forEach((group, index) => {
+      lines.push(
+        `${index + 1}. **${group.mergedName}** — ${group.parts.length} записей` +
+          (group.mergeReasons.length > 0
+            ? ` (${group.mergeReasons.join(", ")})`
+            : ""),
+      );
+      for (const part of group.parts) {
+        lines.push(
+          `   - ${part.name} | ${part.sourceLabel} | строка ${part.rowIndex} | score ${part.score}`,
+        );
+      }
+    });
+    lines.push("");
+    const mergedPreview = dedupGroups
+      .filter((group) => group.parts.length > 1)
+      .map((group) => group.mergedName);
+    if (mergedPreview.length > 0) {
+      lines.push(`**Merged as:** ${mergedPreview.join("; ")}`, "");
+    }
+  }
+
+  const possiblePairs = findPossibleDuplicatePairs(clients);
+  if (possiblePairs.length > 0) {
+    lines.push("**Possible duplicates (FIO only — not auto-merged):**");
+    for (const pair of possiblePairs) {
+      lines.push(
+        `- ${pair.left.name} (${pair.left.sourceLabel}) ↔ ${pair.right.name} (${pair.right.sourceLabel}): ${pair.possibleReasons.join(", ")}`,
+      );
+    }
+    lines.push("");
+  }
+
+  const crmCandidates = clients.filter((c) => c.source === "clients");
+  const formgridCandidates = clients.filter((c) => c.source === "new_clients");
+  if (crmCandidates.length > 0 && formgridCandidates.length > 0) {
+    lines.push("**Passport cross-source debug:**");
+    for (const crm of crmCandidates) {
+      for (const fg of formgridCandidates) {
+        lines.push(...formatPassportPairDebug(crm, fg), "");
+      }
+    }
+  }
+
+  lines.push(
+    clients
+      .map((client) => {
+        const matched =
+          client.matchedFields.length > 0
+            ? client.matchedFields.map((field) => `- ${field}`).join("\n")
+            : "- (нет детализации полей)";
+        const rowJson = JSON.stringify(redactDebugRow(client.debugRow), null, 2);
+
+        return [
+          `Найден клиент: ${client.name}`,
+          `Источник: ${client.sourceLabel}`,
+          `Строка: ${client.rowIndex}`,
+          `Score: ${client.score}`,
+          `Matched fields:`,
+          matched,
+          "",
+          "Raw row JSON:",
+          "```json",
+          rowJson,
+          "```",
+        ].join("\n");
+      })
+      .join("\n\n---\n\n"),
+  );
+
+  return lines.join("\n");
+}

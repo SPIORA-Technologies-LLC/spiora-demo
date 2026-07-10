@@ -1,11 +1,14 @@
 import { AppShell } from "@/components/layout/AppShell";
 import styles from "@/components/layout/AppShell.module.css";
 import { AiWorkspaceView } from "@/components/ai-workspace/AiWorkspaceView";
+import { getTranslations } from "next-intl/server";
 
-export default function AiWorkspacePage() {
+export default async function AiWorkspacePage() {
+  const t = await getTranslations("aiWorkspace");
+
   return (
     <AppShell
-      sectionTitle="AI Workspace"
+      sectionTitle={t("pageTitle")}
       contentClassName={styles.contentFullHeight}
     >
       <AiWorkspaceView />

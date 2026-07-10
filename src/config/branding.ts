@@ -18,6 +18,8 @@ export const branding = {
   defaultLocale: "en" as BrandingLocale,
   availableLocales: ["en", "ru"] as const satisfies readonly BrandingLocale[],
   demoMode: process.env.SPIORA_DEMO_MODE?.trim().toLowerCase() === "true",
+  aiWorkspaceDebug:
+    process.env.SPIORA_AI_WORKSPACE_DEBUG?.trim().toLowerCase() === "true",
   theme: "dark" as const,
   primaryColor: "#1a202c",
   accentColor: "#910d0d",

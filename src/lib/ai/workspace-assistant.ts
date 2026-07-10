@@ -1,10 +1,22 @@
-import { getAiRuntimeConfig, getAiSetupHint, isAiConfigured } from "@/lib/ai/config";
+import type { ChatCompletionOptions, ChatMessage } from "@/lib/ai/openai";
+import { createChatCompletion, streamChatCompletion } from "@/lib/ai/openai";
+import type { AppLocale } from "@/i18n/config";
 import {
-  createChatCompletion,
-  streamChatCompletion,
-  type ChatCompletionOptions,
-  type ChatMessage,
-} from "@/lib/ai/openai";
+  translateWorkspaceMessage,
+  translateWorkspaceSource,
+} from "@/i18n/ai-workspace-messages";
+import {
+  buildDemoFallbackReply,
+  shouldUseDemoResponsesOnly,
+} from "@/lib/ai/workspace-demo-scenarios";
+import {
+  formatDemoClientLookupMessage,
+  isWorkspaceDiagnosticsEnabled,
+} from "@/lib/ai/workspace-demo-safe";
+import {
+  buildOffTopicReply,
+  detectOffTopicCategory,
+} from "@/lib/ai/workspace-off-topic";
 import {
   detectWorkspaceIntent,
   isPassportNumberLookupQuery,
@@ -103,22 +115,35 @@ function pendingCandidatesForTransport(
 function buildSources(
   context: Awaited<ReturnType<typeof buildWorkspaceContext>>,
   intent: ReturnType<typeof detectWorkspaceIntent>,
+  locale: AppLocale = "en",
 ): string[] {
   const sources: string[] = [];
-  if (intent.needsKb) sources.push("Knowledge Base");
+  if (intent.needsKb) sources.push(translateWorkspaceSource(locale, "knowledgeBase"));
   if (intent.needsEmigrantDrive && context.meta.emigrantDriveConfigured) {
-    sources.push("ЭМИГРАНТ (Google Drive)");
+    sources.push(translateWorkspaceSource(locale, "emigrantDrive"));
   }
   if (intent.needsClients && context.meta.clientsTotal > 0) {
-    sources.push(`Клиенты (${context.meta.clientsTotal})`);
+    sources.push(
+      translateWorkspaceSource(locale, "crmCount", context.meta.clientsTotal),
+    );
   }
   if (intent.needsEmigrantDesk && context.meta.emigrantDeskTotal > 0) {
-    sources.push(`Emigrant Desk (${context.meta.emigrantDeskTotal})`);
+    sources.push(
+      translateWorkspaceSource(
+        locale,
+        "emigrantDeskCount",
+        context.meta.emigrantDeskTotal,
+      ),
+    );
   }
   if (intent.needsFormgrid && context.meta.formgridRows > 0) {
-    sources.push(`Анкеты Formgrid (${context.meta.formgridRows})`);
+    sources.push(
+      translateWorkspaceSource(locale, "formgridCount", context.meta.formgridRows),
+    );
   }
-  return sources.length > 0 ? sources : ["Клиенты"];
+  return sources.length > 0
+    ? sources
+    : [translateWorkspaceSource(locale, "crm")];
 }
 
 function buildContextBlock(
@@ -259,11 +284,11 @@ function passportReplyFromResolvedContext(
   return passportReplyFromClientContext(crm);
 }
 
-function buildPassportLookupDirectResult(reply: string) {
+function buildPassportLookupDirectResult(reply: string, locale: AppLocale = "en") {
   return {
     kind: "direct" as const,
     reply,
-    sources: ["Клиенты"],
+    sources: [translateWorkspaceSource(locale, "crm")],
     pendingClientCandidates: [] as ClientContext[],
     needsClientSelection: false,
   };
@@ -295,12 +320,14 @@ async function prepareWorkspaceRequest(
   history: WorkspaceChatTurn[],
   mode: WorkspaceResponseMode,
   pendingClientCandidates: ClientContext[] | null = null,
+  locale: AppLocale = "en",
 ): Promise<
   | { kind: "empty" }
   | {
       kind: "direct";
       reply: string;
       sources: string[];
+      demo?: boolean;
       pendingClientCandidates?: ClientContext[];
       needsClientSelection?: boolean;
     }
@@ -320,12 +347,33 @@ async function prepareWorkspaceRequest(
     return { kind: "empty" };
   }
 
+  const offTopicCategory = detectOffTopicCategory(trimmed);
+  if (offTopicCategory) {
+    return {
+      kind: "direct",
+      reply: buildOffTopicReply(locale, offTopicCategory),
+      sources: [],
+      demo: true,
+    };
+  }
+
   const safePendingCandidates =
     sanitizeClientContextsForTransport(pendingClientCandidates ?? undefined) ??
     null;
 
   if (isDebugClientCommand(trimmed)) {
     const debugQuery = parseDebugClientQuery(trimmed) || trimmed;
+
+    if (!isWorkspaceDiagnosticsEnabled()) {
+      const matches = await lookupAllClientMatches(debugQuery);
+      return {
+        kind: "direct",
+        reply: formatDemoClientLookupMessage(locale, matches.length > 0),
+        sources: [translateWorkspaceSource(locale, "crm")],
+        demo: true,
+      };
+    }
+
     const searchQuery = buildClientSearchQuery(debugQuery);
     const [matches, rawHits] = await Promise.all([
       lookupAllClientMatches(debugQuery),
@@ -353,7 +401,10 @@ async function prepareWorkspaceRequest(
     return {
       kind: "direct",
       reply: redactSensitiveText(debugReply),
-      sources: ["Клиенты", "Новые клиенты"],
+      sources: [
+        translateWorkspaceSource(locale, "crm"),
+        translateWorkspaceSource(locale, "newClients"),
+      ],
     };
   }
 
@@ -366,13 +417,13 @@ async function prepareWorkspaceRequest(
   if (followUp?.kind === "select" && findRecentPassportQuestion(history)) {
     const fromSelected = passportReplyFromClientContext(followUp.client);
     if (fromSelected) {
-      return buildPassportLookupDirectResult(fromSelected);
+      return buildPassportLookupDirectResult(fromSelected, locale);
     }
     const passportQuery = findRecentPassportQuestion(history);
     if (passportQuery) {
       const retry = await tryDirectPassportAnswer(passportQuery);
       if (retry) {
-        return buildPassportLookupDirectResult(retry);
+        return buildPassportLookupDirectResult(retry, locale);
       }
     }
   }
@@ -382,7 +433,7 @@ async function prepareWorkspaceRequest(
   if (isPassportNumberLookupQuery(trimmed)) {
     const early = await tryDirectPassportAnswer(trimmed);
     if (early) {
-      return buildPassportLookupDirectResult(early);
+      return buildPassportLookupDirectResult(early, locale);
     }
   }
 
@@ -455,7 +506,7 @@ async function prepareWorkspaceRequest(
       pendingForUi,
     );
     if (passportReply) {
-      return buildPassportLookupDirectResult(passportReply);
+      return buildPassportLookupDirectResult(passportReply, locale);
     }
     needsClientSelection = false;
     pendingForUi = undefined;
@@ -467,7 +518,7 @@ async function prepareWorkspaceRequest(
       return {
         kind: "direct",
         reply: direct,
-        sources: ["Клиенты"],
+        sources: [translateWorkspaceSource(locale, "crm")],
       };
     }
   }
@@ -478,7 +529,7 @@ async function prepareWorkspaceRequest(
       return {
         kind: "direct",
         reply: direct,
-        sources: ["Emigrant Desk"],
+        sources: [translateWorkspaceSource(locale, "emigrantDesk")],
       };
     }
   }
@@ -489,7 +540,7 @@ async function prepareWorkspaceRequest(
       return {
         kind: "direct",
         reply: direct,
-        sources: ["Анкеты Formgrid"],
+        sources: [translateWorkspaceSource(locale, "formgrid")],
       };
     }
   }
@@ -530,19 +581,24 @@ async function prepareWorkspaceRequest(
     ? [
         isMergedClientContext(clientContext)
           ? deskSlice
-            ? "Клиенты + Новые клиенты + Emigrant Desk"
-            : "Клиенты + Новые клиенты"
+            ? `${translateWorkspaceSource(locale, "crm")} + ${translateWorkspaceSource(locale, "newClients")} + ${translateWorkspaceSource(locale, "emigrantDesk")}`
+            : `${translateWorkspaceSource(locale, "crm")} + ${translateWorkspaceSource(locale, "newClients")}`
           : deskSlice
-            ? `${clientContext.sourceLabel} + Emigrant Desk`
-            : clientContext.sourceLabel,
-        ...buildSources(context, intent).filter(
+            ? `${translateWorkspaceSource(locale, "clientContext")} + ${translateWorkspaceSource(locale, "emigrantDesk")}`
+            : translateWorkspaceSource(locale, "clientContext"),
+        ...buildSources(context, intent, locale).filter(
           (source) =>
-            !/^Клиенты|^Анкеты Formgrid|^Emigrant Desk/i.test(source),
+            !new RegExp(
+              `^${translateWorkspaceSource(locale, "crm")}|^${translateWorkspaceSource(locale, "formgrid")}|^${translateWorkspaceSource(locale, "emigrantDesk")}`,
+            ).test(source),
         ),
       ]
     : clientCandidates?.length
-      ? [`Клиенты (кандидаты: ${clientCandidates.length})`, ...buildSources(context, intent)]
-      : buildSources(context, intent);
+      ? [
+          `${translateWorkspaceSource(locale, "crm")} (${clientCandidates.length})`,
+          ...buildSources(context, intent, locale),
+        ]
+      : buildSources(context, intent, locale);
   const contextBlock = buildContextBlock(
     context,
     intent,
@@ -572,18 +628,19 @@ export async function runWorkspaceAi(
   history: WorkspaceChatTurn[] = [],
   mode: WorkspaceResponseMode = "brief",
   pendingClientCandidates: ClientContext[] | null = null,
+  locale: AppLocale = "en",
 ): Promise<WorkspaceAiResult> {
   const prepared = await prepareWorkspaceRequest(
     userMessage,
     history,
     mode,
     pendingClientCandidates,
+    locale,
   );
 
   if (prepared.kind === "empty") {
     return {
-      reply:
-        "Напишите вопрос — подключу Knowledge Base, клиентов и анкеты Formgrid.",
+      reply: translateWorkspaceMessage(locale, "errors.emptyMessage"),
       sources: [],
       demo: true,
     };
@@ -593,7 +650,17 @@ export async function runWorkspaceAi(
     return {
       reply: prepared.reply,
       sources: prepared.sources,
-      demo: false,
+      demo: prepared.demo ?? false,
+      pendingClientCandidates: prepared.pendingClientCandidates,
+      needsClientSelection: prepared.needsClientSelection,
+    };
+  }
+
+  if (shouldUseDemoResponsesOnly()) {
+    return {
+      reply: buildDemoFallbackReply(prepared.trimmed, locale),
+      sources: prepared.sources,
+      demo: true,
       pendingClientCandidates: prepared.pendingClientCandidates,
       needsClientSelection: prepared.needsClientSelection,
     };
@@ -615,7 +682,7 @@ export async function runWorkspaceAi(
   }
 
   return {
-    reply: buildDemoReply(prepared.trimmed, prepared.context),
+    reply: buildDemoFallbackReply(prepared.trimmed, locale),
     sources: prepared.sources,
     demo: true,
     pendingClientCandidates: prepared.pendingClientCandidates,
@@ -628,6 +695,7 @@ export async function* runWorkspaceAiStream(
   history: WorkspaceChatTurn[] = [],
   mode: WorkspaceResponseMode = "brief",
   pendingClientCandidates: ClientContext[] | null = null,
+  locale: AppLocale = "en",
 ): AsyncGenerator<string | WorkspaceAiStreamMeta | WorkspaceAiStreamStatus> {
   yield { status: "context" };
 
@@ -636,6 +704,7 @@ export async function* runWorkspaceAiStream(
     history,
     mode,
     pendingClientCandidates,
+    locale,
   );
 
   if (prepared.kind === "empty") {
@@ -643,18 +712,29 @@ export async function* runWorkspaceAiStream(
       sources: [],
       demo: true,
     };
-    yield "Напишите вопрос — подключу Knowledge Base, клиентов и анкеты Formgrid.";
+    yield translateWorkspaceMessage(locale, "errors.emptyMessage");
     return;
   }
 
   if (prepared.kind === "direct") {
     yield {
       sources: prepared.sources,
-      demo: false,
+      demo: prepared.demo ?? false,
       pendingClientCandidates: prepared.pendingClientCandidates,
       needsClientSelection: prepared.needsClientSelection,
     };
     yield prepared.reply;
+    return;
+  }
+
+  if (shouldUseDemoResponsesOnly()) {
+    yield {
+      sources: prepared.sources,
+      demo: true,
+      pendingClientCandidates: prepared.pendingClientCandidates,
+      needsClientSelection: prepared.needsClientSelection,
+    };
+    yield buildDemoFallbackReply(prepared.trimmed, locale);
     return;
   }
 
@@ -681,7 +761,7 @@ export async function* runWorkspaceAiStream(
       sources: prepared.sources,
       demo: true,
     };
-    yield buildDemoReply(prepared.trimmed, prepared.context);
+    yield buildDemoFallbackReply(prepared.trimmed, locale);
   }
 }
 
@@ -823,97 +903,4 @@ function extractNameTokens(query: string): string[] {
     .split(/[^\p{L}\p{N}]+/u)
     .map((t) => t.trim())
     .filter((t) => t.length >= 3 && !STOP_WORDS.has(t));
-}
-
-function findClientLines(clientsText: string, query: string): string[] {
-  const nameTokens = extractNameTokens(query);
-
-  if (clientsText.includes("---") && nameTokens.length > 0) {
-    const blocks = clientsText
-      .split("---")
-      .map((b) => b.trim())
-      .filter(Boolean);
-    const byName = blocks.filter((block) => {
-      const hay = block.toLowerCase();
-      return nameTokens.some((t) => hay.includes(t));
-    });
-    if (byName.length > 0) return byName.slice(0, 2);
-  }
-
-  const lines = clientsText.split("\n").filter((line) => line.startsWith("- "));
-  if (lines.length === 0) return [];
-
-  if (nameTokens.length > 0) {
-    const byName = lines.filter((line) => {
-      const hay = line.toLowerCase();
-      return nameTokens.some((t) => hay.includes(t));
-    });
-    if (byName.length > 0) return byName.slice(0, 3);
-  }
-
-  const tokens = query
-    .toLowerCase()
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter((t) => t.length >= 4 && !STOP_WORDS.has(t));
-
-  return lines
-    .filter((line) => {
-      const hay = line.toLowerCase();
-      return tokens.some((t) => hay.includes(t));
-    })
-    .slice(0, 3);
-}
-
-function summarizeClientMatch(block: string): string {
-  const nameLine = block
-    .split("\n")
-    .find((line) => /имя|name|клиент/i.test(line) || line.startsWith("- "));
-  const compact = block
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .slice(0, 4)
-    .join(" · ");
-  return nameLine?.trim() || compact || block.slice(0, 200);
-}
-
-function buildDemoReply(
-  message: string,
-  context: Awaited<ReturnType<typeof buildWorkspaceContext>>,
-): string {
-  const lower = message.toLowerCase();
-  const aiConfigured = isAiConfigured();
-  const modelHint = aiConfigured
-    ? `Сейчас модель недоступна — подождите ~10 сек и повторите. Модель: **${getAiRuntimeConfig()?.model ?? getWorkspaceAiConfig().model ?? "?"}**.`
-    : `Добавьте **${getAiSetupHint()}**.`;
-
-  const clientMatches = findClientLines(context.clientsText, message);
-  if (
-    clientMatches.length > 0 &&
-    (lower.includes("букинг") ||
-      lower.includes("адрес") ||
-      lower.includes("клиент"))
-  ) {
-    const summary = clientMatches
-      .map((block) => summarizeClientMatch(block))
-      .join("\n\n");
-    return `${aiConfigured ? "Пока AI недоступен — кратко по таблице:\n\n" : ""}${summary}\n\n${modelHint}`;
-  }
-
-  if (lower.includes("сколько") && lower.includes("клиент")) {
-    return `В таблице «Клиенты» сейчас **${context.meta.clientsTotal}** записей.\n\n${modelHint}`;
-  }
-
-  if (lower.includes("анкет") || lower.includes("formgrid")) {
-    return `В анкетах Formgrid **${context.meta.formgridRows}** строк. Откройте раздел «Эмиграция» или уточните, какую анкету разобрать.\n\n${modelHint}`;
-  }
-
-  if (
-    lower.includes("статус") &&
-    (lower.includes("emigrant") || lower.includes("кабинет") || lower.includes("дело"))
-  ) {
-    return `В Emigrant Croatia Desk сейчас **${context.meta.emigrantDeskTotal}** клиентов со статусами дел. Уточните имя клиента.\n\n${modelHint}`;
-  }
-
-  return `Контекст собран (Клиенты: ${context.meta.clientsTotal}, Emigrant Desk: ${context.meta.emigrantDeskTotal}, Formgrid: ${context.meta.formgridRows}), но ответ от AI не получен.\n\n${modelHint}`;
 }

@@ -1,10 +1,13 @@
 "use client";
 
-
-
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
+import { branding } from "@/config/branding";
+import { resolveChatTitleForDisplay } from "@/i18n/ai-workspace-messages";
+import { getIntlLocaleTag } from "@/i18n/format";
+import type { AppLocale } from "@/i18n/config";
 
 import type {
   WorkspaceChatTurn,
@@ -13,138 +16,86 @@ import type {
 import type { ClientContext } from "@/lib/ai/client-context";
 
 import type {
-
   WorkspaceChatSession,
-
   WorkspaceChatSummary,
-
 } from "@/lib/ai/workspace-chat-types";
-
-
 
 import { AssistantMessageMarkdown } from "./AssistantMessageMarkdown";
 import styles from "./AiWorkspaceView.module.css";
 
+const PRESET_IDS = [
+  { id: "prioritiesToday", icon: "fa-list-check" },
+  { id: "overdueTasks", icon: "fa-clock" },
+  { id: "findClientSofia", icon: "fa-user-magnifying-glass" },
+  { id: "documentChecklist", icon: "fa-list-check" },
+  { id: "upcomingMeetings", icon: "fa-calendar-days" },
+  { id: "clientFollowUpEmail", icon: "fa-envelope" },
+  { id: "summarizeClientCase", icon: "fa-file-lines" },
+  { id: "teamFocusToday", icon: "fa-people-group" },
+] as const;
 
-
-const PRESETS = [
-
-  {
-
-    icon: "fa-users",
-
-    label: "Клиенты в работе",
-
-    text: "Сколько клиентов сейчас в работе и на каких этапах?",
-
-  },
-
-  {
-
-    icon: "fa-clipboard-list",
-
-    label: "Анкеты Formgrid",
-
-    text: "Покажи последние заявки из анкеты Formgrid",
-
-  },
-
-  {
-
-    icon: "fa-calendar-check",
-
-    label: "Риски по букингу",
-
-    text: "Есть ли риски по клиентам с ближайшим букингом?",
-
-  },
-
-  {
-
-    icon: "fa-book",
-
-    label: "База знаний",
-
-    text: "Сравни требования по программам из базы знаний",
-
-  },
-
-  {
-
-    icon: "fa-passport",
-
-    label: "Digital Nomad",
-
-    text: "Какие документы нужны для Digital Nomad в Хорватии?",
-
-  },
-
-  {
-
-    icon: "fa-list-check",
-
-    label: "Чек-лист клиента",
-
-    text: "Подготовь чек-лист для нового клиента из анкеты",
-
-  },
-
-];
-
-
-
-const DEFAULT_SOURCES = ["Knowledge Base", "Клиенты", "Formgrid"];
-
-const RESPONSE_MODES: {
+const RESPONSE_MODE_IDS: {
   id: WorkspaceResponseMode;
-  label: string;
+  labelKey: "brief" | "detailed" | "clientText" | "caseAnalysis";
   icon: string;
 }[] = [
-  { id: "brief", label: "Кратко", icon: "fa-bolt" },
-  { id: "detailed", label: "Подробно", icon: "fa-list" },
-  { id: "client-text", label: "Текст клиенту", icon: "fa-message" },
-  {
-    id: "case-analysis",
-    label: "Анализ кейса",
-    icon: "fa-magnifying-glass-chart",
-  },
+  { id: "brief", labelKey: "brief", icon: "fa-bolt" },
+  { id: "detailed", labelKey: "detailed", icon: "fa-list" },
+  { id: "client-text", labelKey: "clientText", icon: "fa-message" },
+  { id: "case-analysis", labelKey: "caseAnalysis", icon: "fa-magnifying-glass-chart" },
 ];
 
 const MODE_STORAGE_KEY = "ai-workspace-response-mode";
-
-
+const showWorkspaceDiagnostics =
+  !branding.demoMode || branding.aiWorkspaceDebug;
 
 type ChatEntry = WorkspaceChatTurn;
 
-
-
-function formatChatDate(iso: string): string {
-
+function formatChatDate(iso: string, locale: AppLocale): string {
   try {
-
-    return new Date(iso).toLocaleString("ru-RU", {
-
+    return new Date(iso).toLocaleString(getIntlLocaleTag(locale), {
       day: "2-digit",
-
       month: "2-digit",
-
       hour: "2-digit",
-
       minute: "2-digit",
-
     });
-
   } catch {
-
     return "";
-
   }
-
 }
 
-
-
 export function AiWorkspaceView() {
+  const t = useTranslations("aiWorkspace");
+  const locale = useLocale() as AppLocale;
+
+  const presets = useMemo(
+    () =>
+      PRESET_IDS.map((preset) => ({
+        ...preset,
+        label: t(`prompts.${preset.id}.label`),
+        text: t(`prompts.${preset.id}.text`),
+      })),
+    [t],
+  );
+
+  const defaultSources = useMemo(
+    () => [
+      t("sources.knowledgeBase"),
+      t("sources.crm"),
+      t("sources.tasks"),
+      t("sources.calendar"),
+    ],
+    [t],
+  );
+
+  const responseModes = useMemo(
+    () =>
+      RESPONSE_MODE_IDS.map((mode) => ({
+        ...mode,
+        label: t(`modes.${mode.labelKey}`),
+      })),
+    [t],
+  );
 
   const [message, setMessage] = useState("");
 
@@ -530,8 +481,7 @@ export function AiWorkspaceView() {
         if (event === "error") {
           const payload = JSON.parse(rawData) as { message?: string };
           reply =
-            payload.message ??
-            "Ошибка при обращении к AI. Попробуйте ещё раз.";
+            payload.message ?? t("errors.aiRequest");
           setHistory([
             ...nextHistory,
             { role: "assistant", content: reply },
@@ -541,7 +491,7 @@ export function AiWorkspaceView() {
     }
 
     if (!metaReceived && !reply) {
-      reply = "Не удалось получить ответ. Попробуйте ещё раз.";
+      reply = t("errors.generic");
       setHistory([...nextHistory, { role: "assistant", content: reply }]);
     }
 
@@ -657,7 +607,7 @@ export function AiWorkspaceView() {
 
       const reply =
 
-        data.reply ?? "Не удалось получить ответ. Попробуйте ещё раз.";
+        data.reply ?? t("errors.generic");
 
       setSources(data.sources ?? []);
 
@@ -695,9 +645,7 @@ export function AiWorkspaceView() {
 
           role: "assistant",
 
-          content:
-
-            "Ошибка при обращении к AI. Проверьте, что сервер запущен, и обновите страницу.",
+          content: t("errors.server"),
 
         },
 
@@ -726,7 +674,7 @@ export function AiWorkspaceView() {
 
   async function removeChat(chatId: string) {
 
-    if (!confirm("Удалить этот чат?")) return;
+    if (!confirm(t("history.confirmDelete"))) return;
 
     await fetch(`/api/ai-workspace/chats/${encodeURIComponent(chatId)}`, {
 
@@ -752,7 +700,7 @@ export function AiWorkspaceView() {
 
 
 
-  const activeSources = sources.length > 0 ? sources : DEFAULT_SOURCES;
+  const activeSources = sources.length > 0 ? sources : defaultSources;
 
   const isEmpty = history.length === 0 && !loading;
 
@@ -774,7 +722,7 @@ export function AiWorkspaceView() {
 
                 <i className="fa-solid fa-clock-rotate-left" aria-hidden />
 
-                История
+                {t("history.title")}
 
               </span>
 
@@ -798,7 +746,7 @@ export function AiWorkspaceView() {
 
               <i className="fa-solid fa-plus" aria-hidden />
 
-              Новый чат
+              {t("history.newChat")}
 
             </Button>
 
@@ -810,11 +758,11 @@ export function AiWorkspaceView() {
 
             {!mounted || listLoading ? (
 
-              <p className={styles.historyEmpty}>Загрузка…</p>
+              <p className={styles.historyEmpty}>{t("loading.history")}</p>
 
             ) : chatList.length === 0 ? (
 
-              <p className={styles.historyEmpty}>Нет сохранённых чатов</p>
+              <p className={styles.historyEmpty}>{t("history.empty")}</p>
 
             ) : (
 
@@ -854,14 +802,12 @@ export function AiWorkspaceView() {
 
                 >
 
-                  <span className={styles.chatChipTitle}>{chat.title}</span>
-
+                  <span className={styles.chatChipTitle}>
+                    {resolveChatTitleForDisplay(locale, chat.title)}
+                  </span>
                   <span className={styles.chatChipMeta}>
-
-                    {mounted ? formatChatDate(chat.updatedAt) : "…"} ·{" "}
-
-                    {chat.messageCount} сообщ.
-
+                    {mounted ? formatChatDate(chat.updatedAt, locale) : "…"} ·{" "}
+                    {t("history.messageCount", { count: chat.messageCount })}
                   </span>
 
                   <button
@@ -870,7 +816,7 @@ export function AiWorkspaceView() {
 
                     className={styles.chatChipDelete}
 
-                    aria-label="Удалить чат"
+                    aria-label={t("history.deleteChat")}
 
                     onClick={(e) => {
 
@@ -908,25 +854,27 @@ export function AiWorkspaceView() {
 
                 <i className="fa-solid fa-wand-magic-sparkles" aria-hidden />
 
-                AI Assistant
+                {t("assistantTitle")}
 
               </h2>
 
-              <p className={styles.panelSubtitle}>KB · Клиенты · Formgrid</p>
+              <p className={styles.panelSubtitle}>{t("assistantSubtitle")}</p>
 
             </div>
 
             <div className={styles.panelActions}>
-              <Button
-                type="button"
-                className={styles.sheetsCheckBtn}
-                onClick={() => void runClientsDiagnostic()}
-                disabled={clientsDiagnosticLoading}
-              >
-                {clientsDiagnosticLoading
-                  ? "Диагностика…"
-                  : "🔍 Диагностика клиентов"}
-              </Button>
+              {showWorkspaceDiagnostics ? (
+                <Button
+                  type="button"
+                  className={styles.sheetsCheckBtn}
+                  onClick={() => void runClientsDiagnostic()}
+                  disabled={clientsDiagnosticLoading}
+                >
+                  {clientsDiagnosticLoading
+                    ? t("diagnostic.loading")
+                    : t("diagnostic.button")}
+                </Button>
+              ) : null}
               <div className={styles.sourceRow}>
                 {activeSources.map((source) => (
                   <span key={source} className={styles.sourceBadge}>
@@ -937,13 +885,13 @@ export function AiWorkspaceView() {
             </div>
           </header>
 
-          {clientsDiagnostic ? (
+          {showWorkspaceDiagnostics && clientsDiagnostic ? (
             <div className={styles.sheetsHealth}>
-              <strong>Диагностика Google Sheets</strong>
+              <strong>{t("diagnostic.title")}</strong>
               <span>
-                Синхронизация:{" "}
+                {t("diagnostic.syncedAt")}{" "}
                 {new Date(clientsDiagnostic.lastSyncedAt).toLocaleString(
-                  "ru-RU",
+                  getIntlLocaleTag(locale),
                 )}
               </span>
               <div className={styles.diagnosticBlock}>
@@ -955,7 +903,10 @@ export function AiWorkspaceView() {
                 <ul className={styles.diagnosticList}>
                   {clientsDiagnostic.clientsTable.samples.map((sample) => (
                     <li key={`crm-${sample.rowIndex}-${sample.name}`}>
-                      строка {sample.rowIndex}: {sample.name}
+                      {t("diagnostic.row", {
+                        index: sample.rowIndex,
+                        name: sample.name,
+                      })}
                       {sample.details ? ` — ${sample.details}` : ""}
                     </li>
                   ))}
@@ -970,7 +921,10 @@ export function AiWorkspaceView() {
                 <ul className={styles.diagnosticList}>
                   {clientsDiagnostic.newClientsTable.samples.map((sample) => (
                     <li key={`fg-${sample.rowIndex}-${sample.name}`}>
-                      строка {sample.rowIndex}: {sample.name}
+                      {t("diagnostic.row", {
+                        index: sample.rowIndex,
+                        name: sample.name,
+                      })}
                       {sample.details ? ` — ${sample.details}` : ""}
                     </li>
                   ))}
@@ -978,13 +932,13 @@ export function AiWorkspaceView() {
               </div>
               {clientsDiagnostic.searchColumns ? (
                 <div className={styles.diagnosticBlock}>
-                  <strong>Поля поиска</strong>
+                  <strong>{t("diagnostic.searchFields")}</strong>
                   <div>
-                    Клиенты:{" "}
+                    {t("diagnostic.clientsColumns")}{" "}
                     {clientsDiagnostic.searchColumns.clients.join(", ")}
                   </div>
                   <div>
-                    Новые клиенты:{" "}
+                    {t("diagnostic.newClientsColumns")}{" "}
                     {clientsDiagnostic.searchColumns.newClients.join(", ")}
                   </div>
                 </div>
@@ -992,20 +946,26 @@ export function AiWorkspaceView() {
               {clientsDiagnostic.recentSearches &&
               clientsDiagnostic.recentSearches.length > 0 ? (
                 <div className={styles.diagnosticBlock}>
-                  <strong>Последние поиски (до 5)</strong>
+                  <strong>{t("diagnostic.recentSearches")}</strong>
                   <ul className={styles.diagnosticList}>
                     {clientsDiagnostic.recentSearches.map((entry) => (
                       <li key={`${entry.at}-${entry.query}`}>
-                        «{entry.query}» — {entry.resultKind}, top score{" "}
-                        {entry.topScore}, совпадений {entry.matchCount}
+                        «{entry.query}» — {entry.resultKind},{" "}
+                        {t("diagnostic.scoreLine", {
+                          score: entry.topScore,
+                          count: entry.matchCount,
+                        })}
                         {entry.matches.length > 0 ? (
                           <ul className={styles.diagnosticList}>
                             {entry.matches.map((match) => (
                               <li
                                 key={`${entry.at}-${match.rowIndex}-${match.name}`}
                               >
-                                {match.name} — {match.source}, строка{" "}
-                                {match.rowIndex}, score {match.score}
+                                {t("diagnostic.matchLine", {
+                                  name: match.name,
+                                  source: match.source,
+                                  row: match.rowIndex,
+                                })}
                                 {match.matchedFields.length > 0
                                   ? ` (${match.matchedFields.join("; ")})`
                                   : ""}
@@ -1019,8 +979,8 @@ export function AiWorkspaceView() {
                 </div>
               ) : (
                 <div className={styles.diagnosticBlock}>
-                  <strong>Последние поиски</strong>
-                  <span> Пока нет — выполните запрос в чате.</span>
+                  <strong>{t("diagnostic.recentSearches")}</strong>
+                  <span> {t("diagnostic.recentSearchesEmpty")}</span>
                 </div>
               )}
             </div>
@@ -1029,11 +989,8 @@ export function AiWorkspaceView() {
           {demo ? (
 
             <p className={styles.demoNote}>
-
               <i className="fa-solid fa-triangle-exclamation" aria-hidden />
-
-              Ответ без AI-модели — проверьте AI_WORKSPACE_MODEL или лимиты OpenRouter.
-
+              {t("demo.fallbackNotice")}
             </p>
 
           ) : null}
@@ -1053,21 +1010,20 @@ export function AiWorkspaceView() {
                 </div>
 
                 <h3 className={styles.welcomeTitle}>
-
-                  Чем помочь команде сегодня?
-
+                  {t("empty.heading")}
                 </h3>
 
                 <p className={styles.welcomeText}>
+                  {t("empty.hint")}
+                </p>
 
-                  Клиенты — только из Google Sheets. Для отладки:{" "}
-                  <code>/debug_client Фамилия</code>
-
+                <p className={styles.welcomeText}>
+                  {t("empty.demoHint")}
                 </p>
 
                 <div className={styles.presetGrid}>
 
-                  {PRESETS.map((preset) => (
+                  {presets.map((preset) => (
 
                     <button
 
@@ -1174,7 +1130,7 @@ export function AiWorkspaceView() {
                 {!loading && needsClientSelection && pendingClientCandidates.length > 0 ? (
                   <div className={styles.clientSelectRow}>
                     <span className={styles.clientSelectLabel}>
-                      Выберите клиента:
+                      {t("clientSelection.heading")}
                     </span>
                     {pendingClientCandidates.map((candidate, index) => (
                       <button
@@ -1183,7 +1139,9 @@ export function AiWorkspaceView() {
                         className={styles.clientSelectBtn}
                         disabled={loading}
                         onClick={() =>
-                          void send(`Выбери ${index + 1}`)
+                          void send(
+                            t("clientSelection.choose", { index: index + 1 }),
+                          )
                         }
                       >
                         {index + 1}. {candidate.name} ({candidate.sourceLabel})
@@ -1194,10 +1152,10 @@ export function AiWorkspaceView() {
                       className={styles.clientSelectMergeBtn}
                       disabled={loading}
                       onClick={() =>
-                        void send("Объединить как одного клиента")
+                        void send(t("clientSelection.mergeAsOne"))
                       }
                     >
-                      Объединить как одного клиента
+                      {t("clientSelection.mergeAsOne")}
                     </button>
                   </div>
                 ) : null}
@@ -1222,8 +1180,8 @@ export function AiWorkspaceView() {
 
                       <span className={styles.typingText}>
                         {loadingPhase === "generating"
-                          ? "Формулирую ответ…"
-                          : "Собираю данные…"}
+                          ? t("loading.generating")
+                          : t("loading.context")}
                       </span>
 
                     </div>
@@ -1247,9 +1205,9 @@ export function AiWorkspaceView() {
             <div
               className={styles.modeRow}
               role="group"
-              aria-label="Режим ответа"
+              aria-label={t("modes.ariaLabel")}
             >
-              {RESPONSE_MODES.map((mode) => (
+              {responseModes.map((mode) => (
                 <button
                   key={mode.id}
                   type="button"
@@ -1276,7 +1234,7 @@ export function AiWorkspaceView() {
 
                 className={styles.input}
 
-                placeholder="Спросите про клиента, анкету или документ…"
+                placeholder={t("input.placeholder")}
 
                 value={message}
 

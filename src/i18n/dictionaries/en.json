@@ -540,6 +540,158 @@
       "upcomingMeetingPrep": "Upcoming Meeting Prep"
     }
   },
+  "aiWorkspace": {
+    "pageTitle": "AI Workspace",
+    "assistantTitle": "AI Assistant",
+    "assistantSubtitle": "CRM · Knowledge Base · Tasks · Calendar",
+    "empty": {
+      "heading": "How can I help the team today?",
+      "hint": "Ask about clients, tasks, documents, or upcoming meetings.",
+      "demoHint": "Demo mode — responses use sample company data."
+    },
+    "input": {
+      "placeholder": "Ask about a client, task, document, or meeting…",
+      "send": "Send",
+      "stop": "Stop generation"
+    },
+    "loading": {
+      "context": "Gathering context…",
+      "generating": "Drafting response…",
+      "history": "Loading…"
+    },
+    "modes": {
+      "brief": "Brief",
+      "detailed": "Detailed",
+      "clientText": "Client message",
+      "caseAnalysis": "Case analysis",
+      "ariaLabel": "Response mode"
+    },
+    "prompts": {
+      "prioritiesToday": {
+        "label": "Today's priorities",
+        "text": "Summarize today's priorities"
+      },
+      "overdueTasks": {
+        "label": "Overdue tasks",
+        "text": "Show overdue tasks"
+      },
+      "findClientSofia": {
+        "label": "Find Sofia Martins",
+        "text": "Find client Sofia Martins"
+      },
+      "documentChecklist": {
+        "label": "Document checklist",
+        "text": "Prepare a document checklist"
+      },
+      "upcomingMeetings": {
+        "label": "Upcoming meetings",
+        "text": "Show upcoming meetings"
+      },
+      "clientFollowUpEmail": {
+        "label": "Client follow-up",
+        "text": "Draft a client follow-up email"
+      },
+      "summarizeClientCase": {
+        "label": "Client case summary",
+        "text": "Summarize this client case"
+      },
+      "teamFocusToday": {
+        "label": "Team focus",
+        "text": "What should the team focus on today?"
+      }
+    },
+    "history": {
+      "title": "History",
+      "newChat": "New chat",
+      "untitledChat": "Untitled chat",
+      "deleteChat": "Delete chat",
+      "renameChat": "Rename chat",
+      "clearHistory": "Clear history",
+      "empty": "No saved chats",
+      "confirmDelete": "Delete this chat?",
+      "messageCount": "{count, plural, one {# message} other {# messages}}"
+    },
+    "clientSelection": {
+      "heading": "Select a client:",
+      "choose": "Choose {index}",
+      "mergeAsOne": "Merge as one client"
+    },
+    "sources": {
+      "knowledgeBase": "Knowledge Base",
+      "crm": "CRM",
+      "crmCount": "CRM ({count})",
+      "tasks": "Tasks",
+      "calendar": "Calendar",
+      "documents": "Documents",
+      "clientContext": "Client Context",
+      "formgrid": "Formgrid",
+      "formgridCount": "Formgrid ({count})",
+      "emigrantDesk": "Emigrant Desk",
+      "emigrantDeskCount": "Emigrant Desk ({count})",
+      "emigrantDrive": "Emigrant Drive",
+      "newClients": "New clients"
+    },
+    "demo": {
+      "badge": "Demo response",
+      "fallbackNotice": "Response generated from demo data — no external AI provider was called.",
+      "modelUnavailable": "The AI model is temporarily unavailable. Demo data is shown above.",
+      "integrationDisabled": "External integrations are disabled in demo mode. Sample data is shown."
+    },
+    "diagnostic": {
+      "button": "Client diagnostics",
+      "loading": "Running diagnostics…",
+      "title": "Google Sheets diagnostics",
+      "syncedAt": "Last sync:",
+      "row": "row {index}: {name}",
+      "searchFields": "Search fields",
+      "clientsColumns": "Clients:",
+      "newClientsColumns": "New clients:",
+      "recentSearches": "Recent searches (up to 5)",
+      "recentSearchesEmpty": "No searches yet — run a query in the chat.",
+      "matchLine": "{name} — {source}, row {row}",
+      "scoreLine": "top score {score}, matches {count}"
+    },
+    "actions": {
+      "copy": "Copy",
+      "retry": "Retry",
+      "clearHistory": "Clear history"
+    },
+    "errors": {
+      "generic": "Could not get a response. Please try again.",
+      "aiRequest": "AI request failed. Please try again.",
+      "server": "AI request failed. Check that the server is running and refresh the page.",
+      "internal": "An internal error occurred. Please try again.",
+      "emptyMessage": "Type a question — I will use the Knowledge Base, CRM, tasks, and calendar context."
+    },
+    "guardrails": {
+      "offTopic": "Spiora AI Workspace is designed for company work tasks."
+    },
+    "limits": {
+      "promptTooLong": "Your message is too long for demo mode. Please shorten it and try again.",
+      "historyTooLong": "Chat history is too long for demo mode. Start a new chat.",
+      "ratePerMinute": "Too many requests per minute in demo mode. Please wait a moment.",
+      "ratePerUser": "Demo request limit reached. Please try again later."
+    },
+    "demoSafe": {
+      "clientFound": "Demo client data was found.",
+      "clientNotFound": "No matching demo client was found.",
+      "diagnosticsHidden": "Diagnostics are not available in demo mode."
+    },
+    "demoResponses": {
+      "prioritiesToday": "**Today's priorities**\n\n1. **Client follow-ups** — Sofia Martins (Spain consultation) and Anna Kowalska (Croatia documents) need status updates before end of day.\n2. **Overdue tasks** — 3 tasks are past due: visa document review, booking confirmation for Marco Rossi, and CRM note cleanup.\n3. **Meetings** — Team stand-up at 09:00, client video consultation at 11:00, document review at 14:00.\n4. **Pipeline** — 4 clients are in active stages; 2 new applications arrived this week.\n\n**Suggested order:** clear overdue tasks first, then prep for the 11:00 consultation.",
+      "overdueTasks": "**Overdue tasks (3)**\n\n| Task | Client | Due | Owner |\n|------|--------|-----|-------|\n| Visa document review | Anna Kowalska | May 28 | Lucas Martin |\n| Booking confirmation | Marco Rossi | May 29 | Daniel Cooper |\n| CRM note cleanup | — | May 30 | Emma Wilson |\n\n**Recommendation:** start with Anna Kowalska — documents stage is blocking the next calendar milestone.",
+      "findClientSofia": "**Client found: Sofia Martins**\n\n- **ID:** DEMO-1002\n- **Email:** sofia.martins@example.com\n- **Phone:** +000 000 000 002\n- **Direction:** Spain\n- **Status:** Consultation\n- **Manager:** Emma Wilson\n- **Last activity:** May 27, 2026\n\n**Context:** Initial consultation completed; awaiting program selection and document list confirmation.\n\n**Next step:** send a follow-up with the Spain relocation checklist and schedule a document review call.",
+      "documentChecklist": "**Document checklist — new client onboarding**\n\n**Identity & travel**\n- Valid passport (6+ months validity)\n- Passport photos (biometric standard)\n- Proof of address (utility bill or bank statement, < 3 months)\n\n**Program-specific**\n- Employment contract or remote-work agreement\n- Bank statements (last 3 months)\n- Health insurance certificate\n\n**Internal**\n- Signed service agreement\n- CRM profile complete\n- Manager assigned\n\nFor **Sofia Martins (Spain)** — mark items received in CRM as they arrive.",
+      "upcomingMeetings": "**Upcoming meetings (next 48 hours)**\n\n| Time | Event | Type |\n|------|-------|------|\n| Today 09:00–10:00 | Team Meeting | Company |\n| Today 11:00–12:00 | Client Consultation (Anna Kowalska) | Video |\n| Today 14:00–15:30 | Document Review | Personal |\n| Today 16:30–17:30 | Internal Video Meeting | Video |\n| Tomorrow 10:00–11:00 | Client Portfolio Review | Company |\n\n**Prep:** review Anna Kowalska's document status before the 11:00 call.",
+      "clientFollowUpEmail": "**Draft follow-up — Sofia Martins**\n\nSubject: Next steps for your Spain relocation consultation\n\nHi Sofia,\n\nThank you for our consultation. Based on your profile, I prepared a document checklist for the Spain program. Please review the attached list and let us know which items you already have ready.\n\nWe can schedule a 30-minute document review call this week — Tuesday or Thursday afternoon works on our side.\n\nBest regards,\nEmma Wilson\nSpiora Relocation Team",
+      "summarizeClientCase": "**Case summary — Sofia Martins**\n\n- **Program:** Spain relocation (consultation stage)\n- **Manager:** Emma Wilson\n- **Timeline:** client since April 2026; consultation completed May 27\n- **Status:** awaiting document submission\n- **Open items:** program selection confirmation, passport copy, proof of remote income\n- **Risk:** low — responsive client, no compliance flags\n\n**Recommended action:** send document checklist and book document review within 5 business days.",
+      "teamFocusToday": "**Team focus for today**\n\n1. **Clear overdue tasks** — 3 items need attention (visa review, booking, CRM notes).\n2. **Client consultations** — prep for Anna Kowalska video call at 11:00.\n3. **Pipeline hygiene** — update statuses for clients in \"Consultation\" and \"Documents\" stages.\n4. **Calendar** — 4 meetings today; confirm video links for external calls.\n\n**Capacity note:** Daniel Cooper and Emma Wilson have the heaviest client loads today.",
+      "activeClients": "**Active clients overview**\n\n- **Total in CRM:** 12 demo clients\n- **In progress:** John Carter (Portugal), Anna Kowalska (Croatia)\n- **Consultation:** Sofia Martins (Spain)\n- **Documents:** Anna Kowalska\n- **New:** Marco Rossi (Slovakia)\n\nMost activity this week: consultation follow-ups and document collection.",
+      "knowledgeBase": "**Knowledge Base — program comparison (excerpt)**\n\n| Program | Stay | Income proof | Processing |\n|---------|------|--------------|------------|\n| Croatia Digital Nomad | 12 months | Remote contract | ~45 days |\n| Portugal D7 | Renewable | Passive/remote income | ~60 days |\n| Spain remote work | 1 year | Employment/contract | ~30 days |\n\nAsk for a specific country or client scenario for a tailored checklist.",
+      "formgridOverview": "**Formgrid applications**\n\n- **Recent submissions:** 3 this week\n- **Latest:** Marco Rossi — Slovakia direction, status \"New\"\n- **Pending review:** 1 application awaiting manager assignment\n\nOpen the Immigration section for full survey details or ask about a specific applicant.",
+      "generic": "I reviewed the available demo context (CRM, tasks, calendar, and Knowledge Base). Here is what stands out:\n\n- **4 clients** need attention this week (consultation or documents stage).\n- **3 tasks** are overdue.\n- **4 meetings** are scheduled in the next two days.\n\nTry a suggested prompt for a detailed breakdown, or ask about a specific client by name."
+    }
+  },
   "statuses": {
     "client": {
       "new": "New",

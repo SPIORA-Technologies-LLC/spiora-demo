@@ -12,7 +12,14 @@ import {
   getWorkspaceAiConfig,
   isWorkspaceResponseMode,
 } from "@/lib/ai/workspace-config";
+import { checkDemoRateLimit } from "@/lib/ai/workspace-demo-rate-limit";
+import {
+  isWorkspaceDiagnosticsEnabled,
+  stripClientContextsForDemoPublic,
+} from "@/lib/ai/workspace-demo-safe";
 import { getSession } from "@/lib/auth/session";
+import { getRequestLocale } from "@/i18n/api-messages";
+import { translateWorkspaceMessage } from "@/i18n/ai-workspace-messages";
 
 function parseMode(value: unknown) {
   if (typeof value === "string" && isWorkspaceResponseMode(value)) {
@@ -21,12 +28,33 @@ function parseMode(value: unknown) {
   return "brief" as const;
 }
 
+function finalizeWorkspacePayload<T extends {
+  pendingClientCandidates?: ClientContext[];
+}>(payload: T): T {
+  if (isWorkspaceDiagnosticsEnabled()) {
+    return {
+      ...payload,
+      pendingClientCandidates: sanitizeClientContextsForTransport(
+        payload.pendingClientCandidates,
+      ),
+    };
+  }
+
+  return {
+    ...payload,
+    pendingClientCandidates: stripClientContextsForDemoPublic(
+      sanitizeClientContextsForTransport(payload.pendingClientCandidates),
+    ),
+  };
+}
+
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const locale = await getRequestLocale();
   const body = (await request.json()) as {
     message?: string;
     history?: WorkspaceChatTurn[];
@@ -39,7 +67,21 @@ export async function POST(request: Request) {
   const history = body.history ?? [];
   const pendingClientCandidates =
     sanitizeClientContextsForTransport(body.pendingClientCandidates) ?? null;
+
+  const rateLimit = checkDemoRateLimit(session.id, locale, {
+    promptLength: message.length,
+    historyTurns: history.length,
+  });
+  if (!rateLimit.allowed) {
+    return NextResponse.json({
+      reply: rateLimit.message,
+      sources: [],
+      demo: true,
+    });
+  }
+
   const { stream } = getWorkspaceAiConfig();
+  const internalError = translateWorkspaceMessage(locale, "errors.internal");
 
   if (stream) {
     const encoder = new TextEncoder();
@@ -51,6 +93,7 @@ export async function POST(request: Request) {
             history,
             mode,
             pendingClientCandidates,
+            locale,
           )) {
             if (typeof chunk === "string") {
               controller.enqueue(
@@ -72,14 +115,14 @@ export async function POST(request: Request) {
 
             controller.enqueue(
               encoder.encode(
-                `event: meta\ndata: ${JSON.stringify({
-                  sources: chunk.sources,
-                  demo: chunk.demo,
-                  pendingClientCandidates: sanitizeClientContextsForTransport(
-                    chunk.pendingClientCandidates,
-                  ),
-                  needsClientSelection: chunk.needsClientSelection,
-                })}\n\n`,
+                `event: meta\ndata: ${JSON.stringify(
+                  finalizeWorkspacePayload({
+                    sources: chunk.sources,
+                    demo: chunk.demo,
+                    pendingClientCandidates: chunk.pendingClientCandidates,
+                    needsClientSelection: chunk.needsClientSelection,
+                  }),
+                )}\n\n`,
               ),
             );
           }
@@ -90,8 +133,7 @@ export async function POST(request: Request) {
           controller.enqueue(
             encoder.encode(
               `event: error\ndata: ${JSON.stringify({
-                message:
-                  "Внутренняя ошибка при обработке запроса. Попробуйте снова.",
+                message: internalError,
               })}\n\n`,
             ),
           );
@@ -116,19 +158,14 @@ export async function POST(request: Request) {
       history,
       mode,
       pendingClientCandidates,
+      locale,
     );
-    return NextResponse.json({
-      ...result,
-      pendingClientCandidates: sanitizeClientContextsForTransport(
-        result.pendingClientCandidates,
-      ),
-    });
+    return NextResponse.json(finalizeWorkspacePayload(result));
   } catch (error) {
     console.error("[api/ai-workspace]", error);
     return NextResponse.json(
       {
-        reply:
-          "Внутренняя ошибка при обработке запроса. Перезапустите сервер и попробуйте снова.",
+        reply: internalError,
         sources: [],
         demo: true,
       },

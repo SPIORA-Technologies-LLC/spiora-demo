@@ -6,6 +6,10 @@ import { randomUUID } from "node:crypto";
 import type { WorkspaceChatTurn } from "@/lib/ai/workspace-assistant";
 import { sanitizeWorkspaceChatTurns } from "@/lib/ai/context-redaction";
 import {
+  isUntitledChatTitle,
+  UNTITLED_CHAT_SENTINEL,
+} from "@/i18n/ai-workspace-messages";
+import {
   MAX_WORKSPACE_CHATS,
   type WorkspaceChatSession,
   type WorkspaceChatSummary,
@@ -50,7 +54,7 @@ async function writeStore(userId: string, store: UserChatStore): Promise<void> {
 
 function makeTitle(firstMessage: string): string {
   const clean = firstMessage.trim().replace(/\s+/g, " ");
-  if (!clean) return "Новый чат";
+  if (!clean) return UNTITLED_CHAT_SENTINEL;
   return clean.length > 56 ? `${clean.slice(0, 56)}…` : clean;
 }
 
@@ -116,11 +120,12 @@ export async function getWorkspaceChat(
 
 export async function createWorkspaceChat(
   userId: string,
+  title: string = UNTITLED_CHAT_SENTINEL,
 ): Promise<WorkspaceChatSession> {
   const now = new Date().toISOString();
   const session: WorkspaceChatSession = {
     id: randomUUID(),
-    title: "Новый чат",
+    title,
     createdAt: now,
     updatedAt: now,
     messages: [],
@@ -153,7 +158,7 @@ export async function updateWorkspaceChat(
 
   const firstUser = messages.find((m) => m.role === "user");
   const title =
-    existing.title === "Новый чат" && firstUser
+    isUntitledChatTitle(existing.title) && firstUser
       ? makeTitle(firstUser.content)
       : existing.title;
 

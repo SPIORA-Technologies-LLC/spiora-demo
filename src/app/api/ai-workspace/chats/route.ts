@@ -5,6 +5,8 @@ import {
   listWorkspaceChats,
 } from "@/lib/ai/workspace-chats";
 import { getSession } from "@/lib/auth/session";
+import { getRequestLocale } from "@/i18n/api-messages";
+import { UNTITLED_CHAT_SENTINEL } from "@/i18n/ai-workspace-messages";
 
 export async function GET() {
   const session = await getSession();
@@ -22,6 +24,7 @@ export async function POST() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const chat = await createWorkspaceChat(session.id);
+  await getRequestLocale();
+  const chat = await createWorkspaceChat(session.id, UNTITLED_CHAT_SENTINEL);
   return NextResponse.json({ chat });
 }

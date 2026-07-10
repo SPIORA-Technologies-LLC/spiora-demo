@@ -20,9 +20,14 @@ const MERGE_PHRASES = [
   /это\s+он/i,
   /это\s+она/i,
   /один\s+человек/i,
+  /merge\s+as\s+one/i,
+  /same\s+client/i,
+  /combine\s+(?:as\s+)?one/i,
+  /one\s+person/i,
 ];
 
-const SELECT_NUMBER = /(?:выбери|выберите|номер|вариант|клиент[а]?)\s*(\d+)/i;
+const SELECT_NUMBER =
+  /(?:выбери|выберите|номер|вариант|клиент[а]?|choose|select|option|client|pick)\s*(\d+)/i;
 const ORDINAL: Record<string, number> = {
   первый: 0,
   первого: 0,
@@ -36,6 +41,9 @@ const ORDINAL: Record<string, number> = {
   третьего: 2,
   третью: 2,
   третья: 2,
+  first: 0,
+  second: 1,
+  third: 2,
 };
 
 function isSelectionFollowUpMessage(message: string): boolean {
@@ -77,7 +85,7 @@ function lastAssistantListedCandidates(
   for (let i = history.length - 1; i >= 0; i--) {
     const turn = history[i];
     if (turn.role !== "assistant") continue;
-    return /найдено несколько клиентов|уточните,\s*кого выбрать|точного совпадения не найдено|возможно,\s*вы имели в виду|похожие записи|выберите клиента/i.test(
+    return /найдено несколько клиентов|уточните,\s*кого выбрать|точного совпадения не найдено|возможно,\s*вы имели в виду|похожие записи|выберите клиента|multiple clients found|please select|no exact match|did you mean|similar records|select a client/i.test(
       turn.content,
     );
   }

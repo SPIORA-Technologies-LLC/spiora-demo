@@ -50,6 +50,7 @@ import {
   getRecentClientSearches,
   recordClientSearch,
 } from "@/lib/ai/client-search-history";
+import { isWorkspaceDiagnosticsEnabled } from "@/lib/ai/workspace-demo-safe";
 import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
 import { listAllClients } from "@/lib/google-sheets/service";
 import type { Client } from "@/lib/google-sheets/types";
@@ -254,6 +255,10 @@ function logSearchResult(
   result: ClientLookupResult,
   allMatches: ClientContext[],
 ): void {
+  if (!isWorkspaceDiagnosticsEnabled()) {
+    return;
+  }
+
   const topScore = allMatches[0]?.score ?? 0;
   recordClientSearch({
     query,

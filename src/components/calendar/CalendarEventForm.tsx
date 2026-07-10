@@ -1,10 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import type { AppLocale } from "@/i18n/config";
+import {
+  translateCalendarEventType,
+  translateCalendarScope,
+  translateFormValidation,
+  translateVideoInviteMode,
+} from "@/i18n/calendar-enums";
 import type { CalendarFormValues } from "@/lib/calendar/form";
 import { validateFormValues } from "@/lib/calendar/form";
-import { CALENDAR_EVENT_TYPE_LABELS } from "@/lib/calendar/constants";
 import type { CalendarEventType, CalendarScope, VideoInviteMode } from "@/lib/calendar/types";
 import { CalendarDateSelect } from "./CalendarDateSelect";
 import { CalendarTimeSelect } from "./CalendarTimeSelect";
@@ -37,6 +44,10 @@ export function CalendarEventForm({
   onSubmit,
   onCancel,
 }: CalendarEventFormProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.form");
+  const tToasts = useTranslations("calendar.toasts");
+  const tActions = useTranslations("actions");
   const { timeZone } = useCalendarTimeZone();
   const [values, setValues] = useState<CalendarFormValues>(initial);
   const [loading, setLoading] = useState(false);
@@ -44,9 +55,9 @@ export function CalendarEventForm({
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    const validationError = validateFormValues(values, timeZone);
-    if (validationError) {
-      setError(validationError);
+    const validationCode = validateFormValues(values, timeZone);
+    if (validationCode) {
+      setError(translateFormValidation(locale, validationCode));
       return;
     }
 
@@ -58,7 +69,7 @@ export function CalendarEventForm({
       const message =
         submitError instanceof Error
           ? submitError.message
-          : "Не удалось сохранить событие";
+          : tToasts("saveFailed");
       setError(message);
     } finally {
       setLoading(false);
@@ -117,7 +128,7 @@ export function CalendarEventForm({
     <form className={styles.form} onSubmit={(submitEvent) => void handleSubmit(submitEvent)}>
       {mode === "create" ? (
         <fieldset className={styles.scopeFieldset}>
-          <legend className={styles.label}>Тип события</legend>
+          <legend className={styles.label}>{t("scopeLegend")}</legend>
           <div className={styles.scopeSwitch}>
             <button
               type="button"
@@ -130,7 +141,7 @@ export function CalendarEventForm({
               aria-pressed={values.scope === "personal"}
               onClick={() => setScope("personal")}
             >
-              Личное
+              {translateCalendarScope(locale, "personal")}
             </button>
             <button
               type="button"
@@ -143,27 +154,27 @@ export function CalendarEventForm({
               aria-pressed={values.scope === "company"}
               onClick={() => setScope("company")}
             >
-              Компания
+              {translateCalendarScope(locale, "company")}
             </button>
           </div>
         </fieldset>
       ) : (
         <div className={styles.readonlyScope}>
-          <span className={styles.label}>Тип</span>
+          <span className={styles.label}>{t("scopeType")}</span>
           <span
             className={[
               styles.scopeBadge,
               values.scope === "personal" ? styles.scopePersonal : styles.scopeCompany,
             ].join(" ")}
           >
-            {values.scope === "personal" ? "Личное" : "Компания"}
+            {translateCalendarScope(locale, values.scope)}
           </span>
         </div>
       )}
 
       {mode === "create" ? (
         <fieldset className={styles.formatFieldset}>
-          <legend className={styles.label}>Формат встречи</legend>
+          <legend className={styles.label}>{t("formatLegend")}</legend>
           <div className={styles.formatSwitch}>
             <button
               type="button"
@@ -176,7 +187,7 @@ export function CalendarEventForm({
               aria-pressed={values.eventType === "general"}
               onClick={() => setEventType("general")}
             >
-              {CALENDAR_EVENT_TYPE_LABELS.general}
+              {translateCalendarEventType(locale, "general")}
             </button>
             <button
               type="button"
@@ -189,28 +200,25 @@ export function CalendarEventForm({
               aria-pressed={values.eventType === "video_meeting"}
               onClick={() => setEventType("video_meeting")}
             >
-              {CALENDAR_EVENT_TYPE_LABELS.video_meeting}
+              {translateCalendarEventType(locale, "video_meeting")}
             </button>
           </div>
           {values.eventType === "video_meeting" ? (
-            <p className={styles.fieldHint}>
-              Комната создаётся на платформе. После сохранения в карточке встречи
-              появится ссылка для клиентов без аккаунта.
-            </p>
+            <p className={styles.fieldHint}>{t("videoHint")}</p>
           ) : null}
         </fieldset>
       ) : values.eventType === "video_meeting" ? (
         <div className={styles.readonlyScope}>
-          <span className={styles.label}>Формат</span>
+          <span className={styles.label}>{t("formatType")}</span>
           <span className={[styles.formatBadge, styles.formatVideo].join(" ")}>
-            {CALENDAR_EVENT_TYPE_LABELS.video_meeting}
+            {translateCalendarEventType(locale, "video_meeting")}
           </span>
         </div>
       ) : null}
 
       {showInviteModeSwitch ? (
         <fieldset className={styles.inviteFieldset}>
-          <legend className={styles.label}>Кого пригласить</legend>
+          <legend className={styles.label}>{t("inviteLegend")}</legend>
           <div className={styles.inviteSwitch}>
             <button
               type="button"
@@ -223,7 +231,7 @@ export function CalendarEventForm({
               aria-pressed={values.videoInviteMode === "all_team"}
               onClick={() => setVideoInviteMode("all_team")}
             >
-              Вся команда
+              {translateVideoInviteMode(locale, "all_team")}
             </button>
             <button
               type="button"
@@ -236,7 +244,7 @@ export function CalendarEventForm({
               aria-pressed={values.videoInviteMode === "selected"}
               onClick={() => setVideoInviteMode("selected")}
             >
-              Выбранные
+              {translateVideoInviteMode(locale, "selected")}
             </button>
           </div>
         </fieldset>
@@ -244,11 +252,8 @@ export function CalendarEventForm({
 
       {showParticipantPicker ? (
         <fieldset className={styles.inviteFieldset}>
-          <legend className={styles.label}>Участники</legend>
-          <p className={styles.fieldHintInline}>
-            Вы участвуете автоматически. Отметьте коллег, которым будет доступна
-            встреча и напоминание.
-          </p>
+          <legend className={styles.label}>{t("participantsLegend")}</legend>
+          <p className={styles.fieldHintInline}>{t("participantsHint")}</p>
           <div className={styles.participantList}>
             {inviteCandidates.map((member) => {
               const checked = values.participantUserIds.includes(member.id);
@@ -302,13 +307,13 @@ export function CalendarEventForm({
               })
             }
           />
-          <span>Зал ожидания для гостей по ссылке</span>
+          <span>{t("waitingRoom")}</span>
         </label>
       ) : null}
 
       {values.eventType === "video_meeting" ? (
         <label className={styles.field}>
-          <span className={styles.label}>Максимум гостей по ссылке</span>
+          <span className={styles.label}>{t("guestMax")}</span>
           <input
             className={styles.input}
             type="number"
@@ -327,7 +332,7 @@ export function CalendarEventForm({
 
       {values.eventType === "video_meeting" ? (
         <label className={styles.field}>
-          <span className={styles.label}>Пароль для гостей (необязательно)</span>
+          <span className={styles.label}>{t("guestPassword")}</span>
           <input
             className={styles.input}
             type="password"
@@ -340,8 +345,8 @@ export function CalendarEventForm({
             }
             placeholder={
               mode === "edit"
-                ? "Оставьте пустым, чтобы не менять"
-                : "Без пароля — вход только по ссылке"
+                ? t("guestPasswordEditPlaceholder")
+                : t("guestPasswordCreatePlaceholder")
             }
             autoComplete="new-password"
           />
@@ -349,20 +354,20 @@ export function CalendarEventForm({
       ) : null}
 
       <label className={styles.field}>
-        <span className={styles.label}>Название *</span>
+        <span className={styles.label}>{t("title")}</span>
         <input
           className={styles.input}
           value={values.title}
           onChange={(changeEvent) =>
             setValues({ ...values, title: changeEvent.target.value })
           }
-          placeholder="Например: Консультация с клиентом"
+          placeholder={t("titlePlaceholder")}
           required
         />
       </label>
 
       <label className={styles.field}>
-        <span className={styles.label}>Описание</span>
+        <span className={styles.label}>{t("description")}</span>
         <textarea
           className={styles.textarea}
           value={values.description}
@@ -370,7 +375,7 @@ export function CalendarEventForm({
             setValues({ ...values, description: changeEvent.target.value })
           }
           rows={3}
-          placeholder="Дополнительные детали…"
+          placeholder={t("descriptionPlaceholder")}
         />
       </label>
 
@@ -383,17 +388,17 @@ export function CalendarEventForm({
             setValues({ ...values, allDay: changeEvent.target.checked })
           }
         />
-        <span>Весь день</span>
+        <span>{t("allDay")}</span>
       </label>
 
       <section className={styles.dateTimeSection} aria-labelledby="calendar-datetime-heading">
         <h3 id="calendar-datetime-heading" className={styles.sectionTitle}>
-          Когда
+          {t("when")}
         </h3>
 
         <div className={styles.dateTimeGrid}>
           <div className={styles.field}>
-            <span className={styles.label}>Начало *</span>
+            <span className={styles.label}>{t("start")}</span>
             <CalendarDateSelect
               value={values.startDate}
               onChange={(startDate) => setValues({ ...values, startDate })}
@@ -407,7 +412,7 @@ export function CalendarEventForm({
           </div>
 
           <div className={styles.field}>
-            <span className={styles.label}>Окончание *</span>
+            <span className={styles.label}>{t("end")}</span>
             <CalendarDateSelect
               value={values.endDate}
               onChange={(endDate) => setValues({ ...values, endDate })}
@@ -423,14 +428,14 @@ export function CalendarEventForm({
       </section>
 
       <label className={styles.field}>
-        <span className={styles.label}>Место</span>
+        <span className={styles.label}>{t("location")}</span>
         <input
           className={styles.input}
           value={values.location}
           onChange={(changeEvent) =>
             setValues({ ...values, location: changeEvent.target.value })
           }
-          placeholder="Офис, онлайн, адрес…"
+          placeholder={t("locationPlaceholder")}
         />
       </label>
 
@@ -443,21 +448,19 @@ export function CalendarEventForm({
               setValues({ ...values, sendReminders: changeEvent.target.checked })
             }
           />
-          <span>Напоминания за 24 часа и за 1 час</span>
+          <span>{t("reminders")}</span>
         </label>
-        <p className={styles.fieldHint}>
-          Уведомление в колокольчике. Только на платформе.
-        </p>
+        <p className={styles.fieldHint}>{t("remindersHint")}</p>
       </div>
 
       {error ? <p className={styles.error}>{error}</p> : null}
 
       <div className={styles.actions}>
         <Button type="button" variant="secondary" onClick={onCancel} disabled={loading}>
-          Отмена
+          {tActions("cancel")}
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? "Сохранение…" : submitLabel}
+          {loading ? t("saving") : submitLabel}
         </Button>
       </div>
     </form>

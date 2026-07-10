@@ -3,6 +3,9 @@ import "server-only";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { buildDemoNotificationsForUser } from "@/lib/demo/demo-notifications";
+import { isDemoMode } from "@/lib/demo/demo-mode";
+import type { AppLocale } from "@/i18n/config";
 import { listTeamUsers } from "@/lib/auth/users";
 import { getDeletedUserIds } from "@/lib/team/store";
 import type { CreateNotificationInput, Notification } from "./types";
@@ -32,9 +35,27 @@ async function writeStore(store: NotificationStore): Promise<void> {
   await writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
 }
 
+async function ensureDemoNotificationsForUser(
+  userId: string,
+  locale: AppLocale,
+): Promise<void> {
+  if (!isDemoMode() || isSupabaseConfigured()) {
+    return;
+  }
+
+  const store = await readStore();
+  const existing = store.notifications.some((item) => item.user_id === userId);
+  if (existing) {
+    return;
+  }
+
+  store.notifications.push(...buildDemoNotificationsForUser(userId, locale));
+  await writeStore(store);
+}
+
 export async function listNotificationsForUser(
   userId: string,
-  opts?: { limit?: number; since?: string },
+  opts?: { limit?: number; since?: string; locale?: AppLocale },
 ): Promise<Notification[]> {
   if (isSupabaseConfigured()) {
     try {
@@ -44,6 +65,8 @@ export async function listNotificationsForUser(
       return [];
     }
   }
+
+  await ensureDemoNotificationsForUser(userId, opts?.locale ?? "en");
 
   const store = await readStore();
   const limit = Math.max(1, Math.min(100, opts?.limit ?? 50));

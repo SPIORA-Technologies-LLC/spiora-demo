@@ -34,17 +34,23 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
 }
 
 describe("calendar reminder notification copy", () => {
-  it("builds titles for fixed offsets", () => {
-    assert.equal(getCalendarReminderTitle(1440), "Напоминание: завтра");
-    assert.equal(getCalendarReminderTitle(60), "Напоминание: через 1 час");
+  it("builds titles for fixed offsets in ru", () => {
+    assert.equal(getCalendarReminderTitle(1440, "ru"), "За 24 часа");
+    assert.equal(getCalendarReminderTitle(60, "ru"), "За 1 час");
+  });
+
+  it("builds titles for fixed offsets in en", () => {
+    assert.equal(getCalendarReminderTitle(1440, "en"), "24 hours before");
+    assert.equal(getCalendarReminderTitle(60, "en"), "1 hour before");
   });
 
   it("formats timed and all-day messages", () => {
-    const timed = formatCalendarReminderDisplayMessage(event());
+    const timed = formatCalendarReminderDisplayMessage(event(), "ru");
     assert.match(timed, /^\d{2}:\d{2} – \d{2}:\d{2} — Созвон с клиентом$/);
 
     const allDay = formatCalendarReminderDisplayMessage(
       event({ allDay: true, title: "Выходной" }),
+      "ru",
     );
     assert.equal(allDay, "Весь день — Выходной");
   });
@@ -53,9 +59,10 @@ describe("calendar reminder notification copy", () => {
     const { title, message } = buildCalendarReminderNotificationContent(
       event(),
       60,
+      "ru",
     );
 
-    assert.equal(title, "Напоминание: через 1 час");
+    assert.equal(title, "За 1 час");
     const decoded = decodeCalendarReminderMessage(message);
     assert.equal(decoded.eventId, "evt-42");
     assert.equal(decoded.isVideoMeeting, false);
@@ -66,6 +73,7 @@ describe("calendar reminder notification copy", () => {
     const { message } = buildCalendarReminderNotificationContent(
       event({ eventType: "video_meeting", title: "Синк команды" }),
       60,
+      "ru",
     );
 
     const decoded = decodeCalendarReminderMessage(message);
@@ -96,6 +104,7 @@ describe("calendar reminder notification copy", () => {
   it("builds instant video meeting invite copy", () => {
     const { title, message } = buildVideoMeetingInviteNotificationContent(
       event({ eventType: "video_meeting", title: "Синк команды" }),
+      "ru",
     );
 
     assert.equal(title, "Приглашение на видеовстречу");

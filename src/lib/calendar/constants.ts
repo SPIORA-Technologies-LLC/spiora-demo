@@ -10,8 +10,8 @@ export const CALENDAR_SCOPE_COLORS = {
 export const CALENDAR_DEFAULT_EVENT_TYPE = "general" as const;
 
 export const CALENDAR_EVENT_TYPE_LABELS = {
-  general: "Обычное событие",
-  video_meeting: "Видеовстреча",
+  general: "General event",
+  video_meeting: "Video meeting",
 } as const;
 
 export const CALENDAR_DEFAULT_SEND_REMINDERS = true;

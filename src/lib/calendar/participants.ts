@@ -1,3 +1,5 @@
+import type { AppLocale } from "@/i18n/config";
+import { translateCalendarMessage } from "@/i18n/calendar-enums";
 import { listTeamUsers } from "@/lib/auth/users";
 import type { SessionUser } from "@/lib/auth/types";
 import type { CalendarEvent, VideoInviteMode } from "./types";
@@ -104,11 +106,12 @@ export function resolveVideoMeetingReminderRecipientIds(
 export function formatParticipantNames(
   event: CalendarEvent,
   teamMembers: { id: string; name: string }[],
+  locale: AppLocale = "en",
 ): string {
   const mode = getEffectiveVideoInviteMode(event);
 
   if (mode === "all_team" && event.scope === "company") {
-    return "Вся команда";
+    return translateCalendarMessage(locale, "calendar.participants.allTeam");
   }
 
   const namesById = new Map(teamMembers.map((member) => [member.id, member.name]));
@@ -127,7 +130,9 @@ export function formatParticipantNames(
   }
 
   if (names.size === 0) {
-    return creatorName ?? "Только организатор";
+    return (
+      creatorName ?? translateCalendarMessage(locale, "calendar.participants.organizerOnly")
+    );
   }
 
   return [...names].join(", ");

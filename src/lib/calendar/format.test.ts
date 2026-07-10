@@ -34,16 +34,17 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
 }
 
 describe("formatScopeLabel", () => {
-  it("maps scopes to Russian labels", () => {
-    assert.equal(formatScopeLabel("personal"), "Личное");
-    assert.equal(formatScopeLabel("company"), "Компания");
+  it("maps scopes to localized labels", () => {
+    assert.equal(formatScopeLabel("personal", "ru"), "Личное");
+    assert.equal(formatScopeLabel("company", "ru"), "Компания");
+    assert.equal(formatScopeLabel("personal", "en"), "Personal");
   });
 });
 
 describe("formatEventTimeRange", () => {
   it("returns all-day label", () => {
     assert.equal(
-      formatEventTimeRange(event({ allDay: true })),
+      formatEventTimeRange(event({ allDay: true }), undefined, "ru"),
       "Весь день",
     );
   });

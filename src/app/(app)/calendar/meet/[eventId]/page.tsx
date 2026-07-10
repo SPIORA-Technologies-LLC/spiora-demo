@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { CalendarMeetRoom } from "@/components/meet/CalendarMeetRoom";
 import { MeetingAccessGate } from "@/components/meet/MeetingAccessGate";
 import { handleGetCalendarEvent } from "@/lib/calendar/handlers";
@@ -38,11 +39,13 @@ export default async function CalendarMeetPage({ params }: PageProps) {
     return <MeetingAccessGate variant="closed" event={event} />;
   }
 
+  const t = await getTranslations("calendar.meet");
+
   return (
     <Suspense
       fallback={
         <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
-          Подключение к видеовстрече…
+          {t("connecting")}
         </div>
       }
     >

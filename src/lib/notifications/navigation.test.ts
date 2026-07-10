@@ -27,7 +27,7 @@ describe("notification navigation", () => {
       getNotificationDisplayMessage("calendar_reminder", message),
       "10:00 – 11:00 — Созвон",
     );
-    assert.equal(getNotificationActionLabel("calendar_reminder", message), null);
+    assert.equal(getNotificationActionLabel("calendar_reminder", message, "en", "Join"), null);
   });
 
   it("routes video meeting reminders to meet page", () => {
@@ -42,8 +42,8 @@ describe("notification navigation", () => {
       "/calendar/meet/evt-video",
     );
     assert.equal(
-      getNotificationActionLabel("calendar_reminder", message),
-      "Присоединиться",
+      getNotificationActionLabel("calendar_reminder", message, "en", "Join"),
+      "Join",
     );
   });
 
@@ -65,8 +65,8 @@ describe("notification navigation", () => {
       "10:00 – 11:00 — Синк",
     );
     assert.equal(
-      getNotificationActionLabel("calendar_video_invite", message),
-      "Присоединиться",
+      getNotificationActionLabel("calendar_video_invite", message, "en", "Join"),
+      "Join",
     );
   });
 

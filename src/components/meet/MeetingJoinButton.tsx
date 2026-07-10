@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
 import { getMeetingRoomName, isVideoMeeting } from "@/lib/calendar/meeting";
 import {
   formatMeetingOpensAtLabel,
@@ -16,6 +18,8 @@ type MeetingJoinButtonProps = {
 
 export function MeetingJoinButton({ event, timeZone }: MeetingJoinButtonProps) {
   const router = useRouter();
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.meet");
 
   if (!isVideoMeeting(event)) {
     return null;
@@ -33,9 +37,11 @@ export function MeetingJoinButton({ event, timeZone }: MeetingJoinButtonProps) {
 
   let hint: string | null = null;
   if (phase === "waiting") {
-    hint = `Откроется за 15 мин до начала (${formatMeetingOpensAtLabel(event, timeZone)})`;
+    hint = t("opensIn15Min", {
+      time: formatMeetingOpensAtLabel(event, timeZone, locale),
+    });
   } else if (phase === "closed") {
-    hint = "Встреча завершена";
+    hint = t("meetingEnded");
   }
 
   return (
@@ -45,10 +51,10 @@ export function MeetingJoinButton({ event, timeZone }: MeetingJoinButtonProps) {
         className={styles.joinButton}
         disabled={disabled}
         onClick={handleJoin}
-        aria-label="Присоединиться к видеовстрече"
+        aria-label={t("joinAria")}
       >
         <i className="fa-solid fa-video" aria-hidden="true" />
-        Присоединиться к видеовстрече
+        {t("joinLabel")}
       </button>
       {hint ? <p className={styles.hint}>{hint}</p> : null}
     </div>

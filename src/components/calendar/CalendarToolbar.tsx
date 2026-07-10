@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import styles from "./CalendarToolbar.module.css";
 
 export type CalendarToolbarProps = {
@@ -23,24 +26,26 @@ export function CalendarToolbar({
   onViewChange,
   onCreate,
 }: CalendarToolbarProps) {
+  const t = useTranslations("calendar.toolbar");
+
   return (
     <div className={styles.toolbar}>
       <div className={styles.toolbarMain}>
         <div className={styles.navGroup}>
-        <button type="button" className={styles.navButton} onClick={onPrev} aria-label="Назад">
+        <button type="button" className={styles.navButton} onClick={onPrev} aria-label={t("prevAria")}>
           ◀
         </button>
         <h2 className={styles.periodLabel}>{label}</h2>
-        <button type="button" className={styles.navButton} onClick={onNext} aria-label="Вперёд">
+        <button type="button" className={styles.navButton} onClick={onNext} aria-label={t("nextAria")}>
           ▶
         </button>
         <button type="button" className={styles.todayButton} onClick={onToday}>
-          Сегодня
+          {t("today")}
         </button>
       </div>
 
       <div className={styles.actions}>
-        <div className={styles.viewSwitch} role="tablist" aria-label="Режим просмотра">
+        <div className={styles.viewSwitch} role="tablist" aria-label={t("viewModeAria")}>
           {(["day", "week", "month"] as const).map((mode) => (
             <button
               key={mode}
@@ -52,7 +57,7 @@ export function CalendarToolbar({
                 .join(" ")}
               onClick={() => onViewChange(mode)}
             >
-              {mode === "day" ? "День" : mode === "week" ? "Неделя" : "Месяц"}
+              {t(`views.${mode}`)}
             </button>
           ))}
         </div>
@@ -61,16 +66,16 @@ export function CalendarToolbar({
           type="button"
           className={styles.createButton}
           disabled={createDisabled}
-          title={createDisabled ? "Создание событий будет доступно в следующем релизе" : undefined}
+          title={createDisabled ? t("createDisabledTitle") : undefined}
           onClick={onCreate}
         >
-          + Создать событие
+          {t("createEvent")}
         </button>
       </div>
       </div>
 
       {timeZoneLabel ? (
-        <p className={styles.timeZoneLabel}>Ваше время: {timeZoneLabel}</p>
+        <p className={styles.timeZoneLabel}>{t("yourTime", { label: timeZoneLabel })}</p>
       ) : null}
     </div>
   );

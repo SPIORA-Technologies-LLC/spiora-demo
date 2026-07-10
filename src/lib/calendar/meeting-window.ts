@@ -1,3 +1,4 @@
+import type { AppLocale } from "@/i18n/config";
 import type { CalendarEvent } from "./types";
 
 export const MEETING_EARLY_MINUTES = 15;
@@ -43,9 +44,11 @@ export function getMeetingAccessPhase(
 export function formatMeetingOpensAtLabel(
   event: Pick<CalendarEvent, "startAt" | "endAt">,
   timeZone: string,
+  locale: AppLocale = "ru",
 ): string {
   const { opensAt } = getMeetingAccessWindow(event);
-  return new Intl.DateTimeFormat("ru-RU", {
+  const dateLocale = locale === "en" ? "en-US" : "ru-RU";
+  return new Intl.DateTimeFormat(dateLocale, {
     timeZone,
     hour: "2-digit",
     minute: "2-digit",

@@ -35,6 +35,7 @@ import {
 } from "./participants-store";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import * as sbCalendar from "@/lib/supabase/calendar-events-repo";
+import { buildDemoCalendarEvents } from "./demo-events";
 
 const STORE_PATH = path.join(process.cwd(), ".data", "calendar-events.json");
 
@@ -120,15 +121,40 @@ async function readStore(): Promise<CalendarEventStore> {
   try {
     const raw = await readFile(STORE_PATH, "utf8");
     const data = JSON.parse(raw) as CalendarEventStore;
-    if (!Array.isArray(data.events)) return { events: [] };
+    if (!Array.isArray(data.events)) {
+      return seedDemoStoreIfNeeded({ events: [] });
+    }
+    if (data.events.length === 0 && !isSupabaseConfigured()) {
+      return seedDemoStoreIfNeeded(data);
+    }
     return {
       events: data.events.map((item) =>
         normalizeEvent(item as CalendarEvent),
       ),
     };
   } catch {
-    return { events: [] };
+    if (isSupabaseConfigured()) {
+      return { events: [] };
+    }
+    return seedDemoStoreIfNeeded({ events: [] });
   }
+}
+
+async function seedDemoStoreIfNeeded(
+  store: CalendarEventStore,
+): Promise<CalendarEventStore> {
+  if (isSupabaseConfigured() || store.events.length > 0) {
+    return store;
+  }
+
+  const demoEvents = buildDemoCalendarEvents();
+  if (demoEvents.length === 0) {
+    return store;
+  }
+
+  const seeded = { events: demoEvents };
+  await writeStore(seeded);
+  return seeded;
 }
 
 async function writeStore(store: CalendarEventStore): Promise<void> {

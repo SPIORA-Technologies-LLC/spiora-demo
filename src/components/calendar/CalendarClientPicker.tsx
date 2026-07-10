@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { Client } from "@/lib/google-sheets/types";
 import styles from "./CalendarClientPicker.module.css";
 
@@ -17,6 +18,7 @@ export function CalendarClientPicker({
   onChange,
   disabled = false,
 }: CalendarClientPickerProps) {
+  const t = useTranslations("calendar.clientPicker");
   const [query, setQuery] = useState(clientName ?? "");
   const [results, setResults] = useState<Client[]>([]);
   const [loading, setLoading] = useState(false);
@@ -80,14 +82,14 @@ export function CalendarClientPicker({
   return (
     <div className={styles.field}>
       <label className={styles.label} htmlFor="calendar-client-picker">
-        Клиент (опционально)
+        {t("label")}
       </label>
       <div className={styles.inputRow}>
         <input
           id="calendar-client-picker"
           className={styles.input}
           value={query}
-          placeholder="Начните вводить имя клиента"
+          placeholder={t("placeholder")}
           disabled={disabled}
           onFocus={() => setOpen(true)}
           onChange={(changeEvent) => {
@@ -105,14 +107,14 @@ export function CalendarClientPicker({
             onClick={handleClear}
             disabled={disabled}
           >
-            Сбросить
+            {t("clear")}
           </button>
         ) : null}
       </div>
       {open && query.trim().length >= 2 ? (
         <div className={styles.dropdown} role="listbox">
           {loading ? (
-            <p className={styles.hint}>Поиск…</p>
+            <p className={styles.hint}>{t("searching")}</p>
           ) : results.length > 0 ? (
             results.map((client) => (
               <button
@@ -128,13 +130,11 @@ export function CalendarClientPicker({
               </button>
             ))
           ) : (
-            <p className={styles.hint}>Клиенты не найдены</p>
+            <p className={styles.hint}>{t("notFound")}</p>
           )}
         </div>
       ) : null}
-      <p className={styles.help}>
-        Привязка помогает быстро отправить ссылку клиенту и видеть контекст встречи в CRM.
-      </p>
+      <p className={styles.help}>{t("help")}</p>
     </div>
   );
 }

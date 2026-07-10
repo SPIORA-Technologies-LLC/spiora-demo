@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { partitionDayAgenda } from "@/lib/calendar/format";
 import type { CalendarEvent } from "@/lib/calendar/types";
 import { CalendarEventChip } from "./CalendarEventChip";
@@ -9,13 +12,14 @@ type CalendarDayAgendaProps = {
 };
 
 export function CalendarDayAgenda({ events, onEventClick }: CalendarDayAgendaProps) {
+  const t = useTranslations("calendar.agenda");
   const { allDay, timed } = partitionDayAgenda(events);
 
   return (
     <div className={styles.wrap}>
       {allDay.length > 0 ? (
-        <section className={styles.section} aria-label="События на весь день">
-          <h3 className={styles.sectionTitle}>Весь день</h3>
+        <section className={styles.section} aria-label={t("allDayEventsAria")}>
+          <h3 className={styles.sectionTitle}>{t("allDay")}</h3>
           <ul className={styles.list}>
             {allDay.map((event) => (
               <li key={event.id}>
@@ -27,9 +31,9 @@ export function CalendarDayAgenda({ events, onEventClick }: CalendarDayAgendaPro
       ) : null}
 
       {timed.length > 0 ? (
-        <section className={styles.section} aria-label="События по времени">
+        <section className={styles.section} aria-label={t("timedEventsAria")}>
           {allDay.length === 0 ? (
-            <h3 className={styles.sectionTitle}>Расписание дня</h3>
+            <h3 className={styles.sectionTitle}>{t("daySchedule")}</h3>
           ) : null}
           <ul className={styles.list}>
             {timed.map((event) => (

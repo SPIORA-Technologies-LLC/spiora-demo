@@ -1,15 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import type { AppLocale } from "@/i18n/config";
+import {
+  formatNotificationTime,
+  translateNotificationType,
+  type NotificationTypeKey,
+} from "@/i18n/notification-labels";
 import {
   NOTIFICATION_TYPE_ICONS,
-  NOTIFICATION_TYPE_LABELS,
-  formatNotificationTime,
   isSuccessNotification,
 } from "./constants";
-import { getNotificationDisplayMessage, getNotificationActionLabel, getNotificationHref } from "@/lib/notifications/navigation";
+import {
+  getNotificationActionLabel,
+  getNotificationDisplayMessage,
+  getNotificationHref,
+} from "@/lib/notifications/navigation";
 import {
   isNotificationSoundEnabled,
   setNotificationSoundEnabled,
@@ -20,7 +28,9 @@ import styles from "./NotificationBell.module.css";
 
 export function NotificationBell() {
   const router = useRouter();
+  const locale = useLocale() as AppLocale;
   const t = useTranslations("notifications");
+  const tCalendar = useTranslations("calendar.notifications");
   const ctx = useNotificationsOptional();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -144,6 +154,8 @@ export function NotificationBell() {
                 const actionLabel = getNotificationActionLabel(
                   item.type,
                   item.message,
+                  locale,
+                  tCalendar("joinAction"),
                 );
                 return (
                 <div
@@ -179,11 +191,14 @@ export function NotificationBell() {
                           .join(" ")}
                       >
                         {NOTIFICATION_TYPE_ICONS[item.type]}{" "}
-                        {NOTIFICATION_TYPE_LABELS[item.type]}
+                        {translateNotificationType(
+                          locale,
+                          item.type as NotificationTypeKey,
+                        )}
                       </span>
                     </button>
                     <span className={styles.itemTime}>
-                      {formatNotificationTime(item.created_at)}
+                      {formatNotificationTime(item.created_at, locale)}
                     </span>
                     <button
                       type="button"

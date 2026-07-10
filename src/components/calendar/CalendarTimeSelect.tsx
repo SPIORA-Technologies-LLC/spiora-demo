@@ -1,9 +1,9 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   buildMinuteOptions,
   buildTimeValue,
-  formatTimeValueRu,
   parseTimeParts,
   snapMinuteToStep,
 } from "@/lib/calendar/datetime-input";
@@ -20,6 +20,7 @@ const minuteOptions = buildMinuteOptions(MINUTE_STEP);
 const hourOptions = Array.from({ length: 24 }, (_, hour) => hour);
 
 export function CalendarTimeSelect({ value, onChange, id }: CalendarTimeSelectProps) {
+  const t = useTranslations("calendar.timeSelect");
   const parsed = parseTimeParts(value) ?? { hours: 10, minutes: 0 };
   const selectedMinute = minuteOptions.includes(parsed.minutes)
     ? parsed.minutes
@@ -39,7 +40,7 @@ export function CalendarTimeSelect({ value, onChange, id }: CalendarTimeSelectPr
       <div className={styles.selectRow}>
         <select
           className={styles.select}
-          aria-label="Часы"
+          aria-label={t("hoursAria")}
           value={parsed.hours}
           onChange={(event) => update({ hours: Number(event.target.value) })}
         >
@@ -54,7 +55,7 @@ export function CalendarTimeSelect({ value, onChange, id }: CalendarTimeSelectPr
         </span>
         <select
           className={styles.select}
-          aria-label="Минуты"
+          aria-label={t("minutesAria")}
           value={selectedMinute}
           onChange={(event) => update({ minutes: Number(event.target.value) })}
         >
@@ -65,7 +66,9 @@ export function CalendarTimeSelect({ value, onChange, id }: CalendarTimeSelectPr
           ))}
         </select>
       </div>
-      <span className={styles.hint}>{formatTimeValueRu(value)}</span>
+      <span className={styles.hint}>
+        {buildTimeValue({ hours: parsed.hours, minutes: selectedMinute })}
+      </span>
     </div>
   );
 }

@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
 import { CALENDAR_TIMEZONE } from "@/lib/calendar/constants";
+import { resolveCalendarEventTitle } from "@/lib/calendar/demo-event-title";
 import { formatEventTimeRange } from "@/lib/calendar/format";
 import { formatMeetingOpensAtLabel } from "@/lib/calendar/meeting-client";
 import type { CalendarEvent } from "@/lib/calendar/types";
@@ -21,83 +26,87 @@ type MeetingAccessGateProps = {
   message?: string;
 };
 
-function getCopy(
-  variant: MeetingAccessGateVariant,
-  event?: CalendarEvent,
-): { title: string; body: string; actionLabel: string; actionHref: string } {
-  const eventHref = event
-    ? `/calendar?event=${encodeURIComponent(event.id)}`
-    : "/calendar";
-
-  switch (variant) {
-    case "waiting":
-      return {
-        title: "Встреча ещё не открыта",
-        body: event
-          ? `Вход возможен за 15 минут до начала. Откроется в ${formatMeetingOpensAtLabel(event, CALENDAR_TIMEZONE)}.`
-          : "Вход возможен за 15 минут до начала.",
-        actionLabel: "Вернуться к событию",
-        actionHref: eventHref,
-      };
-    case "closed":
-      return {
-        title: "Встреча завершена",
-        body: "Окно доступа закрыто (окончание + 15 мин).",
-        actionLabel: "Открыть событие в календаре",
-        actionHref: eventHref,
-      };
-    case "not_found":
-      return {
-        title: "Событие не найдено",
-        body: "Видеовстреча недоступна или у вас нет доступа.",
-        actionLabel: "Перейти в календарь",
-        actionHref: "/calendar",
-      };
-    case "not_video":
-      return {
-        title: "Это не видеовстреча",
-        body: "Присоединиться можно только к событиям типа «Видеовстреча».",
-        actionLabel: "Открыть событие",
-        actionHref: eventHref,
-      };
-    case "forbidden":
-      return {
-        title: "Доступ запрещён",
-        body: "Видеовстречи доступны только сотрудникам платформы.",
-        actionLabel: "Перейти в календарь",
-        actionHref: "/calendar",
-      };
-    case "not_configured":
-      return {
-        title: "Видеовстречи не настроены",
-        body: "LiveKit не подключён на сервере. Обратитесь к владельцу платформы.",
-        actionLabel: "Перейти в календарь",
-        actionHref: eventHref,
-      };
-    case "connect_error":
-      return {
-        title: "Не удалось подключиться",
-        body: "Проверьте интернет и попробуйте снова из карточки события.",
-        actionLabel: "Вернуться к событию",
-        actionHref: eventHref,
-      };
-  }
-}
-
 export function MeetingAccessGate({
   variant,
   event,
   message,
 }: MeetingAccessGateProps) {
-  const copy = getCopy(variant, event);
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.meet.accessGate");
+
+  const eventHref = event
+    ? `/calendar?event=${encodeURIComponent(event.id)}`
+    : "/calendar";
+
+  const copy = (() => {
+    switch (variant) {
+      case "waiting":
+        return {
+          title: t("waitingTitle"),
+          body: event
+            ? t("waitingBodyAt", {
+                time: formatMeetingOpensAtLabel(event, CALENDAR_TIMEZONE, locale),
+              })
+            : t("waitingBody"),
+          actionLabel: t("backToEvent"),
+          actionHref: eventHref,
+        };
+      case "closed":
+        return {
+          title: t("closedTitle"),
+          body: t("closedBody"),
+          actionLabel: t("openInCalendar"),
+          actionHref: eventHref,
+        };
+      case "not_found":
+        return {
+          title: t("notFoundTitle"),
+          body: t("notFoundBody"),
+          actionLabel: t("goToCalendar"),
+          actionHref: "/calendar",
+        };
+      case "not_video":
+        return {
+          title: t("notVideoTitle"),
+          body: t("notVideoBody"),
+          actionLabel: t("openEvent"),
+          actionHref: eventHref,
+        };
+      case "forbidden":
+        return {
+          title: t("forbiddenTitle"),
+          body: t("forbiddenBody"),
+          actionLabel: t("goToCalendar"),
+          actionHref: "/calendar",
+        };
+      case "not_configured":
+        return {
+          title: t("notConfiguredTitle"),
+          body: t("notConfiguredBody"),
+          actionLabel: t("goToCalendar"),
+          actionHref: eventHref,
+        };
+      case "connect_error":
+        return {
+          title: t("connectErrorTitle"),
+          body: t("connectErrorBody"),
+          actionLabel: t("backToEvent"),
+          actionHref: eventHref,
+        };
+    }
+  })();
+
+  const displayTitle = event
+    ? resolveCalendarEventTitle(event.title, locale)
+    : null;
 
   return (
     <div className={styles.page}>
       <div className={styles.card}>
         <h1 className={styles.title}>{copy.title}</h1>
-        {event ? (
+        {event && displayTitle ? (
           <p className={styles.eventMeta}>
-            {formatEventTimeRange(event)} — {event.title}
+            {formatEventTimeRange(event, CALENDAR_TIMEZONE, locale)} — {displayTitle}
           </p>
         ) : null}
         <p className={styles.body}>{message ?? copy.body}</p>

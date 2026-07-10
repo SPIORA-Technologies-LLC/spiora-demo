@@ -1,3 +1,5 @@
+import type { AppLocale } from "@/i18n/config";
+import { translateCalendarMessage } from "@/i18n/calendar-enums";
 import { formatEventTimeRange } from "@/lib/calendar/format";
 import { isVideoMeeting } from "@/lib/calendar/meeting";
 import type { CalendarEvent } from "@/lib/calendar/types";
@@ -7,17 +9,24 @@ const EVENT_ID_SEPARATOR = "\u2063";
 
 export function getCalendarReminderTitle(
   offsetMinutes: ReminderOffsetMinutes,
+  locale: AppLocale = "en",
 ): string {
-  if (offsetMinutes === 1440) {
-    return "Напоминание: завтра";
-  }
-  return "Напоминание: через 1 час";
+  return translateReminderOffset(locale, offsetMinutes);
+}
+
+function translateReminderOffset(
+  locale: AppLocale,
+  offsetMinutes: ReminderOffsetMinutes,
+): string {
+  const key = offsetMinutes === 1440 ? "dayBefore" : "hourBefore";
+  return translateCalendarMessage(locale, `calendar.reminders.${key}`);
 }
 
 export function formatCalendarReminderDisplayMessage(
   event: CalendarEvent,
+  locale: AppLocale = "en",
 ): string {
-  const time = formatEventTimeRange(event);
+  const time = formatEventTimeRange(event, undefined, locale);
   return `${time} — ${event.title}`;
 }
 
@@ -62,10 +71,11 @@ export function decodeCalendarReminderMessage(message: string): {
 export function buildCalendarReminderNotificationContent(
   event: CalendarEvent,
   offsetMinutes: ReminderOffsetMinutes,
+  locale: AppLocale = "en",
 ): { title: string; message: string } {
-  const displayMessage = formatCalendarReminderDisplayMessage(event);
+  const displayMessage = formatCalendarReminderDisplayMessage(event, locale);
   return {
-    title: getCalendarReminderTitle(offsetMinutes),
+    title: getCalendarReminderTitle(offsetMinutes, locale),
     message: encodeCalendarReminderMessage(displayMessage, event.id, {
       isVideoMeeting: isVideoMeeting(event),
     }),
@@ -74,10 +84,11 @@ export function buildCalendarReminderNotificationContent(
 
 export function buildVideoMeetingInviteNotificationContent(
   event: CalendarEvent,
+  locale: AppLocale = "en",
 ): { title: string; message: string } {
-  const displayMessage = formatCalendarReminderDisplayMessage(event);
+  const displayMessage = formatCalendarReminderDisplayMessage(event, locale);
   return {
-    title: "Приглашение на видеовстречу",
+    title: translateCalendarMessage(locale, "calendar.notifications.videoInviteTitle"),
     message: encodeCalendarReminderMessage(displayMessage, event.id, {
       isVideoMeeting: true,
     }),

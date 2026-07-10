@@ -1,9 +1,15 @@
+import type { AppLocale } from "@/i18n/config";
+import { getIntlLocaleTag } from "@/i18n/format";
+import { translateAllDayLabel, translateCalendarScope } from "@/i18n/calendar-enums";
 import { CALENDAR_TIMEZONE } from "./constants";
 import { formatDateKey } from "./range";
 import type { CalendarEvent, CalendarScope } from "./types";
 
-function createTimeFormatter(ianaTimeZone: string): Intl.DateTimeFormat {
-  return new Intl.DateTimeFormat("ru-RU", {
+function createTimeFormatter(
+  locale: AppLocale,
+  ianaTimeZone: string,
+): Intl.DateTimeFormat {
+  return new Intl.DateTimeFormat(getIntlLocaleTag(locale), {
     timeZone: ianaTimeZone,
     hour: "2-digit",
     minute: "2-digit",
@@ -12,34 +18,42 @@ function createTimeFormatter(ianaTimeZone: string): Intl.DateTimeFormat {
 
 const dayLabelFormatterCache = new Map<string, Intl.DateTimeFormat>();
 
-function getDayLabelFormatter(ianaTimeZone: string): Intl.DateTimeFormat {
-  let formatter = dayLabelFormatterCache.get(ianaTimeZone);
+function getDayLabelFormatter(
+  locale: AppLocale,
+  ianaTimeZone: string,
+): Intl.DateTimeFormat {
+  const cacheKey = `${locale}:${ianaTimeZone}`;
+  let formatter = dayLabelFormatterCache.get(cacheKey);
   if (!formatter) {
-    formatter = new Intl.DateTimeFormat("ru-RU", {
+    formatter = new Intl.DateTimeFormat(getIntlLocaleTag(locale), {
       timeZone: ianaTimeZone,
       weekday: "long",
       day: "numeric",
       month: "long",
       year: "numeric",
     });
-    dayLabelFormatterCache.set(ianaTimeZone, formatter);
+    dayLabelFormatterCache.set(cacheKey, formatter);
   }
   return formatter;
 }
 
-export function formatScopeLabel(scope: CalendarScope): string {
-  return scope === "personal" ? "Личное" : "Компания";
+export function formatScopeLabel(
+  scope: CalendarScope,
+  locale: AppLocale = "en",
+): string {
+  return translateCalendarScope(locale, scope);
 }
 
 export function formatEventTimeRange(
   event: CalendarEvent,
   timeZone: string = CALENDAR_TIMEZONE,
+  locale: AppLocale = "en",
 ): string {
   if (event.allDay) {
-    return "Весь день";
+    return translateAllDayLabel(locale);
   }
 
-  const formatter = createTimeFormatter(timeZone);
+  const formatter = createTimeFormatter(locale, timeZone);
   const start = formatter.format(new Date(event.startAt));
   const end = formatter.format(new Date(event.endAt));
   return `${start} – ${end}`;
@@ -48,8 +62,9 @@ export function formatEventTimeRange(
 export function formatDayLabel(
   date: Date,
   timeZone: string = CALENDAR_TIMEZONE,
+  locale: AppLocale = "en",
 ): string {
-  const label = getDayLabelFormatter(timeZone).format(date);
+  const label = getDayLabelFormatter(locale, timeZone).format(date);
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 

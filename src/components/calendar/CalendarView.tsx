@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Toast, type ToastMessage } from "@/components/tasks/Toast";
+import type { AppLocale } from "@/i18n/config";
 import type { SessionUser } from "@/lib/auth/types";
 import {
   defaultFormValues,
@@ -96,6 +98,11 @@ export function CalendarView({ user, teamMembers }: CalendarViewProps) {
 }
 
 function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar");
+  const tDialogs = useTranslations("calendar.dialogs");
+  const tToasts = useTranslations("calendar.toasts");
+  const tActions = useTranslations("actions");
   const { timeZone, timeZoneLabel } = useCalendarTimeZone();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -117,8 +124,8 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
   const [deleteEvent, setDeleteEvent] = useState<CalendarEvent | null>(null);
 
   const toolbarLabel = useMemo(
-    () => formatToolbarLabel(view, anchorDate, timeZone),
-    [view, anchorDate, timeZone],
+    () => formatToolbarLabel(view, anchorDate, timeZone, locale),
+    [view, anchorDate, timeZone, locale],
   );
 
   const createInitialValues = useMemo(
@@ -197,7 +204,7 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
           return;
         }
         setEvents([]);
-        setError("Не удалось загрузить события");
+        setError(tToasts("loadFailed"));
       } finally {
         if (!controller.signal.aborted) {
           setLoading(false);
@@ -206,7 +213,7 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
     })();
 
     return () => controller.abort();
-  }, [anchorDate, layers, reloadToken, timeZone, view]);
+  }, [anchorDate, layers, reloadToken, timeZone, view, tToasts]);
 
   const handleLayersChange = useCallback((nextLayers: CalendarLayers) => {
     setLayers(nextLayers);
@@ -276,8 +283,8 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
               setToast({
                 text:
                   response.status === 404
-                    ? "Событие не найдено"
-                    : "Не удалось открыть событие",
+                    ? tToasts("eventNotFound")
+                    : tToasts("openFailed"),
                 type: "error",
               });
               const params = new URLSearchParams(searchParams.toString());
@@ -290,7 +297,7 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
           resolved = data.event;
         } catch {
           if (!cancelled) {
-            setToast({ text: "Не удалось открыть событие", type: "error" });
+            setToast({ text: tToasts("openFailed"), type: "error" });
           }
           return;
         }
@@ -324,6 +331,7 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
     syncUrl,
     timeZone,
     view,
+    tToasts,
   ]);
 
   const handleCreate = useCallback(
@@ -336,15 +344,15 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
 
       if (!response.ok) {
         throw new Error(
-          await readApiError(response, "Не удалось создать событие"),
+          await readApiError(response, tToasts("createFailed")),
         );
       }
 
       setCreateOpen(false);
       refetchEvents();
-      setToast({ text: "Событие создано", type: "success" });
+      setToast({ text: tToasts("created"), type: "success" });
     },
-    [refetchEvents, timeZone],
+    [refetchEvents, timeZone, tToasts],
   );
 
   const handleUpdate = useCallback(
@@ -360,18 +368,18 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
       });
 
       if (!response.ok) {
-        const message = await readApiError(response, "Не удалось обновить событие");
+        const message = await readApiError(response, tToasts("updateFailed"));
         if (response.status === 403) {
-          throw new Error("Недостаточно прав для редактирования");
+          throw new Error(tToasts("insufficientEditRights"));
         }
         throw new Error(message);
       }
 
       setEditEvent(null);
       refetchEvents();
-      setToast({ text: "Событие обновлено", type: "success" });
+      setToast({ text: tToasts("updated"), type: "success" });
     },
-    [editEvent, refetchEvents, timeZone],
+    [editEvent, refetchEvents, timeZone, tToasts],
   );
 
   const confirmDelete = useCallback(async () => {
@@ -384,9 +392,9 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
     });
 
     if (!response.ok) {
-      const message = await readApiError(response, "Не удалось удалить событие");
+      const message = await readApiError(response, tToasts("deleteFailed"));
       setToast({
-        text: response.status === 403 ? "Недостаточно прав для удаления" : message,
+        text: response.status === 403 ? tToasts("insufficientDeleteRights") : message,
         type: "error",
       });
       setDeleteEvent(null);
@@ -395,8 +403,8 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
 
     setDeleteEvent(null);
     refetchEvents();
-    setToast({ text: "Событие удалено", type: "success" });
-  }, [deleteEvent, refetchEvents]);
+    setToast({ text: tToasts("deleted"), type: "success" });
+  }, [deleteEvent, refetchEvents, tToasts]);
 
   const showEmptyState =
     view === "day" && events.length === 0 && hasActiveLayer(layers);
@@ -426,11 +434,11 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
       <div className={styles.body}>
         {loading ? (
           <div className={styles.loading} role="status">
-            Загрузка событий…
+            {t("loadingEvents")}
           </div>
         ) : !hasActiveLayer(layers) ? (
           <div className={styles.loading} role="status">
-            Выберите хотя бы один слой событий, чтобы загрузить календарь.
+            {t("selectLayerToLoad")}
           </div>
         ) : showEmptyState ? (
           <CalendarEmptyState createDisabled={false} onCreate={openCreate} />
@@ -456,11 +464,11 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
       </div>
 
       {createOpen ? (
-        <CalendarDialog title="Новое событие" onClose={() => setCreateOpen(false)}>
+        <CalendarDialog title={tDialogs("newEvent")} onClose={() => setCreateOpen(false)}>
           <CalendarEventForm
             mode="create"
             initial={createInitialValues}
-            submitLabel="Создать"
+            submitLabel={tActions("create")}
             currentUserId={user.id}
             teamMembers={teamMembers}
             onCancel={() => setCreateOpen(false)}
@@ -482,13 +490,13 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
 
       {editEvent ? (
         <CalendarDialog
-          title="Редактировать событие"
+          title={tDialogs("editEvent")}
           onClose={() => setEditEvent(null)}
         >
           <CalendarEventForm
             mode="edit"
             initial={eventToFormValues(editEvent, timeZone)}
-            submitLabel="Сохранить"
+            submitLabel={tActions("save")}
             scopeLocked
             currentUserId={user.id}
             teamMembers={teamMembers}
@@ -499,15 +507,15 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
       ) : null}
 
       {deleteEvent ? (
-        <CalendarDialog title="Удалить событие?" onClose={() => setDeleteEvent(null)}>
-          <p className={styles.confirmText}>Вы уверены?</p>
+        <CalendarDialog title={tDialogs("deleteEvent")} onClose={() => setDeleteEvent(null)}>
+          <p className={styles.confirmText}>{tDialogs("confirmDelete")}</p>
           <p className={styles.confirmEvent}>{deleteEvent.title}</p>
           <div className={styles.confirmActions}>
             <Button type="button" variant="secondary" onClick={() => setDeleteEvent(null)}>
-              Отмена
+              {tActions("cancel")}
             </Button>
             <Button type="button" variant="danger" onClick={() => void confirmDelete()}>
-              Удалить
+              {tActions("delete")}
             </Button>
           </div>
         </CalendarDialog>
@@ -527,13 +535,15 @@ function CalendarDialog({
   children: React.ReactNode;
   onClose: () => void;
 }) {
+  const tDialogs = useTranslations("calendar.dialogs");
+
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true">
       <div className={styles.backdrop} onClick={onClose} aria-hidden />
       <Card className={styles.modal}>
         <header className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>{title}</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть">
+          <button type="button" className={styles.close} onClick={onClose} aria-label={tDialogs("closeAria")}>
             ×
           </button>
         </header>

@@ -76,7 +76,20 @@
     "soundOff": "Sound off",
     "soundOnTitle": "Disable notification sound",
     "soundOffTitle": "Enable notification sound",
-    "closeItem": "Close notification"
+    "closeItem": "Close notification",
+    "types": {
+      "team_chat": "Team chat message",
+      "task_new": "New task",
+      "task_status": "Task status",
+      "task_completed": "Task completed",
+      "task_pending_approval": "Task pending approval",
+      "task_revision": "Task revision",
+      "client_new": "New client",
+      "consultation_assigned": "Consultation",
+      "calendar_reminder": "Calendar reminder",
+      "calendar_video_invite": "Video meeting",
+      "system": "System"
+    }
   },
   "language": {
     "switcherLabel": "Language",
@@ -123,6 +136,14 @@
     "quickActions": {
       "createTask": "Create task",
       "openAiWorkspace": "Open AI Workspace"
+    },
+    "upcomingEvents": {
+      "title": "Upcoming events",
+      "viewCalendar": "View calendar",
+      "loading": "Loading events…",
+      "empty": "No upcoming events",
+      "error": "Failed to load events",
+      "videoBadge": "Video meeting"
     },
     "teamMessages": {
       "voice": "Voice message",
@@ -237,6 +258,286 @@
         "proposal": "Prepare a commercial proposal",
         "managerReport": "Create a brief report for the manager"
       }
+    }
+  },
+  "calendar": {
+    "pageTitle": "Calendar",
+    "loading": "Loading…",
+    "loadingEvents": "Loading events…",
+    "selectLayerToLoad": "Select at least one event layer to load the calendar.",
+    "toolbar": {
+      "prevAria": "Previous",
+      "nextAria": "Next",
+      "today": "Today",
+      "viewModeAria": "View mode",
+      "createEvent": "+ Create event",
+      "createDisabledTitle": "Event creation will be available in the next release",
+      "yourTime": "Your time: {label}",
+      "views": {
+        "day": "Day",
+        "week": "Week",
+        "month": "Month"
+      }
+    },
+    "layers": {
+      "personalTitle": "My events",
+      "personalSubtitle": "Personal calendar",
+      "companyTitle": "Company events",
+      "companySubtitle": "Visible to the whole team",
+      "selectAtLeastOne": "Select at least one layer: My events or Company events",
+      "legendAria": "Legend"
+    },
+    "empty": {
+      "title": "No events for this period",
+      "text": "Create a personal or company event to add it to the calendar.",
+      "createEvent": "+ Create event"
+    },
+    "agenda": {
+      "allDay": "All day",
+      "allDayEventsAria": "All-day events",
+      "timedEventsAria": "Timed events",
+      "daySchedule": "Day schedule"
+    },
+    "monthGrid": {
+      "ariaLabel": "Month calendar",
+      "dayAria": "Day {date}",
+      "moreEvents": "+{count} more"
+    },
+    "weekGrid": {
+      "dayAria": "Day {date}",
+      "allDay": "All day"
+    },
+    "dialogs": {
+      "newEvent": "New event",
+      "editEvent": "Edit event",
+      "deleteEvent": "Delete event?",
+      "confirmDelete": "Are you sure?",
+      "closeAria": "Close"
+    },
+    "toasts": {
+      "loadFailed": "Failed to load events",
+      "eventNotFound": "Event not found",
+      "openFailed": "Failed to open event",
+      "createFailed": "Failed to create event",
+      "updateFailed": "Failed to update event",
+      "deleteFailed": "Failed to delete event",
+      "insufficientEditRights": "Insufficient rights to edit",
+      "insufficientDeleteRights": "Insufficient rights to delete",
+      "created": "Event created",
+      "updated": "Event updated",
+      "deleted": "Event deleted",
+      "saveFailed": "Failed to save event"
+    },
+    "form": {
+      "scopeLegend": "Event scope",
+      "scopeType": "Type",
+      "formatLegend": "Meeting format",
+      "formatType": "Format",
+      "videoHint": "A room is created on the platform. After saving, a link for clients without an account will appear in the meeting card.",
+      "inviteLegend": "Who to invite",
+      "participantsLegend": "Participants",
+      "participantsHint": "You participate automatically. Select colleagues who will have access to the meeting and reminders.",
+      "waitingRoom": "Waiting room for guests via link",
+      "guestMax": "Maximum guests via link",
+      "guestPassword": "Guest password (optional)",
+      "guestPasswordEditPlaceholder": "Leave empty to keep unchanged",
+      "guestPasswordCreatePlaceholder": "No password — link-only access",
+      "title": "Title *",
+      "titlePlaceholder": "e.g. Client consultation",
+      "description": "Description",
+      "descriptionPlaceholder": "Additional details…",
+      "allDay": "All day",
+      "when": "When",
+      "start": "Start *",
+      "end": "End *",
+      "location": "Location",
+      "locationPlaceholder": "Office, online, address…",
+      "reminders": "Reminders 24 hours and 1 hour before",
+      "remindersHint": "Bell notification. Platform only.",
+      "saving": "Saving…"
+    },
+    "modal": {
+      "time": "Time",
+      "room": "Room",
+      "participants": "Participants",
+      "guestLimit": "Guest limit",
+      "noGuestLimit": "No limit",
+      "guestPassword": "Guest password",
+      "passwordSet": "Set",
+      "passwordNotSet": "Not set",
+      "waitingRoom": "Waiting room",
+      "waitingRoomOn": "Enabled for guests",
+      "waitingRoomOff": "Disabled",
+      "client": "Client",
+      "status": "Status",
+      "location": "Location",
+      "author": "Author",
+      "reminders": "Reminders",
+      "remindersOn": "Enabled",
+      "remindersOff": "Disabled",
+      "noDescription": "No description provided."
+    },
+    "clientPicker": {
+      "label": "Client (optional)",
+      "placeholder": "Start typing client name",
+      "clear": "Clear",
+      "searching": "Searching…",
+      "notFound": "No clients found",
+      "help": "Linking helps you quickly send the link to the client and see meeting context in CRM."
+    },
+    "dateSelect": {
+      "dayAria": "Day",
+      "monthAria": "Month",
+      "yearAria": "Year"
+    },
+    "timeSelect": {
+      "hoursAria": "Hours",
+      "minutesAria": "Minutes"
+    },
+    "placeholder": {
+      "title": "«{view}» view",
+      "subtitle": "View grid coming in future releases. Currently loaded {count, plural, one {# event} other {# events}}."
+    },
+    "enums": {
+      "scope": {
+        "personal": "Personal",
+        "company": "Company"
+      },
+      "eventType": {
+        "general": "General event",
+        "video_meeting": "Video meeting"
+      },
+      "inviteMode": {
+        "all_team": "Whole team",
+        "selected": "Selected"
+      },
+      "meetingStatus": {
+        "waiting": "Waiting",
+        "open": "Open",
+        "closed": "Closed"
+      }
+    },
+    "validation": {
+      "titleRequired": "Enter an event title",
+      "videoAllDay": "Video meetings cannot be all-day events",
+      "endBeforeStart": "End cannot be before start",
+      "invalidDateTime": "Invalid date or time"
+    },
+    "reminders": {
+      "dayBefore": "24 hours before",
+      "hourBefore": "1 hour before"
+    },
+    "participants": {
+      "allTeam": "Whole team",
+      "organizerOnly": "Organizer only"
+    },
+    "notifications": {
+      "videoInviteTitle": "Video meeting invitation",
+      "joinAction": "Join",
+      "upcomingMeeting": "Upcoming meeting in 1 hour",
+      "deadlineTomorrow": "Deadline tomorrow",
+      "videoStartsSoon": "Internal video meeting starts soon"
+    },
+    "meet": {
+      "connecting": "Connecting to video meeting…",
+      "joinLabel": "Join video meeting",
+      "joinAria": "Join video meeting",
+      "opensIn15Min": "Opens 15 minutes before start ({time})",
+      "meetingEnded": "Meeting ended",
+      "accessGate": {
+        "waitingTitle": "Meeting not open yet",
+        "waitingBody": "You can join 15 minutes before the start.",
+        "waitingBodyAt": "You can join 15 minutes before the start. Opens at {time}.",
+        "closedTitle": "Meeting ended",
+        "closedBody": "The access window is closed (end time + 15 min).",
+        "notFoundTitle": "Event not found",
+        "notFoundBody": "The video meeting is unavailable or you do not have access.",
+        "notVideoTitle": "Not a video meeting",
+        "notVideoBody": "You can only join events marked as Video meeting.",
+        "forbiddenTitle": "Access denied",
+        "forbiddenBody": "Video meetings are available to platform staff only.",
+        "notConfiguredTitle": "Video meetings not configured",
+        "notConfiguredBody": "LiveKit is not connected on the server. Contact the platform owner.",
+        "connectErrorTitle": "Could not connect",
+        "connectErrorBody": "Check your connection and try again from the event card.",
+        "backToEvent": "Back to event",
+        "openInCalendar": "Open in calendar",
+        "goToCalendar": "Go to calendar",
+        "openEvent": "Open event"
+      },
+      "guestInvite": {
+        "sectionAria": "Client invite link",
+        "title": "Client invite link",
+        "hint": "Copy a ready-made invite with the title, time, and link — then send it to the client via messenger or email. No registration required.",
+        "loading": "Loading link…",
+        "loadFailed": "Could not load the link",
+        "inviteAria": "Client invite text",
+        "copied": "Copied",
+        "copyInvite": "Copy invite",
+        "copyPrompt": "Copy the invite for the client:",
+        "email": "Email",
+        "whatsapp": "WhatsApp",
+        "telegram": "Telegram",
+        "regenerateConfirm": "Create a new link? The old one will stop working.",
+        "regenerateFailed": "Could not update the link",
+        "regenerating": "Updating…",
+        "regenerate": "Create new link",
+        "regenerateHint": "Revokes the current link and creates a new one. Use this if the link needs to be replaced or may have been shared with the wrong person.",
+        "emailSubject": "Meeting invitation: {title}"
+      },
+      "guestHistory": {
+        "loading": "Loading guests…",
+        "loadFailed": "Could not load guests",
+        "empty": "No one has joined via the guest link yet.",
+        "sectionAria": "Guests via link",
+        "title": "Guests via link",
+        "statusPending": "Waiting",
+        "statusAdmitted": "Joined",
+        "statusRejected": "Declined",
+        "statusLeft": "Left"
+      },
+      "inviteMessage": {
+        "greetingMorning": "Good morning",
+        "greetingAfternoon": "Good afternoon",
+        "greetingEvening": "Good evening",
+        "salutation": "{greeting}, {name}!",
+        "salutationNoName": "{greeting}!",
+        "body": "You're invited to the video meeting \"{title}\".",
+        "when": "When: {schedule}",
+        "joinHint": "Join using this link (no registration required):",
+        "closing": "See you soon!",
+        "team": "The {company} team",
+        "allDay": "{date}, all day",
+        "schedule": "{date}, {time}"
+      }
+    },
+    "demoEvents": {
+      "teamMeeting": "Team Meeting",
+      "clientConsultation": "Client Consultation",
+      "documentReview": "Document Review",
+      "internalVideoMeeting": "Internal Video Meeting",
+      "crmReview": "CRM Review",
+      "aiWorkflowPlanning": "AI Workflow Planning",
+      "residencePermitSubmission": "Residence Permit Submission",
+      "partnerSync": "Partner Sync",
+      "caseStrategySession": "Case Strategy Session",
+      "clientFollowUpCall": "Client Follow-up Call",
+      "weeklyOperationsStandup": "Weekly Operations Standup",
+      "visaDocumentChecklist": "Visa Document Checklist",
+      "immigrationPolicyBriefing": "Immigration Policy Briefing",
+      "clientOnboardingWorkshop": "Client Onboarding Workshop",
+      "personalPlanningBlock": "Personal Planning Block",
+      "teamRetrospective": "Team Retrospective",
+      "demoEnvironmentReview": "Demo Environment Review",
+      "companyOffsiteDay": "Company Off-site Day",
+      "nextWeekKickoff": "Next Week Kickoff",
+      "clientPortfolioReview": "Client Portfolio Review",
+      "complianceDeadlinePrep": "Compliance Deadline Prep",
+      "externalPartnerCall": "External Partner Call",
+      "quarterlyPlanning": "Quarterly Planning",
+      "privateFocusTime": "Private Focus Time",
+      "knowledgeBaseReview": "Knowledge Base Review",
+      "upcomingMeetingPrep": "Upcoming Meeting Prep"
     }
   },
   "statuses": {

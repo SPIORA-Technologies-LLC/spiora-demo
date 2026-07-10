@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/layout/AppShell";
 import { CalendarView } from "@/components/calendar/CalendarView";
 import { getSession } from "@/lib/auth/session";
@@ -11,14 +12,15 @@ export default async function CalendarPage() {
     redirect("/login");
   }
 
+  const t = await getTranslations("calendar");
   const teamMembers = (await listTeamMembers()).map((member) => ({
     id: member.id,
     name: member.name,
   }));
 
   return (
-    <AppShell sectionTitle="Календарь">
-      <Suspense fallback={<p>Загрузка…</p>}>
+    <AppShell sectionTitle={t("pageTitle")}>
+      <Suspense fallback={<p>{t("loading")}</p>}>
         <CalendarView user={session} teamMembers={teamMembers} />
       </Suspense>
     </AppShell>

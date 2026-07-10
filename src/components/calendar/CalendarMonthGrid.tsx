@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { getWeekdayNames } from "@/i18n/format";
 import { formatDateKey } from "@/lib/calendar/range";
 import {
-  MONTH_WEEKDAY_LABELS,
   buildMonthMatrix,
   partitionMonthDayEvents,
 } from "@/lib/calendar/month";
@@ -29,7 +31,13 @@ export function CalendarMonthGrid({
   onDayClick,
   onEventClick,
 }: CalendarMonthGridProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.monthGrid");
   const { timeZone } = useCalendarTimeZone();
+  const weekdayLabels = useMemo(
+    () => getWeekdayNames(locale, "short"),
+    [locale],
+  );
   const todayKey = useMemo(
     () => formatDateKey(new Date(), timeZone),
     [timeZone],
@@ -40,9 +48,9 @@ export function CalendarMonthGrid({
   );
 
   return (
-    <div className={styles.grid} role="grid" aria-label="Календарь месяца">
+    <div className={styles.grid} role="grid" aria-label={t("ariaLabel")}>
       <div className={styles.weekdayRow} role="row">
-        {MONTH_WEEKDAY_LABELS.map((label) => (
+        {weekdayLabels.map((label) => (
           <div key={label} className={styles.weekdayCell} role="columnheader">
             {label}
           </div>
@@ -74,7 +82,7 @@ export function CalendarMonthGrid({
                   .filter(Boolean)
                   .join(" ")}
                 onClick={() => onDayClick(cell.dateKey)}
-                aria-label={`День ${cell.dateKey}`}
+                aria-label={t("dayAria", { date: cell.dateKey })}
               >
                 <span className={styles.dayNumber}>{dayNumber(cell.dateKey)}</span>
                 <div className={styles.events}>
@@ -87,7 +95,9 @@ export function CalendarMonthGrid({
                     />
                   ))}
                   {overflow > 0 ? (
-                    <span className={styles.overflow}>+{overflow} ещё</span>
+                    <span className={styles.overflow}>
+                      {t("moreEvents", { count: overflow })}
+                    </span>
                   ) : null}
                 </div>
               </button>

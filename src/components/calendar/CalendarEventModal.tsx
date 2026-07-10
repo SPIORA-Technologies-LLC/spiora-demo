@@ -1,12 +1,15 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { MeetingJoinButton } from "@/components/meet/MeetingJoinButton";
 import { MeetingGuestInviteLink } from "@/components/meet/MeetingGuestInviteLink";
 import { MeetingGuestHistory } from "@/components/meet/MeetingGuestHistory";
+import type { AppLocale } from "@/i18n/config";
+import { translateCalendarEventType } from "@/i18n/calendar-enums";
+import { resolveCalendarEventTitle } from "@/lib/calendar/demo-event-title";
 import type { SessionUser } from "@/lib/auth/types";
-import { CALENDAR_EVENT_TYPE_LABELS } from "@/lib/calendar/constants";
 import {
   formatEventTimeRange,
   formatScopeLabel,
@@ -53,6 +56,10 @@ export function CalendarEventModal({
   onEdit,
   onDelete,
 }: CalendarEventModalProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.modal");
+  const tDialogs = useTranslations("calendar.dialogs");
+  const tActions = useTranslations("actions");
   const { timeZone } = useCalendarTimeZone();
   const canEdit = canEditEvent(user, event);
   const canDelete = canDeleteEvent(user, event);
@@ -60,6 +67,7 @@ export function CalendarEventModal({
     event.scope === "personal" ? styles.scopePersonal : styles.scopeCompany;
   const videoMeeting = isVideoMeeting(event);
   const meetingPhase = videoMeeting ? getMeetingAccessPhase(event) : null;
+  const displayTitle = resolveCalendarEventTitle(event.title, locale);
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="calendar-event-title">
@@ -70,52 +78,52 @@ export function CalendarEventModal({
             <div className={styles.badges}>
               {videoMeeting ? (
                 <span className={[styles.typeBadge, styles.typeVideo].join(" ")}>
-                  {CALENDAR_EVENT_TYPE_LABELS.video_meeting}
+                  {translateCalendarEventType(locale, "video_meeting")}
                 </span>
               ) : null}
               <span className={[styles.scopeBadge, scopeClass].join(" ")}>
-                {formatScopeLabel(event.scope)}
+                {formatScopeLabel(event.scope, locale)}
               </span>
             </div>
             <h2 id="calendar-event-title" className={styles.title}>
-              {event.title}
+              {displayTitle}
             </h2>
           </div>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть">
+          <button type="button" className={styles.close} onClick={onClose} aria-label={tDialogs("closeAria")}>
             ×
           </button>
         </header>
 
         <dl className={styles.meta}>
           <div>
-            <dt>Время</dt>
-            <dd>{formatEventTimeRange(event, timeZone)}</dd>
+            <dt>{t("time")}</dt>
+            <dd>{formatEventTimeRange(event, timeZone, locale)}</dd>
           </div>
           {videoMeeting ? (
             <>
               <div>
-                <dt>Комната</dt>
+                <dt>{t("room")}</dt>
                 <dd className={styles.roomName}>{getMeetingRoomName(event.id)}</dd>
               </div>
               <div>
-                <dt>Участники</dt>
-                <dd>{formatParticipantNames(event, teamMembers)}</dd>
+                <dt>{t("participants")}</dt>
+                <dd>{formatParticipantNames(event, teamMembers, locale)}</dd>
               </div>
               <div>
-                <dt>Лимит гостей</dt>
-                <dd>{event.guestMaxCount ?? "Без лимита"}</dd>
+                <dt>{t("guestLimit")}</dt>
+                <dd>{event.guestMaxCount ?? t("noGuestLimit")}</dd>
               </div>
               <div>
-                <dt>Пароль для гостей</dt>
-                <dd>{event.guestAccessPasswordSet ? "Установлен" : "Не задан"}</dd>
+                <dt>{t("guestPassword")}</dt>
+                <dd>{event.guestAccessPasswordSet ? t("passwordSet") : t("passwordNotSet")}</dd>
               </div>
               <div>
-                <dt>Зал ожидания</dt>
-                <dd>{event.guestWaitingRoom ? "Включён для гостей" : "Выключен"}</dd>
+                <dt>{t("waitingRoom")}</dt>
+                <dd>{event.guestWaitingRoom ? t("waitingRoomOn") : t("waitingRoomOff")}</dd>
               </div>
               {event.linkedClientId ? (
                 <div>
-                  <dt>Клиент</dt>
+                  <dt>{t("client")}</dt>
                   <dd>
                     <a
                       className={styles.clientLink}
@@ -127,7 +135,7 @@ export function CalendarEventModal({
                 </div>
               ) : null}
               <div>
-                <dt>Статус</dt>
+                <dt>{t("status")}</dt>
                 <dd>
                   <span
                     className={[
@@ -137,7 +145,7 @@ export function CalendarEventModal({
                       .filter(Boolean)
                       .join(" ")}
                   >
-                    {meetingPhase ? formatMeetingStatusLabel(meetingPhase) : "—"}
+                    {meetingPhase ? formatMeetingStatusLabel(meetingPhase, locale) : "—"}
                   </span>
                 </dd>
               </div>
@@ -145,17 +153,17 @@ export function CalendarEventModal({
           ) : null}
           {event.location ? (
             <div>
-              <dt>Место</dt>
+              <dt>{t("location")}</dt>
               <dd>{event.location}</dd>
             </div>
           ) : null}
           <div>
-            <dt>Автор</dt>
+            <dt>{t("author")}</dt>
             <dd>{event.createdByName}</dd>
           </div>
           <div>
-            <dt>Напоминания</dt>
-            <dd>{event.sendReminders ? "Включены" : "Выключены"}</dd>
+            <dt>{t("reminders")}</dt>
+            <dd>{event.sendReminders ? t("remindersOn") : t("remindersOff")}</dd>
           </div>
         </dl>
 
@@ -170,7 +178,7 @@ export function CalendarEventModal({
         {event.description ? (
           <p className={styles.description}>{event.description}</p>
         ) : (
-          <p className={styles.noDescription}>Описание не указано.</p>
+          <p className={styles.noDescription}>{t("noDescription")}</p>
         )}
 
         <div className={styles.actions}>
@@ -183,7 +191,7 @@ export function CalendarEventModal({
                 onEdit(event);
               }}
             >
-              Редактировать
+              {tActions("edit")}
             </Button>
           ) : null}
           {canDelete ? (
@@ -195,11 +203,11 @@ export function CalendarEventModal({
                 onDelete(event);
               }}
             >
-              Удалить
+              {tActions("delete")}
             </Button>
           ) : null}
           <Button type="button" variant="ghost" onClick={onClose}>
-            Закрыть
+            {tActions("close")}
           </Button>
         </div>
       </Card>

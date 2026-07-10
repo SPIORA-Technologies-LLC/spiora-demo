@@ -6,6 +6,7 @@ import type { SessionUser } from "@/lib/auth/types";
 import type { TaskStats } from "@/lib/tasks/types";
 import type { TeamChatMessage } from "@/lib/team-chat/types";
 import { DashboardTeamMessages } from "@/components/dashboard/DashboardTeamMessages";
+import { DashboardUpcomingEvents } from "@/components/dashboard/DashboardUpcomingEvents";
 import { TeamOnlineBar } from "@/components/presence/TeamOnlineBar";
 import { Card } from "@/components/ui/Card";
 import styles from "./DashboardView.module.css";
@@ -141,6 +142,10 @@ export async function DashboardView({
           </h1>
           <p className={styles.heroSubtitle}>{t("hero.subtitle")}</p>
         </div>
+      </section>
+
+      <section className={styles.section} aria-labelledby="upcoming-events-section">
+        <DashboardUpcomingEvents userId={user.id} />
       </section>
 
       <section className={styles.section} aria-labelledby="tasks-heading">

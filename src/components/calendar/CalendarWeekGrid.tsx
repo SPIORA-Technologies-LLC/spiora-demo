@@ -1,6 +1,9 @@
 "use client";
 
 import { useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { getWeekdayNames } from "@/i18n/format";
 import { formatEventTimeRange } from "@/lib/calendar/format";
 import { formatDateKey } from "@/lib/calendar/range";
 import type { CalendarEvent } from "@/lib/calendar/types";
@@ -35,8 +38,9 @@ function WeekEventBlock({
   layout: WeekTimedLayout;
   onEventClick?: (event: CalendarEvent) => void;
 }) {
+  const locale = useLocale() as AppLocale;
   const { timeZone } = useCalendarTimeZone();
-  const timeRange = formatEventTimeRange(layout.event, timeZone);
+  const timeRange = formatEventTimeRange(layout.event, timeZone, locale);
   const isCompact = layout.heightRatio < 0.05;
   const scopeClass =
     layout.event.scope === "personal"
@@ -79,7 +83,13 @@ export function CalendarWeekGrid({
   onDayClick,
   onEventClick,
 }: CalendarWeekGridProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.weekGrid");
   const { timeZone } = useCalendarTimeZone();
+  const weekdayLabels = useMemo(
+    () => getWeekdayNames(locale, "short"),
+    [locale],
+  );
   const todayKey = useMemo(
     () => formatDateKey(new Date(), timeZone),
     [timeZone],
@@ -111,7 +121,7 @@ export function CalendarWeekGrid({
     <div className={styles.wrap} style={gridStyle}>
       <div className={styles.header}>
         <div className={styles.timeCorner} aria-hidden />
-        {columns.map((column) => (
+        {columns.map((column, index) => (
           <button
             key={column.dateKey}
             type="button"
@@ -122,9 +132,9 @@ export function CalendarWeekGrid({
               .filter(Boolean)
               .join(" ")}
             onClick={() => onDayClick(column.dateKey)}
-            aria-label={`День ${column.dateKey}`}
+            aria-label={t("dayAria", { date: column.dateKey })}
           >
-            <span className={styles.weekdayLabel}>{column.weekdayLabel}</span>
+            <span className={styles.weekdayLabel}>{weekdayLabels[index]}</span>
             <span className={styles.dayNumber}>{column.dayNumber}</span>
           </button>
         ))}
@@ -132,7 +142,7 @@ export function CalendarWeekGrid({
 
       {showAllDayRow ? (
         <div className={styles.allDayRow}>
-          <div className={styles.allDayLabel}>Весь день</div>
+          <div className={styles.allDayLabel}>{t("allDay")}</div>
           {columns.map((column) => (
             <div key={column.dateKey} className={styles.allDayCell}>
               {getAllDayEventsForWeekDay(events, column.dateKey, timeZone).map((event) => (

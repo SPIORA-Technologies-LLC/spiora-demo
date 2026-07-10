@@ -71,7 +71,7 @@ describe("validateFormValues", () => {
   it("rejects empty title", () => {
     const values = defaultFormValues(new Date("2026-06-20T12:00:00.000Z"));
     values.title = "   ";
-    assert.equal(validateFormValues(values), "Укажите название события");
+    assert.equal(validateFormValues(values), "titleRequired");
   });
 
   it("rejects end before start", () => {
@@ -79,10 +79,7 @@ describe("validateFormValues", () => {
     values.title = "Консультация";
     values.startTime = "12:00";
     values.endTime = "10:00";
-    assert.equal(
-      validateFormValues(values),
-      "Окончание не может быть раньше начала",
-    );
+    assert.equal(validateFormValues(values), "endBeforeStart");
   });
 });
 
@@ -137,10 +134,7 @@ describe("formValuesToCreatePayload", () => {
     values.title = "Синк";
     values.eventType = "video_meeting";
     values.allDay = true;
-    assert.equal(
-      validateFormValues(values),
-      "Видеовстреча не может быть событием на весь день",
-    );
+    assert.equal(validateFormValues(values), "videoAllDay");
   });
 });
 

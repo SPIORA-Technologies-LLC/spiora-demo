@@ -1,11 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { formatAppDate, getMonthNames } from "@/i18n/format";
 import {
   buildDateKey,
   buildYearOptions,
-  CALENDAR_MONTHS_RU,
   daysInMonth,
-  formatDateKeyRu,
   parseDateKey,
 } from "@/lib/calendar/datetime-input";
 import styles from "./CalendarDateTimeInput.module.css";
@@ -17,6 +19,10 @@ type CalendarDateSelectProps = {
 };
 
 export function CalendarDateSelect({ value, onChange, id }: CalendarDateSelectProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.dateSelect");
+  const monthNames = useMemo(() => getMonthNames(locale, "long"), [locale]);
+
   const parsed = parseDateKey(value) ?? {
     year: new Date().getFullYear(),
     month: new Date().getMonth() + 1,
@@ -28,6 +34,14 @@ export function CalendarDateSelect({ value, onChange, id }: CalendarDateSelectPr
     { length: daysInMonth(parsed.year, parsed.month) },
     (_, index) => index + 1,
   );
+
+  const hintDate = useMemo(() => {
+    const parts = parseDateKey(value);
+    if (!parts) {
+      return null;
+    }
+    return new Date(parts.year, parts.month - 1, parts.day);
+  }, [value]);
 
   function update(parts: Partial<typeof parsed>) {
     const next = { ...parsed, ...parts };
@@ -43,7 +57,7 @@ export function CalendarDateSelect({ value, onChange, id }: CalendarDateSelectPr
       <div className={styles.selectRow}>
         <select
           className={[styles.select, styles.selectDay].join(" ")}
-          aria-label="День"
+          aria-label={t("dayAria")}
           value={parsed.day}
           onChange={(event) => update({ day: Number(event.target.value) })}
         >
@@ -56,11 +70,11 @@ export function CalendarDateSelect({ value, onChange, id }: CalendarDateSelectPr
 
         <select
           className={[styles.select, styles.selectMonth].join(" ")}
-          aria-label="Месяц"
+          aria-label={t("monthAria")}
           value={parsed.month}
           onChange={(event) => update({ month: Number(event.target.value) })}
         >
-          {CALENDAR_MONTHS_RU.map((label, index) => (
+          {monthNames.map((label, index) => (
             <option key={label} value={index + 1}>
               {label}
             </option>
@@ -69,7 +83,7 @@ export function CalendarDateSelect({ value, onChange, id }: CalendarDateSelectPr
 
         <select
           className={[styles.select, styles.selectYear].join(" ")}
-          aria-label="Год"
+          aria-label={t("yearAria")}
           value={parsed.year}
           onChange={(event) => update({ year: Number(event.target.value) })}
         >
@@ -80,7 +94,17 @@ export function CalendarDateSelect({ value, onChange, id }: CalendarDateSelectPr
           ))}
         </select>
       </div>
-      <span className={styles.hint}>{formatDateKeyRu(value)}</span>
+      {hintDate ? (
+        <span className={styles.hint}>
+          {formatAppDate(hintDate, locale, {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })}
+        </span>
+      ) : (
+        <span className={styles.hint}>{value}</span>
+      )}
     </div>
   );
 }

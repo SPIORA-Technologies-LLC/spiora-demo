@@ -121,6 +121,7 @@ describe("formatParticipantNames", () => {
           { id: "daniel-cooper", name: "Злата" },
           { id: "emma-wilson", name: "Юля" },
         ],
+        "ru",
       ),
       "Вся команда",
     );

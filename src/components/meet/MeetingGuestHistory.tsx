@@ -1,26 +1,31 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { getIntlLocaleTag } from "@/i18n/format";
 import type { CalendarMeetingGuestAdmission } from "@/lib/calendar/types";
 import styles from "./MeetingGuestHistory.module.css";
-
-const STATUS_LABELS: Record<CalendarMeetingGuestAdmission["status"], string> = {
-  pending: "Ожидает",
-  admitted: "Подключился",
-  rejected: "Отклонён",
-  left: "Вышел",
-};
 
 type MeetingGuestHistoryProps = {
   eventId: string;
 };
 
 export function MeetingGuestHistory({ eventId }: MeetingGuestHistoryProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.meet.guestHistory");
   const [admissions, setAdmissions] = useState<CalendarMeetingGuestAdmission[]>(
     [],
   );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const statusLabels: Record<CalendarMeetingGuestAdmission["status"], string> = {
+    pending: t("statusPending"),
+    admitted: t("statusAdmitted"),
+    rejected: t("statusRejected"),
+    left: t("statusLeft"),
+  };
 
   const loadHistory = useCallback(async () => {
     setLoading(true);
@@ -36,26 +41,28 @@ export function MeetingGuestHistory({ eventId }: MeetingGuestHistoryProps) {
       };
 
       if (!response.ok) {
-        setError(payload.error ?? "Не удалось загрузить гостей");
+        setError(payload.error ?? t("loadFailed"));
         setAdmissions([]);
         return;
       }
 
       setAdmissions(payload.admissions ?? []);
     } catch {
-      setError("Не удалось загрузить гостей");
+      setError(t("loadFailed"));
       setAdmissions([]);
     } finally {
       setLoading(false);
     }
-  }, [eventId]);
+  }, [eventId, t]);
 
   useEffect(() => {
     void loadHistory();
   }, [loadHistory]);
 
+  const intlTag = getIntlLocaleTag(locale);
+
   if (loading) {
-    return <p className={styles.status}>Загрузка гостей…</p>;
+    return <p className={styles.status}>{t("loading")}</p>;
   }
 
   if (error) {
@@ -63,23 +70,21 @@ export function MeetingGuestHistory({ eventId }: MeetingGuestHistoryProps) {
   }
 
   if (admissions.length === 0) {
-    return (
-      <p className={styles.empty}>Пока никто не подключался по гостевой ссылке.</p>
-    );
+    return <p className={styles.empty}>{t("empty")}</p>;
   }
 
   return (
-    <section className={styles.section} aria-label="Гости по ссылке">
-      <h3 className={styles.title}>Гости по ссылке</h3>
+    <section className={styles.section} aria-label={t("sectionAria")}>
+      <h3 className={styles.title}>{t("title")}</h3>
       <ul className={styles.list}>
         {admissions.map((admission) => (
           <li key={admission.id} className={styles.item}>
             <span className={styles.name}>{admission.displayName}</span>
             <span className={styles.meta}>
-              {STATUS_LABELS[admission.status]}
+              {statusLabels[admission.status]}
               {admission.decidedAt
-                ? ` · ${new Date(admission.decidedAt).toLocaleString("ru-RU")}`
-                : ` · ${new Date(admission.createdAt).toLocaleString("ru-RU")}`}
+                ? ` · ${new Date(admission.decidedAt).toLocaleString(intlTag)}`
+                : ` · ${new Date(admission.createdAt).toLocaleString(intlTag)}`}
             </span>
           </li>
         ))}

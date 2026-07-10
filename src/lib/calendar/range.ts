@@ -1,3 +1,5 @@
+import type { AppLocale } from "@/i18n/config";
+import { getIntlLocaleTag } from "@/i18n/format";
 import { CALENDAR_TIMEZONE } from "./constants";
 import {
   getZonedParts,
@@ -174,11 +176,13 @@ export function formatToolbarLabel(
   view: CalendarViewMode,
   anchorDate: Date,
   timeZone: string = CALENDAR_TIMEZONE,
+  locale: AppLocale = "en",
 ): string {
+  const tag = getIntlLocaleTag(locale);
   const anchorKey = formatDateKey(anchorDate, timeZone);
 
   if (view === "day") {
-    return new Intl.DateTimeFormat("ru-RU", {
+    return new Intl.DateTimeFormat(tag, {
       timeZone: timeZone,
       weekday: "long",
       day: "numeric",
@@ -192,12 +196,12 @@ export function formatToolbarLabel(
     const sunday = addDaysToDateKey(monday, 6, timeZone);
     const mondayDate = startOfZonedDay(monday, timeZone);
     const sundayDate = startOfZonedDay(sunday, timeZone);
-    const fromLabel = new Intl.DateTimeFormat("ru-RU", {
+    const fromLabel = new Intl.DateTimeFormat(tag, {
       timeZone: timeZone,
       day: "numeric",
       month: "short",
     }).format(mondayDate);
-    const toLabel = new Intl.DateTimeFormat("ru-RU", {
+    const toLabel = new Intl.DateTimeFormat(tag, {
       timeZone: timeZone,
       day: "numeric",
       month: "short",
@@ -206,7 +210,7 @@ export function formatToolbarLabel(
     return `${fromLabel} – ${toLabel}`;
   }
 
-  return new Intl.DateTimeFormat("ru-RU", {
+  return new Intl.DateTimeFormat(tag, {
     timeZone: timeZone,
     month: "long",
     year: "numeric",

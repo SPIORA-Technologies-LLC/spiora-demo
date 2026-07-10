@@ -1,4 +1,9 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 import { CALENDAR_SCOPE_COLORS } from "@/lib/calendar/constants";
+import { translateCalendarScope } from "@/i18n/calendar-enums";
+import type { AppLocale } from "@/i18n/config";
 import type { CalendarLayers } from "@/lib/calendar/layers";
 import styles from "./CalendarLayerFilters.module.css";
 
@@ -11,6 +16,9 @@ export function CalendarLayerFilters({
   layers,
   onChange,
 }: CalendarLayerFiltersProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.layers");
+
   const bothOff = !layers.personal && !layers.company;
 
   return (
@@ -25,8 +33,8 @@ export function CalendarLayerFilters({
             }
           />
           <span>
-            <strong>Мои события</strong>
-            <small>Личный календарь</small>
+            <strong>{t("personalTitle")}</strong>
+            <small>{t("personalSubtitle")}</small>
           </span>
         </label>
 
@@ -39,32 +47,32 @@ export function CalendarLayerFilters({
             }
           />
           <span>
-            <strong>События компании</strong>
-            <small>Видны всей команде</small>
+            <strong>{t("companyTitle")}</strong>
+            <small>{t("companySubtitle")}</small>
           </span>
         </label>
 
         {bothOff ? (
           <p className={styles.warning} role="status">
-            Выберите хотя бы один слой: Мои события или События компании
+            {t("selectAtLeastOne")}
           </p>
         ) : null}
       </div>
 
-      <div className={styles.legend} aria-label="Легенда">
+      <div className={styles.legend} aria-label={t("legendAria")}>
         <span className={styles.legendItem}>
           <span
             className={styles.legendDot}
             style={{ backgroundColor: CALENDAR_SCOPE_COLORS.personal }}
           />
-          Личное
+          {translateCalendarScope(locale, "personal")}
         </span>
         <span className={styles.legendItem}>
           <span
             className={styles.legendDot}
             style={{ backgroundColor: CALENDAR_SCOPE_COLORS.company }}
           />
-          Компания
+          {translateCalendarScope(locale, "company")}
         </span>
       </div>
     </div>

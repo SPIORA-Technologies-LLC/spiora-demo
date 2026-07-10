@@ -1,7 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
 import { useCalendarTimeZone } from "@/components/calendar/CalendarTimeZoneContext";
+import { resolveCalendarEventTitle } from "@/lib/calendar/demo-event-title";
 import { buildGuestMeetingInviteText } from "@/lib/calendar/meeting-guest-invite-message";
 import {
   buildMailtoShareUrl,
@@ -20,6 +23,8 @@ export function MeetingGuestInviteLink({
   event,
   canRegenerate,
 }: MeetingGuestInviteLinkProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("calendar.meet.guestInvite");
   const { timeZone } = useCalendarTimeZone();
   const [guestJoinUrl, setGuestJoinUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -29,6 +34,8 @@ export function MeetingGuestInviteLink({
   const [linkedClientEmail, setLinkedClientEmail] = useState<string | null>(null);
   const [linkedClientPhone, setLinkedClientPhone] = useState<string | null>(null);
 
+  const displayTitle = resolveCalendarEventTitle(event.title, locale);
+
   const inviteText = useMemo(() => {
     if (!guestJoinUrl) {
       return "";
@@ -37,8 +44,9 @@ export function MeetingGuestInviteLink({
     return buildGuestMeetingInviteText(event, guestJoinUrl, {
       recipientName: event.linkedClientName,
       timeZone,
+      locale,
     });
-  }, [event, guestJoinUrl, timeZone]);
+  }, [event, guestJoinUrl, locale, timeZone]);
 
   const loadInvite = useCallback(async () => {
     setLoading(true);
@@ -54,19 +62,19 @@ export function MeetingGuestInviteLink({
       };
 
       if (!response.ok) {
-        setError(payload.error ?? "Не удалось получить ссылку");
+        setError(payload.error ?? t("loadFailed"));
         setGuestJoinUrl(null);
         return;
       }
 
       setGuestJoinUrl(payload.guestJoinUrl ?? null);
     } catch {
-      setError("Не удалось получить ссылку");
+      setError(t("loadFailed"));
       setGuestJoinUrl(null);
     } finally {
       setLoading(false);
     }
-  }, [event.id]);
+  }, [event.id, t]);
 
   useEffect(() => {
     void loadInvite();
@@ -101,10 +109,10 @@ export function MeetingGuestInviteLink({
     }
 
     return buildMailtoShareUrl(inviteText, {
-      subject: `Приглашение на встречу: ${event.title}`,
+      subject: t("emailSubject", { title: displayTitle }),
       recipientEmail: linkedClientEmail,
     });
-  }, [event.title, inviteText, linkedClientEmail]);
+  }, [displayTitle, inviteText, linkedClientEmail, t]);
 
   const whatsAppUrl = useMemo(() => {
     if (!inviteText) {
@@ -132,7 +140,7 @@ export function MeetingGuestInviteLink({
       setCopied(true);
       window.setTimeout(() => setCopied(false), 2000);
     } catch {
-      window.prompt("Скопируйте приглашение для клиента:", inviteText);
+      window.prompt(t("copyPrompt"), inviteText);
     }
   }
 
@@ -141,9 +149,7 @@ export function MeetingGuestInviteLink({
       return;
     }
 
-    const confirmed = window.confirm(
-      "Создать новую ссылку? Старая перестанет работать.",
-    );
+    const confirmed = window.confirm(t("regenerateConfirm"));
     if (!confirmed) {
       return;
     }
@@ -162,30 +168,27 @@ export function MeetingGuestInviteLink({
       };
 
       if (!response.ok) {
-        setError(payload.error ?? "Не удалось обновить ссылку");
+        setError(payload.error ?? t("regenerateFailed"));
         return;
       }
 
       setGuestJoinUrl(payload.guestJoinUrl ?? null);
     } catch {
-      setError("Не удалось обновить ссылку");
+      setError(t("regenerateFailed"));
     } finally {
       setRegenerating(false);
     }
   }
 
   return (
-    <section className={styles.section} aria-label="Ссылка для клиента">
+    <section className={styles.section} aria-label={t("sectionAria")}>
       <div className={styles.header}>
-        <h3 className={styles.title}>Ссылка для клиента</h3>
-        <p className={styles.hint}>
-          Скопируйте готовое приглашение с названием, временем и ссылкой — и
-          отправьте клиенту в мессенджер или email. Регистрация не нужна.
-        </p>
+        <h3 className={styles.title}>{t("title")}</h3>
+        <p className={styles.hint}>{t("hint")}</p>
       </div>
 
       {loading ? (
-        <p className={styles.status}>Загрузка ссылки…</p>
+        <p className={styles.status}>{t("loading")}</p>
       ) : error ? (
         <p className={styles.error}>{error}</p>
       ) : guestJoinUrl ? (
@@ -195,7 +198,7 @@ export function MeetingGuestInviteLink({
             value={inviteText}
             readOnly
             rows={10}
-            aria-label="Текст приглашения для клиента"
+            aria-label={t("inviteAria")}
             onFocus={(focusEvent) => focusEvent.currentTarget.select()}
           />
           <div className={styles.actionRow}>
@@ -204,7 +207,7 @@ export function MeetingGuestInviteLink({
               className={styles.copyButton}
               onClick={() => void handleCopyInvite()}
             >
-              {copied ? "Скопировано" : "Копировать приглашение"}
+              {copied ? t("copied") : t("copyInvite")}
             </button>
             <a
               className={styles.shareButton}
@@ -216,7 +219,7 @@ export function MeetingGuestInviteLink({
                 }
               }}
             >
-              По email
+              {t("email")}
             </a>
             <a
               className={`${styles.shareButton} ${styles.shareButtonWhatsapp}`}
@@ -230,7 +233,7 @@ export function MeetingGuestInviteLink({
                 }
               }}
             >
-              В WhatsApp
+              {t("whatsapp")}
             </a>
             <a
               className={`${styles.shareButton} ${styles.shareButtonTelegram}`}
@@ -244,7 +247,7 @@ export function MeetingGuestInviteLink({
                 }
               }}
             >
-              В Telegram
+              {t("telegram")}
             </a>
           </div>
         </>
@@ -258,13 +261,9 @@ export function MeetingGuestInviteLink({
             onClick={() => void handleRegenerate()}
             disabled={regenerating}
           >
-            {regenerating ? "Обновление…" : "Создать новую ссылку"}
+            {regenerating ? t("regenerating") : t("regenerate")}
           </button>
-          <p className={styles.regenerateHint}>
-            Отзывает текущую ссылку и создаёт другую. Старая перестанет работать —
-            используйте, если ссылку нужно заменить или она могла попасть не тому
-            человеку.
-          </p>
+          <p className={styles.regenerateHint}>{t("regenerateHint")}</p>
         </div>
       ) : null}
     </section>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -158,6 +159,7 @@ type CalendarMeetRoomProps = {
 };
 
 export function CalendarMeetRoom({ event }: CalendarMeetRoomProps) {
+  const tMeet = useTranslations("calendar.meet");
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDockMode = isMeetingDockMode(searchParams);
@@ -301,7 +303,7 @@ export function CalendarMeetRoom({ event }: CalendarMeetRoomProps) {
       <div className={styles.page}>
         <div className={styles.loadingCard}>
           <div className={styles.spinner} aria-hidden="true" />
-          <p>Подключение к видеовстрече…</p>
+          <p>{tMeet("connecting")}</p>
         </div>
       </div>
     );
@@ -324,7 +326,7 @@ export function CalendarMeetRoom({ event }: CalendarMeetRoomProps) {
       <div className={styles.page}>
         <div className={styles.loadingCard}>
           <div className={styles.spinner} aria-hidden="true" />
-          <p>Подключение к видеовстрече…</p>
+          <p>{tMeet("connecting")}</p>
         </div>
       </div>
     );

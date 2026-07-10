@@ -7,6 +7,7 @@ import { isVideoMeeting } from "@/lib/calendar/meeting";
 import type { ReminderOffsetMinutes } from "@/lib/calendar/constants";
 import { getDeletedUserIds } from "@/lib/team/store";
 import { TASK_STATUS_LABELS, type TaskStatus } from "@/lib/tasks/types";
+import { getRequestLocale } from "@/i18n/api-messages";
 import {
   buildCalendarReminderNotificationContent,
   buildVideoMeetingInviteNotificationContent,
@@ -291,9 +292,11 @@ export async function notifyCalendarReminder(params: {
   offsetMinutes: ReminderOffsetMinutes;
   userId: string;
 }): Promise<Notification> {
+  const locale = await getRequestLocale();
   const content = buildCalendarReminderNotificationContent(
     params.event,
     params.offsetMinutes,
+    locale,
   );
 
   return createNotificationForUser(params.userId, {
@@ -327,7 +330,11 @@ export async function notifyVideoMeetingInvite(params: {
     return;
   }
 
-  const content = buildVideoMeetingInviteNotificationContent(params.event);
+  const locale = await getRequestLocale();
+  const content = buildVideoMeetingInviteNotificationContent(
+    params.event,
+    locale,
+  );
 
   await createNotificationsForTeam(
     {

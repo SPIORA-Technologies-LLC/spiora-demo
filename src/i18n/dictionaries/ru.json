@@ -76,7 +76,20 @@
     "soundOff": "🔕 Звук выкл.",
     "soundOnTitle": "Отключить звук уведомлений",
     "soundOffTitle": "Включить звук уведомлений",
-    "closeItem": "Закрыть уведомление"
+    "closeItem": "Закрыть уведомление",
+    "types": {
+      "team_chat": "Сообщение в чате",
+      "task_new": "Новая задача",
+      "task_status": "Статус задачи",
+      "task_completed": "Задача выполнена",
+      "task_pending_approval": "Задача на проверке",
+      "task_revision": "Доработка задачи",
+      "client_new": "Новый клиент",
+      "consultation_assigned": "Консультация",
+      "calendar_reminder": "Напоминание календаря",
+      "calendar_video_invite": "Видеовстреча",
+      "system": "Системное"
+    }
   },
   "language": {
     "switcherLabel": "Язык",
@@ -123,6 +136,14 @@
     "quickActions": {
       "createTask": "Создать задачу",
       "openAiWorkspace": "Открыть AI Workspace"
+    },
+    "upcomingEvents": {
+      "title": "Ближайшие события",
+      "viewCalendar": "Открыть календарь",
+      "loading": "Загрузка событий…",
+      "empty": "Нет предстоящих событий",
+      "error": "Не удалось загрузить события",
+      "videoBadge": "Видеовстреча"
     },
     "teamMessages": {
       "voice": "Голосовое сообщение",
@@ -237,6 +258,286 @@
         "proposal": "Подготовь коммерческое предложение",
         "managerReport": "Сделай краткий отчёт для менеджера"
       }
+    }
+  },
+  "calendar": {
+    "pageTitle": "Календарь",
+    "loading": "Загрузка…",
+    "loadingEvents": "Загрузка событий…",
+    "selectLayerToLoad": "Выберите хотя бы один слой событий, чтобы загрузить календарь.",
+    "toolbar": {
+      "prevAria": "Назад",
+      "nextAria": "Вперёд",
+      "today": "Сегодня",
+      "viewModeAria": "Режим просмотра",
+      "createEvent": "+ Создать событие",
+      "createDisabledTitle": "Создание событий будет доступно в следующем релизе",
+      "yourTime": "Ваше время: {label}",
+      "views": {
+        "day": "День",
+        "week": "Неделя",
+        "month": "Месяц"
+      }
+    },
+    "layers": {
+      "personalTitle": "Мои события",
+      "personalSubtitle": "Личный календарь",
+      "companyTitle": "События компании",
+      "companySubtitle": "Видны всей команде",
+      "selectAtLeastOne": "Выберите хотя бы один слой: Мои события или События компании",
+      "legendAria": "Легенда"
+    },
+    "empty": {
+      "title": "Нет событий на этот период",
+      "text": "Создайте личное или корпоративное событие, чтобы оно появилось в календаре.",
+      "createEvent": "+ Создать событие"
+    },
+    "agenda": {
+      "allDay": "Весь день",
+      "allDayEventsAria": "События на весь день",
+      "timedEventsAria": "События по времени",
+      "daySchedule": "Расписание дня"
+    },
+    "monthGrid": {
+      "ariaLabel": "Календарь месяца",
+      "dayAria": "День {date}",
+      "moreEvents": "+{count} ещё"
+    },
+    "weekGrid": {
+      "dayAria": "День {date}",
+      "allDay": "Весь день"
+    },
+    "dialogs": {
+      "newEvent": "Новое событие",
+      "editEvent": "Редактировать событие",
+      "deleteEvent": "Удалить событие?",
+      "confirmDelete": "Вы уверены?",
+      "closeAria": "Закрыть"
+    },
+    "toasts": {
+      "loadFailed": "Не удалось загрузить события",
+      "eventNotFound": "Событие не найдено",
+      "openFailed": "Не удалось открыть событие",
+      "createFailed": "Не удалось создать событие",
+      "updateFailed": "Не удалось обновить событие",
+      "deleteFailed": "Не удалось удалить событие",
+      "insufficientEditRights": "Недостаточно прав для редактирования",
+      "insufficientDeleteRights": "Недостаточно прав для удаления",
+      "created": "Событие создано",
+      "updated": "Событие обновлено",
+      "deleted": "Событие удалено",
+      "saveFailed": "Не удалось сохранить событие"
+    },
+    "form": {
+      "scopeLegend": "Тип события",
+      "scopeType": "Тип",
+      "formatLegend": "Формат встречи",
+      "formatType": "Формат",
+      "videoHint": "Комната создаётся на платформе. После сохранения в карточке встречи появится ссылка для клиентов без аккаунта.",
+      "inviteLegend": "Кого пригласить",
+      "participantsLegend": "Участники",
+      "participantsHint": "Вы участвуете автоматически. Отметьте коллег, которым будет доступна встреча и напоминание.",
+      "waitingRoom": "Зал ожидания для гостей по ссылке",
+      "guestMax": "Максимум гостей по ссылке",
+      "guestPassword": "Пароль для гостей (необязательно)",
+      "guestPasswordEditPlaceholder": "Оставьте пустым, чтобы не менять",
+      "guestPasswordCreatePlaceholder": "Без пароля — вход только по ссылке",
+      "title": "Название *",
+      "titlePlaceholder": "Например: Консультация с клиентом",
+      "description": "Описание",
+      "descriptionPlaceholder": "Дополнительные детали…",
+      "allDay": "Весь день",
+      "when": "Когда",
+      "start": "Начало *",
+      "end": "Окончание *",
+      "location": "Место",
+      "locationPlaceholder": "Офис, онлайн, адрес…",
+      "reminders": "Напоминания за 24 часа и за 1 час",
+      "remindersHint": "Уведомление в колокольчике. Только на платформе.",
+      "saving": "Сохранение…"
+    },
+    "modal": {
+      "time": "Время",
+      "room": "Комната",
+      "participants": "Участники",
+      "guestLimit": "Лимит гостей",
+      "noGuestLimit": "Без лимита",
+      "guestPassword": "Пароль для гостей",
+      "passwordSet": "Установлен",
+      "passwordNotSet": "Не задан",
+      "waitingRoom": "Зал ожидания",
+      "waitingRoomOn": "Включён для гостей",
+      "waitingRoomOff": "Выключен",
+      "client": "Клиент",
+      "status": "Статус",
+      "location": "Место",
+      "author": "Автор",
+      "reminders": "Напоминания",
+      "remindersOn": "Включены",
+      "remindersOff": "Выключены",
+      "noDescription": "Описание не указано."
+    },
+    "clientPicker": {
+      "label": "Клиент (опционально)",
+      "placeholder": "Начните вводить имя клиента",
+      "clear": "Сбросить",
+      "searching": "Поиск…",
+      "notFound": "Клиенты не найдены",
+      "help": "Привязка помогает быстро отправить ссылку клиенту и видеть контекст встречи в CRM."
+    },
+    "dateSelect": {
+      "dayAria": "День",
+      "monthAria": "Месяц",
+      "yearAria": "Год"
+    },
+    "timeSelect": {
+      "hoursAria": "Часы",
+      "minutesAria": "Минуты"
+    },
+    "placeholder": {
+      "title": "Режим «{view}»",
+      "subtitle": "Сетка просмотра появится в следующих релизах. Сейчас загружено {count, plural, one {# событие} few {# события} many {# событий} other {# события}}."
+    },
+    "enums": {
+      "scope": {
+        "personal": "Личное",
+        "company": "Компания"
+      },
+      "eventType": {
+        "general": "Обычное событие",
+        "video_meeting": "Видеовстреча"
+      },
+      "inviteMode": {
+        "all_team": "Вся команда",
+        "selected": "Выбранные"
+      },
+      "meetingStatus": {
+        "waiting": "Ожидание",
+        "open": "Открыта",
+        "closed": "Завершена"
+      }
+    },
+    "validation": {
+      "titleRequired": "Укажите название события",
+      "videoAllDay": "Видеовстреча не может быть событием на весь день",
+      "endBeforeStart": "Окончание не может быть раньше начала",
+      "invalidDateTime": "Некорректная дата или время"
+    },
+    "reminders": {
+      "dayBefore": "За 24 часа",
+      "hourBefore": "За 1 час"
+    },
+    "participants": {
+      "allTeam": "Вся команда",
+      "organizerOnly": "Только организатор"
+    },
+    "notifications": {
+      "videoInviteTitle": "Приглашение на видеовстречу",
+      "joinAction": "Присоединиться",
+      "upcomingMeeting": "Встреча через 1 час",
+      "deadlineTomorrow": "Дедлайн завтра",
+      "videoStartsSoon": "Внутренняя видеовстреча скоро начнётся"
+    },
+    "meet": {
+      "connecting": "Подключение к видеовстрече…",
+      "joinLabel": "Присоединиться к видеовстрече",
+      "joinAria": "Присоединиться к видеовстрече",
+      "opensIn15Min": "Откроется за 15 мин до начала ({time})",
+      "meetingEnded": "Встреча завершена",
+      "accessGate": {
+        "waitingTitle": "Встреча ещё не открыта",
+        "waitingBody": "Вход возможен за 15 минут до начала.",
+        "waitingBodyAt": "Вход возможен за 15 минут до начала. Откроется в {time}.",
+        "closedTitle": "Встреча завершена",
+        "closedBody": "Окно доступа закрыто (окончание + 15 мин).",
+        "notFoundTitle": "Событие не найдено",
+        "notFoundBody": "Видеовстреча недоступна или у вас нет доступа.",
+        "notVideoTitle": "Это не видеовстреча",
+        "notVideoBody": "Присоединиться можно только к событиям типа «Видеовстреча».",
+        "forbiddenTitle": "Доступ запрещён",
+        "forbiddenBody": "Видеовстречи доступны только сотрудникам платформы.",
+        "notConfiguredTitle": "Видеовстречи не настроены",
+        "notConfiguredBody": "LiveKit не подключён на сервере. Обратитесь к владельцу платформы.",
+        "connectErrorTitle": "Не удалось подключиться",
+        "connectErrorBody": "Проверьте интернет и попробуйте снова из карточки события.",
+        "backToEvent": "Вернуться к событию",
+        "openInCalendar": "Открыть событие в календаре",
+        "goToCalendar": "Перейти в календарь",
+        "openEvent": "Открыть событие"
+      },
+      "guestInvite": {
+        "sectionAria": "Ссылка для клиента",
+        "title": "Ссылка для клиента",
+        "hint": "Скопируйте готовое приглашение с названием, временем и ссылкой — и отправьте клиенту в мессенджер или email. Регистрация не нужна.",
+        "loading": "Загрузка ссылки…",
+        "loadFailed": "Не удалось получить ссылку",
+        "inviteAria": "Текст приглашения для клиента",
+        "copied": "Скопировано",
+        "copyInvite": "Копировать приглашение",
+        "copyPrompt": "Скопируйте приглашение для клиента:",
+        "email": "По email",
+        "whatsapp": "В WhatsApp",
+        "telegram": "В Telegram",
+        "regenerateConfirm": "Создать новую ссылку? Старая перестанет работать.",
+        "regenerateFailed": "Не удалось обновить ссылку",
+        "regenerating": "Обновление…",
+        "regenerate": "Создать новую ссылку",
+        "regenerateHint": "Отзывает текущую ссылку и создаёт другую. Старая перестанет работать — используйте, если ссылку нужно заменить или она могла попасть не тому человеку.",
+        "emailSubject": "Приглашение на встречу: {title}"
+      },
+      "guestHistory": {
+        "loading": "Загрузка гостей…",
+        "loadFailed": "Не удалось загрузить гостей",
+        "empty": "Пока никто не подключался по гостевой ссылке.",
+        "sectionAria": "Гости по ссылке",
+        "title": "Гости по ссылке",
+        "statusPending": "Ожидает",
+        "statusAdmitted": "Подключился",
+        "statusRejected": "Отклонён",
+        "statusLeft": "Вышел"
+      },
+      "inviteMessage": {
+        "greetingMorning": "Доброе утро",
+        "greetingAfternoon": "Добрый день",
+        "greetingEvening": "Добрый вечер",
+        "salutation": "{greeting}, {name}!",
+        "salutationNoName": "{greeting}!",
+        "body": "Приглашаем вас на видеовстречу «{title}».",
+        "when": "Когда: {schedule}",
+        "joinHint": "Подключиться можно по ссылке (регистрация не нужна):",
+        "closing": "До встречи!",
+        "team": "Команда {company}",
+        "allDay": "{date}, весь день",
+        "schedule": "{date}, {time}"
+      }
+    },
+    "demoEvents": {
+      "teamMeeting": "Командное совещание",
+      "clientConsultation": "Консультация с клиентом",
+      "documentReview": "Проверка документов",
+      "internalVideoMeeting": "Внутренняя видеовстреча",
+      "crmReview": "Обзор CRM",
+      "aiWorkflowPlanning": "Планирование AI-процессов",
+      "residencePermitSubmission": "Подача заявления на ВНЖ",
+      "partnerSync": "Синхронизация с партнёром",
+      "caseStrategySession": "Стратегия по делу",
+      "clientFollowUpCall": "Повторный звонок клиенту",
+      "weeklyOperationsStandup": "Еженедельный операционный стендап",
+      "visaDocumentChecklist": "Чеклист визовых документов",
+      "immigrationPolicyBriefing": "Брифинг по миграционной политике",
+      "clientOnboardingWorkshop": "Воркшоп по онбордингу клиента",
+      "personalPlanningBlock": "Личный блок планирования",
+      "teamRetrospective": "Ретроспектива команды",
+      "demoEnvironmentReview": "Проверка демо-среды",
+      "companyOffsiteDay": "Корпоративный выездной день",
+      "nextWeekKickoff": "Старт следующей недели",
+      "clientPortfolioReview": "Обзор портфеля клиентов",
+      "complianceDeadlinePrep": "Подготовка к дедлайну compliance",
+      "externalPartnerCall": "Звонок внешнему партнёру",
+      "quarterlyPlanning": "Квартальное планирование",
+      "privateFocusTime": "Личное время для фокуса",
+      "knowledgeBaseReview": "Обзор базы знаний",
+      "upcomingMeetingPrep": "Подготовка к предстоящей встрече"
     }
   },
   "statuses": {

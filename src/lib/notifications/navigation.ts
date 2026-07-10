@@ -1,3 +1,4 @@
+import type { AppLocale } from "@/i18n/config";
 import type { NotificationType } from "@/lib/notifications/types";
 import { decodeCalendarReminderMessage } from "./calendar-reminder-copy";
 
@@ -91,10 +92,12 @@ export function getNotificationHref(
 
 export function getNotificationActionLabel(
   type: NotificationType,
-  message?: string,
+  message: string | undefined,
+  locale: AppLocale,
+  joinLabel: string,
 ): string | null {
   if (type === "calendar_video_invite") {
-    return "Присоединиться";
+    return joinLabel;
   }
 
   if (type !== "calendar_reminder") {
@@ -102,7 +105,7 @@ export function getNotificationActionLabel(
   }
 
   const { isVideoMeeting } = decodeCalendarReminderMessage(message ?? "");
-  return isVideoMeeting ? "Присоединиться" : null;
+  return isVideoMeeting ? joinLabel : null;
 }
 
 export function pathnameMatchesNotificationSection(

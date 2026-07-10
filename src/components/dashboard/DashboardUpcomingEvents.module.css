@@ -1,0 +1,154 @@
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.headingRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.title {
+  margin: 0;
+  font-family: Sora, sans-serif;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: Inter, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #93c5fd;
+  text-decoration: none;
+}
+
+.link:hover {
+  color: #dbeafe;
+}
+
+.state {
+  margin: 0;
+  padding: 1rem 0;
+  font-family: Inter, sans-serif;
+  font-size: 0.9375rem;
+  color: #94a3b8;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.itemLink {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+.itemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.itemLink:hover .itemCard {
+  border-color: rgba(148, 163, 184, 0.35);
+  background: rgba(30, 41, 59, 0.55);
+}
+
+.itemTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.time {
+  font-family: Inter, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.videoBadge,
+.scopeBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-family: Inter, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.videoBadge {
+  background: rgba(99, 102, 241, 0.22);
+  color: #c7d2fe;
+}
+
+.scopeBadge {
+  color: #f8fafc;
+}
+
+.scopePersonal {
+  background: rgba(59, 130, 246, 0.88);
+}
+
+.scopeCompany {
+  background: rgba(34, 197, 94, 0.88);
+}
+
+.eventTitle {
+  font-family: Sora, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventType {
+  font-family: Inter, sans-serif;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+  .itemTop {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .eventTitle {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}

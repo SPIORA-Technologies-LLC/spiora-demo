@@ -1,6 +1,9 @@
 "use client";
 
+import { useLocale } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
 import { CALENDAR_SCOPE_COLORS } from "@/lib/calendar/constants";
+import { resolveCalendarEventTitle } from "@/lib/calendar/demo-event-title";
 import {
   formatEventTimeRange,
   formatScopeLabel,
@@ -20,10 +23,13 @@ export function CalendarEventChip({
   variant = "agenda",
   onClick,
 }: CalendarEventChipProps) {
+  const locale = useLocale() as AppLocale;
   const { timeZone } = useCalendarTimeZone();
   const scopeClass =
     event.scope === "personal" ? styles.personal : styles.company;
-  const timeRange = formatEventTimeRange(event, timeZone);
+  const timeRange = formatEventTimeRange(event, timeZone, locale);
+  const scopeLabel = formatScopeLabel(event.scope, locale);
+  const displayTitle = resolveCalendarEventTitle(event.title, locale);
 
   if (variant === "month") {
     return (
@@ -34,10 +40,10 @@ export function CalendarEventChip({
           clickEvent.stopPropagation();
           onClick?.(event);
         }}
-        aria-label={`${event.title}, ${formatScopeLabel(event.scope)}`}
-        title={event.title}
+        aria-label={`${displayTitle}, ${scopeLabel}`}
+        title={displayTitle}
       >
-        <span className={styles.monthTitle}>{event.title}</span>
+        <span className={styles.monthTitle}>{displayTitle}</span>
       </button>
     );
   }
@@ -47,12 +53,12 @@ export function CalendarEventChip({
       type="button"
       className={[styles.chip, scopeClass].join(" ")}
       onClick={() => onClick?.(event)}
-      aria-label={`${event.title}, ${formatScopeLabel(event.scope)}, ${timeRange}`}
+      aria-label={`${displayTitle}, ${scopeLabel}, ${timeRange}`}
     >
       <span className={styles.time}>{timeRange}</span>
       <span className={styles.body}>
-        <span className={styles.title}>{event.title}</span>
-        <span className={styles.scope}>{formatScopeLabel(event.scope)}</span>
+        <span className={styles.title}>{displayTitle}</span>
+        <span className={styles.scope}>{scopeLabel}</span>
       </span>
       <span
         className={styles.accent}

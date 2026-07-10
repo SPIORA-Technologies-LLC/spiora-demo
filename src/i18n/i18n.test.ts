@@ -20,6 +20,11 @@ import {
   translateMessage,
 } from "./messages.ts";
 import { translateClientStatus } from "./statuses.ts";
+import {
+  translateCalendarEventType,
+  translateCalendarScope,
+  translateFormValidation,
+} from "./calendar-enums.ts";
 
 describe("i18n config", () => {
   it("использует English по умолчанию", () => {
@@ -231,6 +236,79 @@ describe("core modules i18n — locale preservation", () => {
     assert.equal(
       buildPreserveRouteUrl("/clients", "search=ann&page=2"),
       "/clients?search=ann&page=2",
+    );
+  });
+});
+
+describe("calendar i18n — Month View", () => {
+  it("возвращает английские month labels", () => {
+    assert.equal(translateMessage("en", "calendar.pageTitle"), "Calendar");
+    assert.equal(translateMessage("en", "calendar.toolbar.today"), "Today");
+    assert.equal(translateMessage("en", "calendar.toolbar.views.month"), "Month");
+    assert.equal(translateMessage("en", "calendar.monthGrid.ariaLabel"), "Month calendar");
+  });
+
+  it("возвращает русские month labels", () => {
+    assert.equal(translateMessage("ru", "calendar.pageTitle"), "Календарь");
+    assert.equal(translateMessage("ru", "calendar.toolbar.views.month"), "Месяц");
+    assert.equal(translateMessage("ru", "calendar.monthGrid.moreEvents"), "+{count} ещё");
+  });
+});
+
+describe("calendar i18n — Day View", () => {
+  it("возвращает английские day labels", () => {
+    assert.equal(translateMessage("en", "calendar.toolbar.views.day"), "Day");
+    assert.equal(translateMessage("en", "calendar.agenda.daySchedule"), "Day schedule");
+    assert.equal(translateMessage("en", "calendar.agenda.allDay"), "All day");
+  });
+
+  it("возвращает русские day labels", () => {
+    assert.equal(translateMessage("ru", "calendar.toolbar.views.day"), "День");
+    assert.equal(translateMessage("ru", "calendar.agenda.allDay"), "Весь день");
+  });
+});
+
+describe("calendar i18n — Event Modal & Form", () => {
+  it("возвращает английские create/edit/delete labels", () => {
+    assert.equal(translateMessage("en", "calendar.dialogs.newEvent"), "New event");
+    assert.equal(translateMessage("en", "calendar.dialogs.editEvent"), "Edit event");
+    assert.equal(translateMessage("en", "calendar.dialogs.deleteEvent"), "Delete event?");
+  });
+
+  it("возвращает русские create/edit/delete labels", () => {
+    assert.equal(translateMessage("ru", "calendar.dialogs.newEvent"), "Новое событие");
+    assert.equal(translateMessage("ru", "calendar.form.reminders"), "Напоминания за 24 часа и за 1 час");
+  });
+});
+
+describe("calendar i18n — Reminders & Toasts", () => {
+  it("локализует reminders EN", () => {
+    assert.equal(translateMessage("en", "calendar.reminders.dayBefore"), "24 hours before");
+    assert.equal(translateMessage("en", "calendar.toasts.created"), "Event created");
+  });
+
+  it("локализует reminders RU", () => {
+    assert.equal(translateMessage("ru", "calendar.reminders.hourBefore"), "За 1 час");
+    assert.equal(translateMessage("ru", "calendar.toasts.deleted"), "Событие удалено");
+  });
+});
+
+describe("calendar i18n — enums", () => {
+  it("переводит scope и event type", () => {
+    assert.equal(translateCalendarScope("en", "company"), "Company");
+    assert.equal(translateCalendarScope("ru", "personal"), "Личное");
+    assert.equal(translateCalendarEventType("en", "video_meeting"), "Video meeting");
+    assert.equal(translateCalendarEventType("ru", "general"), "Обычное событие");
+  });
+
+  it("локализует validation", () => {
+    assert.equal(
+      translateFormValidation("en", "titleRequired"),
+      "Enter an event title",
+    );
+    assert.equal(
+      translateFormValidation("ru", "videoAllDay"),
+      "Видеовстреча не может быть событием на весь день",
     );
   });
 });

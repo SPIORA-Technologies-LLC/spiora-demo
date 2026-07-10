@@ -8,7 +8,7 @@ const event: CalendarEvent = {
   companyId: "northstar-mobility",
   scope: "company",
   ownerUserId: null,
-  title: "Консультация по релокации",
+  title: "Relocation consultation",
   description: "",
   eventType: "video_meeting",
   videoInviteMode: "all_team",
@@ -32,17 +32,30 @@ const event: CalendarEvent = {
 };
 
 describe("buildGuestMeetingInviteText", () => {
-  it("builds a full invite with greeting, schedule and link", () => {
+  it("builds a full RU invite with greeting, schedule and link", () => {
     const text = buildGuestMeetingInviteText(
       event,
       "https://example.com/join/abc123",
-      { recipientName: "Анна", timeZone: "Europe/Moscow" },
+      { recipientName: "Anna", timeZone: "Europe/Moscow", locale: "ru" },
     );
 
-    assert.match(text, /Добрый день, Анна!/);
-    assert.match(text, /Консультация по релокации/);
+    assert.match(text, /Добрый день, Anna!/);
+    assert.match(text, /Relocation consultation/);
     assert.match(text, /Когда:/);
     assert.match(text, /https:\/\/example\.com\/join\/abc123/);
     assert.match(text, /Команда Northstar Mobility/);
+  });
+
+  it("builds a full EN invite without Cyrillic UI strings", () => {
+    const text = buildGuestMeetingInviteText(
+      event,
+      "https://example.com/join/abc123",
+      { recipientName: "Anna", timeZone: "Europe/Moscow", locale: "en" },
+    );
+
+    assert.doesNotMatch(text, /[А-Яа-яЁё]/);
+    assert.match(text, /Good (morning|afternoon|evening), Anna!/);
+    assert.match(text, /When:/);
+    assert.match(text, /https:\/\/example\.com\/join\/abc123/);
   });
 });

@@ -155,25 +155,31 @@ export function formValuesToTimestamps(
   };
 }
 
+export type CalendarFormValidationCode =
+  | "titleRequired"
+  | "videoAllDay"
+  | "endBeforeStart"
+  | "invalidDateTime";
+
 export function validateFormValues(
   values: CalendarFormValues,
   timeZone: string = CALENDAR_TIMEZONE,
-): string | null {
+): CalendarFormValidationCode | null {
   if (!values.title.trim()) {
-    return "Укажите название события";
+    return "titleRequired";
   }
 
   if (values.eventType === "video_meeting" && values.allDay) {
-    return "Видеовстреча не может быть событием на весь день";
+    return "videoAllDay";
   }
 
   try {
     const { startAt, endAt } = formValuesToTimestamps(values, timeZone);
     if (endAt < startAt) {
-      return "Окончание не может быть раньше начала";
+      return "endBeforeStart";
     }
   } catch {
-    return "Укажите корректные дату и время";
+    return "invalidDateTime";
   }
 
   return null;

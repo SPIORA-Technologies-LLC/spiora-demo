@@ -1,7 +1,6 @@
 import "server-only";
 
 import { listTeamUsers } from "@/lib/auth/users";
-import { notifyCalendarReminder } from "@/lib/notifications/emit";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getDeletedUserIds } from "@/lib/team/store";
 import * as sbDeliveries from "@/lib/supabase/calendar-reminder-deliveries-repo";
@@ -49,6 +48,7 @@ export async function deliverCalendarReminderNotification(params: {
   delivery: CalendarReminderDelivery;
   offsetMinutes: ReminderOffsetMinutes;
 }): Promise<void> {
+  const { notifyCalendarReminder } = await import("@/lib/notifications/emit");
   const notification = await notifyCalendarReminder({
     event: params.event,
     offsetMinutes: params.offsetMinutes,

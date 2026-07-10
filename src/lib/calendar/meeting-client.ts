@@ -8,15 +8,13 @@ export {
   type MeetingAccessPhase,
 } from "./meeting-window";
 
+import type { AppLocale } from "@/i18n/config";
+import { translateMeetingStatus } from "@/i18n/calendar-enums";
 import type { MeetingAccessPhase } from "./meeting-window";
 
-export function formatMeetingStatusLabel(phase: MeetingAccessPhase): string {
-  switch (phase) {
-    case "waiting":
-      return "Ожидание";
-    case "open":
-      return "Открыта";
-    case "closed":
-      return "Завершена";
-  }
+export function formatMeetingStatusLabel(
+  phase: MeetingAccessPhase,
+  locale: AppLocale = "en",
+): string {
+  return translateMeetingStatus(locale, phase);
 }

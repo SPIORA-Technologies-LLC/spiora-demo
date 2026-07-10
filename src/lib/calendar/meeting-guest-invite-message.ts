@@ -1,21 +1,29 @@
-import { CALENDAR_TIMEZONE } from "./constants";
+import type { AppLocale } from "@/i18n/config";
+import { translateCalendarMessage } from "@/i18n/calendar-enums";
 import { branding } from "@/config/branding";
+import { resolveCalendarEventTitle } from "./demo-event-title";
 import { formatDayLabel, formatEventTimeRange } from "./format";
+import { CALENDAR_TIMEZONE } from "./constants";
 import type { CalendarEvent } from "./types";
 
-function greetingForMeetingHour(hour: number): string {
+function greetingKeyForMeetingHour(hour: number): string {
   if (hour < 12) {
-    return "Доброе утро";
+    return "greetingMorning";
   }
   if (hour < 18) {
-    return "Добрый день";
+    return "greetingAfternoon";
   }
-  return "Добрый вечер";
+  return "greetingEvening";
 }
 
-function meetingStartHour(event: CalendarEvent, timeZone: string): number {
+function meetingStartHour(
+  event: CalendarEvent,
+  timeZone: string,
+  locale: AppLocale,
+): number {
+  const intlTag = locale === "ru" ? "ru-RU" : "en-US";
   return Number(
-    new Intl.DateTimeFormat("ru-RU", {
+    new Intl.DateTimeFormat(intlTag, {
       timeZone,
       hour: "numeric",
       hour12: false,
@@ -29,29 +37,58 @@ export function buildGuestMeetingInviteText(
   options?: {
     recipientName?: string | null;
     timeZone?: string;
+    locale?: AppLocale;
   },
 ): string {
   const timeZone = options?.timeZone ?? CALENDAR_TIMEZONE;
-  const greeting = greetingForMeetingHour(meetingStartHour(event, timeZone));
+  const locale = options?.locale ?? "en";
+  const greetingKey = greetingKeyForMeetingHour(
+    meetingStartHour(event, timeZone, locale),
+  );
+  const greeting = translateCalendarMessage(
+    locale,
+    `calendar.meet.inviteMessage.${greetingKey}`,
+  );
   const recipientName = options?.recipientName?.trim();
-  const salutation = recipientName ? `${greeting}, ${recipientName}!` : `${greeting}!`;
-  const dateLabel = formatDayLabel(new Date(event.startAt), timeZone);
-  const timeRange = formatEventTimeRange(event, timeZone);
+  const salutation = recipientName
+    ? translateCalendarMessage(locale, "calendar.meet.inviteMessage.salutation", {
+        greeting,
+        name: recipientName,
+      })
+    : translateCalendarMessage(
+        locale,
+        "calendar.meet.inviteMessage.salutationNoName",
+        { greeting },
+      );
+  const dateLabel = formatDayLabel(new Date(event.startAt), timeZone, locale);
+  const timeRange = formatEventTimeRange(event, timeZone, locale);
+  const displayTitle = resolveCalendarEventTitle(event.title, locale);
   const scheduleLine = event.allDay
-    ? `${dateLabel}, весь день`
-    : `${dateLabel}, ${timeRange}`;
+    ? translateCalendarMessage(locale, "calendar.meet.inviteMessage.allDay", {
+        date: dateLabel,
+      })
+    : translateCalendarMessage(locale, "calendar.meet.inviteMessage.schedule", {
+        date: dateLabel,
+        time: timeRange,
+      });
 
   return [
     salutation,
     "",
-    `Приглашаем вас на видеовстречу «${event.title.trim()}».`,
+    translateCalendarMessage(locale, "calendar.meet.inviteMessage.body", {
+      title: displayTitle,
+    }),
     "",
-    `Когда: ${scheduleLine}`,
+    translateCalendarMessage(locale, "calendar.meet.inviteMessage.when", {
+      schedule: scheduleLine,
+    }),
     "",
-    "Подключиться можно по ссылке (регистрация не нужна):",
+    translateCalendarMessage(locale, "calendar.meet.inviteMessage.joinHint"),
     guestJoinUrl,
     "",
-    "До встречи!",
-    `Команда ${branding.companyName}`,
+    translateCalendarMessage(locale, "calendar.meet.inviteMessage.closing"),
+    translateCalendarMessage(locale, "calendar.meet.inviteMessage.team", {
+      company: branding.companyName,
+    }),
   ].join("\n");
 }

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 88" role="img" aria-label="Spiora">
+  <rect x="8" y="12" width="64" height="64" rx="14" fill="#910d0d"/>
+  <path d="M20 30 C20 30 28 30 32 38 C36 46 44 46 44 46 L44 58 C44 58 36 58 32 50 C28 42 20 42 20 42 Z" fill="#ffffff" opacity="0.95"/>
+  <path d="M32 46 L44 58 L32 58 L26 52 Z" fill="#ffffff" opacity="0.75"/>
+  <text x="88" y="46" fill="#ffffff" font-family="Sora, system-ui, sans-serif" font-size="28" font-weight="700">Spiora</text>
+  <text x="88" y="68" fill="#cbd5e0" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500">Corporate Digital Workspace</text>
+</svg>

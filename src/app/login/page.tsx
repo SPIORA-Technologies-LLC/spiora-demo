@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { DemoCredentials } from "@/components/auth/DemoCredentials";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { Logo } from "@/components/ui/Logo";
+import { branding, getProductDescription } from "@/config/branding";
 import { getSession } from "@/lib/auth/session";
 import styles from "./login.module.css";
 
@@ -50,10 +51,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <Logo priority size="lg" />
         </div>
         <h1 className={styles.title} style={{ color: "#fff", margin: 0 }}>
-          Northstar Mobility
+          {branding.productName}
         </h1>
         <p className={styles.subtitle} style={{ color: "#cbd5e0" }}>
-          Вход в корпоративную платформу
+          {getProductDescription("ru")}
         </p>
         <LoginForm nextPath={nextPath} />
         {process.env.NODE_ENV !== "production" ? <DemoCredentials /> : null}

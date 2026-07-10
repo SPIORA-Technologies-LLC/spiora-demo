@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import type { SessionUser } from "./types";
 import { isUserRole } from "./users";
 
-const COOKIE_NAME = "ss_session";
+const COOKIE_NAME = "spiora_session";
 
 function getAuthSecret(): Uint8Array | null {
   const secret = process.env.AUTH_SECRET?.trim();
@@ -11,7 +11,7 @@ function getAuthSecret(): Uint8Array | null {
     return new TextEncoder().encode(secret);
   }
   if (process.env.NODE_ENV !== "production") {
-    return new TextEncoder().encode("northstar-mobility-dev-secret-change-me");
+    return new TextEncoder().encode("spiora-demo-dev-secret-change-me");
   }
   return null;
 }

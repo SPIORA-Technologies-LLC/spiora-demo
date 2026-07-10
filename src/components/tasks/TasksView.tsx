@@ -1,5 +1,6 @@
 "use client";
 
+import { branding } from "@/config/branding";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useNotificationsOptional } from "@/components/notifications/notification-context";
@@ -429,7 +430,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
     <div className={styles.wrap}>
       <SectionHeader
         title="Задачи команды"
-        subtitle="Общий список задач Northstar Mobility"
+        subtitle={`Общий список задач ${branding.companyName}`}
         action={
           <Button type="button" onClick={() => setCreateOpen(true)}>
             ➕ Новая задача

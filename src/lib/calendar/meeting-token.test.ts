@@ -102,7 +102,7 @@ describe("mintMeetingAccessToken", () => {
       now,
     );
 
-    assert.equal(minted.roomName, "northstar-cal-evt-video");
+    assert.equal(minted.roomName, "spiora-cal-evt-video");
     assert.ok(minted.token.length > 20);
     assert.equal(
       minted.expiresAt,

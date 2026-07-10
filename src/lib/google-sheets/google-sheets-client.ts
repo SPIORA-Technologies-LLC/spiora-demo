@@ -1,3 +1,4 @@
+import { branding } from "@/config/branding";
 import { fetchWithTlsFallback } from "@/lib/google-fetch";
 import {
   getGoogleAccessToken,
@@ -46,7 +47,7 @@ export class GoogleSheetsClient {
         {
           rejectUnauthorized: false,
           headers: {
-            "User-Agent": "northstar-mobility-demo/1.0",
+            "User-Agent": `${branding.httpUserAgent}`,
           },
         },
         (res) => {

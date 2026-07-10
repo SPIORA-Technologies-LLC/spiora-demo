@@ -1,3 +1,4 @@
+import { branding } from "@/config/branding";
 import { CALENDAR_TIMEZONE } from "@/lib/calendar/constants";
 import { formatEventTimeRange } from "@/lib/calendar/format";
 import { formatMeetingOpensAtLabel } from "@/lib/calendar/meeting-client";
@@ -74,7 +75,7 @@ export function GuestMeetingGate({
   return (
     <div className={styles.page}>
       <div className={styles.card}>
-        <p className={styles.brand}>Northstar Mobility</p>
+        <p className={styles.brand}>{branding.productName}</p>
         <h1 className={styles.title}>{copy.title}</h1>
         {event ? (
           <p className={styles.eventMeta}>

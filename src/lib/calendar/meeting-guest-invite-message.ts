@@ -1,4 +1,5 @@
 import { CALENDAR_TIMEZONE } from "./constants";
+import { branding } from "@/config/branding";
 import { formatDayLabel, formatEventTimeRange } from "./format";
 import type { CalendarEvent } from "./types";
 
@@ -51,6 +52,6 @@ export function buildGuestMeetingInviteText(
     guestJoinUrl,
     "",
     "До встречи!",
-    "Команда Northstar Mobility",
+    `Команда ${branding.companyName}`,
   ].join("\n");
 }

@@ -1,6 +1,7 @@
 import type { WorkspaceResponseMode } from "@/lib/ai/workspace-config";
+import { branding } from "@/config/branding";
 
-const WORKSPACE_BASE_PROMPT = `Ты — внутренний AI-партнёр команды Northstar Mobility.
+const WORKSPACE_BASE_PROMPT = `Ты — внутренний AI-партнёр платформы ${branding.productName} для команды ${branding.companyName}.
 Ты помогаешь команде быстро разбираться в клиентах, анкетах, документах, законах и миграционных кейсах.
 
 Стиль:

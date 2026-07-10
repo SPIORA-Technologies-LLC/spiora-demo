@@ -1,5 +1,6 @@
 "use client";
 
+import { branding } from "@/config/branding";
 import {
   useEffect,
   useLayoutEffect,
@@ -690,7 +691,7 @@ export function TeamChatView({
     <div className={styles.wrap}>
       <SectionHeader
         title="Командный чат"
-        subtitle="Внутреннее пространство для общения команды Northstar Mobility"
+        subtitle={`Внутреннее пространство для общения команды ${branding.companyName}`}
         action={
           isOwner ? (
             <Button

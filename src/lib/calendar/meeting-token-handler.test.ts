@@ -179,7 +179,7 @@ describe("handleMintMeetingToken", () => {
     assert.ok(!("status" in result));
     if ("status" in result) return;
     assert.equal(result.wsUrl, "wss://example.livekit.cloud");
-    assert.equal(result.roomName, "northstar-cal-evt-video");
+    assert.equal(result.roomName, "spiora-cal-evt-video");
     assert.ok(result.token.length > 20);
     assert.ok(result.expiresAt.includes("T"));
   });

@@ -1,5 +1,5 @@
 import type { NavItem } from "@/components/layout/Sidebar";
-import { MARKETING_SITE_URL } from "@/lib/brand";
+import { branding, getDemoCompanySiteLabel } from "@/config/branding";
 import type { SessionUser, UserRole } from "./types";
 
 const NAV_DASHBOARD: NavItem = {
@@ -93,8 +93,8 @@ const NAV_SETTINGS: NavItem = {
 };
 
 const NAV_WEBSITE: NavItem = {
-  href: MARKETING_SITE_URL,
-  label: "Сайт Northstar Mobility",
+  href: branding.demoCompanyWebsiteUrl,
+  label: getDemoCompanySiteLabel(),
   icon: "fa-solid fa-globe",
   external: true,
 };

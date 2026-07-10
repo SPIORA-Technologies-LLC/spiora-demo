@@ -1,5 +1,6 @@
 import { createChatCompletion } from "@/lib/ai/openai";
 import { TEAM_AI_SYSTEM_TONE } from "@/lib/ai/tone";
+import { branding } from "@/config/branding";
 import { buildClientAiContext } from "@/lib/google-sheets/service";
 import type { ClientDetail } from "@/lib/google-sheets/types";
 
@@ -94,7 +95,7 @@ ${client.status === "Новый" ? "⚠️ Клиент на ранней ста
   if (lower.includes("сообщен") || lower.includes("follow")) {
     return `Здравствуйте, ${client.name.split(" ")[0]}!
 
-Спасибо за обращение в Northstar Mobility. По вашему направлению (${client.direction}) мы подготовили следующие шаги. Готовы созвониться в удобное время.
+Спасибо за обращение в ${branding.companyName}. По вашему направлению (${client.direction}) мы подготовили следующие шаги. Готовы созвониться в удобное время.
 
 С уважением,
 ${client.manager}`;

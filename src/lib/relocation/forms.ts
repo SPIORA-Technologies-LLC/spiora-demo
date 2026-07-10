@@ -1,3 +1,5 @@
+import { branding } from "@/config/branding";
+
 export type RelocationResourceType =
   | "form"
   | "formgrid"
@@ -139,7 +141,7 @@ export const RELOCATION_SECTIONS: RelocationSection[] = [
   {
     id: "croatia",
     title: "Demo relocation hub",
-    subtitle: "Sample resources for Northstar Mobility demonstrations",
+    subtitle: `Sample resources for ${branding.companyName} demonstrations`,
     items: CROATIA_RESOURCES,
   },
   {

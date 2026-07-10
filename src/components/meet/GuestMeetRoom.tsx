@@ -7,6 +7,7 @@ import {
   useParticipants,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
+import { branding } from "@/config/branding";
 import { formatEventTimeRange } from "@/lib/calendar/format";
 import { CALENDAR_TIMEZONE } from "@/lib/calendar/constants";
 import type { CalendarEvent } from "@/lib/calendar/types";
@@ -362,7 +363,7 @@ export function GuestMeetRoom({
     return (
       <div className={styles.lobbyPage}>
         <div className={styles.lobbyCard}>
-          <p className={styles.lobbyBrand}>Northstar Mobility</p>
+          <p className={styles.lobbyBrand}>{branding.productName}</p>
           <h1 className={styles.lobbyTitle}>Видеовстреча</h1>
           <p className={styles.lobbyEventTitle}>{event.title}</p>
           <p className={styles.lobbyEventTime}>

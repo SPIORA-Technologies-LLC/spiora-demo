@@ -1,17 +1,19 @@
-# Northstar Mobility Demo
+# Spiora Demo
 
-Демонстрационная корпоративная платформа Northstar Mobility: AI Workspace, CRM, задачи, чат и аналитика.
+Демонстрационная корпоративная платформа **Spiora**: AI Workspace, CRM, задачи, чат и аналитика.
 
-> Это sanitized demo-копия. Не содержит production credentials и персональных данных.
+> Sanitized demo-копия. Не содержит production credentials и персональных данных.
 
 ## Локальный запуск
 
 ```bash
 npm install
-cp .env.example .env.local
+cp .env.spiora.example .env.local
 # заполните AUTH_SECRET и AUTH_PASSWORD_* локально
 npm run dev
 ```
+
+Подробнее: `SPIORA_LOCAL_ENV_SETUP.md`
 
 ## Демо-учётные записи
 
@@ -24,7 +26,11 @@ npm run dev
 
 ## PWA
 
-Приложение можно установить как PWA с главной страницы входа. Иконки — нейтральные demo-assets.
+Приложение можно установить как PWA со страницы входа. Иконки генерируются из `public/spiora-mark.svg`:
+
+```bash
+npm run pwa:icons
+```
 
 ## Тесты
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { branding } from "@/config/branding";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/Card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -43,7 +44,7 @@ export function NewTaskPageView({ teamMembers }: NewTaskPageViewProps) {
     <div className={styles.wrap}>
       <SectionHeader
         title="Новая задача"
-        subtitle="Создайте задачу для всей команды Northstar Mobility"
+        subtitle={`Создайте задачу для всей команды ${branding.companyName}`}
       />
       <Card className={styles.card}>
         <TaskForm

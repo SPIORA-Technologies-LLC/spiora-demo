@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { branding } from "@/config/branding";
 import type { DashboardStats } from "@/lib/dashboard/stats";
 import type { SessionUser } from "@/lib/auth/types";
 import type { TaskStats } from "@/lib/tasks/types";
@@ -118,7 +119,7 @@ export function DashboardView({
         <div className={styles.heroInner}>
           <p className={styles.heroEyebrow}>Добро пожаловать, {user.name}</p>
           <h1 id="dashboard-hero-title" className={styles.heroTitle}>
-            Northstar Mobility Workspace
+            {branding.productName} Workspace
           </h1>
           <p className={styles.heroSubtitle}>
             Единое пространство для клиентов, анкет, AI-аналитики и внутренних

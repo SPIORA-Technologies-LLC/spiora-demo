@@ -1,9 +1,10 @@
+import { branding } from "@/config/branding";
 import { fetchWithTlsFallback } from "@/lib/google-fetch";
 import * as https from "node:https";
 import { getCached, setCached } from "./cache";
 
 const DEFAULT_FORMGRID_GID = "0";
-const DEMO_USER_AGENT = "northstar-mobility-demo/1.0";
+const DEMO_USER_AGENT = branding.httpUserAgent;
 
 export type LeadsTableResult = {
   headers: string[];

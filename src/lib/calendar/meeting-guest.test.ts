@@ -237,7 +237,7 @@ describe("mintGuestMeetingAccessToken", () => {
       new Date("2026-06-25T08:10:00.000Z"),
     );
 
-    assert.equal(minted.roomName, "northstar-cal-evt-video");
+    assert.equal(minted.roomName, "spiora-cal-evt-video");
     assert.ok(minted.token.length > 20);
   });
 });

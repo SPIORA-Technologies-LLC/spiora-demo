@@ -3,8 +3,8 @@ import { describe, it } from "node:test";
 import { getMeetingRoomName, isVideoMeeting } from "./meeting";
 
 describe("getMeetingRoomName", () => {
-  it("uses northstar-cal prefix with event id", () => {
-    assert.equal(getMeetingRoomName("evt_abc123"), "northstar-cal-evt_abc123");
+  it("uses spiora-cal prefix with event id", () => {
+    assert.equal(getMeetingRoomName("evt_abc123"), "spiora-cal-evt_abc123");
   });
 });
 

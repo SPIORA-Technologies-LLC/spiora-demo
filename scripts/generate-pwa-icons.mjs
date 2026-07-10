@@ -5,11 +5,10 @@ import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const src = path.join(root, "logo_15.jpg");
+const src = path.join(root, "public", "spiora-mark.svg");
 const outDir = path.join(root, "public", "icons");
 
-const ICON_BG = "#FFFFFF";
-/** Скругление как у иконок Windows 11 (~18%) */
+const ICON_BG = "#1a202c";
 const CORNER_RADIUS_RATIO = 0.18;
 
 async function loadTrimmedLogo() {
@@ -27,7 +26,7 @@ function roundedRectMask(size) {
 
 async function buildRoundedSquareIcon(size) {
   const trimmed = await loadTrimmedLogo();
-  const logoSize = Math.round(size * 0.86);
+  const logoSize = Math.round(size * 0.72);
 
   const logo = await sharp(trimmed)
     .resize(logoSize, logoSize, { fit: "contain", background: ICON_BG })
@@ -55,7 +54,7 @@ async function buildRoundedSquareIcon(size) {
 
 async function buildMaskableIcon(size) {
   const trimmed = await loadTrimmedLogo();
-  const logoSize = Math.round(size * 0.72);
+  const logoSize = Math.round(size * 0.62);
 
   return sharp({
     create: {
@@ -93,14 +92,4 @@ for (const [size, filename, builder] of tasks) {
   console.log(`created ${filename}`);
 }
 
-const faviconTargets = [
-  path.join(root, "public", "favicon.jpg"),
-  path.join(root, "src", "app", "icon.jpg"),
-  path.join(root, "src", "app", "apple-icon.jpg"),
-];
-
-const faviconBuffer = await buildRoundedSquareIcon(192);
-for (const target of faviconTargets) {
-  await sharp(faviconBuffer).jpeg({ quality: 92 }).toFile(target);
-  console.log(`updated ${path.relative(root, target)}`);
-}
+console.log("PWA icons generated from public/spiora-mark.svg");

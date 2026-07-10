@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BRAND_NAME, LOGO_PATH } from "@/lib/brand";
+import { branding } from "@/config/branding";
 import styles from "./Logo.module.css";
 
 export type LogoSize = "sm" | "md" | "lg" | "sidebar";
@@ -33,7 +33,8 @@ export function LogoMark({
   size?: LogoSize;
 }) {
   const dims = LOGO_DIMENSIONS[size];
-  const isSvg = LOGO_PATH.toLowerCase().endsWith(".svg");
+  const assetPath = branding.logoPath;
+  const isSvg = assetPath.toLowerCase().endsWith(".svg");
 
   return (
     <span
@@ -44,8 +45,8 @@ export function LogoMark({
       {isSvg ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={LOGO_PATH}
-          alt={BRAND_NAME}
+          src={assetPath}
+          alt={branding.productName}
           width={dims.width}
           height={dims.height}
           className={styles.image}
@@ -53,8 +54,8 @@ export function LogoMark({
         />
       ) : (
         <Image
-          src={LOGO_PATH}
-          alt={BRAND_NAME}
+          src={assetPath}
+          alt={branding.productName}
           width={dims.width}
           height={dims.height}
           className={styles.image}
@@ -77,7 +78,7 @@ export function Logo({
   const content = showText ? (
     <>
       {mark}
-      <span className={styles.brandText}>Northstar Mobility</span>
+      <span className={styles.brandText}>{branding.productName}</span>
     </>
   ) : (
     mark

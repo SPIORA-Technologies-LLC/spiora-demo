@@ -1,7 +1,12 @@
-/** Логотип: neutral demo mark → `public/logo.svg` */
-export const LOGO_PATH = "/logo.svg";
+import { branding } from "@/config/branding";
 
-export const BRAND_NAME = "Northstar Mobility";
+/** @deprecated Prefer `branding.logoPath` from `@/config/branding`. */
+export const LOGO_PATH = branding.logoPath;
 
-/** Placeholder marketing URL — replace in PR #2 (Spiora branding). */
-export const MARKETING_SITE_URL = "https://example.com/northstar-mobility";
+/** @deprecated Prefer `branding.productName` from `@/config/branding`. */
+export const BRAND_NAME = branding.productName;
+
+/** Demo tenant marketing site — not the Spiora product URL. */
+export const MARKETING_SITE_URL = branding.demoCompanyWebsiteUrl;
+
+export { branding } from "@/config/branding";

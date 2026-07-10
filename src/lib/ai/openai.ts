@@ -1,4 +1,5 @@
 import { getAiRuntimeConfig } from "@/lib/ai/config";
+import { branding } from "@/config/branding";
 import { isExternalAiIntegrationEnabled } from "@/lib/demo/integration-policy";
 import {
   assertOpenRouterPayloadSafe,
@@ -64,7 +65,7 @@ function buildRequestHeaders(
       "http://localhost:3000";
     headers["X-OpenRouter-Title"] =
       process.env.OPENROUTER_APP_TITLE?.trim() ||
-      "Northstar Mobility Demo";
+      branding.openRouterAppTitle;
   }
 
   return headers;

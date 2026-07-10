@@ -166,7 +166,7 @@ describe("handleRecordMeetingAudit", () => {
     assert.ok(!("status" in result));
     if ("status" in result) return;
     assert.equal(result.audit.action, "left");
-    assert.equal(result.audit.roomName, "northstar-cal-evt-video");
+    assert.equal(result.audit.roomName, "spiora-cal-evt-video");
     assert.equal(rows.length, 1);
   });
 

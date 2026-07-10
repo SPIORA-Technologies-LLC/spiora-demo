@@ -1,5 +1,6 @@
 "use client";
 
+import { branding } from "@/config/branding";
 import { useEffect, useState } from "react";
 import styles from "./PwaInstallHint.module.css";
 
@@ -51,7 +52,7 @@ export function PwaInstallHint() {
   return (
     <div className={styles.banner} role="status">
       <p className={styles.text}>
-        Установите Northstar Mobility как приложение на ноутбук — быстрый доступ с
+        Установите {branding.productName} как приложение на ноутбук — быстрый доступ с
         рабочего стола.
       </p>
       <div className={styles.actions}>

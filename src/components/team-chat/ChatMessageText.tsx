@@ -1,3 +1,8 @@
+"use client";
+
+import { useLocale } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { resolveDemoMessageText } from "@/lib/team-chat/demo-message-text";
 import { linkifyText } from "@/lib/team-chat/linkify";
 import styles from "./ChatMessageText.module.css";
 
@@ -7,7 +12,9 @@ type ChatMessageTextProps = {
 };
 
 export function ChatMessageText({ text, className }: ChatMessageTextProps) {
-  const parts = linkifyText(text);
+  const locale = useLocale() as AppLocale;
+  const displayText = resolveDemoMessageText(locale, text);
+  const parts = linkifyText(displayText);
 
   return (
     <p className={[styles.text, className].filter(Boolean).join(" ")}>

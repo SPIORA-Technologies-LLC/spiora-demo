@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { encodeCalendarReminderMessage } from "./calendar-reminder-copy";
+import { encodeDemoNavMessage } from "./notification-demo-nav";
 import {
   getNotificationActionLabel,
   getNotificationDisplayMessage,
@@ -27,7 +28,10 @@ describe("notification navigation", () => {
       getNotificationDisplayMessage("calendar_reminder", message),
       "10:00 – 11:00 — Созвон",
     );
-    assert.equal(getNotificationActionLabel("calendar_reminder", message, "en", "Join"), null);
+    assert.equal(
+      getNotificationActionLabel("calendar_reminder", message, "en", "Join"),
+      null,
+    );
   });
 
   it("routes video meeting reminders to meet page", () => {
@@ -47,26 +51,34 @@ describe("notification navigation", () => {
     );
   });
 
-  it("routes video meeting invites to meet page with toast", () => {
-    const message = encodeCalendarReminderMessage(
-      "10:00 – 11:00 — Синк",
-      "evt-invite",
-      { isVideoMeeting: true },
+  it("routes demo client notifications to demo client routes", () => {
+    const message = encodeDemoNavMessage(
+      "Sofia Martins uploaded a new document",
+      "/clients/DEMO-1002",
     );
 
     assert.equal(
-      getNotificationHref("calendar_video_invite", message),
-      "/calendar/meet/evt-invite",
+      getNotificationHref("client_new", message),
+      "/clients/DEMO-1002",
     );
-    assert.equal(getNotificationSection("calendar_video_invite"), "calendar");
-    assert.equal(shouldShowNotificationToast("calendar_video_invite"), true);
+    assert.equal(getNotificationSection("client_new", message), "clients");
     assert.equal(
-      getNotificationDisplayMessage("calendar_video_invite", message),
-      "10:00 – 11:00 — Синк",
+      getNotificationDisplayMessage("client_new", message),
+      "Sofia Martins uploaded a new document",
     );
+  });
+
+  it("routes demo system notifications to AI Workspace", () => {
+    const message = encodeDemoNavMessage(
+      "AI summary is ready",
+      "/ai-workspace",
+    );
+
+    assert.equal(getNotificationHref("system", message), "/ai-workspace");
+    assert.equal(shouldShowNotificationToast("system"), true);
     assert.equal(
-      getNotificationActionLabel("calendar_video_invite", message, "en", "Join"),
-      "Join",
+      pathnameMatchesNotificationSection("/ai-workspace", "ai-workspace"),
+      true,
     );
   });
 

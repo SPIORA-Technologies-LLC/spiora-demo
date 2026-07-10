@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/layout/AppShell";
 import styles from "@/components/layout/AppShell.module.css";
 import { TeamChatView } from "@/components/team-chat/TeamChatView";
@@ -15,6 +16,8 @@ export default async function TeamChatPage() {
     redirect("/login");
   }
 
+  const t = await getTranslations("teamChat");
+
   await markTeamChatSeen(session.id);
 
   const initial = await listTeamChatMessages({ limit: 100 });
@@ -22,7 +25,7 @@ export default async function TeamChatPage() {
 
   return (
     <AppShell
-      sectionTitle="Командный чат"
+      sectionTitle={t("pageTitle")}
       contentClassName={styles.contentFullHeight}
     >
       <TeamChatView

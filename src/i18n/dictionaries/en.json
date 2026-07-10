@@ -89,6 +89,101 @@
       "calendar_reminder": "Calendar reminder",
       "calendar_video_invite": "Video meeting",
       "system": "System"
+    },
+    "openSection": "Open section →",
+    "emit": {
+      "notifyTeamChatMessage": {
+        "title": "New message"
+      },
+      "taskCreated": {
+        "title": "New task",
+        "titleAssigned": "Task assigned to you"
+      },
+      "taskStatusChanged": {
+        "title": "Task status changed"
+      },
+      "taskCompleted": {
+        "title": "Task completed"
+      },
+      "taskPendingApproval": {
+        "title": "Task pending review"
+      },
+      "taskRevisionRequested": {
+        "title": "Task needs revision"
+      },
+      "taskApproved": {
+        "title": "Task approved"
+      },
+      "newClient": {
+        "title": "New client"
+      },
+      "consultationAssigned": {
+        "title": "Consultation assigned"
+      },
+      "teamChatPreview": {
+        "voice": "🎤 Voice message",
+        "image": "🖼 Image",
+        "imageWithCaption": "🖼 {caption}",
+        "file": "📎 File",
+        "fileWithCaption": "📎 {caption}"
+      },
+      "taskStatus": {
+        "new": "New",
+        "in_progress": "In progress",
+        "pending_approval": "Pending review",
+        "needs_revision": "Needs revision",
+        "completed": "Approved"
+      },
+      "demo": {
+        "teamMeetingSoon": {
+          "title": "Upcoming meeting in 1 hour",
+          "message": "10:00 – 11:00 — Team Meeting"
+        },
+        "sofiaDocument": {
+          "title": "Sofia Martins — documents update",
+          "message": "Sofia Martins uploaded a passport copy and proof of remote income for review."
+        },
+        "aiSummaryReady": {
+          "title": "AI summary ready",
+          "message": "Client case summary for Anna Kowalska is ready in AI Workspace."
+        },
+        "messageFromEmma": {
+          "title": "New team chat message",
+          "message": "Emma Wilson: Can someone cover the Sofia Martins follow-up before 17:00?"
+        },
+        "taskDeadlineTomorrow": {
+          "title": "Deadline tomorrow",
+          "message": "Visa document review for Anna Kowalska is due tomorrow."
+        },
+        "videoMeetingSoon": {
+          "title": "Internal video meeting starts soon",
+          "message": "16:30 – 17:30 — Internal Video Meeting"
+        },
+        "newClientApplication": {
+          "title": "New client application",
+          "message": "Marco Rossi submitted a new application (Slovakia direction)."
+        },
+        "calendarReminderTomorrow": {
+          "title": "Reminder: tomorrow",
+          "message": "09:30 – 10:30 — CRM Review"
+        },
+        "taskAssigned": {
+          "title": "Task assigned to you",
+          "message": "Prepare document checklist for Sofia Martins"
+        },
+        "consultationAssigned": {
+          "title": "Consultation assigned",
+          "message": "Sofia Martins — Spain relocation consultation"
+        },
+        "teamChatMessage": {
+          "title": "New team chat message",
+          "message": "Daniel Cooper shared the updated visa checklist in Team Chat."
+        },
+        "documentUploaded": {
+          "title": "Client uploaded documents",
+          "message": "Anna Kowalska submitted 3 files for review."
+        }
+      }
     }
   },
   "language": {
@@ -690,6 +785,158 @@
       "knowledgeBase": "**Knowledge Base — program comparison (excerpt)**\n\n| Program | Stay | Income proof | Processing |\n|---------|------|--------------|------------|\n| Croatia Digital Nomad | 12 months | Remote contract | ~45 days |\n| Portugal D7 | Renewable | Passive/remote income | ~60 days |\n| Spain remote work | 1 year | Employment/contract | ~30 days |\n\nAsk for a specific country or client scenario for a tailored checklist.",
       "formgridOverview": "**Formgrid applications**\n\n- **Recent submissions:** 3 this week\n- **Latest:** Marco Rossi — Slovakia direction, status \"New\"\n- **Pending review:** 1 application awaiting manager assignment\n\nOpen the Immigration section for full survey details or ask about a specific applicant.",
       "generic": "I reviewed the available demo context (CRM, tasks, calendar, and Knowledge Base). Here is what stands out:\n\n- **4 clients** need attention this week (consultation or documents stage).\n- **3 tasks** are overdue.\n- **4 meetings** are scheduled in the next two days.\n\nTry a suggested prompt for a detailed breakdown, or ask about a specific client by name."
+    }
+  },
+  "teamChat": {
+    "pageTitle": "Team Chat",
+    "title": "Team Chat",
+    "subtitle": "Internal workspace for the {companyName} team",
+    "searchPlaceholder": "Search by text and author…",
+    "viewShared": "Media",
+    "viewChat": "Back to chat",
+    "clearChat": "Clear chat",
+    "pinned": {
+      "title": "Pinned",
+      "unpinAria": "Unpin"
+    },
+    "actions": {
+      "reply": "Reply",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "delete": "Delete",
+      "deleteWithIcon": "🗑 Delete",
+      "send": "Send",
+      "cancel": "Cancel",
+      "close": "Close"
+    },
+    "messages": {
+      "empty": "No messages yet.",
+      "loadingOlder": "Loading older messages…"
+    },
+    "composer": {
+      "placeholder": "Message… Ctrl+V — screenshot, paperclip — file",
+      "captionPlaceholder": "Attachment caption (optional)…",
+      "hint": "Attach a file or screenshot, add a caption, and press Send — everything goes as one message. Ctrl+V — paste screenshot. Paperclip — documents up to 25 MB.",
+      "recording": "Recording {duration}",
+      "attachmentFallback": "Attachment",
+      "imageKind": "Image",
+      "fileKind": "File"
+    },
+    "aria": {
+      "cancelReply": "Cancel reply",
+      "removeAttachment": "Remove attachment",
+      "attachFile": "Attach file",
+      "attachImage": "Attach image",
+      "recordVoice": "Record voice message",
+      "close": "Close"
+    },
+    "titles": {
+      "attachFile": "PDF, Word, Excel, etc.",
+      "attachImage": "Image",
+      "voiceMessage": "Voice message",
+      "openFile": "Open file",
+      "openImage": "Open image"
+    },
+    "shared": {
+      "tabs": {
+        "image": "Media",
+        "file": "Files",
+        "links": "Links",
+        "voice": "Voice"
+      },
+      "loading": "Loading…",
+      "goToMessage": "Go to message",
+      "emptyLinks": "No links yet.",
+      "emptyCategory": "Nothing in this category yet."
+    },
+    "modals": {
+      "deleteMessage": "Delete message?",
+      "confirmClear": "Are you sure?",
+      "irreversible": "This action cannot be undone."
+    },
+    "toasts": {
+      "pinFailed": "Could not pin message.",
+      "unpinFailed": "Could not unpin message.",
+      "pinned": "Message pinned.",
+      "unpinned": "Message unpinned.",
+      "imageSent": "Image sent.",
+      "fileSent": "File sent.",
+      "voiceSent": "Voice message sent.",
+      "messageSent": "Message sent.",
+      "deleteFailed": "Could not delete message.",
+      "messageDeleted": "Message deleted.",
+      "clearFailed": "Could not clear chat.",
+      "chatCleared": "Chat cleared."
+    },
+    "errors": {
+      "imageSendFailed": "Could not send image.",
+      "fileSendFailed": "Could not send file.",
+      "voiceRecordFailed": "Could not record voice message.",
+      "voiceSendFailed": "Could not send voice message.",
+      "captionTooLong": "Caption is too long (max 5000 characters).",
+      "textRequired": "Enter message text.",
+      "messageTooLong": "Message is too long (max 5000 characters).",
+      "sendFailed": "Could not send message."
+    },
+    "voiceRecorder": {
+      "unsupported": "This browser does not support microphone recording.",
+      "noCodec": "This browser does not support voice recording.",
+      "micDenied": "Could not access the microphone."
+    },
+    "voice": {
+      "unsupportedPlayback": "Your browser does not support audio playback."
+    },
+    "image": {
+      "alt": "Chat image"
+    },
+    "file": {
+      "fallbackName": "File"
+    },
+    "messageTypes": {
+      "text": "Message",
+      "voice": "Voice message",
+      "image": "Image",
+      "file": "File"
+    },
+    "searchLabels": {
+      "voice": "voice message",
+      "image": "image",
+      "file": "file"
+    },
+    "demoMessages": {
+      "mondayStandup": "Good morning, team! Standup at 09:00 — please share blockers on client cases and overdue tasks before we start.",
+      "pipelineMoved": "Pipeline update: Sofia Martins moved to Documents, Anna Kowalska stays In progress. Two new applications need manager assignment today.",
+      "carterFileUpdate": "John Carter's Portugal dossier is updated in CRM — contract and bank statements are attached. Ready for internal review.",
+      "sofiaConsultationAsk": "Quick question on Sofia Martins: did we confirm the Spain program option after yesterday's consultation? I need to send the checklist today.",
+      "martinsCoverageReply": "I can cover Sofia Martins follow-up until 17:00 — send me the draft checklist and I'll call her after the Anna Kowalska video meeting.",
+      "sofiaDocumentStatus": "Sofia Martins sent a passport scan and remote income proof. Missing: health insurance certificate and signed service agreement.",
+      "visaChecklistFile": "Sharing the updated visa checklist for Croatia cases — please use this version for Anna Kowalska and new document-stage clients.",
+      "taskDeadlineReminder": "Reminder: visa document review for Anna Kowalska is due tomorrow. Lucas, can you close comments in CRM once done?",
+      "taskProgressUpdate": "Booking confirmation for Marco Rossi is in progress — partner replied, waiting for final slot. Will update the task by EOD.",
+      "meetingMovedThursday": "Client Portfolio Review moved to Thursday 10:00–11:00 (company calendar). Same video link — I'll update invites.",
+      "calendarLinkShare": "Calendar link for tomorrow's CRM Review is in the event card — copy the client invite from there if needed.",
+      "meetingPrepAnna": "Before the 11:00 call with Anna Kowalska: check document status in CRM and note which items are still blocking submission.",
+      "aiSummaryReady": "AI summary for Anna Kowalska is ready in AI Workspace — risks, open documents, and suggested next steps included.",
+      "kbArticleLink": "Useful KB article on Spain remote work requirements — share with Sofia Martins when sending the document list.",
+      "clientPipelineReview": "Client pipeline for this week: 4 active cases, 2 in consultation, 1 new application. Focus on document collection for Spain and Croatia.",
+      "overdueTasksNote": "Heads-up: 3 tasks are overdue (visa review, Marco Rossi booking, CRM notes). Let's clear at least two before lunch.",
+      "videoCallReminder": "Video consultation with Anna Kowalska starts in 1 hour — link is in the calendar event. Please review her file beforehand.",
+      "aiWorkspaceLink": "Team prompt for today is in AI Workspace — \"What should the team focus on today?\" Useful before standup.",
+      "internalTaskHandoff": "Handing off internal task: CRM note cleanup for Q2 cases. Daniel picks it up after client calls — details in Tasks.",
+      "crmUpdateSofia": "CRM updated for Sofia Martins: status Consultation → Documents, manager Emma Wilson. Next step — document review call.",
+      "documentReviewDone": "Document review for Anna Kowalska completed — passport and bank statements OK. Still waiting on health insurance certificate.",
+      "teamFocusToday": "Team focus today: clear overdue tasks, prep Anna Kowalska video call, follow up Sofia Martins on missing documents.",
+      "clientAnnaFiles": "Anna Kowalska uploaded 3 files overnight — all in the client card. Please verify naming before we forward to the partner.",
+      "calendarEventTomorrow": "Tomorrow 09:30 — CRM Review (company). Agenda: pipeline hygiene and consultation follow-ups for Sofia Martins and Anna Kowalska.",
+      "passportReminder": "Reminder for active cases: check passport validity (6+ months). Anna Kowalska's copy expires in 8 months — OK for now.",
+      "q3GoalsThread": "Starting Q3 goals thread — reply with one client-success metric and one internal process improvement for July.",
+      "closingThanks": "Thanks everyone for the updates today — great progress on Sofia Martins and Anna Kowalska. See you at standup tomorrow."
+    },
+    "limits": {
+      "ratePerMinute": "Too many messages per minute in demo mode. Please wait a moment.",
+      "ratePerUser": "Demo message limit reached. Please try again later.",
+      "uploadPerMinute": "Too many uploads per minute in demo mode. Please wait a moment.",
+      "deletePerMinute": "Too many deletions per minute in demo mode. Please wait a moment."
     }
   },
   "statuses": {

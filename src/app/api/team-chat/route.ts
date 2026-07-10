@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { getRequestLocale } from "@/i18n/api-messages";
 import { getSession } from "@/lib/auth/session";
 import { notifyTeamChatMessage } from "@/lib/notifications/emit";
+import { enforceTeamChatDemoGuard } from "@/lib/team-chat/demo-api-guard";
 import {
   createTeamChatMessage,
   listTeamChatMessages,
@@ -17,12 +19,14 @@ export async function GET(request: Request) {
   const beforeCreatedAt = searchParams.get("before") ?? undefined;
   const afterCreatedAt = searchParams.get("after") ?? undefined;
   const q = searchParams.get("q") ?? undefined;
+  const locale = await getRequestLocale();
 
   const result = await listTeamChatMessages({
     limit,
     beforeCreatedAt,
     afterCreatedAt,
     q,
+    locale,
   });
 
   return NextResponse.json(result);
@@ -39,6 +43,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
   }
 
+  const blocked = await enforceTeamChatDemoGuard(
+    session.id,
+    "send",
+    body.text.length,
+  );
+  if (blocked) {
+    return blocked;
+  }
+
+  const locale = await getRequestLocale();
+
   try {
     const message = await createTeamChatMessage(
       {
@@ -47,6 +62,7 @@ export async function POST(request: Request) {
           typeof body.replyToId === "string" ? body.replyToId : undefined,
       },
       session,
+      locale,
     );
     await notifyTeamChatMessage({
       senderId: session.id,

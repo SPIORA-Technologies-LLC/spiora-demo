@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { formatFileSize } from "@/lib/tasks/attachment-formats";
 import { FileTypeIcon } from "@/components/ui/UiIcon";
 import styles from "./TeamChatView.module.css";
@@ -17,13 +18,15 @@ export function ChatFileMessage({
   fileSize,
   contentType,
 }: ChatFileMessageProps) {
+  const t = useTranslations("teamChat.titles");
+
   return (
     <a
       href={src}
       target="_blank"
       rel="noopener noreferrer"
       className={styles.fileLink}
-      title="Открыть файл"
+      title={t("openFile")}
     >
       <FileTypeIcon contentType={contentType} className={styles.fileIcon} />
       <span className={styles.fileMeta}>

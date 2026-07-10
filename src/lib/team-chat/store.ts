@@ -36,15 +36,15 @@ import type {
   TeamChatSharedMediaResult,
   TeamChatSharedMediaType,
 } from "./types";
-import {
-  FILE_MESSAGE_SEARCH_LABEL,
-  IMAGE_MESSAGE_SEARCH_LABEL,
-  VOICE_MESSAGE_SEARCH_LABEL,
-} from "./types";
+import type { AppLocale } from "@/i18n/config";
+import { resolveDemoMessageText } from "./demo-message-text";
+import { translateTeamChatSearchLabel } from "@/i18n/team-chat-messages";
 import { buildMessagePreview } from "./message-preview";
 import { linkifyText } from "./linkify";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import * as sbChat from "@/lib/supabase/team-chat-repo";
+import { isDemoMode } from "@/lib/demo/demo-mode";
+import { buildDemoTeamChatMessages } from "./demo-messages";
 
 const STORE_PATH = path.join(process.cwd(), ".data", "team-chat-messages.json");
 const LAST_SEEN_PATH = path.join(
@@ -134,15 +134,40 @@ async function readMessagesStore(): Promise<TeamChatStore> {
   try {
     const raw = await readFile(STORE_PATH, "utf8");
     const data = JSON.parse(raw) as TeamChatStore;
-    if (!Array.isArray(data.messages)) return { messages: [] };
+    if (!Array.isArray(data.messages)) {
+      return seedDemoTeamChatIfNeeded({ messages: [] });
+    }
+    if (data.messages.length === 0 && !isSupabaseConfigured()) {
+      return seedDemoTeamChatIfNeeded(data);
+    }
     return {
       messages: data.messages.map((message) =>
         normalizeTeamChatMessage(message),
       ),
     };
   } catch {
-    return { messages: [] };
+    if (isSupabaseConfigured()) {
+      return { messages: [] };
+    }
+    return seedDemoTeamChatIfNeeded({ messages: [] });
   }
+}
+
+async function seedDemoTeamChatIfNeeded(
+  store: TeamChatStore,
+): Promise<TeamChatStore> {
+  if (!isDemoMode() || isSupabaseConfigured() || store.messages.length > 0) {
+    return store;
+  }
+
+  const demoMessages = buildDemoTeamChatMessages();
+  if (demoMessages.length === 0) {
+    return store;
+  }
+
+  const seeded = { messages: demoMessages };
+  await writeMessagesStore(seeded);
+  return seeded;
 }
 
 async function writeMessagesStore(store: TeamChatStore): Promise<void> {
@@ -186,6 +211,7 @@ function validateCaption(text: string | undefined): string {
 async function applyReplyToMessage(
   message: TeamChatMessage,
   replyToId?: string,
+  locale: AppLocale = "en",
 ): Promise<void> {
   if (!replyToId?.trim()) return;
 
@@ -202,7 +228,7 @@ async function applyReplyToMessage(
   message.reply_to_message_id = parent.id;
   message.reply_to_user_name = parent.user_name;
   message.reply_to_message_type = parent.message_type;
-  message.reply_to_preview = buildMessagePreview(parent);
+  message.reply_to_preview = buildMessagePreview(parent, locale);
 }
 
 export async function listTeamChatMessages(opts: {
@@ -210,6 +236,7 @@ export async function listTeamChatMessages(opts: {
   beforeCreatedAt?: string;
   afterCreatedAt?: string;
   q?: string;
+  locale?: AppLocale;
 }): Promise<{
   messages: TeamChatMessage[];
   hasMoreBefore: boolean;
@@ -227,15 +254,16 @@ export async function listTeamChatMessages(opts: {
 
   if (opts.q?.trim()) {
     const q = opts.q.trim().toLowerCase();
+    const locale = opts.locale ?? "en";
     filtered = filtered.filter((message) => {
       const text =
         message.message_type === "voice"
-          ? VOICE_MESSAGE_SEARCH_LABEL
+          ? translateTeamChatSearchLabel(locale, "voice")
           : message.message_type === "image"
-            ? `${IMAGE_MESSAGE_SEARCH_LABEL} ${message.message_text}`.trim()
+            ? `${translateTeamChatSearchLabel(locale, "image")} ${resolveDemoMessageText(locale, message.message_text)}`.trim()
             : message.message_type === "file"
-              ? `${FILE_MESSAGE_SEARCH_LABEL} ${message.file_name ?? ""} ${message.message_text}`.trim()
-              : message.message_text.toLowerCase();
+              ? `${translateTeamChatSearchLabel(locale, "file")} ${message.file_name ?? ""} ${resolveDemoMessageText(locale, message.message_text)}`.trim()
+              : resolveDemoMessageText(locale, message.message_text).toLowerCase();
       const haystack = text.toLowerCase();
       const name = message.user_name.toLowerCase();
       return haystack.includes(q) || name.includes(q);
@@ -287,6 +315,7 @@ export async function listTeamChatMessages(opts: {
 export async function createTeamChatMessage(
   input: CreateTeamChatMessageInput,
   user: SessionUser,
+  locale: AppLocale = "en",
 ): Promise<TeamChatMessage> {
   const text = validateText(input.text);
   if (!text) {
@@ -307,7 +336,7 @@ export async function createTeamChatMessage(
     updated_at: now,
   };
 
-  await applyReplyToMessage(message, input.replyToId);
+  await applyReplyToMessage(message, input.replyToId, locale);
 
   if (isSupabaseConfigured()) {
     try {
@@ -329,6 +358,7 @@ export async function createVoiceTeamChatMessage(
   user: SessionUser,
   audioBuffer: Buffer,
   contentType: string,
+  locale: AppLocale = "en",
 ): Promise<TeamChatMessage> {
   const normalizedType = normalizeTeamChatAudioContentType(contentType);
   if (!normalizedType) {
@@ -358,7 +388,7 @@ export async function createVoiceTeamChatMessage(
   };
   message.audio_url = getTeamChatAudioApiPath(message.id);
 
-  await applyReplyToMessage(message, input.replyToId);
+  await applyReplyToMessage(message, input.replyToId, locale);
 
   await saveTeamChatAudio(message.id, audioBuffer, normalizedType);
 
@@ -384,6 +414,7 @@ export async function createImageTeamChatMessage(
   contentType: string,
   caption?: string,
   replyToId?: string,
+  locale: AppLocale = "en",
 ): Promise<TeamChatMessage> {
   const normalizedType = normalizeTeamChatImageContentType(contentType);
   if (!normalizedType) {
@@ -411,7 +442,7 @@ export async function createImageTeamChatMessage(
   };
   message.image_url = getTeamChatImageApiPath(message.id);
 
-  await applyReplyToMessage(message, replyToId);
+  await applyReplyToMessage(message, replyToId, locale);
 
   await saveTeamChatImage(message.id, imageBuffer, normalizedType);
 
@@ -438,6 +469,7 @@ export async function createFileTeamChatMessage(
   contentType: string,
   caption?: string,
   replyToId?: string,
+  locale: AppLocale = "en",
 ): Promise<TeamChatMessage> {
   const normalizedName = fileName.trim() || "file";
   const normalizedType = normalizeTeamChatFileContentType(
@@ -472,7 +504,7 @@ export async function createFileTeamChatMessage(
   message.file_content_type = normalizedType;
   message.file_size = fileBuffer.length;
 
-  await applyReplyToMessage(message, replyToId);
+  await applyReplyToMessage(message, replyToId, locale);
 
   await saveTeamChatFile(message.id, normalizedName, fileBuffer, normalizedType);
 

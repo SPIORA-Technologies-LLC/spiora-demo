@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { getRequestLocale } from "@/i18n/api-messages";
 import { getSession } from "@/lib/auth/session";
 import { notifyTeamChatMessage } from "@/lib/notifications/emit";
+import { enforceTeamChatDemoGuard } from "@/lib/team-chat/demo-api-guard";
 import { normalizeTeamChatAudioContentType } from "@/lib/team-chat/audio-storage";
 import { createVoiceTeamChatMessage } from "@/lib/team-chat/store";
 
@@ -8,6 +10,11 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const blocked = await enforceTeamChatDemoGuard(session.id, "upload");
+  if (blocked) {
+    return blocked;
   }
 
   let formData: FormData;
@@ -30,6 +37,7 @@ export async function POST(request: Request) {
   }
 
   const replyToId = String(formData.get("replyToId") ?? "").trim() || undefined;
+  const locale = await getRequestLocale();
 
   const contentType = normalizeTeamChatAudioContentType(
     audioEntry.type || "audio/webm",
@@ -46,6 +54,7 @@ export async function POST(request: Request) {
       session,
       buffer,
       contentType,
+      locale,
     );
 
     await notifyTeamChatMessage({

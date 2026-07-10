@@ -9,20 +9,26 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { OnlineIndicator } from "@/components/presence/OnlineIndicator";
+import type { AppLocale } from "@/i18n/config";
+import { getIntlLocaleTag } from "@/i18n/format";
 import type { SessionUser } from "@/lib/auth/types";
 import { PRESENCE_POLL_INTERVAL_MS } from "@/lib/presence/constants";
 import type { PresenceMap } from "@/lib/presence/types";
 import type { TeamChatMessage, TeamChatSharedMediaType } from "@/lib/team-chat/types";
-import { buildMessagePreview } from "@/lib/team-chat/message-preview";
-import { formatTeamChatDateTime, formatVoiceDuration } from "@/lib/team-chat/format";
+import { formatVoiceDuration } from "@/lib/team-chat/format";
 import { Button } from "@/components/ui/Button";
 import { useVoiceRecorder } from "./useVoiceRecorder";
 import { VoiceMessageAudio } from "./VoiceMessageAudio";
 import { ChatImageMessage } from "./ChatImageMessage";
 import { ChatFileMessage, CHAT_DOCUMENT_ACCEPT } from "./ChatFileMessage";
 import { ChatMessageText } from "./ChatMessageText";
-import { ChatMessageReply, ChatReplyQuote } from "./ChatReplyQuote";
+import {
+  buildLocalizedMessagePreview,
+  ChatMessageReply,
+  ChatReplyQuote,
+} from "./ChatReplyQuote";
 import { ChatPinnedBar } from "./ChatPinnedBar";
 import { TeamChatSharedPanel } from "./TeamChatSharedPanel";
 import { Card } from "@/components/ui/Card";
@@ -51,6 +57,22 @@ function formatBytes(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+function formatLocalizedTeamChatDateTime(iso: string, locale: AppLocale): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const intlTag = getIntlLocaleTag(locale);
+  const datePart = new Intl.DateTimeFormat(intlTag, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+  const timePart = new Intl.DateTimeFormat(intlTag, {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+  return `${datePart} • ${timePart}`;
+}
+
 export function TeamChatView({
   user,
   initialMessages,
@@ -58,6 +80,8 @@ export function TeamChatView({
   initialHasMoreBefore,
   initialPinnedMessages = [],
 }: TeamChatViewProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("teamChat");
   const listRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -207,9 +231,7 @@ export function TeamChatView({
     );
     if (!res.ok) {
       setToast({
-        text: nextPinned
-          ? "Не удалось закрепить сообщение."
-          : "Не удалось открепить сообщение.",
+        text: nextPinned ? t("toasts.pinFailed") : t("toasts.unpinFailed"),
         type: "error",
       });
       return;
@@ -221,7 +243,7 @@ export function TeamChatView({
     );
     await fetchPinned();
     setToast({
-      text: nextPinned ? "Сообщение закреплено." : "Сообщение откреплено.",
+      text: nextPinned ? t("toasts.pinned") : t("toasts.unpinned"),
     });
   }
 
@@ -426,14 +448,14 @@ export function TeamChatView({
         const data = (await res.json().catch(() => null)) as {
           error?: string;
         } | null;
-        setError(data?.error ?? "Не удалось отправить изображение.");
+        setError(data?.error ?? t("errors.imageSendFailed"));
         return false;
       }
 
       const data = (await res.json()) as { message: TeamChatMessage };
       await appendMessage(data.message);
       clearReply();
-      setToast({ text: "Изображение отправлено." });
+      setToast({ text: t("toasts.imageSent") });
       return true;
     } finally {
       setSending(false);
@@ -460,14 +482,14 @@ export function TeamChatView({
         const data = (await res.json().catch(() => null)) as {
           error?: string;
         } | null;
-        setError(data?.error ?? "Не удалось отправить файл.");
+        setError(data?.error ?? t("errors.fileSendFailed"));
         return false;
       }
 
       const data = (await res.json()) as { message: TeamChatMessage };
       await appendMessage(data.message);
       clearReply();
-      setToast({ text: "Файл отправлен." });
+      setToast({ text: t("toasts.fileSent") });
       return true;
     } finally {
       setSending(false);
@@ -510,7 +532,7 @@ export function TeamChatView({
 
     const recording = await voiceRecorder.stopAndGetBlob();
     if (!recording) {
-      setError("Не удалось записать голосовое сообщение.");
+      setError(t("errors.voiceRecordFailed"));
       return;
     }
 
@@ -531,14 +553,14 @@ export function TeamChatView({
         const data = (await res.json().catch(() => null)) as {
           error?: string;
         } | null;
-        setError(data?.error ?? "Не удалось отправить голосовое сообщение.");
+        setError(data?.error ?? t("errors.voiceSendFailed"));
         return;
       }
 
       const data = (await res.json()) as { message: TeamChatMessage };
       await appendMessage(data.message);
       clearReply();
-      setToast({ text: "Голосовое сообщение отправлено." });
+      setToast({ text: t("toasts.voiceSent") });
     } finally {
       voiceRecorder.setUploading(false);
       setSending(false);
@@ -564,7 +586,7 @@ export function TeamChatView({
 
     if (pendingAttachment) {
       if (text.length > 5000) {
-        setError("Подпись слишком длинная (макс. 5000 символов).");
+        setError(t("errors.captionTooLong"));
         return;
       }
       await handleSendPendingAttachment(text);
@@ -572,11 +594,11 @@ export function TeamChatView({
     }
 
     if (!text) {
-      setError("Введите текст сообщения.");
+      setError(t("errors.textRequired"));
       return;
     }
     if (text.length > 5000) {
-      setError("Сообщение слишком длинное (макс. 5000 символов).");
+      setError(t("errors.messageTooLong"));
       return;
     }
 
@@ -591,7 +613,7 @@ export function TeamChatView({
         }),
       });
       if (!res.ok) {
-        setError("Не удалось отправить сообщение.");
+        setError(t("errors.sendFailed"));
         return;
       }
 
@@ -599,7 +621,7 @@ export function TeamChatView({
       setComposerText("");
       clearReply();
       await appendMessage(data.message);
-      setToast({ text: "Сообщение отправлено." });
+      setToast({ text: t("toasts.messageSent") });
     } finally {
       setSending(false);
     }
@@ -631,7 +653,7 @@ export function TeamChatView({
         <>
           <ChatFileMessage
             src={message.file_url}
-            fileName={message.file_name ?? "Файл"}
+            fileName={message.file_name ?? t("file.fallbackName")}
             fileSize={message.file_size}
             contentType={message.file_content_type}
           />
@@ -650,7 +672,7 @@ export function TeamChatView({
       method: "DELETE",
     });
     if (!res.ok) {
-      setToast({ text: "Не удалось удалить сообщение.", type: "error" });
+      setToast({ text: t("toasts.deleteFailed"), type: "error" });
       return;
     }
 
@@ -661,13 +683,13 @@ export function TeamChatView({
       return next;
     });
     setPinnedMessages((prev) => prev.filter((message) => message.id !== targetId));
-    setToast({ text: "Сообщение удалено." });
+    setToast({ text: t("toasts.messageDeleted") });
   }
 
   async function confirmClear() {
     const res = await fetch("/api/team-chat/clear", { method: "POST" });
     if (!res.ok) {
-      setToast({ text: "Не удалось очистить чат.", type: "error" });
+      setToast({ text: t("toasts.clearFailed"), type: "error" });
       return;
     }
 
@@ -675,7 +697,7 @@ export function TeamChatView({
     setMessages([]);
     setLatestCreatedAt(null);
     setHasMoreBefore(false);
-    setToast({ text: "Чат очищен." });
+    setToast({ text: t("toasts.chatCleared") });
   }
 
   function onScroll() {
@@ -690,8 +712,8 @@ export function TeamChatView({
   return (
     <div className={styles.wrap}>
       <SectionHeader
-        title="Командный чат"
-        subtitle={`Внутреннее пространство для общения команды ${branding.companyName}`}
+        title={t("title")}
+        subtitle={t("subtitle", { companyName: branding.companyName })}
         action={
           isOwner ? (
             <Button
@@ -699,7 +721,7 @@ export function TeamChatView({
               variant="danger"
               onClick={() => setClearOpen(true)}
             >
-              Очистить чат
+              {t("clearChat")}
             </Button>
           ) : null
         }
@@ -709,7 +731,7 @@ export function TeamChatView({
         <input
           className={styles.search}
           type="search"
-          placeholder="Поиск по тексту и автору…"
+          placeholder={t("searchPlaceholder")}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           disabled={viewMode === "shared"}
@@ -722,7 +744,7 @@ export function TeamChatView({
             setViewMode((current) => (current === "chat" ? "shared" : "chat"))
           }
         >
-          {viewMode === "shared" ? "К чату" : "Материалы"}
+          {viewMode === "shared" ? t("viewChat") : t("viewShared")}
         </Button>
       </div>
 
@@ -743,7 +765,7 @@ export function TeamChatView({
       ) : (
       <div className={styles.list} ref={listRef} onScroll={onScroll}>
         {loadingOlder && !searchQuery.trim() ? (
-          <p className={styles.loading}>Загрузка старых сообщений…</p>
+          <p className={styles.loading}>{t("messages.loadingOlder")}</p>
         ) : null}
 
         {messages.map((message) => {
@@ -769,10 +791,10 @@ export function TeamChatView({
                       type="button"
                       className={styles.actionBtn}
                       onClick={() => startReply(message)}
-                      title="Ответить"
+                      title={t("actions.reply")}
                     >
                       <UiIcon icon="reply" className={styles.actionIcon} />
-                      Ответить
+                      {t("actions.reply")}
                     </button>
                     <button
                       type="button"
@@ -782,10 +804,16 @@ export function TeamChatView({
                           : styles.actionBtn
                       }
                       onClick={() => void togglePin(message)}
-                      title={message.is_pinned ? "Открепить" : "Закрепить"}
+                      title={
+                        message.is_pinned
+                          ? t("actions.unpin")
+                          : t("actions.pin")
+                      }
                     >
                       <UiIcon icon="thumbtack" className={styles.actionIcon} />
-                      {message.is_pinned ? "Открепить" : "Закрепить"}
+                      {message.is_pinned
+                        ? t("actions.unpin")
+                        : t("actions.pin")}
                     </button>
                     {showDelete ? (
                       <Button
@@ -794,13 +822,13 @@ export function TeamChatView({
                         className={styles.deleteBtn}
                         onClick={() => setDeleteTarget(message)}
                       >
-                        🗑 Удалить
+                        {t("actions.deleteWithIcon")}
                       </Button>
                     ) : null}
                   </div>
                 </div>
                 <div className={styles.messageTime}>
-                  {formatTeamChatDateTime(message.created_at)}
+                  {formatLocalizedTeamChatDateTime(message.created_at, locale)}
                 </div>
                 <ChatMessageReply
                   message={message}
@@ -813,7 +841,7 @@ export function TeamChatView({
         })}
 
         {!messages.length && !loadingOlder ? (
-          <p className={styles.empty}>Пока нет сообщений.</p>
+          <p className={styles.empty}>{t("messages.empty")}</p>
         ) : null}
       </div>
       )}
@@ -824,14 +852,14 @@ export function TeamChatView({
             <ChatReplyQuote
               userName={replyTarget.user_name}
               messageType={replyTarget.message_type}
-              preview={buildMessagePreview(replyTarget)}
+              preview={buildLocalizedMessagePreview(locale, replyTarget)}
               compact
             />
             <button
               type="button"
               className={styles.composerReplyClear}
               onClick={clearReply}
-              aria-label="Отменить ответ"
+              aria-label={t("aria.cancelReply")}
             >
               ×
             </button>
@@ -841,7 +869,9 @@ export function TeamChatView({
           <div className={styles.recordingBar}>
             <span className={styles.recordingDot} aria-hidden />
             <span className={styles.recordingLabel}>
-              Запись {formatVoiceDuration(voiceRecorder.elapsedMs)}
+              {t("composer.recording", {
+                duration: formatVoiceDuration(voiceRecorder.elapsedMs),
+              })}
             </span>
             <div className={styles.recordingActions}>
               <Button
@@ -850,14 +880,14 @@ export function TeamChatView({
                 disabled={sending}
                 onClick={() => voiceRecorder.cancelRecording()}
               >
-                Отмена
+                {t("actions.cancel")}
               </Button>
               <Button
                 type="button"
                 disabled={sending}
                 onClick={() => void handleSendVoice()}
               >
-                Отправить
+                {t("actions.send")}
               </Button>
             </div>
           </div>
@@ -883,12 +913,12 @@ export function TeamChatView({
                 )}
                 <div className={styles.attachmentInfo}>
                   <span className={styles.attachmentName}>
-                    {pendingAttachment.file.name || "Вложение"}
+                    {pendingAttachment.file.name || t("composer.attachmentFallback")}
                   </span>
                   <span className={styles.attachmentMeta}>
                     {pendingAttachment.kind === "image"
-                      ? "Изображение"
-                      : "Файл"}{" "}
+                      ? t("composer.imageKind")
+                      : t("composer.fileKind")}{" "}
                     · {formatBytes(pendingAttachment.file.size)}
                   </span>
                 </div>
@@ -898,7 +928,7 @@ export function TeamChatView({
                   className={styles.attachmentRemove}
                   disabled={sending || voiceRecorder.state === "uploading"}
                   onClick={clearPendingAttachment}
-                  aria-label="Убрать вложение"
+                  aria-label={t("aria.removeAttachment")}
                 >
                   ×
                 </Button>
@@ -908,8 +938,8 @@ export function TeamChatView({
               className={styles.composerInput}
               placeholder={
                 pendingAttachment
-                  ? "Подпись к вложению (необязательно)…"
-                  : "Сообщение… Ctrl+V — скриншот, скрепка — файл"
+                  ? t("composer.captionPlaceholder")
+                  : t("composer.placeholder")
               }
               value={composerText}
               maxLength={5000}
@@ -942,8 +972,8 @@ export function TeamChatView({
                 className={styles.micBtn}
                 disabled={sending || voiceRecorder.state === "uploading"}
                 onClick={() => fileInputRef.current?.click()}
-                aria-label="Прикрепить файл"
-                title="PDF, Word, Excel и др."
+                aria-label={t("aria.attachFile")}
+                title={t("titles.attachFile")}
               >
                 <UiIcon icon="paperclip" className={styles.composerIcon} />
               </Button>
@@ -964,8 +994,8 @@ export function TeamChatView({
                 className={styles.micBtn}
                 disabled={sending || voiceRecorder.state === "uploading"}
                 onClick={() => imageInputRef.current?.click()}
-                aria-label="Прикрепить изображение"
-                title="Изображение"
+                aria-label={t("aria.attachImage")}
+                title={t("titles.attachImage")}
               >
                 <UiIcon icon="image" className={styles.composerIcon} />
               </Button>
@@ -979,8 +1009,8 @@ export function TeamChatView({
                   Boolean(pendingAttachment)
                 }
                 onClick={() => void handleToggleVoiceRecording()}
-                aria-label="Записать голосовое сообщение"
-                title="Голосовое сообщение"
+                aria-label={t("aria.recordVoice")}
+                title={t("titles.voiceMessage")}
               >
                 <UiIcon icon="microphone" className={styles.composerIcon} />
               </Button>
@@ -995,7 +1025,7 @@ export function TeamChatView({
               >
                 {sending || voiceRecorder.state === "uploading"
                   ? "…"
-                  : "Отправить"}
+                  : t("actions.send")}
               </Button>
             </div>
           </>
@@ -1003,10 +1033,7 @@ export function TeamChatView({
       </div>
 
       {voiceRecorder.state === "idle" ? (
-        <p className={styles.composerHint}>
-          Прикрепите файл или скриншот, добавьте подпись и нажмите «Отправить» — всё
-          уйдёт одним сообщением. Ctrl+V — вставить скриншот. Скрепка — документы до 25 МБ.
-        </p>
+        <p className={styles.composerHint}>{t("composer.hint")}</p>
       ) : null}
 
       {voiceRecorder.error ? (
@@ -1015,45 +1042,51 @@ export function TeamChatView({
       {error ? <p className={styles.error}>{error}</p> : null}
 
       {deleteTarget ? (
-        <Modal title="Удалить сообщение?" onClose={() => setDeleteTarget(null)}>
+        <Modal
+          title={t("modals.deleteMessage")}
+          closeLabel={t("aria.close")}
+          onClose={() => setDeleteTarget(null)}
+        >
           <div className={styles.confirmActions}>
             <Button
               type="button"
               variant="secondary"
               onClick={() => setDeleteTarget(null)}
             >
-              Отмена
+              {t("actions.cancel")}
             </Button>
             <Button
               type="button"
               variant="danger"
               onClick={() => void confirmDelete()}
             >
-              Удалить
+              {t("actions.delete")}
             </Button>
           </div>
         </Modal>
       ) : null}
 
       {clearOpen ? (
-        <Modal title="Вы уверены?" onClose={() => setClearOpen(false)}>
-          <p className={styles.confirmText}>
-            Это действие нельзя отменить.
-          </p>
+        <Modal
+          title={t("modals.confirmClear")}
+          closeLabel={t("aria.close")}
+          onClose={() => setClearOpen(false)}
+        >
+          <p className={styles.confirmText}>{t("modals.irreversible")}</p>
           <div className={styles.confirmActions}>
             <Button
               type="button"
               variant="secondary"
               onClick={() => setClearOpen(false)}
             >
-              Отмена
+              {t("actions.cancel")}
             </Button>
             <Button
               type="button"
               variant="danger"
               onClick={() => void confirmClear()}
             >
-              Очистить чат
+              {t("clearChat")}
             </Button>
           </div>
         </Modal>
@@ -1067,10 +1100,12 @@ export function TeamChatView({
 function Modal({
   title,
   children,
+  closeLabel,
   onClose,
 }: {
   title: string;
   children: ReactNode;
+  closeLabel: string;
   onClose: () => void;
 }) {
   return (
@@ -1083,7 +1118,7 @@ function Modal({
             type="button"
             className={styles.close}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label={closeLabel}
           >
             ×
           </button>

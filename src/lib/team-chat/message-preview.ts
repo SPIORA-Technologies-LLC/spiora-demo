@@ -1,34 +1,57 @@
-import type { TeamChatMessage, TeamChatMessageType } from "./types";
+import type { AppLocale } from "@/i18n/config";
 import {
-  FILE_MESSAGE_SEARCH_LABEL,
-  IMAGE_MESSAGE_SEARCH_LABEL,
-  VOICE_MESSAGE_SEARCH_LABEL,
-} from "./types";
+  translateTeamChatMessageTypeLabel,
+  translateTeamChatSearchLabel,
+} from "@/i18n/team-chat-messages";
+import { resolveDemoMessageText } from "./demo-message-text";
+import type { TeamChatMessage, TeamChatMessageType } from "./types";
 
-export function buildMessagePreview(message: TeamChatMessage): string {
+export function buildMessagePreview(
+  message: TeamChatMessage,
+  locale: AppLocale = "en",
+): string {
   if (message.message_type === "voice") {
-    return VOICE_MESSAGE_SEARCH_LABEL;
+    return translateTeamChatSearchLabel(locale, "voice");
   }
   if (message.message_type === "image") {
-    const caption = message.message_text.trim();
-    return caption || IMAGE_MESSAGE_SEARCH_LABEL;
+    const caption = resolveDemoMessageText(
+      locale,
+      message.message_text.trim(),
+    );
+    return caption || translateTeamChatSearchLabel(locale, "image");
   }
   if (message.message_type === "file") {
-    const caption = message.message_text.trim();
-    return caption || message.file_name?.trim() || FILE_MESSAGE_SEARCH_LABEL;
+    const caption = resolveDemoMessageText(
+      locale,
+      message.message_text.trim(),
+    );
+    return (
+      caption ||
+      message.file_name?.trim() ||
+      translateTeamChatSearchLabel(locale, "file")
+    );
   }
-  return message.message_text.trim().slice(0, 240);
+  return resolveDemoMessageText(locale, message.message_text.trim()).slice(
+    0,
+    240,
+  );
 }
 
-export function messageTypeLabel(type: TeamChatMessageType): string {
-  switch (type) {
-    case "voice":
-      return VOICE_MESSAGE_SEARCH_LABEL;
-    case "image":
-      return IMAGE_MESSAGE_SEARCH_LABEL;
-    case "file":
-      return FILE_MESSAGE_SEARCH_LABEL;
-    default:
-      return "Сообщение";
+export function messageTypeLabel(
+  type: TeamChatMessageType,
+  locale: AppLocale = "en",
+): string {
+  if (type === "text") {
+    return translateTeamChatMessageTypeLabel(locale, "text");
   }
+  if (type === "voice") {
+    return translateTeamChatSearchLabel(locale, "voice");
+  }
+  if (type === "image") {
+    return translateTeamChatSearchLabel(locale, "image");
+  }
+  if (type === "file") {
+    return translateTeamChatSearchLabel(locale, "file");
+  }
+  return translateTeamChatMessageTypeLabel(locale, "text");
 }

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import { getRequestLocale } from "@/i18n/api-messages";
 import { getSession } from "@/lib/auth/session";
 import { notifyTeamChatMessage } from "@/lib/notifications/emit";
+import { enforceTeamChatDemoGuard } from "@/lib/team-chat/demo-api-guard";
 import { normalizeTeamChatFileContentType } from "@/lib/team-chat/file-storage";
 import { createFileTeamChatMessage } from "@/lib/team-chat/store";
 
@@ -8,6 +10,11 @@ export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const blocked = await enforceTeamChatDemoGuard(session.id, "upload");
+  if (blocked) {
+    return blocked;
   }
 
   let formData: FormData;
@@ -34,6 +41,7 @@ export async function POST(request: Request) {
   const buffer = Buffer.from(await fileEntry.arrayBuffer());
   const caption = String(formData.get("text") ?? formData.get("caption") ?? "");
   const replyToId = String(formData.get("replyToId") ?? "").trim() || undefined;
+  const locale = await getRequestLocale();
 
   try {
     const message = await createFileTeamChatMessage(
@@ -43,12 +51,13 @@ export async function POST(request: Request) {
       contentType,
       caption,
       replyToId,
+      locale,
     );
 
     await notifyTeamChatMessage({
       senderId: session.id,
       senderName: session.name,
-      text: message.message_text || (message.file_name ?? "Файл"),
+      text: message.message_text || message.file_name || "",
       isFile: true,
     });
 

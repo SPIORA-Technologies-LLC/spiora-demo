@@ -34,11 +34,21 @@ function baseMessage(
 }
 
 describe("buildMessagePreview", () => {
-  it("uses voice label for voice messages", () => {
+  it("EN: uses voice label for voice messages", () => {
     const preview = buildMessagePreview(
       baseMessage({ message_type: "voice", message_text: "" }),
+      "en",
     );
-    assert.match(preview, /голосовое/i);
+    assert.match(preview, /voice/i);
+    assert.doesNotMatch(preview, /[А-Яа-яЁё]/);
+  });
+
+  it("RU: uses Russian voice label", () => {
+    const preview = buildMessagePreview(
+      baseMessage({ message_type: "voice", message_text: "" }),
+      "ru",
+    );
+    assert.match(preview, /голосов/i);
   });
 
   it("uses file name for file messages", () => {
@@ -48,6 +58,7 @@ describe("buildMessagePreview", () => {
         file_name: "contract.pdf",
         message_text: "",
       }),
+      "en",
     );
     assert.equal(preview, "contract.pdf");
   });

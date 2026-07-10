@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import {
   getNotificationDisplayMessage,
@@ -67,6 +68,7 @@ function ToastCard({
   onDismiss: () => void;
   onOpen: () => void;
 }) {
+  const t = useTranslations("notifications");
   const href = getNotificationHref(
     notification.type,
     notification.message,
@@ -102,7 +104,7 @@ function ToastCard({
           notification.message,
         )}
       </div>
-      {href ? <div className={styles.toastAction}>Открыть раздел →</div> : null}
+      {href ? <div className={styles.toastAction}>{t("openSection")}</div> : null}
       <span
         className={styles.toastClose}
         role="presentation"
@@ -138,7 +140,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const showToast = useCallback(
     (notification: NotificationItem) => {
       if (!shouldShowNotificationToast(notification.type)) return;
-      if (isOnNotificationSection(pathname, notification.type)) return;
+      if (
+        isOnNotificationSection(
+          pathname,
+          notification.type,
+          notification.message,
+        )
+      ) {
+        return;
+      }
 
       let added = false;
       setToasts((prev) => {
@@ -326,7 +336,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
     setToasts((prev) =>
       prev.filter((toast) => {
-        const section = getNotificationSection(toast.notification.type);
+        const section = getNotificationSection(
+          toast.notification.type,
+          toast.notification.message,
+        );
         if (
           section &&
           pathnameMatchesNotificationSection(pathname, section)

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export type VoiceRecorderState = "idle" | "recording" | "uploading";
 
@@ -29,6 +30,7 @@ function stopStream(stream: MediaStream | null) {
 }
 
 export function useVoiceRecorder() {
+  const t = useTranslations("teamChat.voiceRecorder");
   const [state, setState] = useState<VoiceRecorderState>("idle");
   const [elapsedMs, setElapsedMs] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -61,13 +63,13 @@ export function useVoiceRecorder() {
     setError(null);
 
     if (!navigator.mediaDevices?.getUserMedia) {
-      setError("Браузер не поддерживает запись с микрофона.");
+      setError(t("unsupported"));
       return false;
     }
 
     const mimeType = getPreferredMimeType();
     if (!mimeType) {
-      setError("Браузер не поддерживает запись голоса.");
+      setError(t("noCodec"));
       return false;
     }
 
@@ -97,10 +99,10 @@ export function useVoiceRecorder() {
       return true;
     } catch {
       cleanup();
-      setError("Не удалось получить доступ к микрофону.");
+      setError(t("micDenied"));
       return false;
     }
-  }, [cleanup]);
+  }, [cleanup, t]);
 
   const cancelRecording = useCallback(() => {
     const recorder = mediaRecorderRef.current;

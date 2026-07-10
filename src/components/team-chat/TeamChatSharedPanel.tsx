@@ -1,23 +1,36 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { getIntlLocaleTag } from "@/i18n/format";
 import type {
   TeamChatLinkItem,
   TeamChatMessage,
   TeamChatSharedMediaType,
 } from "@/lib/team-chat/types";
-import { formatTeamChatDateTime } from "@/lib/team-chat/format";
 import { ChatFileMessage } from "./ChatFileMessage";
 import { ChatImageMessage } from "./ChatImageMessage";
 import { VoiceMessageAudio } from "./VoiceMessageAudio";
 import styles from "./TeamChatView.module.css";
 
-const TABS: Array<{ id: TeamChatSharedMediaType; label: string }> = [
-  { id: "image", label: "Медиа" },
-  { id: "file", label: "Файлы" },
-  { id: "links", label: "Ссылки" },
-  { id: "voice", label: "Голосовые" },
-];
+const TAB_IDS: TeamChatSharedMediaType[] = ["image", "file", "links", "voice"];
+
+function formatLocalizedTeamChatDateTime(iso: string, locale: AppLocale): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  const intlTag = getIntlLocaleTag(locale);
+  const datePart = new Intl.DateTimeFormat(intlTag, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+  const timePart = new Intl.DateTimeFormat(intlTag, {
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+  return `${datePart} • ${timePart}`;
+}
 
 type TeamChatSharedPanelProps = {
   activeTab: TeamChatSharedMediaType;
@@ -30,6 +43,8 @@ export function TeamChatSharedPanel({
   onTabChange,
   onOpenMessage,
 }: TeamChatSharedPanelProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("teamChat");
   const [loading, setLoading] = useState(false);
   const [messages, setMessages] = useState<TeamChatMessage[]>([]);
   const [links, setLinks] = useState<TeamChatLinkItem[]>([]);
@@ -64,24 +79,24 @@ export function TeamChatSharedPanel({
   return (
     <div className={styles.sharedPanel}>
       <div className={styles.sharedTabs}>
-        {TABS.map((tab) => (
+        {TAB_IDS.map((tabId) => (
           <button
-            key={tab.id}
+            key={tabId}
             type="button"
             className={
-              activeTab === tab.id
+              activeTab === tabId
                 ? styles.sharedTabActive
                 : styles.sharedTab
             }
-            onClick={() => onTabChange(tab.id)}
+            onClick={() => onTabChange(tabId)}
           >
-            {tab.label}
+            {t(`shared.tabs.${tabId}`)}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <p className={styles.sharedEmpty}>Загрузка…</p>
+        <p className={styles.sharedEmpty}>{t("shared.loading")}</p>
       ) : activeTab === "links" ? (
         links.length ? (
           <div className={styles.sharedLinks}>
@@ -100,20 +115,20 @@ export function TeamChatSharedPanel({
                 </a>
                 <div className={styles.sharedLinkMeta}>
                   <span>{link.user_name}</span>
-                  <span>{formatTeamChatDateTime(link.created_at)}</span>
+                  <span>{formatLocalizedTeamChatDateTime(link.created_at, locale)}</span>
                 </div>
                 <button
                   type="button"
                   className={styles.sharedOpenMessageBtn}
                   onClick={() => onOpenMessage(link.message_id)}
                 >
-                  К сообщению
+                  {t("shared.goToMessage")}
                 </button>
               </div>
             ))}
           </div>
         ) : (
-          <p className={styles.sharedEmpty}>Ссылок пока нет.</p>
+          <p className={styles.sharedEmpty}>{t("shared.emptyLinks")}</p>
         )
       ) : messages.length ? (
         <div
@@ -137,7 +152,7 @@ export function TeamChatSharedPanel({
               {activeTab === "file" && message.file_url ? (
                 <ChatFileMessage
                   src={message.file_url}
-                  fileName={message.file_name ?? "Файл"}
+                  fileName={message.file_name ?? t("file.fallbackName")}
                   fileSize={message.file_size}
                   contentType={message.file_content_type}
                 />
@@ -150,20 +165,22 @@ export function TeamChatSharedPanel({
               ) : null}
               <div className={styles.sharedItemMeta}>
                 <span>{message.user_name}</span>
-                <span>{formatTeamChatDateTime(message.created_at)}</span>
+                <span>
+                  {formatLocalizedTeamChatDateTime(message.created_at, locale)}
+                </span>
               </div>
               <button
                 type="button"
                 className={styles.sharedOpenMessageBtn}
                 onClick={() => onOpenMessage(message.id)}
               >
-                К сообщению
+                {t("shared.goToMessage")}
               </button>
             </div>
           ))}
         </div>
       ) : (
-        <p className={styles.sharedEmpty}>В этой категории пока пусто.</p>
+        <p className={styles.sharedEmpty}>{t("shared.emptyCategory")}</p>
       )}
     </div>
   );

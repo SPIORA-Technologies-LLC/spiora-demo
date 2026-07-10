@@ -1,8 +1,18 @@
 import type { AppLocale } from "@/i18n/config";
 import type { NotificationType } from "@/lib/notifications/types";
 import { decodeCalendarReminderMessage } from "./calendar-reminder-copy";
+import {
+  decodeDemoNavMessage,
+  getDemoNavHref,
+} from "./notification-demo-nav";
 
-export type NotificationSection = "team-chat" | "tasks" | "formgrid" | "calendar";
+export type NotificationSection =
+  | "team-chat"
+  | "tasks"
+  | "formgrid"
+  | "calendar"
+  | "ai-workspace"
+  | "clients";
 
 const TOAST_NOTIFICATION_TYPES = new Set<NotificationType>([
   "team_chat",
@@ -13,6 +23,7 @@ const TOAST_NOTIFICATION_TYPES = new Set<NotificationType>([
   "consultation_assigned",
   "calendar_reminder",
   "calendar_video_invite",
+  "system",
 ]);
 
 const CALENDAR_LINK_TYPES = new Set<NotificationType>([
@@ -35,12 +46,28 @@ export function getNotificationDisplayMessage(
   if (isCalendarLinkType(type)) {
     return decodeCalendarReminderMessage(message).display;
   }
+
+  const demoNav = decodeDemoNavMessage(message);
+  if (demoNav.href) {
+    return demoNav.display;
+  }
+
   return message;
 }
 
 export function getNotificationSection(
   type: NotificationType,
+  message?: string,
 ): NotificationSection | null {
+  const demoHref = message ? getDemoNavHref(message) : null;
+  if (demoHref) {
+    if (demoHref.startsWith("/ai-workspace")) return "ai-workspace";
+    if (demoHref.startsWith("/clients/")) return "clients";
+    if (demoHref.startsWith("/team-chat")) return "team-chat";
+    if (demoHref.startsWith("/tasks")) return "tasks";
+    if (demoHref.startsWith("/calendar")) return "calendar";
+  }
+
   switch (type) {
     case "team_chat":
       return "team-chat";
@@ -54,6 +81,8 @@ export function getNotificationSection(
     case "calendar_reminder":
     case "calendar_video_invite":
       return "calendar";
+    case "system":
+      return demoHref?.startsWith("/ai-workspace") ? "ai-workspace" : null;
     default:
       return null;
   }
@@ -63,6 +92,11 @@ export function getNotificationHref(
   type: NotificationType,
   message?: string,
 ): string | null {
+  const demoHref = message ? getDemoNavHref(message) : null;
+  if (demoHref) {
+    return demoHref;
+  }
+
   switch (type) {
     case "team_chat":
       return "/team-chat";
@@ -126,6 +160,13 @@ export function pathnameMatchesNotificationSection(
       );
     case "calendar":
       return pathname === "/calendar" || pathname.startsWith("/calendar/");
+    case "ai-workspace":
+      return (
+        pathname === "/ai-workspace" ||
+        pathname.startsWith("/ai-workspace/")
+      );
+    case "clients":
+      return pathname === "/clients" || pathname.startsWith("/clients/");
     default:
       return false;
   }
@@ -134,8 +175,9 @@ export function pathnameMatchesNotificationSection(
 export function isOnNotificationSection(
   pathname: string,
   type: NotificationType,
+  message?: string,
 ): boolean {
-  const section = getNotificationSection(type);
+  const section = getNotificationSection(type, message);
   if (!section) return false;
   return pathnameMatchesNotificationSection(pathname, section);
 }

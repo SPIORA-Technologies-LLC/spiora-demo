@@ -5,15 +5,49 @@ import { resolveVideoMeetingReminderRecipientIds } from "@/lib/calendar/particip
 import type { CalendarEvent } from "@/lib/calendar/types";
 import { isVideoMeeting } from "@/lib/calendar/meeting";
 import type { ReminderOffsetMinutes } from "@/lib/calendar/constants";
-import { getDeletedUserIds } from "@/lib/team/store";
-import { TASK_STATUS_LABELS, type TaskStatus } from "@/lib/tasks/types";
 import { getRequestLocale } from "@/i18n/api-messages";
+import {
+  translateNotificationEmit,
+  translateTaskStatusForNotification,
+  translateTeamChatPreview,
+} from "@/i18n/notification-emit-messages";
+import { getDeletedUserIds } from "@/lib/team/store";
+import type { TaskStatus } from "@/lib/tasks/types";
 import {
   buildCalendarReminderNotificationContent,
   buildVideoMeetingInviteNotificationContent,
 } from "./calendar-reminder-copy";
 import { createNotificationForUser, createNotificationsForTeam } from "./store";
 import type { Notification } from "./types";
+
+function buildTeamChatPreview(
+  locale: Awaited<ReturnType<typeof getRequestLocale>>,
+  params: {
+    text: string;
+    isVoice?: boolean;
+    isImage?: boolean;
+    isFile?: boolean;
+  },
+): string {
+  if (params.isVoice) {
+    return translateTeamChatPreview(locale, "voice");
+  }
+  if (params.isImage) {
+    const caption = params.text.trim();
+    return caption
+      ? translateTeamChatPreview(locale, "imageWithCaption", caption)
+      : translateTeamChatPreview(locale, "image");
+  }
+  if (params.isFile) {
+    const caption = params.text.trim();
+    return caption
+      ? translateTeamChatPreview(locale, "fileWithCaption", caption)
+      : translateTeamChatPreview(locale, "file");
+  }
+  return params.text.length > 200
+    ? `${params.text.slice(0, 200)}…`
+    : params.text;
+}
 
 export async function notifyTeamChatMessage(params: {
   senderId: string;
@@ -23,24 +57,13 @@ export async function notifyTeamChatMessage(params: {
   isImage?: boolean;
   isFile?: boolean;
 }) {
-  const preview = params.isVoice
-    ? "🎤 Голосовое сообщение"
-    : params.isImage
-      ? params.text.trim()
-        ? `🖼 ${params.text.trim()}`
-        : "🖼 Изображение"
-      : params.isFile
-        ? params.text.trim()
-          ? `📎 ${params.text.trim()}`
-          : `📎 ${params.text || "Файл"}`
-        : params.text.length > 200
-          ? `${params.text.slice(0, 200)}…`
-          : params.text;
+  const locale = await getRequestLocale();
+  const preview = buildTeamChatPreview(locale, params);
 
   await createNotificationsForTeam(
     {
       type: "team_chat",
-      title: "Новое сообщение",
+      title: translateNotificationEmit(locale, "notifyTeamChatMessage.title"),
       author_name: params.senderName,
       message: preview,
     },
@@ -54,12 +77,15 @@ export async function notifyTaskCreated(params: {
   taskTitle: string;
   assigneeIds?: string[];
 }) {
+  const locale = await getRequestLocale();
   const hasAssignees = Boolean(params.assigneeIds?.length);
 
   await createNotificationsForTeam(
     {
       type: "task_new",
-      title: hasAssignees ? "Вам назначена задача" : "Новая задача",
+      title: hasAssignees
+        ? translateNotificationEmit(locale, "taskCreated.titleAssigned")
+        : translateNotificationEmit(locale, "taskCreated.title"),
       author_name: params.actorName,
       message: params.taskTitle,
     },
@@ -76,12 +102,14 @@ export async function notifyTaskStatusChanged(params: {
   taskTitle: string;
   status: TaskStatus;
 }) {
+  const locale = await getRequestLocale();
+
   await createNotificationsForTeam(
     {
       type: "task_status",
-      title: "Изменение статуса задачи",
+      title: translateNotificationEmit(locale, "taskStatusChanged.title"),
       author_name: params.actorName,
-      message: `${params.taskTitle} — ${TASK_STATUS_LABELS[params.status]}`,
+      message: `${params.taskTitle} — ${translateTaskStatusForNotification(locale, params.status)}`,
     },
     { excludeUserId: params.actorId },
   );
@@ -95,10 +123,12 @@ export async function notifyTaskCompleted(params: {
 }) {
   if (params.creatorUserId === params.actorId) return;
 
+  const locale = await getRequestLocale();
+
   await createNotificationsForTeam(
     {
       type: "task_completed",
-      title: "Задача выполнена",
+      title: translateNotificationEmit(locale, "taskCompleted.title"),
       author_name: params.actorName,
       message: params.taskTitle,
     },
@@ -117,10 +147,12 @@ export async function notifyTaskPendingApproval(params: {
 }) {
   if (params.creatorUserId === params.actorId) return;
 
+  const locale = await getRequestLocale();
+
   await createNotificationsForTeam(
     {
       type: "task_pending_approval",
-      title: "Задача на проверке",
+      title: translateNotificationEmit(locale, "taskPendingApproval.title"),
       author_name: params.actorName,
       message: params.taskTitle,
     },
@@ -138,6 +170,7 @@ export async function notifyTaskRevisionRequested(params: {
   comment: string;
   assigneeIds: string[];
 }) {
+  const locale = await getRequestLocale();
   const preview =
     params.comment.length > 160
       ? `${params.comment.slice(0, 160)}…`
@@ -146,7 +179,7 @@ export async function notifyTaskRevisionRequested(params: {
   await createNotificationsForTeam(
     {
       type: "task_revision",
-      title: "Задача на доработке",
+      title: translateNotificationEmit(locale, "taskRevisionRequested.title"),
       author_name: params.actorName,
       message: `${params.taskTitle} — ${preview}`,
     },
@@ -163,10 +196,12 @@ export async function notifyTaskApproved(params: {
   taskTitle: string;
   assigneeIds: string[];
 }) {
+  const locale = await getRequestLocale();
+
   await createNotificationsForTeam(
     {
       type: "task_completed",
-      title: "Задача принята",
+      title: translateNotificationEmit(locale, "taskApproved.title"),
       author_name: params.actorName,
       message: params.taskTitle,
     },
@@ -245,9 +280,11 @@ export async function notifyNewClient(params: {
   clientName: string;
   source?: string;
 }) {
+  const locale = await getRequestLocale();
+
   await createNotificationsForTeam({
     type: "client_new",
-    title: "Новый клиент",
+    title: translateNotificationEmit(locale, "newClient.title"),
     author_name: null,
     message: params.source
       ? `${params.clientName} (${params.source})`
@@ -260,10 +297,12 @@ export async function notifyConsultationAssigned(params: {
   managerName?: string;
   onlyUserIds?: string[];
 }) {
+  const locale = await getRequestLocale();
+
   await createNotificationsForTeam(
     {
       type: "consultation_assigned",
-      title: "Назначена консультация",
+      title: translateNotificationEmit(locale, "consultationAssigned.title"),
       author_name: params.managerName ?? null,
       message: params.clientName,
     },
@@ -280,7 +319,6 @@ export async function notifySystem(params: {
     {
       type: "system",
       title: params.title,
-      author_name: null,
       message: params.message,
     },
     { onlyUserIds: params.onlyUserIds },

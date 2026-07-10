@@ -1,21 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import styles from "./ClientAiPanel.module.css";
 
-const PRESETS = [
-  "Покажи краткое резюме клиента",
-  "Какие документы ещё нужны клиенту?",
-  "Подготовь сообщение клиенту",
-  "Подготовь follow-up после консультации",
-  "Есть ли риски по этому кейсу?",
-  "Какая программа подходит клиенту лучше всего?",
-  "Сравни Испанию и Хорватию для этого клиента",
-  "Подготовь коммерческое предложение",
-  "Сделай краткий отчёт для менеджера",
-];
+const PRESET_KEYS = [
+  "summary",
+  "documentsNeeded",
+  "clientMessage",
+  "followUp",
+  "risks",
+  "bestProgram",
+  "compareCountries",
+  "proposal",
+  "managerReport",
+] as const;
+
+type PresetKey = (typeof PRESET_KEYS)[number];
 
 type PanelState = {
   open: boolean;
@@ -35,6 +38,7 @@ export function ClientAiPanel({
   state,
   onClose,
 }: ClientAiPanelProps) {
+  const t = useTranslations("clients.ai");
   const [message, setMessage] = useState("");
   const [reply, setReply] = useState("");
   const [loading, setLoading] = useState(false);
@@ -55,9 +59,9 @@ export function ClientAiPanel({
         },
       );
       const data = (await res.json()) as { reply?: string; error?: string };
-      setReply(data.reply ?? data.error ?? "Не удалось получить ответ AI.");
+      setReply(data.reply ?? data.error ?? t("errorReply"));
     } catch {
-      setReply("Ошибка соединения с AI.");
+      setReply(t("errorConnection"));
     } finally {
       setLoading(false);
     }
@@ -79,36 +83,36 @@ export function ClientAiPanel({
         <header className={styles.header}>
           <div>
             <h2 className={styles.title}>
-              {state.mode === "summary" ? "AI Summary" : "AI по клиенту"}
+              {state.mode === "summary" ? t("titleSummary") : t("titleChat")}
             </h2>
             <p className={styles.subtitle}>
-              Контекст: <strong>{clientName}</strong> — анкеты, документы и
-              заметки подключены автоматически
+              {t("context", { name: clientName })}
             </p>
           </div>
           <button
             type="button"
             className={styles.close}
             onClick={onClose}
-            aria-label="Закрыть"
+            aria-label={t("closeAria")}
           >
             <i className="fa-solid fa-xmark" />
           </button>
         </header>
 
         <div className={styles.presets}>
-          {PRESETS.map((preset) => (
+          {PRESET_KEYS.map((presetKey) => (
             <button
-              key={preset}
+              key={presetKey}
               type="button"
               className={styles.preset}
               disabled={loading}
               onClick={() => {
+                const preset = t(`presets.${presetKey}` as `presets.${PresetKey}`);
                 setMessage(preset);
                 void sendAi(preset, "chat");
               }}
             >
-              {preset}
+              {t(`presets.${presetKey}` as `presets.${PresetKey}`)}
             </button>
           ))}
         </div>
@@ -117,7 +121,7 @@ export function ClientAiPanel({
           <input
             type="text"
             className={styles.input}
-            placeholder='Например: "Напиши сообщение"'
+            placeholder={t("inputPlaceholder")}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) => {
@@ -129,20 +133,17 @@ export function ClientAiPanel({
             disabled={loading || !message.trim()}
             onClick={() => void sendAi(message, "chat")}
           >
-            {loading ? "…" : "Отправить"}
+            {loading ? "…" : t("send")}
           </Button>
         </div>
 
         <div className={styles.reply}>
           {loading ? (
-            <p className={styles.loading}>AI думает…</p>
+            <p className={styles.loading}>{t("loading")}</p>
           ) : reply ? (
             <pre className={styles.replyText}>{reply}</pre>
           ) : (
-            <p className={styles.hint}>
-              Выберите подсказку или напишите запрос — AI уже знает, какой
-              клиент открыт.
-            </p>
+            <p className={styles.hint}>{t("hint")}</p>
           )}
         </div>
       </Card>
@@ -157,6 +158,7 @@ export function ClientAiActions({
   clientId: string;
   clientName: string;
 }) {
+  const t = useTranslations("clients.ai");
   const [panel, setPanel] = useState<PanelState>({ open: false, mode: "chat" });
 
   return (
@@ -166,14 +168,14 @@ export function ClientAiActions({
           type="button"
           onClick={() => setPanel({ open: true, mode: "chat" })}
         >
-          🤖 Спросить AI по клиенту
+          🤖 {t("askButton")}
         </Button>
         <Button
           type="button"
           variant="secondary"
           onClick={() => setPanel({ open: true, mode: "summary" })}
         >
-          📋 AI Summary
+          📋 {t("summaryButton")}
         </Button>
       </div>
       <ClientAiPanel

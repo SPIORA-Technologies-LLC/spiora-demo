@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { OnlineIndicator } from "@/components/presence/OnlineIndicator";
 import { PRESENCE_POLL_INTERVAL_MS } from "@/lib/presence/constants";
 import type { PresenceMap } from "@/lib/presence/types";
@@ -14,6 +15,7 @@ type DashboardTeamMessagesProps = {
 };
 
 export function DashboardTeamMessages({ messages }: DashboardTeamMessagesProps) {
+  const t = useTranslations("dashboard.teamMessages");
   const [presence, setPresence] = useState<PresenceMap>({});
 
   useEffect(() => {
@@ -55,7 +57,7 @@ export function DashboardTeamMessages({ messages }: DashboardTeamMessagesProps) 
             </div>
             <p className={styles.chatText}>
               {message.message_type === "voice"
-                ? `🎤 Голосовое сообщение${
+                ? `🎤 ${t("voice")}${
                     message.audio_duration_ms != null
                       ? ` · ${formatVoiceDuration(message.audio_duration_ms)}`
                       : ""
@@ -63,11 +65,11 @@ export function DashboardTeamMessages({ messages }: DashboardTeamMessagesProps) 
                 : message.message_type === "image"
                   ? message.message_text?.trim()
                     ? `🖼 ${message.message_text.trim()}`
-                    : "🖼 Изображение"
+                    : `🖼 ${t("image")}`
                   : message.message_type === "file"
                     ? message.message_text?.trim()
                       ? `📎 ${message.message_text.trim()}`
-                      : `📎 ${message.file_name ?? "Файл"}`
+                      : `📎 ${message.file_name ?? t("file")}`
                     : message.message_text}
             </p>
           </Card>
@@ -75,7 +77,7 @@ export function DashboardTeamMessages({ messages }: DashboardTeamMessagesProps) 
       ))}
       {messages.length === 0 ? (
         <li className={styles.chatEmpty}>
-          <p>Пока нет сообщений.</p>
+          <p>{t("empty")}</p>
         </li>
       ) : null}
     </ul>

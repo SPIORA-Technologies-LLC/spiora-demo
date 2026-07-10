@@ -5,40 +5,57 @@ function display(value: string | undefined): string {
   return trimmed && trimmed !== "—" ? trimmed : "—";
 }
 
+export type ClientSheetFieldKey =
+  | "lastName"
+  | "latin"
+  | "passport"
+  | "email"
+  | "submittedAt"
+  | "expectedApproval"
+  | "referent"
+  | "bookingAddress"
+  | "bookingRange"
+  | "approvalDate"
+  | "notes"
+  | "cardIssuedDate"
+  | "appPassword"
+  | "partner"
+  | "contract";
+
 /** Все поля вкладки «Клиенты» (Google Sheets) в порядке таблицы. */
 export function getClientSheetFields(
   client: Client,
-): Array<{ label: string; value: string }> {
+): Array<{ labelKey: ClientSheetFieldKey; value: string }> {
   return [
-    { label: "Фамилия", value: display(client.name) },
-    { label: "Латиница", value: display(client.citizenship) },
+    { labelKey: "lastName", value: display(client.name) },
+    { labelKey: "latin", value: display(client.citizenship) },
     {
-      label: "Номер паспорта",
+      labelKey: "passport",
       value: display(client.passportNumber ?? client.id),
     },
-    { label: "Электронная почта", value: display(client.email) },
+    { labelKey: "email", value: display(client.email) },
     {
-      label: "Дата подачи",
+      labelKey: "submittedAt",
       value: display(client.submittedAt ?? client.createdAt),
     },
     {
-      label: "Предполагаемое одобрение",
+      labelKey: "expectedApproval",
       value: display(client.expectedApprovalAt),
     },
     {
-      label: "Имя референта",
+      labelKey: "referent",
       value: display(client.referentName ?? client.manager),
     },
-    { label: "Адрес букинга", value: display(client.bookingAddress) },
-    { label: "Дата букинга (от и до)", value: display(client.bookingRange) },
-    { label: "Дата одобрения ВНЖ", value: display(client.approvalAt) },
-    { label: "Заметки", value: display(client.notes) },
+    { labelKey: "bookingAddress", value: display(client.bookingAddress) },
+    { labelKey: "bookingRange", value: display(client.bookingRange) },
+    { labelKey: "approvalDate", value: display(client.approvalAt) },
+    { labelKey: "notes", value: display(client.notes) },
     {
-      label: "Дата выдачи карточки ВНЖ",
+      labelKey: "cardIssuedDate",
       value: display(client.residenceCardIssuedAt),
     },
-    { label: "Пароль для приложения", value: display(client.appPassword) },
-    { label: "Партнер от кого клиент", value: display(client.partnerName) },
-    { label: "Договор", value: display(client.contract) },
+    { labelKey: "appPassword", value: display(client.appPassword) },
+    { labelKey: "partner", value: display(client.partnerName) },
+    { labelKey: "contract", value: display(client.contract) },
   ];
 }

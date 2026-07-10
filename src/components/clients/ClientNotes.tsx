@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import type { ClientNote } from "@/lib/google-sheets/types";
 import { Button } from "@/components/ui/Button";
 import styles from "./ClientNotes.module.css";
@@ -11,15 +12,19 @@ type ClientNotesProps = {
 };
 
 export function ClientNotes({ clientId, initialNotes }: ClientNotesProps) {
+  const t = useTranslations("clients.notes");
+  const tApi = useTranslations("api");
   const [notes, setNotes] = useState(initialNotes);
   const [text, setText] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleAdd() {
     const trimmed = text.trim();
     if (!trimmed) return;
 
     setSaving(true);
+    setError(null);
     try {
       const res = await fetch(
         `/api/clients/${encodeURIComponent(clientId)}/notes`,
@@ -33,7 +38,12 @@ export function ClientNotes({ clientId, initialNotes }: ClientNotesProps) {
         const data = (await res.json()) as { notes: ClientNote[] };
         setNotes(data.notes);
         setText("");
+      } else {
+        const data = (await res.json()) as { error?: string };
+        setError(data.error ?? tApi("noteSaveFailed"));
       }
+    } catch {
+      setError(tApi("noteSaveFailed"));
     } finally {
       setSaving(false);
     }
@@ -45,18 +55,19 @@ export function ClientNotes({ clientId, initialNotes }: ClientNotesProps) {
         <textarea
           className={styles.textarea}
           rows={3}
-          placeholder="Новая заметка…"
+          placeholder={t("placeholder")}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
         <Button type="button" disabled={saving || !text.trim()} onClick={handleAdd}>
-          {saving ? "Сохранение…" : "Добавить заметку"}
+          {saving ? t("saving") : t("add")}
         </Button>
+        {error ? <p className={styles.error}>{error}</p> : null}
       </div>
 
       <ul className={styles.list}>
         {notes.length === 0 ? (
-          <li className={styles.empty}>Заметок пока нет</li>
+          <li className={styles.empty}>{t("empty")}</li>
         ) : (
           notes.map((note) => (
             <li key={note.id} className={styles.note}>

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { branding } from "@/config/branding";
 import type { DashboardStats } from "@/lib/dashboard/stats";
 import type { SessionUser } from "@/lib/auth/types";
@@ -10,32 +11,22 @@ import { Card } from "@/components/ui/Card";
 import styles from "./DashboardView.module.css";
 
 type StatItem = {
+  id: string;
   label: string;
   value: string;
   hint: string;
   icon: string;
   href?: string;
+  overdueHighlight?: boolean;
 };
 
 type QuickAction = {
+  id: string;
   label: string;
   href: string;
   icon: string;
   external?: boolean;
 };
-
-const QUICK_ACTIONS: QuickAction[] = [
-  {
-    label: "Создать задачу",
-    href: "/tasks/new",
-    icon: "fa-solid fa-list-check",
-  },
-  {
-    label: "Открыть AI Workspace",
-    href: "/ai-workspace",
-    icon: "fa-solid fa-robot",
-  },
-];
 
 type DashboardViewProps = {
   user: SessionUser;
@@ -44,71 +35,96 @@ type DashboardViewProps = {
   dashboardStats: DashboardStats;
 };
 
-function buildPlatformStats(stats: DashboardStats): StatItem[] {
-  return [
-    {
-      label: "Клиенты",
-      value: String(stats.clientsTotal),
-      hint: "в CRM",
-      icon: "fa-solid fa-users",
-    },
-    {
-      label: "Новые анкеты",
-      value: String(stats.newFormgridLeads7Days),
-      hint: "за 7 дней",
-      icon: "fa-solid fa-clipboard-list",
-    },
-    {
-      label: "Активные консультации",
-      value: String(stats.activeConsultations),
-      hint: "на этой неделе",
-      icon: "fa-solid fa-calendar-check",
-    },
-    {
-      label: "AI-запросы",
-      value: String(stats.aiRequestsThisMonth),
-      hint: "за месяц",
-      icon: "fa-solid fa-wand-magic-sparkles",
-    },
-  ];
-}
-
-export function DashboardView({
+export async function DashboardView({
   user,
   taskStats,
   teamRecentMessages,
   dashboardStats,
 }: DashboardViewProps) {
-  const platformStats = buildPlatformStats(dashboardStats);
+  const t = await getTranslations("dashboard");
+
+  const quickActions: QuickAction[] = [
+    {
+      id: "createTask",
+      label: t("quickActions.createTask"),
+      href: "/tasks/new",
+      icon: "fa-solid fa-list-check",
+    },
+    {
+      id: "openAiWorkspace",
+      label: t("quickActions.openAiWorkspace"),
+      href: "/ai-workspace",
+      icon: "fa-solid fa-robot",
+    },
+  ];
+
+  const platformStats: StatItem[] = [
+    {
+      id: "clients",
+      label: t("platformStats.clients"),
+      value: String(dashboardStats.clientsTotal),
+      hint: t("platformStats.clientsHint"),
+      icon: "fa-solid fa-users",
+    },
+    {
+      id: "newForms",
+      label: t("platformStats.newForms"),
+      value: String(dashboardStats.newFormgridLeads7Days),
+      hint: t("platformStats.newFormsHint"),
+      icon: "fa-solid fa-clipboard-list",
+    },
+    {
+      id: "consultations",
+      label: t("platformStats.consultations"),
+      value: String(dashboardStats.activeConsultations),
+      hint: t("platformStats.consultationsHint"),
+      icon: "fa-solid fa-calendar-check",
+    },
+    {
+      id: "aiRequests",
+      label: t("platformStats.aiRequests"),
+      value: String(dashboardStats.aiRequestsThisMonth),
+      hint: t("platformStats.aiRequestsHint"),
+      icon: "fa-solid fa-wand-magic-sparkles",
+    },
+  ];
 
   const taskStatItems: StatItem[] = [
     {
-      label: "Всего задач",
+      id: "total",
+      label: t("taskStats.total"),
       value: String(taskStats.total),
-      hint: "в командном списке",
+      hint: t("taskStats.totalHint"),
       icon: "fa-solid fa-list-check",
       href: "/tasks",
     },
     {
-      label: "В работе",
+      id: "inProgress",
+      label: t("taskStats.inProgress"),
       value: String(taskStats.inProgress),
-      hint: "активные",
+      hint: t("taskStats.inProgressHint"),
       icon: "fa-solid fa-spinner",
       href: "/tasks?status=in_progress",
     },
     {
-      label: "Выполнено",
+      id: "completed",
+      label: t("taskStats.completed"),
       value: String(taskStats.completed),
-      hint: "закрытые",
+      hint: t("taskStats.completedHint"),
       icon: "fa-solid fa-circle-check",
       href: "/tasks?status=completed",
     },
     {
-      label: "Просрочено",
+      id: "overdue",
+      label: t("taskStats.overdue"),
       value: String(taskStats.overdue),
-      hint: taskStats.overdue > 0 ? "нажмите, чтобы открыть" : "требуют внимания",
+      hint:
+        taskStats.overdue > 0
+          ? t("taskStats.overdueHintClick")
+          : t("taskStats.overdueHintNone"),
       icon: "fa-solid fa-clock",
       href: taskStats.overdue > 0 ? "/tasks?overdue=1" : "/tasks",
+      overdueHighlight: taskStats.overdue > 0,
     },
   ];
 
@@ -117,24 +133,23 @@ export function DashboardView({
       <section className={styles.hero} aria-labelledby="dashboard-hero-title">
         <div className={styles.heroGlow} aria-hidden />
         <div className={styles.heroInner}>
-          <p className={styles.heroEyebrow}>Добро пожаловать, {user.name}</p>
-          <h1 id="dashboard-hero-title" className={styles.heroTitle}>
-            {branding.productName} Workspace
-          </h1>
-          <p className={styles.heroSubtitle}>
-            Единое пространство для клиентов, анкет, AI-аналитики и внутренних
-            процессов команды.
+          <p className={styles.heroEyebrow}>
+            {t("hero.welcome", { name: user.name })}
           </p>
+          <h1 id="dashboard-hero-title" className={styles.heroTitle}>
+            {t("hero.workspace", { product: branding.productName })}
+          </h1>
+          <p className={styles.heroSubtitle}>{t("hero.subtitle")}</p>
         </div>
       </section>
 
       <section className={styles.section} aria-labelledby="tasks-heading">
         <div className={styles.sectionHeadingRow}>
           <h2 id="tasks-heading" className={styles.sectionTitle}>
-            📋 Задачи
+            📋 {t("sections.tasks")}
           </h2>
           <Link href="/tasks" className={styles.sectionLink}>
-            Все задачи
+            {t("sections.allTasks")}
             <i className="fa-solid fa-arrow-right" aria-hidden />
           </Link>
         </div>
@@ -146,9 +161,7 @@ export function DashboardView({
                   className={[
                     styles.statCard,
                     stat.href ? styles.statCardClickable : "",
-                    stat.label === "Просрочено" && taskStats.overdue > 0
-                      ? styles.statCardOverdue
-                      : "",
+                    stat.overdueHighlight ? styles.statCardOverdue : "",
                   ]
                     .filter(Boolean)
                     .join(" ")}
@@ -165,7 +178,7 @@ export function DashboardView({
               );
 
               return (
-                <li key={stat.label}>
+                <li key={stat.id}>
                   {stat.href ? (
                     <Link href={stat.href} className={styles.statLink}>
                       {card}
@@ -186,27 +199,29 @@ export function DashboardView({
       >
         <div className={styles.sectionHeadingRow}>
           <h2 id="team-chat-heading" className={styles.sectionTitle}>
-            Последние сообщения команды
+            {t("sections.teamMessages")}
           </h2>
           <Link href="/team-chat" className={styles.sectionLink}>
-            Открыть чат
+            {t("sections.openChat")}
             <i className="fa-solid fa-arrow-right" aria-hidden />
           </Link>
         </div>
 
         <TeamOnlineBar variant="prominent" />
-        <h3 className={styles.subsectionTitle}>Последние сообщения</h3>
+        <h3 className={styles.subsectionTitle}>
+          {t("sections.recentMessages")}
+        </h3>
         <DashboardTeamMessages messages={teamRecentMessages} />
       </section>
 
       <section className={styles.section} aria-labelledby="stats-heading">
         <h2 id="stats-heading" className={styles.sectionTitle}>
-          Статистика
+          {t("sections.stats")}
         </h2>
         <div className={styles.statsGridWrap}>
           <ul className={styles.statsGrid}>
             {platformStats.map((stat) => (
-              <li key={stat.label}>
+              <li key={stat.id}>
                 <Card className={styles.statCard}>
                   <div className={styles.statIconWrap} aria-hidden>
                     <i className={stat.icon} />
@@ -225,10 +240,10 @@ export function DashboardView({
 
       <section className={styles.section} aria-labelledby="actions-heading">
         <h2 id="actions-heading" className={styles.sectionTitle}>
-          Быстрые действия
+          {t("sections.quickActions")}
         </h2>
         <ul className={styles.actionsGrid}>
-          {QUICK_ACTIONS.map((action) => {
+          {quickActions.map((action) => {
             const card = (
               <Card className={styles.actionCard}>
                 <span className={styles.actionIconWrap} aria-hidden>
@@ -245,7 +260,7 @@ export function DashboardView({
             );
 
             return (
-              <li key={action.href}>
+              <li key={action.id}>
                 {action.external ? (
                   <a
                     href={action.href}

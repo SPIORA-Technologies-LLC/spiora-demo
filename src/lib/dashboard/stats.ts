@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isClientStatus } from "@/i18n/statuses";
 import { parseFlexibleDate } from "@/lib/analytics/dates";
 import { countFormgridRowsSince } from "@/lib/google-sheets/formgrid-dates";
 import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
@@ -65,7 +66,7 @@ function countConsultationsThisWeek(
   const weekStart = startOfWeekMonday();
 
   return clients.filter((client) => {
-    if (client.status === "Консультация") return true;
+    if (isClientStatus(client.status, "consultation")) return true;
 
     const activity =
       parseFlexibleDate(client.lastActivity) ??
@@ -75,8 +76,8 @@ function countConsultationsThisWeek(
     if (!activity || !isOnOrAfter(activity, weekStart)) return false;
 
     return (
-      client.status === "Новый" ||
-      client.status === "Консультация" ||
+      isClientStatus(client.status, "new") ||
+      isClientStatus(client.status, "consultation") ||
       /консультац/i.test(client.notes ?? "")
     );
   }).length;

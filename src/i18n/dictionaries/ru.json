@@ -82,5 +82,181 @@
     "switcherLabel": "Язык",
     "en": "EN",
     "ru": "RU"
+  },
+  "dashboard": {
+    "pageTitle": "Dashboard",
+    "hero": {
+      "welcome": "Добро пожаловать, {name}",
+      "workspace": "{product} Workspace",
+      "subtitle": "Единое пространство для клиентов, анкет, AI-аналитики и внутренних процессов команды."
+    },
+    "sections": {
+      "tasks": "Задачи",
+      "allTasks": "Все задачи",
+      "teamMessages": "Последние сообщения команды",
+      "openChat": "Открыть чат",
+      "recentMessages": "Последние сообщения",
+      "stats": "Статистика",
+      "quickActions": "Быстрые действия"
+    },
+    "taskStats": {
+      "total": "Всего задач",
+      "totalHint": "в командном списке",
+      "inProgress": "В работе",
+      "inProgressHint": "активные",
+      "completed": "Выполнено",
+      "completedHint": "закрытые",
+      "overdue": "Просрочено",
+      "overdueHintClick": "нажмите, чтобы открыть",
+      "overdueHintNone": "требуют внимания"
+    },
+    "platformStats": {
+      "clients": "Клиенты",
+      "clientsHint": "в CRM",
+      "newForms": "Новые анкеты",
+      "newFormsHint": "за 7 дней",
+      "consultations": "Активные консультации",
+      "consultationsHint": "на этой неделе",
+      "aiRequests": "AI-запросы",
+      "aiRequestsHint": "за месяц"
+    },
+    "quickActions": {
+      "createTask": "Создать задачу",
+      "openAiWorkspace": "Открыть AI Workspace"
+    },
+    "teamMessages": {
+      "voice": "Голосовое сообщение",
+      "image": "Изображение",
+      "file": "Файл",
+      "empty": "Пока нет сообщений."
+    }
+  },
+  "clients": {
+    "title": "Клиенты",
+    "subtitle": "Данные из Google Sheets — без дублирования в локальную БД",
+    "search": {
+      "placeholder": "Поиск: имя, паспорт…"
+    },
+    "meta": {
+      "loading": "Загрузка…",
+      "count": "{count, plural, one {# клиент} few {# клиента} many {# клиентов} other {# клиента}}"
+    },
+    "sources": {
+      "googleSheets": "Google Sheets",
+      "demo": "Демо-данные"
+    },
+    "table": {
+      "name": "Имя",
+      "latin": "Латиница",
+      "passport": "Номер паспорта",
+      "email": "Электронная почта",
+      "submittedAt": "Дата подачи",
+      "expectedApproval": "Предполагаемое одобрение",
+      "referent": "Имя референта",
+      "bookingAddress": "Адрес букинга",
+      "bookingDate": "Дата букинга",
+      "approvalDate": "Дата одобрения ВНЖ",
+      "cardIssuedDate": "Дата выдачи карточки ВНЖ",
+      "appPassword": "Пароль приложения",
+      "partner": "Партнер от кого клиент",
+      "contract": "Договор",
+      "notes": "Заметки"
+    },
+    "empty": {
+      "loading": "Загрузка клиентов…",
+      "notFound": "Клиенты не найдены"
+    },
+    "pagination": {
+      "prev": "Назад",
+      "next": "Далее"
+    },
+    "openCardAria": "Открыть карточку клиента {name}",
+    "errors": {
+      "loadFailed": "Не удалось загрузить клиентов"
+    },
+    "detail": {
+      "sectionTitle": "Клиенты · {name}",
+      "subtitle": "Все данные клиента из Google Sheets",
+      "backToList": "К списку клиентов",
+      "fullName": "ФИО",
+      "passport": "Паспорт",
+      "status": "Статус",
+      "source": "Источник",
+      "sourceDemo": "Демо",
+      "sourceSheets": "Google Sheets",
+      "rowIndex": "строка {index}",
+      "sheetData": "Данные из таблицы",
+      "surveys": "Анкеты",
+      "documents": "Документы",
+      "managerNotes": "Заметки менеджеров"
+    },
+    "fields": {
+      "lastName": "Фамилия",
+      "latin": "Латиница",
+      "passport": "Номер паспорта",
+      "email": "Электронная почта",
+      "submittedAt": "Дата подачи",
+      "expectedApproval": "Предполагаемое одобрение",
+      "referent": "Имя референта",
+      "bookingAddress": "Адрес букинга",
+      "bookingRange": "Дата букинга (от и до)",
+      "approvalDate": "Дата одобрения ВНЖ",
+      "notes": "Заметки",
+      "cardIssuedDate": "Дата выдачи карточки ВНЖ",
+      "appPassword": "Пароль для приложения",
+      "partner": "Партнер от кого клиент",
+      "contract": "Договор"
+    },
+    "notes": {
+      "placeholder": "Новая заметка…",
+      "saving": "Сохранение…",
+      "add": "Добавить заметку",
+      "empty": "Заметок пока нет"
+    },
+    "ai": {
+      "askButton": "Спросить AI по клиенту",
+      "summaryButton": "AI Summary",
+      "titleChat": "AI по клиенту",
+      "titleSummary": "AI Summary",
+      "context": "Контекст: {name} — анкеты, документы и заметки подключены автоматически",
+      "closeAria": "Закрыть",
+      "inputPlaceholder": "Например: «Напиши сообщение»",
+      "send": "Отправить",
+      "loading": "AI думает…",
+      "hint": "Выберите подсказку или напишите запрос — AI уже знает, какой клиент открыт.",
+      "errorReply": "Не удалось получить ответ AI.",
+      "errorConnection": "Ошибка соединения с AI.",
+      "presets": {
+        "summary": "Покажи краткое резюме клиента",
+        "documentsNeeded": "Какие документы ещё нужны клиенту?",
+        "clientMessage": "Подготовь сообщение клиенту",
+        "followUp": "Подготовь follow-up после консультации",
+        "risks": "Есть ли риски по этому кейсу?",
+        "bestProgram": "Какая программа подходит клиенту лучше всего?",
+        "compareCountries": "Сравни Испанию и Хорватию для этого клиента",
+        "proposal": "Подготовь коммерческое предложение",
+        "managerReport": "Сделай краткий отчёт для менеджера"
+      }
+    }
+  },
+  "statuses": {
+    "client": {
+      "new": "Новый",
+      "in_progress": "В работе",
+      "consultation": "Консультация",
+      "documents": "Подготовка документов",
+      "completed": "Завершён",
+      "waiting": "Ожидание",
+      "on_hold": "На паузе",
+      "unspecified": "Не указан"
+    }
+  },
+  "api": {
+    "unauthorized": "Доступ запрещён",
+    "notFound": "Не найдено",
+    "textRequired": "Текст заметки обязателен",
+    "noteSaveFailed": "Не удалось сохранить заметку",
+    "loadClientsFailed": "Не удалось загрузить клиентов",
+    "loadClientFailed": "Не удалось загрузить клиента"
   }
 }

@@ -82,5 +82,181 @@
     "switcherLabel": "Language",
     "en": "EN",
     "ru": "RU"
+  },
+  "dashboard": {
+    "pageTitle": "Dashboard",
+    "hero": {
+      "welcome": "Welcome, {name}",
+      "workspace": "{product} Workspace",
+      "subtitle": "A single workspace for clients, applications, AI analytics, and internal team processes."
+    },
+    "sections": {
+      "tasks": "Tasks",
+      "allTasks": "All tasks",
+      "teamMessages": "Latest team messages",
+      "openChat": "Open chat",
+      "recentMessages": "Recent messages",
+      "stats": "Statistics",
+      "quickActions": "Quick actions"
+    },
+    "taskStats": {
+      "total": "Total tasks",
+      "totalHint": "in team list",
+      "inProgress": "In progress",
+      "inProgressHint": "active",
+      "completed": "Completed",
+      "completedHint": "closed",
+      "overdue": "Overdue",
+      "overdueHintClick": "click to open",
+      "overdueHintNone": "need attention"
+    },
+    "platformStats": {
+      "clients": "Clients",
+      "clientsHint": "in CRM",
+      "newForms": "New applications",
+      "newFormsHint": "last 7 days",
+      "consultations": "Active consultations",
+      "consultationsHint": "this week",
+      "aiRequests": "AI requests",
+      "aiRequestsHint": "this month"
+    },
+    "quickActions": {
+      "createTask": "Create task",
+      "openAiWorkspace": "Open AI Workspace"
+    },
+    "teamMessages": {
+      "voice": "Voice message",
+      "image": "Image",
+      "file": "File",
+      "empty": "No messages yet."
+    }
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "Data from Google Sheets — no duplication to local database",
+    "search": {
+      "placeholder": "Search: name, passport…"
+    },
+    "meta": {
+      "loading": "Loading…",
+      "count": "{count, plural, one {# client} other {# clients}}"
+    },
+    "sources": {
+      "googleSheets": "Google Sheets",
+      "demo": "Demo data"
+    },
+    "table": {
+      "name": "Name",
+      "latin": "Latin spelling",
+      "passport": "Passport number",
+      "email": "Email",
+      "submittedAt": "Submission date",
+      "expectedApproval": "Expected approval",
+      "referent": "Referent name",
+      "bookingAddress": "Booking address",
+      "bookingDate": "Booking date",
+      "approvalDate": "Residence permit approval date",
+      "cardIssuedDate": "Residence card issue date",
+      "appPassword": "App password",
+      "partner": "Partner source",
+      "contract": "Contract",
+      "notes": "Notes"
+    },
+    "empty": {
+      "loading": "Loading clients…",
+      "notFound": "No clients found"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "openCardAria": "Open client card {name}",
+    "errors": {
+      "loadFailed": "Failed to load clients"
+    },
+    "detail": {
+      "sectionTitle": "Clients · {name}",
+      "subtitle": "All client data from Google Sheets",
+      "backToList": "Back to clients",
+      "fullName": "Full name",
+      "passport": "Passport",
+      "status": "Status",
+      "source": "Source",
+      "sourceDemo": "Demo",
+      "sourceSheets": "Google Sheets",
+      "rowIndex": "row {index}",
+      "sheetData": "Spreadsheet data",
+      "surveys": "Applications",
+      "documents": "Documents",
+      "managerNotes": "Manager notes"
+    },
+    "fields": {
+      "lastName": "Last name",
+      "latin": "Latin spelling",
+      "passport": "Passport number",
+      "email": "Email",
+      "submittedAt": "Submission date",
+      "expectedApproval": "Expected approval",
+      "referent": "Referent name",
+      "bookingAddress": "Booking address",
+      "bookingRange": "Booking date (from–to)",
+      "approvalDate": "Residence permit approval date",
+      "notes": "Notes",
+      "cardIssuedDate": "Residence card issue date",
+      "appPassword": "App password",
+      "partner": "Partner source",
+      "contract": "Contract"
+    },
+    "notes": {
+      "placeholder": "New note…",
+      "saving": "Saving…",
+      "add": "Add note",
+      "empty": "No notes yet"
+    },
+    "ai": {
+      "askButton": "Ask AI about client",
+      "summaryButton": "AI Summary",
+      "titleChat": "AI for client",
+      "titleSummary": "AI Summary",
+      "context": "Context: {name} — applications, documents, and notes are connected automatically",
+      "closeAria": "Close",
+      "inputPlaceholder": "For example: \"Write a message\"",
+      "send": "Send",
+      "loading": "AI is thinking…",
+      "hint": "Choose a prompt or write a request — AI already knows which client is open.",
+      "errorReply": "Failed to get AI response.",
+      "errorConnection": "AI connection error.",
+      "presets": {
+        "summary": "Show a brief client summary",
+        "documentsNeeded": "What documents does the client still need?",
+        "clientMessage": "Prepare a message for the client",
+        "followUp": "Prepare a follow-up after consultation",
+        "risks": "Are there risks for this case?",
+        "bestProgram": "Which program fits this client best?",
+        "compareCountries": "Compare Spain and Croatia for this client",
+        "proposal": "Prepare a commercial proposal",
+        "managerReport": "Create a brief report for the manager"
+      }
+    }
+  },
+  "statuses": {
+    "client": {
+      "new": "New",
+      "in_progress": "In progress",
+      "consultation": "Consultation",
+      "documents": "Document preparation",
+      "completed": "Completed",
+      "waiting": "Waiting",
+      "on_hold": "On hold",
+      "unspecified": "Not specified"
+    }
+  },
+  "api": {
+    "unauthorized": "Access denied",
+    "notFound": "Not found",
+    "textRequired": "Note text is required",
+    "noteSaveFailed": "Failed to save note",
+    "loadClientsFailed": "Failed to load clients",
+    "loadClientFailed": "Failed to load client"
   }
 }

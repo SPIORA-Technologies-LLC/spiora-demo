@@ -74,3 +74,10 @@
   font-family: Inter, sans-serif;
   font-size: 0.875rem;
 }
+
+.error {
+  margin: 0;
+  color: #f87171;
+  font-family: Inter, sans-serif;
+  font-size: 0.8125rem;
+}

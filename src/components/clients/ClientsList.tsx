@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   type Client,
@@ -12,13 +13,33 @@ import styles from "./ClientsList.module.css";
 
 const PAGE_SIZE = 25;
 
+const TABLE_COLUMNS = [
+  "name",
+  "latin",
+  "passport",
+  "email",
+  "submittedAt",
+  "expectedApproval",
+  "referent",
+  "bookingAddress",
+  "bookingDate",
+  "approvalDate",
+  "cardIssuedDate",
+  "appPassword",
+  "partner",
+  "contract",
+  "notes",
+] as const;
+
 export function ClientsList() {
   const router = useRouter();
+  const t = useTranslations("clients");
   const [clients, setClients] = useState<Client[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [source, setSource] = useState<ClientsListResult["source"]>("demo");
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   const [search, setSearch] = useState("");
 
@@ -32,6 +53,7 @@ export function ClientsList() {
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const res = await fetch(`/api/clients?${queryString}`);
       if (!res.ok) throw new Error("fetch failed");
@@ -42,6 +64,7 @@ export function ClientsList() {
     } catch {
       setClients([]);
       setTotal(0);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -54,8 +77,6 @@ export function ClientsList() {
     return () => clearTimeout(timer);
   }, [fetchClients, search]);
 
-  // Подтягиваем новые записи из Google Sheets с небольшим интервалом.
-  // Сервер при этом тоже кэширует на короткое время (см. GOOGLE_SHEETS_CACHE_TTL_MS).
   useEffect(() => {
     const interval = setInterval(() => {
       void fetchClients();
@@ -84,7 +105,7 @@ export function ClientsList() {
           <input
             type="search"
             className={styles.search}
-            placeholder="Поиск: имя, паспорт…"
+            placeholder={t("search.placeholder")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -92,9 +113,15 @@ export function ClientsList() {
       </div>
 
       <p className={styles.meta}>
-        {loading ? "Загрузка…" : `${total} клиентов`}
+        {loading
+          ? t("meta.loading")
+          : loadError
+            ? t("errors.loadFailed")
+            : t("meta.count", { count: total })}
         <span className={styles.source}>
-          {source === "google_sheets" ? "Google Sheets" : "Демо-данные"}
+          {source === "google_sheets"
+            ? t("sources.googleSheets")
+            : t("sources.demo")}
         </span>
       </p>
 
@@ -103,34 +130,22 @@ export function ClientsList() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Имя</th>
-                <th>Латиница</th>
-                <th>Номер паспорта</th>
-                <th>Электронная почта</th>
-                <th>Дата подачи</th>
-                <th>Предполагаемое одобрение</th>
-                <th>Имя референта</th>
-                <th>Адрес букинга</th>
-                <th>Дата букинга</th>
-                <th>Дата одобрения ВНЖ</th>
-                <th>Дата выдачи карточки ВНЖ</th>
-                <th>Пароль приложения</th>
-                <th>Партнер от кого клиент</th>
-                <th>Договор</th>
-                <th>Заметки</th>
+                {TABLE_COLUMNS.map((column) => (
+                  <th key={column}>{t(`table.${column}`)}</th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={15} className={styles.empty}>
-                    Загрузка клиентов…
+                  <td colSpan={TABLE_COLUMNS.length} className={styles.empty}>
+                    {t("empty.loading")}
                   </td>
                 </tr>
               ) : clients.length === 0 ? (
                 <tr>
-                  <td colSpan={15} className={styles.empty}>
-                    Клиенты не найдены
+                  <td colSpan={TABLE_COLUMNS.length} className={styles.empty}>
+                    {loadError ? t("errors.loadFailed") : t("empty.notFound")}
                   </td>
                 </tr>
               ) : (
@@ -147,7 +162,7 @@ export function ClientsList() {
                     }}
                     tabIndex={0}
                     role="link"
-                    aria-label={`Открыть карточку клиента ${client.name}`}
+                    aria-label={t("openCardAria", { name: client.name })}
                   >
                     <td>
                       <Link
@@ -188,7 +203,7 @@ export function ClientsList() {
             disabled={page <= 1 || loading}
             onClick={() => setPage((p) => p - 1)}
           >
-            Назад
+            {t("pagination.prev")}
           </button>
           <span className={styles.pageInfo}>
             {page} / {totalPages}
@@ -199,7 +214,7 @@ export function ClientsList() {
             disabled={page >= totalPages || loading}
             onClick={() => setPage((p) => p + 1)}
           >
-            Далее
+            {t("pagination.next")}
           </button>
         </div>
       ) : null}

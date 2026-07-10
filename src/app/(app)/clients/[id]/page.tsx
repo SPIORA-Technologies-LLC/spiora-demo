@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/layout/AppShell";
 import { ClientDetailView } from "@/components/clients/ClientDetailView";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -11,16 +12,17 @@ type ClientPageProps = {
 export default async function ClientPage({ params }: ClientPageProps) {
   const { id } = await params;
   const detail = await getClientDetail(decodeURIComponent(id));
+  const t = await getTranslations("clients.detail");
 
   if (!detail) {
     notFound();
   }
 
   return (
-    <AppShell sectionTitle={`Клиенты · ${detail.client.name}`}>
+    <AppShell sectionTitle={t("sectionTitle", { name: detail.client.name })}>
       <SectionHeader
         title={detail.client.name}
-        subtitle="Все данные клиента из Google Sheets"
+        subtitle={t("subtitle")}
       />
       <ClientDetailView detail={detail} />
     </AppShell>

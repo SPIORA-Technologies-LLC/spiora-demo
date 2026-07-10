@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { ClientDetail } from "@/lib/google-sheets/types";
 import { getClientSheetFields } from "@/lib/google-sheets/client-detail-fields";
+import { translateClientStatus } from "@/i18n/statuses";
+import type { AppLocale } from "@/i18n/config";
 import { Card } from "@/components/ui/Card";
 import { ClientAiActions } from "./ClientAiPanel";
 import { ClientNotes } from "./ClientNotes";
@@ -10,49 +13,59 @@ type ClientDetailViewProps = {
   detail: ClientDetail;
 };
 
-export function ClientDetailView({ detail }: ClientDetailViewProps) {
+export async function ClientDetailView({ detail }: ClientDetailViewProps) {
+  const locale = (await getLocale()) as AppLocale;
+  const t = await getTranslations("clients.detail");
+  const tFields = await getTranslations("clients.fields");
   const { client, surveys, documents, notes } = detail;
   const sheetFields = getClientSheetFields(client);
+  const statusLabel = translateClientStatus(locale, client.status);
 
   return (
     <div className={styles.page}>
       <Link href="/clients" className={styles.back}>
-        <i className="fa-solid fa-arrow-left" aria-hidden /> К списку клиентов
+        <i className="fa-solid fa-arrow-left" aria-hidden /> {t("backToList")}
       </Link>
 
       <div className={styles.summary}>
         <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>ФИО</span>
+          <span className={styles.fieldLabel}>{t("fullName")}</span>
           <span className={styles.fieldValue}>{client.name}</span>
         </div>
         <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Паспорт</span>
+          <span className={styles.fieldLabel}>{t("passport")}</span>
           <span className={styles.fieldValue}>
             {client.passportNumber ?? client.id}
           </span>
         </div>
         <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Статус</span>
+          <span className={styles.fieldLabel}>{t("status")}</span>
           <span className={styles.fieldValue}>
-            <span className={styles.statusBadge}>{client.status}</span>
+            <span className={styles.statusBadge}>{statusLabel}</span>
           </span>
         </div>
         <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>Источник</span>
+          <span className={styles.fieldLabel}>{t("source")}</span>
           <span className={styles.fieldValue}>
-            {detail.source === "google_sheets" ? "Google Sheets" : "Демо"}
-            {client.rowIndex ? ` · строка ${client.rowIndex}` : null}
+            {detail.source === "google_sheets"
+              ? t("sourceSheets")
+              : t("sourceDemo")}
+            {client.rowIndex
+              ? ` · ${t("rowIndex", { index: client.rowIndex })}`
+              : null}
           </span>
         </div>
       </div>
 
       <div className={styles.detailLayout}>
         <Card className={styles.panel}>
-          <h2 className={styles.panelTitle}>Данные из таблицы</h2>
+          <h2 className={styles.panelTitle}>{t("sheetData")}</h2>
           <div className={styles.fieldGrid}>
             {sheetFields.map((field) => (
-              <div key={field.label} className={styles.fieldRow}>
-                <span className={styles.fieldLabel}>{field.label}</span>
+              <div key={field.labelKey} className={styles.fieldRow}>
+                <span className={styles.fieldLabel}>
+                  {tFields(field.labelKey)}
+                </span>
                 <span className={styles.fieldValue}>{field.value}</span>
               </div>
             ))}
@@ -61,7 +74,7 @@ export function ClientDetailView({ detail }: ClientDetailViewProps) {
 
         {surveys.length > 0 ? (
           <Card className={styles.panel}>
-            <h2 className={styles.panelTitle}>Анкеты</h2>
+            <h2 className={styles.panelTitle}>{t("surveys")}</h2>
             <ul className={styles.itemList}>
               {surveys.map((s) => (
                 <li key={s.id} className={styles.item}>
@@ -77,7 +90,7 @@ export function ClientDetailView({ detail }: ClientDetailViewProps) {
 
         {documents.length > 0 ? (
           <Card className={styles.panel}>
-            <h2 className={styles.panelTitle}>Документы</h2>
+            <h2 className={styles.panelTitle}>{t("documents")}</h2>
             <ul className={styles.itemList}>
               {documents.map((d) => (
                 <li key={d.id} className={styles.item}>
@@ -95,7 +108,7 @@ export function ClientDetailView({ detail }: ClientDetailViewProps) {
       <ClientAiActions clientId={client.id} clientName={client.name} />
 
       <Card className={styles.panelWide}>
-        <h2 className={styles.panelTitle}>Заметки менеджеров</h2>
+        <h2 className={styles.panelTitle}>{t("managerNotes")}</h2>
         <ClientNotes clientId={client.id} initialNotes={notes} />
       </Card>
     </div>

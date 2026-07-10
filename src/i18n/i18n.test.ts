@@ -19,6 +19,7 @@ import {
   getMessagesForLocale,
   translateMessage,
 } from "./messages.ts";
+import { translateClientStatus } from "./statuses.ts";
 
 describe("i18n config", () => {
   it("использует English по умолчанию", () => {
@@ -128,5 +129,108 @@ describe("html lang", () => {
   it("устанавливает lang=en и lang=ru", () => {
     assert.equal(getHtmlLang("en"), "en");
     assert.equal(getHtmlLang("ru"), "ru");
+  });
+});
+
+describe("core modules i18n — Dashboard", () => {
+  it("возвращает английские dashboard labels", () => {
+    assert.equal(translateMessage("en", "dashboard.pageTitle"), "Dashboard");
+    assert.equal(
+      translateMessage("en", "dashboard.hero.welcome"),
+      "Welcome, {name}",
+    );
+    assert.equal(
+      translateMessage("en", "dashboard.platformStats.clients"),
+      "Clients",
+    );
+    assert.equal(
+      translateMessage("en", "dashboard.quickActions.createTask"),
+      "Create task",
+    );
+  });
+
+  it("возвращает русские dashboard labels", () => {
+    assert.equal(
+      translateMessage("ru", "dashboard.hero.welcome"),
+      "Добро пожаловать, {name}",
+    );
+    assert.equal(
+      translateMessage("ru", "dashboard.platformStats.clients"),
+      "Клиенты",
+    );
+    assert.equal(
+      translateMessage("ru", "dashboard.sections.quickActions"),
+      "Быстрые действия",
+    );
+  });
+});
+
+describe("core modules i18n — Clients", () => {
+  it("возвращает английские clients labels", () => {
+    assert.equal(translateMessage("en", "clients.title"), "Clients");
+    assert.equal(
+      translateMessage("en", "clients.search.placeholder"),
+      "Search: name, passport…",
+    );
+    assert.equal(
+      translateMessage("en", "clients.empty.notFound"),
+      "No clients found",
+    );
+    assert.equal(
+      translateMessage("en", "clients.detail.backToList"),
+      "Back to clients",
+    );
+  });
+
+  it("возвращает русские clients labels", () => {
+    assert.equal(translateMessage("ru", "clients.title"), "Клиенты");
+    assert.equal(
+      translateMessage("ru", "clients.empty.notFound"),
+      "Клиенты не найдены",
+    );
+    assert.equal(
+      translateMessage("ru", "clients.notes.add"),
+      "Добавить заметку",
+    );
+  });
+
+  it("локализует API-сообщения", () => {
+    assert.equal(translateMessage("en", "api.unauthorized"), "Access denied");
+    assert.equal(translateMessage("ru", "api.notFound"), "Не найдено");
+    assert.equal(
+      translateMessage("ru", "api.noteSaveFailed"),
+      "Не удалось сохранить заметку",
+    );
+  });
+});
+
+describe("core modules i18n — statuses", () => {
+  it("переводит статусы клиентов одинаково из разных источников", () => {
+    assert.equal(translateClientStatus("en", "New"), "New");
+    assert.equal(translateClientStatus("en", "Новый"), "New");
+    assert.equal(translateClientStatus("ru", "In progress"), "В работе");
+    assert.equal(translateClientStatus("ru", "В работе"), "В работе");
+    assert.equal(translateClientStatus("en", "Consultation"), "Consultation");
+    assert.equal(translateClientStatus("ru", "Консультация"), "Консультация");
+  });
+
+  it("использует fallback для неизвестного статуса", () => {
+    assert.equal(translateClientStatus("en", "Custom status"), "Custom status");
+  });
+});
+
+describe("core modules i18n — locale preservation", () => {
+  it("сохраняет маршрут карточки клиента при смене языка", () => {
+    assert.equal(
+      buildPreserveRouteUrl("/clients/demo-001", "tab=notes"),
+      "/clients/demo-001?tab=notes",
+    );
+  });
+
+  it("сохраняет query поиска клиентов при смене языка", () => {
+    assert.equal(
+      buildPreserveRouteUrl("/clients", "search=ann&page=2"),
+      "/clients?search=ann&page=2",
+    );
   });
 });

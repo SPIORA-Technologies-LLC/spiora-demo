@@ -937,6 +937,440 @@
       "deletePerMinute": "Слишком много удалений в минуту в демо-режиме. Подождите немного."
     }
   },
+  "roles": {
+    "owner": "Владелец",
+    "manager": "Менеджер",
+    "viewer": "Наблюдатель",
+    "status": {
+      "active": "Активен",
+      "inactive": "Неактивен",
+      "invited": "Приглашён",
+      "suspended": "Приостановлен"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "KPI, тренды и операционная аналитика по направлениям",
+    "demoBadge": "Демонстрационные данные",
+    "sections": {
+      "overview": "Обзор",
+      "croatia": "Хорватия",
+      "spain": "Испания",
+      "checkups": "Мед. чекапы"
+    },
+    "states": {
+      "loading": "Загрузка аналитики…",
+      "error": "Не удалось загрузить аналитику",
+      "loadFailed": "Ошибка загрузки"
+    },
+    "export": {
+      "excel": "Excel",
+      "pdf": "PDF"
+    },
+    "meta": {
+      "sourceSheets": "Google Sheets · Клиенты Хорватия",
+      "sourceDemo": "Демо-данные",
+      "updated": "Обновлено"
+    },
+    "period": {
+      "label": "Период",
+      "from": "С",
+      "to": "По",
+      "presets": {
+        "current_month": "Текущий месяц",
+        "prev_month": "Прошлый месяц",
+        "current_quarter": "Текущий квартал",
+        "half_year": "Полугодие",
+        "nine_months": "9 месяцев",
+        "calendar_year": "Календарный год",
+        "custom": "Произвольный период"
+      }
+    },
+    "overview": {
+      "title": "Обзор",
+      "subtitle": "Сводные KPI платформы за выбранный период",
+      "kpis": {
+        "activeClients": "Активные клиенты",
+        "newLeads": "Новые лиды",
+        "completedCases": "Завершённые кейсы",
+        "overdueTasks": "Просроченные задачи",
+        "upcomingDeadlines": "Ближайшие дедлайны",
+        "avgProcessingDays": "Средний срок обработки",
+        "taskCompletionRate": "Выполнение задач"
+      },
+      "comparison": {
+        "vsPreviousPeriod": "к прошлому периоду",
+        "up": "Рост",
+        "down": "Снижение"
+      },
+      "charts": {
+        "monthlyActivity": "Активность по месяцам",
+        "monthlyActivityHint": "Новые лиды, завершённые кейсы и закрытые задачи",
+        "tasksClosed": "Закрытые задачи",
+        "teamWorkload": "Нагрузка команды",
+        "clientDistribution": "Распределение клиентов"
+      },
+      "tables": {
+        "member": "Сотрудник",
+        "role": "Роль",
+        "openTasks": "Открытые задачи",
+        "activeClients": "Активные клиенты",
+        "direction": "Направление",
+        "count": "Количество",
+        "share": "Доля"
+      },
+      "distribution": {
+        "spain": "Испания",
+        "croatia": "Хорватия",
+        "portugal": "Португалия",
+        "other": "Другое"
+      }
+    },
+    "croatia": {
+      "overview": {
+        "title": "Общая статистика",
+        "subtitle": "Заявки и одобрения ВНЖ за выбранный период",
+        "kpis": {
+          "submitted": "Подано заявок",
+          "approved": "Одобрено ВНЖ",
+          "activeCases": "Активных дел",
+          "avgProcessingDays": "Средний срок",
+          "fastestDays": "Самое быстрое",
+          "slowestDays": "Самое долгое"
+        },
+        "charts": {
+          "submittedMonthly": "Подано по месяцам",
+          "approvedMonthly": "Одобрено по месяцам"
+        }
+      },
+      "processing": {
+        "title": "Сроки рассмотрения MUP",
+        "subtitle": "Средние сроки и динамика по месяцам",
+        "kpis": {
+          "avgProcessingDays": "Средний срок",
+          "last30Days": "За 30 дней",
+          "last90Days": "За 90 дней",
+          "trend": "Тренд"
+        },
+        "trends": {
+          "accelerating": "Ускорение рассмотрения",
+          "slowing": "Замедление рассмотрения",
+          "stable": "Стабильные сроки",
+          "unknown": "Недостаточно данных для тренда"
+        }
+      },
+      "inspectors": {
+        "title": "Аналитика по инспекторам MUP",
+        "subtitle": "Референт из таблицы клиентов используется как инспектор",
+        "table": {
+          "inspector": "Инспектор",
+          "activeCases": "Активных дел",
+          "completed": "Завершено",
+          "avgProcessingDays": "Средний срок",
+          "fastest": "Быстрее всего",
+          "slowest": "Дольше всего"
+        }
+      },
+      "forecasts": {
+        "title": "Прогноз по активным делам",
+        "subtitle": "Прогноз даты решения на основе среднего срока инспектора",
+        "empty": "Нет активных дел",
+        "table": {
+          "client": "Клиент",
+          "inspector": "Инспектор",
+          "daysInWork": "Дней в работе",
+          "inspectorAvgDays": "Средний срок инспектора",
+          "predictedDecision": "Прогноз решения"
+        }
+      },
+      "visaD": {
+        "title": "Визы D",
+        "subtitle": "Статистика по консульствам (доп. источник данных)",
+        "kpis": {
+          "submitted": "Подано",
+          "issued": "Выдано виз",
+          "rejected": "Отказано",
+          "approvalRate": "% одобрения",
+          "rejectionRate": "% отказов",
+          "avgProcessingDays": "Средний срок"
+        },
+        "table": {
+          "consulate": "Консульство",
+          "submitted": "Подано",
+          "approved": "Одобрено",
+          "rejected": "Отказано",
+          "approvalRate": "% одобрения",
+          "avgProcessingDays": "Средний срок"
+        }
+      },
+      "addresses": {
+        "title": "Адреса",
+        "subtitle": "Нагрузка по адресам букинга",
+        "empty": "Нет адресов в данных клиентов",
+        "table": {
+          "address": "Адрес",
+          "activeClients": "Активных клиентов",
+          "totalClients": "Всего клиентов",
+          "approved": "Одобрено",
+          "load": "Нагрузка"
+        }
+      },
+      "addressLoad": {
+        "title": "Нагрузка на адреса",
+        "loadHint": "Индикация: 🟢 до 4 активных · 🟡 5–9 · 🔴 10 и более",
+        "kpis": {
+          "uniqueAddresses": "Уникальных адресов",
+          "overFiveClients": "Адресов > 5 клиентов",
+          "overTenClients": "Адресов > 10 клиентов"
+        }
+      },
+      "loadBadges": {
+        "high": "🔴 Высокая",
+        "medium": "🟡 Средняя",
+        "low": "🟢 Низкая"
+      }
+    },
+    "spain": {
+      "title": "Аналитика — Испания",
+      "subtitle": "Раздел будет подключён после загрузки данных",
+      "placeholderLead": "Данные по этому направлению появятся позже. Архитектура уже готова: фильтр периода, KPI, таблицы и графики будут работать так же, как для Хорватии.",
+      "placeholderFuture": "Также запланированы: финансовый дашборд, B2B, AI и маркетинг.",
+      "blocks": {
+        "generalStats": "Общая статистика",
+        "applicantTypeStats": "Статистика по типу заявителя",
+        "monthlyQuarterlyDynamics": "Динамика по месяцам и кварталам",
+        "processingTimes": "Сроки рассмотрения",
+        "familyApplications": "Семейные заявки"
+      }
+    },
+    "checkups": {
+      "title": "Аналитика — Медицинские чекапы",
+      "subtitle": "Раздел будет подключён после загрузки данных",
+      "placeholderLead": "Данные по этому направлению появятся позже. Архитектура уже готова: фильтр периода, KPI, таблицы и графики будут работать так же, как для Хорватии.",
+      "placeholderFuture": "Также запланированы: финансовый дашборд, B2B, AI и маркетинг.",
+      "blocks": {
+        "generalStats": "Общая статистика",
+        "demographics": "Демография и возрастные группы",
+        "programPopularity": "Популярность программ",
+        "medicalStats": "Медицинская статистика",
+        "topIssues": "ТОП выявляемых проблем",
+        "genderAnalytics": "Аналитика по полу",
+        "healthIndex": "Индекс здоровья",
+        "recommendations": "Рекомендации после чекапа",
+        "repeatVisits": "Повторные обращения"
+      }
+    },
+    "charts": {
+      "noData": "Нет данных для графика",
+      "unitLabel": "Единицы",
+      "daysUnit": "дн."
+    }
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Список пользователей платформы",
+    "subtitleOnline": "Список пользователей платформы · {count} в сети",
+    "deleteHint": "Удаление доступно назначенным администраторам (владелец и выбранные менеджеры). Удалённый пользователь не сможет войти на платформу.",
+    "onlineBar": {
+      "loading": "Проверяем, кто сейчас в сети…",
+      "empty": "Сейчас никого нет в сети.",
+      "openTeam": "Открыть Team",
+      "online": "В сети",
+      "onlineNow": "Сейчас в сети",
+      "onlineSubtitle": "Команда на платформе прямо сейчас",
+      "membersOnline": "Участники онлайн",
+      "viewAll": "Все в Team",
+      "memberOnlineTitle": "{name} в сети"
+    },
+    "loading": "Загрузка…",
+    "empty": "В команде пока нет пользователей.",
+    "youLabel": "(это вы)",
+    "aiRequests": "AI-запросы",
+    "perMonth": "за месяц",
+    "delete": "Удалить",
+    "demoPreviewDelete": "Удаление пользователей в демо-режиме доступно только для просмотра.",
+    "modal": {
+      "title": "Удалить пользователя?",
+      "body": "Пользователь потеряет доступ к платформе.",
+      "cancel": "Отмена",
+      "deleting": "Удаление…",
+      "deleteBtn": "Удалить"
+    },
+    "toasts": {
+      "memberDeleted": "{name} удалён из команды.",
+      "deleteFailed": "Не удалось удалить пользователя."
+    },
+    "errors": {
+      "deleteFailed": "Не удалось удалить пользователя.",
+      "deleteForbidden": "Недостаточно прав для удаления этого пользователя.",
+      "notFound": "Пользователь не найден.",
+      "alreadyDeleted": "Пользователь уже удалён.",
+      "saveFailed": "Не удалось сохранить изменения."
+    }
+  },
+  "settings": {
+    "title": "Настройки",
+    "subtitle": "Управление доступом команды",
+    "demoBadge": "Демо-режим",
+    "demoContent": {
+      "readOnlyNotice": "Только просмотр — в демо-режиме настройки нельзя изменить.",
+      "profile": {
+        "name": "Имя",
+        "email": "Email",
+        "role": "Роль"
+      },
+      "company": {
+        "name": "Название компании",
+        "timezone": "Часовой пояс",
+        "website": "Сайт"
+      },
+      "notifications": {
+        "emailDigest": "Email-дайджест",
+        "inApp": "Уведомления в приложении",
+        "taskAlerts": "Оповещения по задачам"
+      },
+      "appearance": {
+        "theme": "Тема",
+        "density": "Плотность интерфейса"
+      },
+      "language": {
+        "locale": "Язык интерфейса"
+      },
+      "ai": {
+        "model": "Модель по умолчанию",
+        "context": "Источники контекста"
+      },
+      "calendar": {
+        "defaultDuration": "Длительность встречи по умолчанию",
+        "videoProvider": "Видеопровайдер"
+      },
+      "values": {
+        "timezone": "Europe/Prague",
+        "theme": "Тёмная",
+        "density": "Комфортная",
+        "emailDigest": "Ежедневная сводка",
+        "inApp": "Включены",
+        "taskAlerts": "Только назначенные задачи",
+        "model": "Демо-ассистент",
+        "context": "CRM · Задачи · Календарь",
+        "defaultDuration": "45 минут",
+        "videoProvider": "LiveKit (демо)"
+      }
+    },
+    "tabs": {
+      "profile": {
+        "title": "Профиль",
+        "hint": "Имя, email и аватар"
+      },
+      "company": {
+        "title": "Компания",
+        "hint": "Название компании, часовой пояс и брендинг"
+      },
+      "notifications": {
+        "title": "Уведомления",
+        "hint": "Email и настройки уведомлений в приложении"
+      },
+      "security": {
+        "title": "Безопасность",
+        "hint": "Пароли и контроль доступа"
+      },
+      "appearance": {
+        "title": "Оформление",
+        "hint": "Тема и параметры отображения"
+      },
+      "language": {
+        "title": "Язык",
+        "hint": "Язык интерфейса"
+      },
+      "integrations": {
+        "title": "Интеграции",
+        "hint": "Внешние сервисы и источники данных"
+      },
+      "ai": {
+        "title": "AI",
+        "hint": "AI Workspace и настройки модели"
+      },
+      "calendar": {
+        "title": "Календарь",
+        "hint": "Видеовстречи и параметры календаря"
+      }
+    },
+    "integrations": {
+      "googleDrive": "Google Drive",
+      "googleSheets": "Google Sheets",
+      "supabase": "Supabase",
+      "livekit": "LiveKit",
+      "webhooks": "Webhooks",
+      "externalAi": "Внешний AI-провайдер",
+      "descriptions": {
+        "googleDrive": "Интеграция Google Drive отключена в публичной демоверсии.",
+        "googleSheets": "Интеграция Google Sheets отключена в публичной демоверсии.",
+        "supabase": "Подключение Supabase недоступно в публичной демоверсии.",
+        "livekit": "Интеграция LiveKit отключена в публичной демоверсии.",
+        "webhooks": "Webhooks отключены в публичной демоверсии.",
+        "externalAi": "Внешние AI-провайдеры работают в demo mode с заготовленными ответами."
+      },
+      "statuses": {
+        "demoMode": "Демо-режим",
+        "disabled": "Отключено",
+        "notConnected": "Не подключено",
+        "customDeployment": "Собственное развёртывание"
+      }
+    },
+    "security": {
+      "password": {
+        "title": "Пароли команды",
+        "hint": "Сбросьте пароль сотруднику и передайте новый пароль в Telegram или WhatsApp. После сброса старый пароль перестаёт работать. Если пароль ещё не сбрасывали через эту панель, действует пароль из настроек хостинга.",
+        "table": {
+          "employee": "Сотрудник",
+          "role": "Роль",
+          "passwordStatus": "Пароль в системе",
+          "updated": "Обновлён"
+        },
+        "badges": {
+          "accessDisabled": "Доступ отключён",
+          "resetManually": "Сброшен вручную",
+          "fromHosting": "Из настроек хостинга"
+        },
+        "resetPassword": "Сбросить пароль",
+        "loading": "Загрузка…",
+        "modal": {
+          "resetTitle": "Сброс пароля: {name}",
+          "resetBody": "Задайте новый пароль вручную или сгенерируйте случайный.",
+          "successTitle": "Новый пароль готов",
+          "successBody": "Передайте пароль сотруднику {name} ({email}). После закрытия окна он больше не отобразится.",
+          "newPasswordLabel": "Новый пароль",
+          "repeatPasswordLabel": "Повторите пароль",
+          "warning": "Сохраните пароль сейчас — повторно его посмотреть нельзя.",
+          "close": "Закрыть",
+          "copy": "Скопировать",
+          "cancel": "Отмена",
+          "generate": "Сгенерировать",
+          "save": "Сохранить",
+          "saving": "Сохранение…"
+        },
+        "toasts": {
+          "loadFailed": "Не удалось загрузить список команды.",
+          "passwordCopied": "Пароль скопирован.",
+          "copyFailed": "Не удалось скопировать пароль."
+        },
+        "errors": {
+          "passwordsMismatch": "Пароли не совпадают.",
+          "resetFailed": "Не удалось сбросить пароль.",
+          "deletedUser": "Нельзя сбросить пароль удалённому пользователю."
+        }
+      }
+    }
+  },
+  "demoGuard": {
+    "teamDelete": "Удаление участников команды недоступно в демо-режиме.",
+    "teamInvite": "Приглашение участников команды недоступно в демо-режиме.",
+    "teamRoleChange": "Изменение ролей команды недоступно в демо-режиме.",
+    "settingsPasswordReset": "Сброс пароля недоступен в демо-режиме.",
+    "settingsCompany": "Настройки компании недоступны в демо-режиме.",
+    "settingsIntegrations": "Настройки интеграций недоступны в демо-режиме.",
+    "analyticsExport": "Экспорт аналитики недоступен в демо-режиме."
+  },
   "statuses": {
     "client": {
       "new": "Новый",

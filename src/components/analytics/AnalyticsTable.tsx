@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import styles from "./AnalyticsTable.module.css";
 
@@ -18,11 +21,14 @@ type AnalyticsTableProps<T> = {
 export function AnalyticsTable<T>({
   columns,
   rows,
-  emptyText = "Нет данных",
+  emptyText,
   getRowKey,
 }: AnalyticsTableProps<T>) {
+  const tStates = useTranslations("states");
+  const resolvedEmptyText = emptyText ?? tStates("noData");
+
   if (rows.length === 0) {
-    return <p className={styles.empty}>{emptyText}</p>;
+    return <p className={styles.empty}>{resolvedEmptyText}</p>;
   }
 
   return (

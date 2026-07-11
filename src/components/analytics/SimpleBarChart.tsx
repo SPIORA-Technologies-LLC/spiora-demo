@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import styles from "./SimpleBarChart.module.css";
 
 export type BarSeries = {
@@ -22,8 +25,10 @@ export function SimpleBarChart({
   series,
   height = 200,
 }: SimpleBarChartProps) {
+  const t = useTranslations("analytics");
+
   if (points.length === 0) {
-    return <p className={styles.empty}>Нет данных для графика</p>;
+    return <p className={styles.empty}>{t("charts.noData")}</p>;
   }
 
   const max = Math.max(

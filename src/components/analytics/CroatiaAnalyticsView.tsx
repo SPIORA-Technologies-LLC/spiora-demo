@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { formatDays } from "@/lib/analytics/dates";
 import type { CroatiaAnalytics } from "@/lib/analytics/types";
 import { AnalyticsBlock } from "./AnalyticsBlock";
@@ -13,12 +14,6 @@ type CroatiaAnalyticsViewProps = {
   data: CroatiaAnalytics;
 };
 
-function loadBadge(level: "low" | "medium" | "high") {
-  if (level === "high") return "🔴 Высокая";
-  if (level === "medium") return "🟡 Средняя";
-  return "🟢 Низкая";
-}
-
 function trendIcon(trend: CroatiaAnalytics["processingTimes"]["trend"]) {
   if (trend === "accelerating") return "fa-arrow-trend-down";
   if (trend === "slowing") return "fa-arrow-trend-up";
@@ -27,6 +22,13 @@ function trendIcon(trend: CroatiaAnalytics["processingTimes"]["trend"]) {
 }
 
 export function CroatiaAnalyticsView({ data }: CroatiaAnalyticsViewProps) {
+  const t = useTranslations("analytics");
+  const daysUnit = t("charts.daysUnit");
+  const fmtDays = (value: number | null) => formatDays(value, daysUnit);
+
+  const loadBadge = (level: "low" | "medium" | "high") =>
+    t(`croatia.loadBadges.${level}`);
+
   const barPoints = data.monthlyTrend.map((m) => ({
     label: m.label,
     values: { submitted: m.submitted, approved: m.approved },
@@ -35,39 +37,39 @@ export function CroatiaAnalyticsView({ data }: CroatiaAnalyticsViewProps) {
   return (
     <div className={styles.page}>
       <AnalyticsBlock
-        title="Общая статистика"
-        subtitle="Заявки и одобрения ВНЖ за выбранный период"
+        title={t("croatia.overview.title")}
+        subtitle={t("croatia.overview.subtitle")}
       >
         <KpiGrid
           items={[
             {
-              label: "Подано заявок",
+              label: t("croatia.overview.kpis.submitted"),
               value: String(data.overview.submitted),
               icon: "fa-solid fa-file-import",
             },
             {
-              label: "Одобрено ВНЖ",
+              label: t("croatia.overview.kpis.approved"),
               value: String(data.overview.approved),
               icon: "fa-solid fa-passport",
             },
             {
-              label: "Активных дел",
+              label: t("croatia.overview.kpis.activeCases"),
               value: String(data.overview.activeCases),
               icon: "fa-solid fa-briefcase",
             },
             {
-              label: "Средний срок",
-              value: formatDays(data.overview.avgProcessingDays),
+              label: t("croatia.overview.kpis.avgProcessingDays"),
+              value: fmtDays(data.overview.avgProcessingDays),
               icon: "fa-solid fa-clock",
             },
             {
-              label: "Самое быстрое",
-              value: formatDays(data.overview.fastestDays),
+              label: t("croatia.overview.kpis.fastestDays"),
+              value: fmtDays(data.overview.fastestDays),
               icon: "fa-solid fa-bolt",
             },
             {
-              label: "Самое долгое",
-              value: formatDays(data.overview.slowestDays),
+              label: t("croatia.overview.kpis.slowestDays"),
+              value: fmtDays(data.overview.slowestDays),
               icon: "fa-solid fa-hourglass-end",
             },
           ]}
@@ -78,12 +80,12 @@ export function CroatiaAnalyticsView({ data }: CroatiaAnalyticsViewProps) {
           series={[
             {
               key: "submitted",
-              label: "Подано по месяцам",
+              label: t("croatia.overview.charts.submittedMonthly"),
               color: "rgba(145, 13, 13, 0.85)",
             },
             {
               key: "approved",
-              label: "Одобрено по месяцам",
+              label: t("croatia.overview.charts.approvedMonthly"),
               color: "rgba(74, 222, 128, 0.85)",
             },
           ]}
@@ -91,103 +93,115 @@ export function CroatiaAnalyticsView({ data }: CroatiaAnalyticsViewProps) {
       </AnalyticsBlock>
 
       <AnalyticsBlock
-        title="Сроки рассмотрения MUP"
-        subtitle="Средние сроки и динамика по месяцам"
+        title={t("croatia.processing.title")}
+        subtitle={t("croatia.processing.subtitle")}
       >
         <KpiGrid
           items={[
             {
-              label: "Средний срок",
-              value: formatDays(data.processingTimes.avgProcessingDays),
+              label: t("croatia.processing.kpis.avgProcessingDays"),
+              value: fmtDays(data.processingTimes.avgProcessingDays),
             },
             {
-              label: "За 30 дней",
-              value: formatDays(data.processingTimes.avgLast30Days),
+              label: t("croatia.processing.kpis.last30Days"),
+              value: fmtDays(data.processingTimes.avgLast30Days),
             },
             {
-              label: "За 90 дней",
-              value: formatDays(data.processingTimes.avgLast90Days),
+              label: t("croatia.processing.kpis.last90Days"),
+              value: fmtDays(data.processingTimes.avgLast90Days),
             },
             {
-              label: "Тренд",
-              value: data.processingTimes.trendLabel,
+              label: t("croatia.processing.kpis.trend"),
+              value: t(`croatia.processing.trends.${data.processingTimes.trend}`),
               icon: `fa-solid ${trendIcon(data.processingTimes.trend)}`,
             },
           ]}
           columns={4}
         />
-        <SimpleLineChart points={data.processingTimes.monthlyAvg} />
+        <SimpleLineChart points={data.processingTimes.monthlyAvg} unit={daysUnit} />
       </AnalyticsBlock>
 
       <AnalyticsBlock
-        title="Аналитика по инспекторам MUP"
-        subtitle="Референт из таблицы клиентов используется как инспектор"
+        title={t("croatia.inspectors.title")}
+        subtitle={t("croatia.inspectors.subtitle")}
       >
         <AnalyticsTable
           rows={data.inspectors}
           getRowKey={(r) => r.inspector}
           columns={[
-            { key: "inspector", header: "Инспектор", render: (r) => r.inspector },
+            {
+              key: "inspector",
+              header: t("croatia.inspectors.table.inspector"),
+              render: (r) => r.inspector,
+            },
             {
               key: "active",
-              header: "Активных дел",
+              header: t("croatia.inspectors.table.activeCases"),
               align: "right",
               render: (r) => r.activeCases,
             },
             {
               key: "completed",
-              header: "Завершено",
+              header: t("croatia.inspectors.table.completed"),
               align: "right",
               render: (r) => r.completedCases,
             },
             {
               key: "avg",
-              header: "Средний срок",
+              header: t("croatia.inspectors.table.avgProcessingDays"),
               align: "right",
-              render: (r) => formatDays(r.avgProcessingDays),
+              render: (r) => fmtDays(r.avgProcessingDays),
             },
             {
               key: "fast",
-              header: "Быстрее всего",
+              header: t("croatia.inspectors.table.fastest"),
               align: "right",
-              render: (r) => formatDays(r.fastestDays),
+              render: (r) => fmtDays(r.fastestDays),
             },
             {
               key: "slow",
-              header: "Дольше всего",
+              header: t("croatia.inspectors.table.slowest"),
               align: "right",
-              render: (r) => formatDays(r.slowestDays),
+              render: (r) => fmtDays(r.slowestDays),
             },
           ]}
         />
       </AnalyticsBlock>
 
       <AnalyticsBlock
-        title="Прогноз по активным делам"
-        subtitle="Прогноз даты решения на основе среднего срока инспектора"
+        title={t("croatia.forecasts.title")}
+        subtitle={t("croatia.forecasts.subtitle")}
       >
         <AnalyticsTable
           rows={data.forecasts}
           getRowKey={(r) => r.clientId}
-          emptyText="Нет активных дел"
+          emptyText={t("croatia.forecasts.empty")}
           columns={[
-            { key: "name", header: "Клиент", render: (r) => r.clientName },
-            { key: "inspector", header: "Инспектор", render: (r) => r.inspector },
+            {
+              key: "name",
+              header: t("croatia.forecasts.table.client"),
+              render: (r) => r.clientName,
+            },
+            {
+              key: "inspector",
+              header: t("croatia.forecasts.table.inspector"),
+              render: (r) => r.inspector,
+            },
             {
               key: "days",
-              header: "Дней в работе",
+              header: t("croatia.forecasts.table.daysInWork"),
               align: "right",
               render: (r) => r.daysInWork,
             },
             {
               key: "avg",
-              header: "Средний срок инспектора",
+              header: t("croatia.forecasts.table.inspectorAvgDays"),
               align: "right",
-              render: (r) => formatDays(r.inspectorAvgDays),
+              render: (r) => fmtDays(r.inspectorAvgDays),
             },
             {
               key: "predicted",
-              header: "Прогноз решения",
+              header: t("croatia.forecasts.table.predictedDecision"),
               render: (r) => r.predictedDecisionAt ?? "—",
             },
           ]}
@@ -195,25 +209,34 @@ export function CroatiaAnalyticsView({ data }: CroatiaAnalyticsViewProps) {
       </AnalyticsBlock>
 
       <AnalyticsBlock
-        title="Визы D"
-        subtitle="Статистика по консульствам (доп. источник данных)"
+        title={t("croatia.visaD.title")}
+        subtitle={t("croatia.visaD.subtitle")}
       >
         <KpiGrid
           items={[
-            { label: "Подано", value: String(data.visaD.overview.submitted) },
-            { label: "Выдано виз", value: String(data.visaD.overview.issued) },
-            { label: "Отказано", value: String(data.visaD.overview.rejected) },
             {
-              label: "% одобрения",
+              label: t("croatia.visaD.kpis.submitted"),
+              value: String(data.visaD.overview.submitted),
+            },
+            {
+              label: t("croatia.visaD.kpis.issued"),
+              value: String(data.visaD.overview.issued),
+            },
+            {
+              label: t("croatia.visaD.kpis.rejected"),
+              value: String(data.visaD.overview.rejected),
+            },
+            {
+              label: t("croatia.visaD.kpis.approvalRate"),
               value: `${data.visaD.overview.approvalRate}%`,
             },
             {
-              label: "% отказов",
+              label: t("croatia.visaD.kpis.rejectionRate"),
               value: `${data.visaD.overview.rejectionRate}%`,
             },
             {
-              label: "Средний срок",
-              value: formatDays(data.visaD.overview.avgProcessingDays),
+              label: t("croatia.visaD.kpis.avgProcessingDays"),
+              value: fmtDays(data.visaD.overview.avgProcessingDays),
             },
           ]}
           columns={3}
@@ -222,81 +245,105 @@ export function CroatiaAnalyticsView({ data }: CroatiaAnalyticsViewProps) {
           rows={data.visaD.consulates}
           getRowKey={(r) => r.consulate}
           columns={[
-            { key: "c", header: "Консульство", render: (r) => r.consulate },
-            { key: "s", header: "Подано", align: "right", render: (r) => r.submitted },
-            { key: "a", header: "Одобрено", align: "right", render: (r) => r.approved },
-            { key: "r", header: "Отказано", align: "right", render: (r) => r.rejected },
+            {
+              key: "c",
+              header: t("croatia.visaD.table.consulate"),
+              render: (r) => r.consulate,
+            },
+            {
+              key: "s",
+              header: t("croatia.visaD.table.submitted"),
+              align: "right",
+              render: (r) => r.submitted,
+            },
+            {
+              key: "a",
+              header: t("croatia.visaD.table.approved"),
+              align: "right",
+              render: (r) => r.approved,
+            },
+            {
+              key: "r",
+              header: t("croatia.visaD.table.rejected"),
+              align: "right",
+              render: (r) => r.rejected,
+            },
             {
               key: "rate",
-              header: "% одобрения",
+              header: t("croatia.visaD.table.approvalRate"),
               align: "right",
               render: (r) => `${r.approvalRate}%`,
             },
             {
               key: "avg",
-              header: "Средний срок",
+              header: t("croatia.visaD.table.avgProcessingDays"),
               align: "right",
-              render: (r) => formatDays(r.avgProcessingDays),
+              render: (r) => fmtDays(r.avgProcessingDays),
             },
           ]}
         />
       </AnalyticsBlock>
 
-      <AnalyticsBlock title="Адреса" subtitle="Нагрузка по адресам букинга">
+      <AnalyticsBlock
+        title={t("croatia.addresses.title")}
+        subtitle={t("croatia.addresses.subtitle")}
+      >
         <AnalyticsTable
           rows={data.addresses}
           getRowKey={(r) => r.address}
-          emptyText="Нет адресов в данных клиентов"
+          emptyText={t("croatia.addresses.empty")}
           columns={[
-            { key: "addr", header: "Адрес", render: (r) => r.address },
+            {
+              key: "addr",
+              header: t("croatia.addresses.table.address"),
+              render: (r) => r.address,
+            },
             {
               key: "active",
-              header: "Активных клиентов",
+              header: t("croatia.addresses.table.activeClients"),
               align: "right",
               render: (r) => r.activeClients,
             },
             {
               key: "total",
-              header: "Всего клиентов",
+              header: t("croatia.addresses.table.totalClients"),
               align: "right",
               render: (r) => r.totalClients,
             },
             {
               key: "approved",
-              header: "Одобрено",
+              header: t("croatia.addresses.table.approved"),
               align: "right",
               render: (r) => r.approvedCount,
             },
             {
               key: "load",
-              header: "Нагрузка",
+              header: t("croatia.addresses.table.load"),
               render: (r) => loadBadge(r.loadLevel),
             },
           ]}
         />
       </AnalyticsBlock>
 
-      <AnalyticsBlock title="Нагрузка на адреса">
+      <AnalyticsBlock title={t("croatia.addressLoad.title")}>
         <KpiGrid
           items={[
             {
-              label: "Уникальных адресов",
+              label: t("croatia.addressLoad.kpis.uniqueAddresses"),
               value: String(data.addressLoad.uniqueAddresses),
             },
             {
-              label: "Адресов > 5 клиентов",
+              label: t("croatia.addressLoad.kpis.overFiveClients"),
               value: String(data.addressLoad.overFiveClients),
             },
             {
-              label: "Адресов > 10 клиентов",
+              label: t("croatia.addressLoad.kpis.overTenClients"),
               value: String(data.addressLoad.overTenClients),
             },
           ]}
           columns={3}
         />
-        <p className={styles.loadHint}>
-          Индикация: 🟢 до 4 активных · 🟡 5–9 · 🔴 10 и более
-        </p>
+        <p className={styles.loadHint}>{t("croatia.addressLoad.loadHint")}</p>
       </AnalyticsBlock>
     </div>
   );

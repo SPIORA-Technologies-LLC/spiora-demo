@@ -939,6 +939,440 @@
       "deletePerMinute": "Too many deletions per minute in demo mode. Please wait a moment."
     }
   },
+  "roles": {
+    "owner": "Owner",
+    "manager": "Manager",
+    "viewer": "Viewer",
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "invited": "Invited",
+      "suspended": "Suspended"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "subtitle": "KPIs, trends, and operational insights across directions",
+    "demoBadge": "Demo data",
+    "sections": {
+      "overview": "Overview",
+      "croatia": "Croatia",
+      "spain": "Spain",
+      "checkups": "Medical checkups"
+    },
+    "states": {
+      "loading": "Loading analytics…",
+      "error": "Failed to load analytics",
+      "loadFailed": "Could not load analytics"
+    },
+    "export": {
+      "excel": "Excel",
+      "pdf": "PDF"
+    },
+    "meta": {
+      "sourceSheets": "Google Sheets · Croatia Clients",
+      "sourceDemo": "Demo data",
+      "updated": "Updated"
+    },
+    "period": {
+      "label": "Period",
+      "from": "From",
+      "to": "To",
+      "presets": {
+        "current_month": "Current month",
+        "prev_month": "Previous month",
+        "current_quarter": "Current quarter",
+        "half_year": "Half year",
+        "nine_months": "9 months",
+        "calendar_year": "Calendar year",
+        "custom": "Custom range"
+      }
+    },
+    "overview": {
+      "title": "Overview",
+      "subtitle": "Platform-wide KPIs for the selected period",
+      "kpis": {
+        "activeClients": "Active clients",
+        "newLeads": "New leads",
+        "completedCases": "Completed cases",
+        "overdueTasks": "Overdue tasks",
+        "upcomingDeadlines": "Upcoming deadlines",
+        "avgProcessingDays": "Avg. processing time",
+        "taskCompletionRate": "Task completion rate"
+      },
+      "comparison": {
+        "vsPreviousPeriod": "vs previous period",
+        "up": "Up",
+        "down": "Down"
+      },
+      "charts": {
+        "monthlyActivity": "Monthly activity",
+        "monthlyActivityHint": "New leads, completed cases, and closed tasks",
+        "tasksClosed": "Tasks closed",
+        "teamWorkload": "Team workload",
+        "clientDistribution": "Client distribution"
+      },
+      "tables": {
+        "member": "Team member",
+        "role": "Role",
+        "openTasks": "Open tasks",
+        "activeClients": "Active clients",
+        "direction": "Direction",
+        "count": "Count",
+        "share": "Share"
+      },
+      "distribution": {
+        "spain": "Spain",
+        "croatia": "Croatia",
+        "portugal": "Portugal",
+        "other": "Other"
+      }
+    },
+    "croatia": {
+      "overview": {
+        "title": "General statistics",
+        "subtitle": "Applications and residence permit approvals for the selected period",
+        "kpis": {
+          "submitted": "Applications submitted",
+          "approved": "Residence permits approved",
+          "activeCases": "Active cases",
+          "avgProcessingDays": "Average processing time",
+          "fastestDays": "Fastest case",
+          "slowestDays": "Slowest case"
+        },
+        "charts": {
+          "submittedMonthly": "Submitted by month",
+          "approvedMonthly": "Approved by month"
+        }
+      },
+      "processing": {
+        "title": "MUP processing times",
+        "subtitle": "Average times and monthly dynamics",
+        "kpis": {
+          "avgProcessingDays": "Average processing time",
+          "last30Days": "Last 30 days",
+          "last90Days": "Last 90 days",
+          "trend": "Trend"
+        },
+        "trends": {
+          "accelerating": "Processing accelerating",
+          "slowing": "Processing slowing",
+          "stable": "Stable processing times",
+          "unknown": "Not enough data for trend"
+        }
+      },
+      "inspectors": {
+        "title": "MUP inspector analytics",
+        "subtitle": "Referent from the client spreadsheet is used as the inspector",
+        "table": {
+          "inspector": "Inspector",
+          "activeCases": "Active cases",
+          "completed": "Completed",
+          "avgProcessingDays": "Average time",
+          "fastest": "Fastest",
+          "slowest": "Slowest"
+        }
+      },
+      "forecasts": {
+        "title": "Active case forecast",
+        "subtitle": "Predicted decision date based on the inspector's average processing time",
+        "empty": "No active cases",
+        "table": {
+          "client": "Client",
+          "inspector": "Inspector",
+          "daysInWork": "Days in progress",
+          "inspectorAvgDays": "Inspector avg. time",
+          "predictedDecision": "Predicted decision"
+        }
+      },
+      "visaD": {
+        "title": "D visas",
+        "subtitle": "Consulate statistics (supplementary data source)",
+        "kpis": {
+          "submitted": "Submitted",
+          "issued": "Visas issued",
+          "rejected": "Rejected",
+          "approvalRate": "Approval rate",
+          "rejectionRate": "Rejection rate",
+          "avgProcessingDays": "Average processing time"
+        },
+        "table": {
+          "consulate": "Consulate",
+          "submitted": "Submitted",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "approvalRate": "Approval rate",
+          "avgProcessingDays": "Average time"
+        }
+      },
+      "addresses": {
+        "title": "Addresses",
+        "subtitle": "Load by booking addresses",
+        "empty": "No addresses in client data",
+        "table": {
+          "address": "Address",
+          "activeClients": "Active clients",
+          "totalClients": "Total clients",
+          "approved": "Approved",
+          "load": "Load"
+        }
+      },
+      "addressLoad": {
+        "title": "Address load",
+        "loadHint": "Indicator: 🟢 up to 4 active · 🟡 5–9 · 🔴 10 or more",
+        "kpis": {
+          "uniqueAddresses": "Unique addresses",
+          "overFiveClients": "Addresses with > 5 clients",
+          "overTenClients": "Addresses with > 10 clients"
+        }
+      },
+      "loadBadges": {
+        "high": "🔴 High",
+        "medium": "🟡 Medium",
+        "low": "🟢 Low"
+      }
+    },
+    "spain": {
+      "title": "Analytics — Spain",
+      "subtitle": "This section will be connected after data is loaded",
+      "placeholderLead": "Data for this direction will appear later. The architecture is ready: period filter, KPIs, tables, and charts will work the same way as for Croatia.",
+      "placeholderFuture": "Also planned: financial dashboard, B2B, AI, and marketing.",
+      "blocks": {
+        "generalStats": "General statistics",
+        "applicantTypeStats": "Statistics by applicant type",
+        "monthlyQuarterlyDynamics": "Monthly and quarterly dynamics",
+        "processingTimes": "Processing times",
+        "familyApplications": "Family applications"
+      }
+    },
+    "checkups": {
+      "title": "Analytics — Medical checkups",
+      "subtitle": "This section will be connected after data is loaded",
+      "placeholderLead": "Data for this direction will appear later. The architecture is ready: period filter, KPIs, tables, and charts will work the same way as for Croatia.",
+      "placeholderFuture": "Also planned: financial dashboard, B2B, AI, and marketing.",
+      "blocks": {
+        "generalStats": "General statistics",
+        "demographics": "Demographics and age groups",
+        "programPopularity": "Program popularity",
+        "medicalStats": "Medical statistics",
+        "topIssues": "Top detected issues",
+        "genderAnalytics": "Gender analytics",
+        "healthIndex": "Health index",
+        "recommendations": "Post-checkup recommendations",
+        "repeatVisits": "Repeat visits"
+      }
+    },
+    "charts": {
+      "noData": "No data for chart",
+      "unitLabel": "Units",
+      "daysUnit": "days"
+    }
+  },
+  "team": {
+    "title": "Team",
+    "subtitle": "Platform user list",
+    "subtitleOnline": "Platform user list · {count} online",
+    "deleteHint": "Deletion is available to designated administrators (Owner and selected managers). A deleted user will not be able to sign in.",
+    "onlineBar": {
+      "loading": "Checking who is online…",
+      "empty": "No one is online right now.",
+      "openTeam": "Open Team",
+      "online": "Online",
+      "onlineNow": "Online now",
+      "onlineSubtitle": "Team on the platform right now",
+      "membersOnline": "Members online",
+      "viewAll": "View all in Team",
+      "memberOnlineTitle": "{name} is online"
+    },
+    "loading": "Loading…",
+    "empty": "No users on the team yet.",
+    "youLabel": "(you)",
+    "aiRequests": "AI requests",
+    "perMonth": "this month",
+    "delete": "Delete",
+    "demoPreviewDelete": "User deletion is preview-only in demo mode.",
+    "modal": {
+      "title": "Delete user?",
+      "body": "The user will lose access to the platform.",
+      "cancel": "Cancel",
+      "deleting": "Deleting…",
+      "deleteBtn": "Delete"
+    },
+    "toasts": {
+      "memberDeleted": "{name} removed from the team.",
+      "deleteFailed": "Could not delete user."
+    },
+    "errors": {
+      "deleteFailed": "Could not delete user.",
+      "deleteForbidden": "Insufficient permissions to delete this user.",
+      "notFound": "User not found.",
+      "alreadyDeleted": "User is already deleted.",
+      "saveFailed": "Failed to save changes."
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Team access management",
+    "demoBadge": "Demo mode",
+    "demoContent": {
+      "readOnlyNotice": "Preview only — settings cannot be changed in demo mode.",
+      "profile": {
+        "name": "Name",
+        "email": "Email",
+        "role": "Role"
+      },
+      "company": {
+        "name": "Company name",
+        "timezone": "Timezone",
+        "website": "Website"
+      },
+      "notifications": {
+        "emailDigest": "Email digest",
+        "inApp": "In-app notifications",
+        "taskAlerts": "Task alerts"
+      },
+      "appearance": {
+        "theme": "Theme",
+        "density": "Interface density"
+      },
+      "language": {
+        "locale": "Interface language"
+      },
+      "ai": {
+        "model": "Default model",
+        "context": "Context sources"
+      },
+      "calendar": {
+        "defaultDuration": "Default meeting duration",
+        "videoProvider": "Video provider"
+      },
+      "values": {
+        "timezone": "Europe/Prague",
+        "theme": "Dark",
+        "density": "Comfortable",
+        "emailDigest": "Daily summary",
+        "inApp": "Enabled",
+        "taskAlerts": "Assigned tasks only",
+        "model": "Demo assistant",
+        "context": "CRM · Tasks · Calendar",
+        "defaultDuration": "45 minutes",
+        "videoProvider": "LiveKit (demo)"
+      }
+    },
+    "tabs": {
+      "profile": {
+        "title": "Profile",
+        "hint": "Your name, email, and avatar"
+      },
+      "company": {
+        "title": "Company",
+        "hint": "Company name, timezone, and branding"
+      },
+      "notifications": {
+        "title": "Notifications",
+        "hint": "Email and in-app notification preferences"
+      },
+      "security": {
+        "title": "Security",
+        "hint": "Passwords and access control"
+      },
+      "appearance": {
+        "title": "Appearance",
+        "hint": "Theme and display preferences"
+      },
+      "language": {
+        "title": "Language",
+        "hint": "Interface language"
+      },
+      "integrations": {
+        "title": "Integrations",
+        "hint": "External services and data sources"
+      },
+      "ai": {
+        "title": "AI",
+        "hint": "AI Workspace and model settings"
+      },
+      "calendar": {
+        "title": "Calendar",
+        "hint": "Video meetings and calendar defaults"
+      }
+    },
+    "integrations": {
+      "googleDrive": "Google Drive",
+      "googleSheets": "Google Sheets",
+      "supabase": "Supabase",
+      "livekit": "LiveKit",
+      "webhooks": "Webhooks",
+      "externalAi": "External AI provider",
+      "descriptions": {
+        "googleDrive": "Google Drive integration is disabled in the public demo.",
+        "googleSheets": "Google Sheets integration is disabled in the public demo.",
+        "supabase": "Supabase connection is not available in the public demo.",
+        "livekit": "LiveKit video integration is disabled in the public demo.",
+        "webhooks": "Webhooks are disabled in the public demo.",
+        "externalAi": "External AI providers run in demo mode with canned responses."
+      },
+      "statuses": {
+        "demoMode": "Demo mode",
+        "disabled": "Disabled",
+        "notConnected": "Not connected",
+        "customDeployment": "Custom deployment"
+      }
+    },
+    "security": {
+      "password": {
+        "title": "Team passwords",
+        "hint": "Reset a team member's password and share the new password via Telegram or WhatsApp. After reset, the old password stops working. If the password was never reset through this panel, the hosting configuration password applies.",
+        "table": {
+          "employee": "Employee",
+          "role": "Role",
+          "passwordStatus": "Password in system",
+          "updated": "Updated"
+        },
+        "badges": {
+          "accessDisabled": "Access disabled",
+          "resetManually": "Reset manually",
+          "fromHosting": "From hosting settings"
+        },
+        "resetPassword": "Reset password",
+        "loading": "Loading…",
+        "modal": {
+          "resetTitle": "Reset password: {name}",
+          "resetBody": "Set a new password manually or generate a random one.",
+          "successTitle": "New password ready",
+          "successBody": "Share the password with {name} ({email}). After closing this window it will not be shown again.",
+          "newPasswordLabel": "New password",
+          "repeatPasswordLabel": "Repeat password",
+          "warning": "Save the password now — it cannot be viewed again.",
+          "close": "Close",
+          "copy": "Copy",
+          "cancel": "Cancel",
+          "generate": "Generate",
+          "save": "Save",
+          "saving": "Saving…"
+        },
+        "toasts": {
+          "loadFailed": "Could not load team list.",
+          "passwordCopied": "Password copied.",
+          "copyFailed": "Could not copy password."
+        },
+        "errors": {
+          "passwordsMismatch": "Passwords do not match.",
+          "resetFailed": "Could not reset password.",
+          "deletedUser": "Cannot reset password for a deleted user."
+        }
+      }
+    }
+  },
+  "demoGuard": {
+    "teamDelete": "Deleting team members is disabled in demo mode.",
+    "teamInvite": "Inviting team members is disabled in demo mode.",
+    "teamRoleChange": "Changing team roles is disabled in demo mode.",
+    "settingsPasswordReset": "Password reset is disabled in demo mode.",
+    "settingsCompany": "Company settings are disabled in demo mode.",
+    "settingsIntegrations": "Integration settings are disabled in demo mode.",
+    "analyticsExport": "Analytics export is disabled in demo mode."
+  },
   "statuses": {
     "client": {
       "new": "New",

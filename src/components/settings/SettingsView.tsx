@@ -1,11 +1,31 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { ROLE_LABELS } from "@/lib/auth/types";
+import { useLocale, useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import type { AppLocale } from "@/i18n/config";
+import { translateRole } from "@/i18n/roles";
+import { branding } from "@/config/branding";
+import type { SessionUser } from "@/lib/auth/types";
+import type {
+  IntegrationKey,
+  IntegrationStatuses,
+} from "@/lib/settings/integrations";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Toast, type ToastMessage } from "@/components/tasks/Toast";
 import styles from "./SettingsView.module.css";
+
+type SettingsTab =
+  | "profile"
+  | "company"
+  | "notifications"
+  | "security"
+  | "appearance"
+  | "language"
+  | "integrations"
+  | "ai"
+  | "calendar";
 
 type PasswordMember = {
   id: string;
@@ -24,11 +44,39 @@ type ResetResult = {
   password: string;
 };
 
-function formatDate(value: string | null): string {
+type SettingsViewProps = {
+  user: SessionUser;
+  demoMode: boolean;
+  integrationStatuses: IntegrationStatuses;
+  companyWebsite: string;
+};
+
+const TAB_ORDER: SettingsTab[] = [
+  "profile",
+  "company",
+  "notifications",
+  "security",
+  "appearance",
+  "language",
+  "integrations",
+  "ai",
+  "calendar",
+];
+
+const INTEGRATION_KEYS: IntegrationKey[] = [
+  "googleDrive",
+  "googleSheets",
+  "supabase",
+  "livekit",
+  "webhooks",
+  "externalAi",
+];
+
+function formatDate(value: string | null, locale: AppLocale): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString("ru-RU", {
+  return date.toLocaleString(locale === "ru" ? "ru-RU" : "en-GB", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -37,7 +85,38 @@ function formatDate(value: string | null): string {
   });
 }
 
-export function SettingsView() {
+function ReadOnlyField({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <label className={styles.field}>
+      <span className={styles.label}>{label}</span>
+      <input
+        type="text"
+        className={styles.input}
+        value={value}
+        readOnly
+        disabled
+      />
+    </label>
+  );
+}
+
+export function SettingsView({
+  user,
+  demoMode,
+  integrationStatuses,
+  companyWebsite,
+}: SettingsViewProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("settings");
+  const tDemo = useTranslations("demoGuard");
+  const tLang = useTranslations("language");
+  const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
   const [members, setMembers] = useState<PasswordMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [resetTarget, setResetTarget] = useState<PasswordMember | null>(null);
@@ -57,17 +136,24 @@ export function SettingsView() {
       setMembers(data.members ?? []);
     } catch {
       setMembers([]);
-      setToast({ text: "Не удалось загрузить список команды.", type: "error" });
+      setToast({
+        text: t("security.password.toasts.loadFailed"),
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void fetchMembers();
   }, [fetchMembers]);
 
   function openReset(member: PasswordMember) {
+    if (demoMode) {
+      setToast({ text: tDemo("settingsPasswordReset"), type: "error" });
+      return;
+    }
     setResetTarget(member);
     setPassword("");
     setConfirmPassword("");
@@ -84,13 +170,11 @@ export function SettingsView() {
   }
 
   async function submitReset(generate = false) {
-    if (!resetTarget) return;
+    if (!resetTarget || demoMode) return;
 
-    if (!generate) {
-      if (password !== confirmPassword) {
-        setError("Пароли не совпадают.");
-        return;
-      }
+    if (!generate && password !== confirmPassword) {
+      setError(t("security.password.errors.passwordsMismatch"));
+      return;
     }
 
     setSubmitting(true);
@@ -107,12 +191,17 @@ export function SettingsView() {
       });
       const data = (await res.json()) as {
         error?: string;
+        demo?: boolean;
         password?: string;
         userName?: string;
         email?: string;
       };
       if (!res.ok) {
-        setError(data.error ?? "Не удалось сбросить пароль.");
+        if (data.demo) {
+          setError(tDemo("settingsPasswordReset"));
+        } else {
+          setError(data.error ?? t("security.password.errors.resetFailed"));
+        }
         return;
       }
 
@@ -123,7 +212,7 @@ export function SettingsView() {
       });
       await fetchMembers();
     } catch {
-      setError("Не удалось сбросить пароль.");
+      setError(t("security.password.errors.resetFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -133,38 +222,214 @@ export function SettingsView() {
     if (!resetResult?.password) return;
     try {
       await navigator.clipboard.writeText(resetResult.password);
-      setToast({ text: "Пароль скопирован." });
+      setToast({ text: t("security.password.toasts.passwordCopied") });
     } catch {
-      setToast({ text: "Не удалось скопировать пароль.", type: "error" });
+      setToast({
+        text: t("security.password.toasts.copyFailed"),
+        type: "error",
+      });
     }
   }
 
-  return (
-    <div className={styles.settingsWrap}>
+  function renderDemoNotice() {
+    if (!demoMode) return null;
+    return <p className={styles.demoNotice}>{t("demoContent.readOnlyNotice")}</p>;
+  }
+
+  function renderProfileTab() {
+    return (
       <Card className={styles.sectionCard}>
-        <h2 className={styles.sectionTitle}>Пароли команды</h2>
-        <p className={styles.sectionHint}>
-          Сбросьте пароль сотруднику и передайте новый пароль в Telegram или
-          WhatsApp. После сброса старый пароль перестаёт работать. Если пароль
-          ещё не сбрасывали через эту панель, действует пароль из настроек
-          хостинга.
-        </p>
+        <h2 className={styles.sectionTitle}>{t("tabs.profile.title")}</h2>
+        <p className={styles.sectionHint}>{t("tabs.profile.hint")}</p>
+        {renderDemoNotice()}
+        <ReadOnlyField
+          label={t("demoContent.profile.name")}
+          value={user.name}
+        />
+        <ReadOnlyField
+          label={t("demoContent.profile.email")}
+          value={user.email}
+        />
+        <ReadOnlyField
+          label={t("demoContent.profile.role")}
+          value={translateRole(locale, user.role)}
+        />
+      </Card>
+    );
+  }
+
+  function renderCompanyTab() {
+    return (
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>{t("tabs.company.title")}</h2>
+        <p className={styles.sectionHint}>{t("tabs.company.hint")}</p>
+        {renderDemoNotice()}
+        <ReadOnlyField
+          label={t("demoContent.company.name")}
+          value={branding.companyName}
+        />
+        <ReadOnlyField
+          label={t("demoContent.company.timezone")}
+          value={t("demoContent.values.timezone")}
+        />
+        <ReadOnlyField
+          label={t("demoContent.company.website")}
+          value={companyWebsite}
+        />
+      </Card>
+    );
+  }
+
+  function renderNotificationsTab() {
+    return (
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>{t("tabs.notifications.title")}</h2>
+        <p className={styles.sectionHint}>{t("tabs.notifications.hint")}</p>
+        {renderDemoNotice()}
+        <ReadOnlyField
+          label={t("demoContent.notifications.emailDigest")}
+          value={t("demoContent.values.emailDigest")}
+        />
+        <ReadOnlyField
+          label={t("demoContent.notifications.inApp")}
+          value={t("demoContent.values.inApp")}
+        />
+        <ReadOnlyField
+          label={t("demoContent.notifications.taskAlerts")}
+          value={t("demoContent.values.taskAlerts")}
+        />
+      </Card>
+    );
+  }
+
+  function renderAppearanceTab() {
+    return (
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>{t("tabs.appearance.title")}</h2>
+        <p className={styles.sectionHint}>{t("tabs.appearance.hint")}</p>
+        {renderDemoNotice()}
+        <ReadOnlyField
+          label={t("demoContent.appearance.theme")}
+          value={t("demoContent.values.theme")}
+        />
+        <ReadOnlyField
+          label={t("demoContent.appearance.density")}
+          value={t("demoContent.values.density")}
+        />
+      </Card>
+    );
+  }
+
+  function renderLanguageTab() {
+    return (
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>{t("tabs.language.title")}</h2>
+        <p className={styles.sectionHint}>{t("tabs.language.hint")}</p>
+        {renderDemoNotice()}
+        <ReadOnlyField
+          label={t("demoContent.language.locale")}
+          value={tLang(locale)}
+        />
+        <div className={styles.languageSwitcherWrap}>
+          <LanguageSwitcher />
+        </div>
+      </Card>
+    );
+  }
+
+  function renderAiTab() {
+    return (
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>{t("tabs.ai.title")}</h2>
+        <p className={styles.sectionHint}>{t("tabs.ai.hint")}</p>
+        {renderDemoNotice()}
+        <ReadOnlyField
+          label={t("demoContent.ai.model")}
+          value={t("demoContent.values.model")}
+        />
+        <ReadOnlyField
+          label={t("demoContent.ai.context")}
+          value={t("demoContent.values.context")}
+        />
+      </Card>
+    );
+  }
+
+  function renderCalendarTab() {
+    return (
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>{t("tabs.calendar.title")}</h2>
+        <p className={styles.sectionHint}>{t("tabs.calendar.hint")}</p>
+        {renderDemoNotice()}
+        <ReadOnlyField
+          label={t("demoContent.calendar.defaultDuration")}
+          value={t("demoContent.values.defaultDuration")}
+        />
+        <ReadOnlyField
+          label={t("demoContent.calendar.videoProvider")}
+          value={t("demoContent.values.videoProvider")}
+        />
+      </Card>
+    );
+  }
+
+  function renderIntegrationsTab() {
+    return (
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>{t("tabs.integrations.title")}</h2>
+        <p className={styles.sectionHint}>{t("tabs.integrations.hint")}</p>
+        {renderDemoNotice()}
+        <ul className={styles.integrationList}>
+          {INTEGRATION_KEYS.map((key) => (
+            <li key={key} className={styles.integrationRow}>
+              <div className={styles.integrationMain}>
+                <span className={styles.integrationName}>
+                  {t(`integrations.${key}`)}
+                </span>
+                <span className={styles.integrationDescription}>
+                  {t(`integrations.descriptions.${key}`)}
+                </span>
+              </div>
+              <span className={styles.integrationStatus}>
+                {t(
+                  `integrations.statuses.${integrationStatuses[key]}`,
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </Card>
+    );
+  }
+
+  function renderSecurityTab() {
+    return (
+      <Card className={styles.sectionCard}>
+        <h2 className={styles.sectionTitle}>
+          {t("security.password.title")}
+        </h2>
+        <p className={styles.sectionHint}>{t("security.password.hint")}</p>
+        {demoMode ? (
+          <p className={styles.demoGuardHint}>
+            {tDemo("settingsPasswordReset")}
+          </p>
+        ) : null}
 
         <div className={styles.tableScroll}>
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Сотрудник</th>
-                <th>Роль</th>
-                <th>Пароль в системе</th>
-                <th>Обновлён</th>
+                <th>{t("security.password.table.employee")}</th>
+                <th>{t("security.password.table.role")}</th>
+                <th>{t("security.password.table.passwordStatus")}</th>
+                <th>{t("security.password.table.updated")}</th>
                 <th />
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5}>Загрузка…</td>
+                  <td colSpan={5}>{t("security.password.loading")}</td>
                 </tr>
               ) : (
                 members.map((member) => (
@@ -173,26 +438,26 @@ export function SettingsView() {
                       <span className={styles.memberName}>{member.name}</span>
                       <div className={styles.memberEmail}>{member.email}</div>
                     </td>
-                    <td>{ROLE_LABELS[member.role]}</td>
+                    <td>{translateRole(locale, member.role)}</td>
                     <td>
                       {member.deleted ? (
                         <span className={`${styles.badge} ${styles.badgeMuted}`}>
-                          Доступ отключён
+                          {t("security.password.badges.accessDisabled")}
                         </span>
                       ) : member.hasCustomPassword ? (
                         <span className={`${styles.badge} ${styles.badgeOk}`}>
-                          Сброшен вручную
+                          {t("security.password.badges.resetManually")}
                         </span>
                       ) : (
                         <span className={`${styles.badge} ${styles.badgeMuted}`}>
-                          Из настроек хостинга
+                          {t("security.password.badges.fromHosting")}
                         </span>
                       )}
                     </td>
                     <td className={styles.metaMuted}>
                       {member.hasCustomPassword ? (
                         <>
-                          {formatDate(member.passwordUpdatedAt)}
+                          {formatDate(member.passwordUpdatedAt, locale)}
                           {member.passwordUpdatedBy
                             ? ` · ${member.passwordUpdatedBy}`
                             : ""}
@@ -205,10 +470,10 @@ export function SettingsView() {
                       <Button
                         type="button"
                         variant="secondary"
-                        disabled={member.deleted}
+                        disabled={member.deleted || demoMode}
                         onClick={() => openReset(member)}
                       >
-                        Сбросить пароль
+                        {t("security.password.resetPassword")}
                       </Button>
                     </td>
                   </tr>
@@ -218,6 +483,59 @@ export function SettingsView() {
           </table>
         </div>
       </Card>
+    );
+  }
+
+  function renderTabContent() {
+    switch (activeTab) {
+      case "profile":
+        return renderProfileTab();
+      case "company":
+        return renderCompanyTab();
+      case "notifications":
+        return renderNotificationsTab();
+      case "security":
+        return renderSecurityTab();
+      case "appearance":
+        return renderAppearanceTab();
+      case "language":
+        return renderLanguageTab();
+      case "integrations":
+        return renderIntegrationsTab();
+      case "ai":
+        return renderAiTab();
+      case "calendar":
+        return renderCalendarTab();
+      default:
+        return null;
+    }
+  }
+
+  return (
+    <div className={styles.settingsWrap}>
+      {demoMode ? (
+        <span className={styles.demoBadge}>{t("demoBadge")}</span>
+      ) : null}
+
+      <div className={styles.layout}>
+        <nav className={styles.tabNav} aria-label={t("title")}>
+          {TAB_ORDER.map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              className={
+                activeTab === tab ? styles.tabActive : styles.tab
+              }
+              onClick={() => setActiveTab(tab)}
+            >
+              <span className={styles.tabTitle}>{t(`tabs.${tab}.title`)}</span>
+              <span className={styles.tabHint}>{t(`tabs.${tab}.hint`)}</span>
+            </button>
+          ))}
+        </nav>
+
+        <div className={styles.tabPanel}>{renderTabContent()}</div>
+      </div>
 
       {resetTarget ? (
         <div className={styles.overlay} role="dialog" aria-modal="true">
@@ -225,37 +543,42 @@ export function SettingsView() {
           <Card className={styles.modal}>
             {resetResult ? (
               <>
-                <h3 className={styles.modalTitle}>Новый пароль готов</h3>
+                <h3 className={styles.modalTitle}>
+                  {t("security.password.modal.successTitle")}
+                </h3>
                 <p className={styles.modalText}>
-                  Передайте пароль сотруднику{" "}
-                  <strong>{resetResult.userName}</strong> ({resetResult.email}).
-                  После закрытия окна он больше не отобразится.
+                  {t("security.password.modal.successBody", {
+                    name: resetResult.userName,
+                    email: resetResult.email,
+                  })}
                 </p>
                 <div className={styles.passwordReveal}>
-                  <span>Новый пароль</span>
+                  <span>{t("security.password.modal.newPasswordLabel")}</span>
                   <code className={styles.passwordValue}>
                     {resetResult.password}
                   </code>
                 </div>
                 <p className={styles.warning}>
-                  Сохраните пароль сейчас — повторно его посмотреть нельзя.
+                  {t("security.password.modal.warning")}
                 </p>
                 <div className={styles.modalActions}>
                   <Button type="button" variant="secondary" onClick={closeReset}>
-                    Закрыть
+                    {t("security.password.modal.close")}
                   </Button>
                   <Button type="button" onClick={() => void copyPassword()}>
-                    Скопировать
+                    {t("security.password.modal.copy")}
                   </Button>
                 </div>
               </>
             ) : (
               <>
                 <h3 className={styles.modalTitle}>
-                  Сброс пароля: {resetTarget.name}
+                  {t("security.password.modal.resetTitle", {
+                    name: resetTarget.name,
+                  })}
                 </h3>
                 <p className={styles.modalText}>
-                  Задайте новый пароль вручную или сгенерируйте случайный.
+                  {t("security.password.modal.resetBody")}
                 </p>
                 {error ? (
                   <p className={styles.error} role="alert">
@@ -263,7 +586,9 @@ export function SettingsView() {
                   </p>
                 ) : null}
                 <label className={styles.field}>
-                  <span className={styles.label}>Новый пароль</span>
+                  <span className={styles.label}>
+                    {t("security.password.modal.newPasswordLabel")}
+                  </span>
                   <input
                     type="text"
                     className={styles.input}
@@ -274,7 +599,9 @@ export function SettingsView() {
                   />
                 </label>
                 <label className={styles.field}>
-                  <span className={styles.label}>Повторите пароль</span>
+                  <span className={styles.label}>
+                    {t("security.password.modal.repeatPasswordLabel")}
+                  </span>
                   <input
                     type="text"
                     className={styles.input}
@@ -291,7 +618,7 @@ export function SettingsView() {
                     disabled={submitting}
                     onClick={closeReset}
                   >
-                    Отмена
+                    {t("security.password.modal.cancel")}
                   </Button>
                   <Button
                     type="button"
@@ -299,14 +626,16 @@ export function SettingsView() {
                     disabled={submitting}
                     onClick={() => void submitReset(true)}
                   >
-                    Сгенерировать
+                    {t("security.password.modal.generate")}
                   </Button>
                   <Button
                     type="button"
                     disabled={submitting || !password || !confirmPassword}
                     onClick={() => void submitReset(false)}
                   >
-                    {submitting ? "Сохранение…" : "Сохранить"}
+                    {submitting
+                      ? t("security.password.modal.saving")
+                      : t("security.password.modal.save")}
                   </Button>
                 </div>
               </>

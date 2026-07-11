@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { isDemoMode } from "@/lib/demo/demo-mode";
 import { getSession } from "@/lib/auth/session";
 import {
   AI_REQUEST_STATS_DAYS,
@@ -33,5 +34,6 @@ export async function GET() {
     members: enrichedMembers,
     canDelete: canDeleteTeamMembers(session),
     onlineCount,
+    demo: isDemoMode(),
   });
 }

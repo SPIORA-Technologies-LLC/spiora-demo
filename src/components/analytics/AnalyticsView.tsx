@@ -1,40 +1,49 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Toast, type ToastMessage } from "@/components/tasks/Toast";
+import type { AppLocale } from "@/i18n/config";
 import { exportCroatiaExcel, exportCroatiaPdf } from "@/lib/analytics/export";
 import { resolvePeriodRange, type PeriodPreset } from "@/lib/analytics/period";
-import type { AnalyticsSection, CroatiaAnalytics } from "@/lib/analytics/types";
+import type {
+  AnalyticsSection,
+  CroatiaAnalytics,
+  OverviewAnalytics,
+} from "@/lib/analytics/types";
 import { AnalyticsBlock } from "./AnalyticsBlock";
 import { CroatiaAnalyticsView } from "./CroatiaAnalyticsView";
+import { OverviewAnalyticsView } from "./OverviewAnalyticsView";
 import { PeriodFilter } from "./PeriodFilter";
 import styles from "./AnalyticsView.module.css";
 
-const SECTIONS: Array<{ id: AnalyticsSection; label: string; icon: string }> = [
-  { id: "croatia", label: "Хорватия", icon: "fa-flag" },
-  { id: "spain", label: "Испания", icon: "fa-flag" },
-  { id: "checkups", label: "Мед. чекапы", icon: "fa-heart-pulse" },
+const SECTIONS: Array<{ id: AnalyticsSection; icon: string }> = [
+  { id: "overview", icon: "fa-chart-pie" },
+  { id: "croatia", icon: "fa-flag" },
+  { id: "spain", icon: "fa-flag" },
+  { id: "checkups", icon: "fa-heart-pulse" },
 ];
 
-const PLACEHOLDER_BLOCKS: Record<"spain" | "checkups", string[]> = {
+const PLACEHOLDER_BLOCK_KEYS: Record<"spain" | "checkups", string[]> = {
   spain: [
-    "Общая статистика",
-    "Статистика по типу заявителя",
-    "Динамика по месяцам и кварталам",
-    "Сроки рассмотрения",
-    "Семейные заявки",
+    "generalStats",
+    "applicantTypeStats",
+    "monthlyQuarterlyDynamics",
+    "processingTimes",
+    "familyApplications",
   ],
   checkups: [
-    "Общая статистика",
-    "Демография и возрастные группы",
-    "Популярность программ",
-    "Медицинская статистика",
-    "ТОП выявляемых проблем",
-    "Аналитика по полу",
-    "Индекс здоровья",
-    "Рекомендации после чекапа",
-    "Повторные обращения",
+    "generalStats",
+    "demographics",
+    "programPopularity",
+    "medicalStats",
+    "topIssues",
+    "genderAnalytics",
+    "healthIndex",
+    "recommendations",
+    "repeatVisits",
   ],
 };
 
@@ -48,20 +57,66 @@ function defaultCustomRange() {
   };
 }
 
+function isClientDemoMode(
+  overviewDemo?: boolean,
+  croatiaSource?: CroatiaAnalytics["source"],
+): boolean {
+  return (
+    overviewDemo === true ||
+    croatiaSource === "demo" ||
+    process.env.NEXT_PUBLIC_SPIORA_DEMO_MODE?.trim().toLowerCase() === "true"
+  );
+}
+
+function formatLocaleDate(date: Date, locale: AppLocale): string {
+  const intlTag = locale === "ru" ? "ru-RU" : "en-US";
+  return date.toLocaleDateString(intlTag, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 export function AnalyticsView() {
-  const [section, setSection] = useState<AnalyticsSection>("croatia");
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("analytics");
+  const tDemo = useTranslations("demoGuard");
+
+  const [section, setSection] = useState<AnalyticsSection>("overview");
   const [preset, setPreset] = useState<PeriodPreset>("current_month");
   const [customFrom, setCustomFrom] = useState(defaultCustomRange().from);
   const [customTo, setCustomTo] = useState(defaultCustomRange().to);
-  const [data, setData] = useState<CroatiaAnalytics | null>(null);
+  const [overviewData, setOverviewData] = useState<OverviewAnalytics | null>(null);
+  const [croatiaData, setCroatiaData] = useState<CroatiaAnalytics | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
 
-  const periodLabel = resolvePeriodRange(
-    preset,
-    customFrom,
-    customTo,
-  ).label;
+  const range = resolvePeriodRange(preset, customFrom, customTo);
+  const periodLabel = useMemo(() => {
+    if (preset === "custom") {
+      return `${formatLocaleDate(range.from, locale)} — ${formatLocaleDate(range.to, locale)}`;
+    }
+    return t(`period.presets.${preset}`);
+  }, [locale, preset, range.from, range.to, t]);
+
+  const isDemo = isClientDemoMode(overviewData?.demo, croatiaData?.source);
+
+  const loadOverview = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/analytics/overview");
+      if (!res.ok) throw new Error(t("states.loadFailed"));
+      const json = (await res.json()) as OverviewAnalytics;
+      setOverviewData(json);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t("states.error"));
+      setOverviewData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
 
   const loadCroatia = useCallback(async () => {
     setLoading(true);
@@ -73,22 +128,48 @@ export function AnalyticsView() {
         params.set("to", customTo);
       }
       const res = await fetch(`/api/analytics/croatia?${params.toString()}`);
-      if (!res.ok) throw new Error("Не удалось загрузить аналитику");
+      if (!res.ok) throw new Error(t("states.loadFailed"));
       const json = (await res.json()) as CroatiaAnalytics;
-      setData(json);
+      setCroatiaData(json);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Ошибка загрузки");
-      setData(null);
+      setError(e instanceof Error ? e.message : t("states.error"));
+      setCroatiaData(null);
     } finally {
       setLoading(false);
     }
-  }, [preset, customFrom, customTo]);
+  }, [customFrom, customTo, preset, t]);
 
   useEffect(() => {
+    if (section === "overview") {
+      void loadOverview();
+      return;
+    }
     if (section === "croatia") {
       void loadCroatia();
+      return;
     }
-  }, [section, loadCroatia]);
+    setLoading(false);
+    setError(null);
+  }, [section, loadCroatia, loadOverview]);
+
+  const handleExportExcel = () => {
+    if (isDemo) {
+      setToast({ text: tDemo("analyticsExport"), type: "error" });
+      return;
+    }
+    if (croatiaData) exportCroatiaExcel(croatiaData);
+  };
+
+  const handleExportPdf = () => {
+    if (isDemo) {
+      setToast({ text: tDemo("analyticsExport"), type: "error" });
+      return;
+    }
+    exportCroatiaPdf();
+  };
+
+  const formatUpdatedAt = (value: string) =>
+    new Date(value).toLocaleString(locale === "ru" ? "ru-RU" : "en-US");
 
   return (
     <div className={styles.page}>
@@ -98,34 +179,35 @@ export function AnalyticsView() {
             <button
               key={tab.id}
               type="button"
-              className={
-                section === tab.id ? styles.tabActive : styles.tab
-              }
+              className={section === tab.id ? styles.tabActive : styles.tab}
               onClick={() => setSection(tab.id)}
             >
               <i className={`fa-solid ${tab.icon}`} aria-hidden />
-              {tab.label}
+              {t(`sections.${tab.id}`)}
             </button>
           ))}
         </div>
         <div className={styles.exportRow}>
+          {isDemo ? (
+            <span className={styles.demoBadge}>{t("demoBadge")}</span>
+          ) : null}
           <Button
             type="button"
             className={styles.exportBtn}
-            disabled={!data || section !== "croatia"}
-            onClick={() => data && exportCroatiaExcel(data)}
+            disabled={!croatiaData || section !== "croatia" || isDemo}
+            onClick={handleExportExcel}
           >
             <i className="fa-solid fa-file-excel" aria-hidden />
-            Excel
+            {t("export.excel")}
           </Button>
           <Button
             type="button"
             className={styles.exportBtn}
-            disabled={section !== "croatia" || !data}
-            onClick={exportCroatiaPdf}
+            disabled={section !== "croatia" || !croatiaData || isDemo}
+            onClick={handleExportPdf}
           >
             <i className="fa-solid fa-file-pdf" aria-hidden />
-            PDF
+            {t("export.pdf")}
           </Button>
         </div>
       </div>
@@ -140,55 +222,67 @@ export function AnalyticsView() {
         onCustomToChange={setCustomTo}
       />
 
-      {section === "croatia" ? (
+      {section === "overview" ? (
         <>
           {loading ? (
-            <Card className={styles.stateCard}>Загрузка аналитики…</Card>
+            <Card className={styles.stateCard}>{t("states.loading")}</Card>
           ) : error ? (
             <Card className={styles.stateCard}>{error}</Card>
-          ) : data ? (
+          ) : overviewData ? (
             <>
               <p className={styles.meta}>
-                Источник:{" "}
-                {data.source === "google_sheets"
-                  ? "Google Sheets · Клиенты Хорватия"
-                  : "Демо-данные"}
-                {" · "}
-                Обновлено:{" "}
-                {new Date(data.generatedAt).toLocaleString("ru-RU")}
+                {t("meta.sourceDemo")} · {t("meta.updated")}:{" "}
+                {formatUpdatedAt(overviewData.generatedAt)}
               </p>
               <div className={styles.printArea}>
-                <CroatiaAnalyticsView data={data} />
+                <OverviewAnalyticsView data={overviewData} />
+              </div>
+            </>
+          ) : null}
+        </>
+      ) : section === "croatia" ? (
+        <>
+          {loading ? (
+            <Card className={styles.stateCard}>{t("states.loading")}</Card>
+          ) : error ? (
+            <Card className={styles.stateCard}>{error}</Card>
+          ) : croatiaData ? (
+            <>
+              <p className={styles.meta}>
+                {croatiaData.source === "google_sheets"
+                  ? t("meta.sourceSheets")
+                  : t("meta.sourceDemo")}{" "}
+                · {t("meta.updated")}:{" "}
+                {formatUpdatedAt(croatiaData.generatedAt)}
+              </p>
+              <div className={styles.printArea}>
+                <CroatiaAnalyticsView data={croatiaData} />
               </div>
             </>
           ) : null}
         </>
       ) : (
         <AnalyticsBlock
-          title={
-            section === "spain"
-              ? "Аналитика — Испания"
-              : "Аналитика — Медицинские чекапы"
-          }
-          subtitle="Раздел будет подключён после загрузки данных"
+          title={t(`${section}.title`)}
+          subtitle={t(`${section}.subtitle`)}
         >
           <Card className={styles.placeholderCard}>
             <p className={styles.placeholderLead}>
-              Данные по этому направлению появятся позже. Архитектура уже
-              готова: фильтр периода, KPI, таблицы и графики будут работать
-              так же, как для Хорватии.
+              {t(`${section}.placeholderLead`)}
             </p>
             <p className={styles.placeholderFuture}>
-              Также запланированы: финансовый дашборд, B2B, AI и маркетинг.
+              {t(`${section}.placeholderFuture`)}
             </p>
             <ul className={styles.placeholderList}>
-              {PLACEHOLDER_BLOCKS[section].map((block) => (
-                <li key={block}>{block}</li>
+              {PLACEHOLDER_BLOCK_KEYS[section].map((blockKey) => (
+                <li key={blockKey}>{t(`${section}.blocks.${blockKey}`)}</li>
               ))}
             </ul>
           </Card>
         </AnalyticsBlock>
       )}
+
+      <Toast message={toast} onClose={() => setToast(null)} />
     </div>
   );
 }

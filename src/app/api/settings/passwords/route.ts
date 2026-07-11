@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import { getRequestLocale } from "@/i18n/api-messages";
+import { translateAdminMessage } from "@/i18n/admin-messages";
+import { enforceAdminDemoGuard } from "@/lib/admin/demo-guard";
+import { isDemoMode } from "@/lib/demo/demo-mode";
 import { getSession } from "@/lib/auth/session";
 import { listTeamUsers } from "@/lib/auth/users";
 import {
@@ -35,7 +39,7 @@ export async function GET() {
     }),
   );
 
-  return NextResponse.json({ members });
+  return NextResponse.json({ members, demo: isDemoMode() });
 }
 
 export async function POST(request: Request) {
@@ -46,6 +50,13 @@ export async function POST(request: Request) {
   if (session.role !== "owner") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+
+  const demoBlocked = await enforceAdminDemoGuard("settingsPasswordReset");
+  if (demoBlocked) {
+    return demoBlocked;
+  }
+
+  const locale = await getRequestLocale();
 
   const body = (await request.json().catch(() => null)) as {
     userId?: string;
@@ -65,7 +76,12 @@ export async function POST(request: Request) {
 
   if (await isUserDeleted(user.id)) {
     return NextResponse.json(
-      { error: "Нельзя сбросить пароль удалённому пользователю." },
+      {
+        error: translateAdminMessage(
+          locale,
+          "settings.security.password.errors.deletedUser",
+        ),
+      },
       { status: 400 },
     );
   }

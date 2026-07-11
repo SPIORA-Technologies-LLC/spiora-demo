@@ -98,9 +98,9 @@ export function daysBetween(start: Date, end: Date): number {
   return Math.max(0, Math.round(ms / (1000 * 60 * 60 * 24)));
 }
 
-export function formatDays(value: number | null): string {
+export function formatDays(value: number | null, unit = "дн."): string {
   if (value === null || Number.isNaN(value)) return "—";
-  return `${Math.round(value)} дн.`;
+  return `${Math.round(value)} ${unit}`;
 }
 
 export function addDays(date: Date, days: number): Date {

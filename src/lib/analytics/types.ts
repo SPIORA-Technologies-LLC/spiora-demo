@@ -1,6 +1,10 @@
 import type { DateRange, PeriodPreset } from "./period";
 
-export type AnalyticsSection = "croatia" | "spain" | "checkups";
+export type AnalyticsSection =
+  | "overview"
+  | "croatia"
+  | "spain"
+  | "checkups";
 
 export type MonthlyPoint = {
   key: string;
@@ -103,4 +107,52 @@ export type PlaceholderSection = {
   title: string;
   message: string;
   plannedBlocks: string[];
+};
+
+export type OverviewKpis = {
+  activeClients: number;
+  newLeads: number;
+  completedCases: number;
+  overdueTasks: number;
+  upcomingDeadlines: number;
+  avgProcessingDays: number;
+  taskCompletionRate: number;
+};
+
+export type OverviewMonthlyPoint = {
+  key: string;
+  label: string;
+  newLeads: number;
+  completedCases: number;
+  tasksClosed: number;
+};
+
+export type OverviewTeamWorkload = {
+  memberId: string;
+  name: string;
+  role: "owner" | "manager";
+  openTasks: number;
+  activeClients: number;
+};
+
+export type OverviewClientDistribution = {
+  direction: string;
+  count: number;
+  share: number;
+};
+
+export type OverviewAnalytics = {
+  source: "demo";
+  generatedAt: string;
+  demo: true;
+  kpis: OverviewKpis;
+  monthlyActivity: OverviewMonthlyPoint[];
+  teamWorkload: OverviewTeamWorkload[];
+  clientDistribution: OverviewClientDistribution[];
+  comparison: {
+    activeClientsDelta: number;
+    newLeadsDelta: number;
+    completedCasesDelta: number;
+    overdueTasksDelta: number;
+  };
 };

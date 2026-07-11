@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PERIOD_PRESETS, type PeriodPreset } from "@/lib/analytics/period";
 import styles from "./PeriodFilter.module.css";
 
@@ -22,6 +23,8 @@ export function PeriodFilter({
   onCustomToChange,
   periodLabel,
 }: PeriodFilterProps) {
+  const t = useTranslations("analytics");
+
   return (
     <div className={styles.wrap}>
       <div className={styles.presets}>
@@ -34,14 +37,14 @@ export function PeriodFilter({
             }
             onClick={() => onPresetChange(item.id)}
           >
-            {item.label}
+            {t(`period.presets.${item.id}`)}
           </button>
         ))}
       </div>
       {preset === "custom" ? (
         <div className={styles.customRow}>
           <label className={styles.dateField}>
-            <span>С</span>
+            <span>{t("period.from")}</span>
             <input
               type="date"
               value={customFrom}
@@ -49,7 +52,7 @@ export function PeriodFilter({
             />
           </label>
           <label className={styles.dateField}>
-            <span>По</span>
+            <span>{t("period.to")}</span>
             <input
               type="date"
               value={customTo}
@@ -60,7 +63,7 @@ export function PeriodFilter({
       ) : null}
       <p className={styles.periodLabel}>
         <i className="fa-solid fa-calendar-days" aria-hidden />
-        Период: <strong>{periodLabel}</strong>
+        {t("period.label")}: <strong>{periodLabel}</strong>
       </p>
     </div>
   );

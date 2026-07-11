@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import styles from "./SimpleLineChart.module.css";
 
 export type LineChartPoint = {
@@ -16,14 +19,17 @@ export function SimpleLineChart({
   points,
   color = "#e57373",
   height = 200,
-  unit = "дн.",
+  unit,
 }: SimpleLineChartProps) {
+  const t = useTranslations("analytics");
+  const resolvedUnit = unit ?? t("charts.daysUnit");
+
   const values = points
     .map((p) => p.value)
     .filter((v): v is number => v !== null);
 
   if (values.length === 0) {
-    return <p className={styles.empty}>Нет данных для графика</p>;
+    return <p className={styles.empty}>{t("charts.noData")}</p>;
   }
 
   const max = Math.max(...values, 1);
@@ -54,7 +60,7 @@ export function SimpleLineChart({
                         height: `${barPct}%`,
                         background: color,
                       }}
-                      title={`${point.label}: ${Math.round(point.value!)} ${unit}`}
+                      title={`${point.label}: ${Math.round(point.value!)} ${resolvedUnit}`}
                     />
                   ) : (
                     <span className={styles.noData}>—</span>
@@ -66,7 +72,9 @@ export function SimpleLineChart({
           })}
         </div>
       </div>
-      <span className={styles.unit}>Единица: {unit}</span>
+      <span className={styles.unit}>
+        {t("charts.unitLabel")}: {resolvedUnit}
+      </span>
     </div>
   );
 }

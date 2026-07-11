@@ -1,8 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { OnlineIndicator } from "@/components/presence/OnlineIndicator";
-import { ROLE_LABELS, type SessionUser } from "@/lib/auth/types";
+import type { AppLocale } from "@/i18n/config";
+import { translateRole } from "@/i18n/roles";
+import type { SessionUser } from "@/lib/auth/types";
 import { PRESENCE_POLL_INTERVAL_MS } from "@/lib/presence/constants";
 import type { TeamMember } from "@/lib/team/types";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +19,8 @@ type TeamViewProps = {
 };
 
 export function TeamView({ user }: TeamViewProps) {
+  const locale = useLocale() as AppLocale;
+  const t = useTranslations("team");
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
   const [canDelete, setCanDelete] = useState(false);
@@ -61,16 +66,20 @@ export function TeamView({ user }: TeamViewProps) {
       const res = await fetch(`/api/team/${deleteTarget.id}`, {
         method: "DELETE",
       });
-      const data = (await res.json()) as { error?: string };
+      const data = (await res.json()) as { error?: string; demo?: boolean };
       if (!res.ok) {
-        setToast({ text: data.error ?? "Не удалось удалить пользователя." });
+        if (data.demo) {
+          setToast({ text: t("demoPreviewDelete") });
+        } else {
+          setToast({ text: data.error ?? t("toasts.deleteFailed") });
+        }
         return;
       }
-      setToast({ text: `${deleteTarget.name} удалён из команды.` });
+      setToast({ text: t("toasts.memberDeleted", { name: deleteTarget.name }) });
       setDeleteTarget(null);
       await fetchMembers();
     } catch {
-      setToast({ text: "Не удалось удалить пользователя." });
+      setToast({ text: t("toasts.deleteFailed") });
     } finally {
       setDeleting(false);
     }
@@ -79,25 +88,22 @@ export function TeamView({ user }: TeamViewProps) {
   return (
     <div className={styles.wrap}>
       <SectionHeader
-        title="Team"
+        title={t("title")}
         subtitle={
           onlineCount > 0
-            ? `Список пользователей платформы · ${onlineCount} в сети`
-            : "Список пользователей платформы"
+            ? t("subtitleOnline", { count: onlineCount })
+            : t("subtitle")
         }
       />
 
       {canDelete ? (
-        <p className={styles.hint}>
-          Удаление доступно Веронике и Злате. Удалённый пользователь не сможет
-          войти на платформу.
-        </p>
+        <p className={styles.hint}>{t("deleteHint")}</p>
       ) : null}
 
       {loading ? (
-        <Card className={styles.empty}>Загрузка…</Card>
+        <Card className={styles.empty}>{t("loading")}</Card>
       ) : members.length === 0 ? (
-        <Card className={styles.empty}>В команде пока нет пользователей.</Card>
+        <Card className={styles.empty}>{t("empty")}</Card>
       ) : (
         <ul className={styles.list}>
           {members.map((member) => {
@@ -117,19 +123,19 @@ export function TeamView({ user }: TeamViewProps) {
                         <OnlineIndicator online={Boolean(member.isOnline)} />
                       </span>
                       {isSelf ? (
-                        <span className={styles.you}> (это вы)</span>
+                        <span className={styles.you}>{t("youLabel")}</span>
                       ) : null}
                     </p>
                     <p className={styles.meta}>{member.email}</p>
                     <p className={styles.stats}>
-                      AI-запросы:{" "}
+                      {t("aiRequests")}:{" "}
                       <span className={styles.statValue}>
                         {member.aiRequestsThisMonth ?? 0}
                       </span>{" "}
-                      за месяц
+                      {t("perMonth")}
                     </p>
                     <span className={styles.role}>
-                      {ROLE_LABELS[member.role]}
+                      {translateRole(locale, member.role)}
                     </span>
                   </div>
                   {showDelete ? (
@@ -139,7 +145,7 @@ export function TeamView({ user }: TeamViewProps) {
                         variant="danger"
                         onClick={() => setDeleteTarget(member)}
                       >
-                        Удалить
+                        {t("delete")}
                       </Button>
                     </div>
                   ) : null}
@@ -158,10 +164,8 @@ export function TeamView({ user }: TeamViewProps) {
             aria-hidden
           />
           <Card className={styles.modal}>
-            <h2 className={styles.modalTitle}>Удалить пользователя?</h2>
-            <p className={styles.confirmText}>
-              Пользователь потеряет доступ к платформе.
-            </p>
+            <h2 className={styles.modalTitle}>{t("modal.title")}</h2>
+            <p className={styles.confirmText}>{t("modal.body")}</p>
             <p className={styles.confirmName}>{deleteTarget.name}</p>
             <div className={styles.confirmActions}>
               <Button
@@ -170,7 +174,7 @@ export function TeamView({ user }: TeamViewProps) {
                 onClick={() => setDeleteTarget(null)}
                 disabled={deleting}
               >
-                Отмена
+                {t("modal.cancel")}
               </Button>
               <Button
                 type="button"
@@ -178,7 +182,7 @@ export function TeamView({ user }: TeamViewProps) {
                 onClick={() => void confirmDelete()}
                 disabled={deleting}
               >
-                {deleting ? "Удаление…" : "Удалить"}
+                {deleting ? t("modal.deleting") : t("modal.deleteBtn")}
               </Button>
             </div>
           </Card>

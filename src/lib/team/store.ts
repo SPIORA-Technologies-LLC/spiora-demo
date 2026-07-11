@@ -79,22 +79,28 @@ export async function listTeamMembers(): Promise<TeamMember[]> {
     .map(({ id, email, name, role }) => ({ id, email, name, role }));
 }
 
+export type TeamDeleteErrorCode =
+  | "deleteForbidden"
+  | "notFound"
+  | "alreadyDeleted"
+  | "saveFailed";
+
 export async function deleteTeamMember(
   actor: SessionUser,
   targetId: string,
-): Promise<{ ok: true } | { ok: false; error: string }> {
+): Promise<{ ok: true } | { ok: false; error: TeamDeleteErrorCode }> {
   if (!canDeleteTeamMember(actor, targetId)) {
-    return { ok: false, error: "Недостаточно прав для удаления этого пользователя." };
+    return { ok: false, error: "deleteForbidden" };
   }
 
   const target = listTeamUsers().find((user) => user.id === targetId);
   if (!target) {
-    return { ok: false, error: "Пользователь не найден." };
+    return { ok: false, error: "notFound" };
   }
 
   const store = await readStore();
   if (store.userIds.includes(targetId)) {
-    return { ok: false, error: "Пользователь уже удалён." };
+    return { ok: false, error: "alreadyDeleted" };
   }
 
   const saved = await writeStore({
@@ -102,7 +108,7 @@ export async function deleteTeamMember(
   });
 
   if (!saved) {
-    return { ok: false, error: "Не удалось сохранить изменения." };
+    return { ok: false, error: "saveFailed" };
   }
 
   return { ok: true };

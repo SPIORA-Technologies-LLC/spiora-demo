@@ -547,7 +547,7 @@ async function prepareWorkspaceRequest(
 
   let context: Awaited<ReturnType<typeof buildWorkspaceContext>>;
   try {
-    context = await buildWorkspaceContext(trimmed, intent);
+    context = await buildWorkspaceContext(trimmed, intent, locale);
   } catch (error) {
     console.error("[workspace-ai] context build failed", error);
     context = {

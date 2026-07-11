@@ -633,9 +633,20 @@ async function getDriveTextForAi(
 export async function getKnowledgeBaseTextForAi(
   userQuery: string,
   options?: DriveTextOptions,
+  locale: import("@/i18n/config").AppLocale = "en",
 ): Promise<string> {
+  const { shouldUseDemoKnowledgeBase, getDemoKnowledgeBaseTextForAi } =
+    await import("@/lib/knowledge-base/store");
+
+  if (shouldUseDemoKnowledgeBase()) {
+    return getDemoKnowledgeBaseTextForAi(locale, userQuery);
+  }
+
   if (!isGoogleDriveKbConfigured()) {
-    return "Knowledge Base: не настроена (GOOGLE_DRIVE_KB_FOLDER_ID).";
+    const { translateKnowledgeBaseMessage } = await import(
+      "@/i18n/knowledge-base-messages"
+    );
+    return translateKnowledgeBaseMessage(locale, "empty.unconfigured");
   }
 
   return getDriveTextForAi(

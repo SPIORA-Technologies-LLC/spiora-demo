@@ -1,14 +1,14 @@
+import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/layout/AppShell";
 import { KnowledgeBaseView } from "@/components/knowledge-base/KnowledgeBaseView";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
-export default function KnowledgeBasePage() {
+export default async function KnowledgeBasePage() {
+  const t = await getTranslations("knowledgeBase");
+
   return (
-    <AppShell sectionTitle="Knowledge Base">
-      <SectionHeader
-        title="Knowledge Base"
-        subtitle="База знаний из Google Drive — папки и файлы без загрузки на платформу"
-      />
+    <AppShell sectionTitle={t("title")}>
+      <SectionHeader title={t("title")} subtitle={t("subtitle")} />
       <KnowledgeBaseView />
     </AppShell>
   );

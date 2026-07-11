@@ -1,4 +1,9 @@
 import { fetchWithTlsFallback } from "@/lib/google-fetch";
+import type { AppLocale } from "@/i18n/config";
+import {
+  translateKnowledgeBaseFileType,
+  translateKnowledgeBaseMessage,
+} from "@/i18n/knowledge-base-messages";
 import { getGoogleAccessToken, isGoogleDriveKbConfigured } from "@/lib/google-sheets/auth";
 import { getCached, setCached } from "@/lib/google-sheets/cache";
 
@@ -38,16 +43,20 @@ function formatSize(bytes?: string): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function mimeLabel(mimeType: string): string {
-  if (mimeType === FOLDER_MIME) return "Папка";
-  if (mimeType.includes("pdf")) return "PDF";
+function mimeLabel(mimeType: string, locale: AppLocale): string {
+  if (mimeType === FOLDER_MIME) {
+    return translateKnowledgeBaseFileType(locale, "folder");
+  }
+  if (mimeType.includes("pdf")) {
+    return translateKnowledgeBaseFileType(locale, "pdf");
+  }
   if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) {
-    return "Таблица";
+    return translateKnowledgeBaseFileType(locale, "spreadsheet");
   }
   if (mimeType.includes("document") || mimeType.includes("word")) {
-    return "Документ";
+    return translateKnowledgeBaseFileType(locale, "document");
   }
-  return "Файл";
+  return translateKnowledgeBaseFileType(locale, "file");
 }
 
 async function driveFetch<T>(path: string): Promise<T | null> {
@@ -60,7 +69,7 @@ async function driveFetch<T>(path: string): Promise<T | null> {
     });
 
     if (!response.ok) {
-      console.error("[google-drive] fetch error", path, await response.text());
+      console.error("[google-drive] fetch error", path);
       return null;
     }
 
@@ -87,15 +96,34 @@ async function getFolderMeta(
   };
 }
 
+async function isFolderWithinKbRoot(
+  folderId: string,
+  rootFolderId: string,
+): Promise<boolean> {
+  if (folderId === rootFolderId) return true;
+
+  let current = folderId;
+  const seen = new Set<string>();
+  while (current && !seen.has(current)) {
+    seen.add(current);
+    const meta = await getFolderMeta(current);
+    if (!meta?.parentId) return false;
+    if (meta.parentId === rootFolderId) return true;
+    current = meta.parentId;
+  }
+  return false;
+}
+
 export async function listKnowledgeBaseFolder(
   folderId?: string,
+  locale: AppLocale = "en",
 ): Promise<DriveKbListing> {
   const rootFolderId = getRootFolderId();
 
   if (!isGoogleDriveKbConfigured()) {
     return {
       folderId: rootFolderId,
-      folderName: "Knowledge Base",
+      folderName: translateKnowledgeBaseMessage(locale, "title"),
       parentId: null,
       rootFolderId,
       items: [],
@@ -103,8 +131,25 @@ export async function listKnowledgeBaseFolder(
     };
   }
 
-  const currentId = folderId?.trim() || rootFolderId;
-  const cacheKey = `drive-kb:${currentId}`;
+  const requestedId = folderId?.trim() || rootFolderId;
+  const allowed =
+    requestedId === rootFolderId ||
+    (await isFolderWithinKbRoot(requestedId, rootFolderId));
+
+  if (!allowed) {
+    return {
+      folderId: rootFolderId,
+      folderName: translateKnowledgeBaseMessage(locale, "title"),
+      parentId: null,
+      rootFolderId,
+      items: [],
+      source: "error",
+      errorMessage: translateKnowledgeBaseMessage(locale, "errors.accessDenied"),
+    };
+  }
+
+  const currentId = requestedId;
+  const cacheKey = `drive-kb:${currentId}:${locale}`;
   const cached = getCached<DriveKbListing>(cacheKey);
   if (cached) return cached;
 
@@ -133,6 +178,7 @@ export async function listKnowledgeBaseFolder(
         ? null
         : rootFolderId;
 
+  const intlTag = locale === "ru" ? "ru-RU" : "en-US";
   const items: DriveKbItem[] = (filesData?.files ?? []).map((file) => {
     const isFolder = file.mimeType === FOLDER_MIME;
     return {
@@ -141,33 +187,35 @@ export async function listKnowledgeBaseFolder(
       mimeType: file.mimeType,
       isFolder,
       modifiedTime: file.modifiedTime
-        ? new Date(file.modifiedTime).toLocaleDateString("ru-RU")
+        ? new Date(file.modifiedTime).toLocaleDateString(intlTag)
         : "—",
       webViewLink:
         file.webViewLink ??
         (isFolder
           ? `https://drive.google.com/drive/folders/${file.id}`
           : `https://drive.google.com/file/d/${file.id}/view`),
-      sizeLabel: isFolder ? mimeLabel(file.mimeType) : formatSize(file.size),
+      sizeLabel: isFolder
+        ? mimeLabel(file.mimeType, locale)
+        : formatSize(file.size),
     };
   });
 
   items.sort((a, b) => {
     if (a.isFolder !== b.isFolder) return a.isFolder ? -1 : 1;
-    return a.name.localeCompare(b.name, "ru");
+    return a.name.localeCompare(b.name, locale);
   });
 
   const hasData = Boolean(meta || filesData);
   const result: DriveKbListing = {
     folderId: currentId,
-    folderName: meta?.name ?? rootMeta?.name ?? "Knowledge Base",
+    folderName: meta?.name ?? rootMeta?.name ?? translateKnowledgeBaseMessage(locale, "title"),
     parentId: safeParent,
     rootFolderId,
     items,
     source: hasData ? "google_drive" : "error",
     errorMessage: hasData
       ? undefined
-      : "Не удалось подключиться к Google Drive. Проверьте доступ service account к папке.",
+      : translateKnowledgeBaseMessage(locale, "errors.loadFailed"),
   };
 
   if (hasData) setCached(cacheKey, result, 30_000);

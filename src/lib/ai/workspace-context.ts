@@ -1,3 +1,4 @@
+import type { AppLocale } from "@/i18n/config";
 import {
   formatClientForAi,
   formatClientOneLiner,
@@ -148,6 +149,7 @@ export type WorkspaceContextBundle = {
 export async function buildWorkspaceContext(
   userMessage: string,
   intent: WorkspaceQueryIntent,
+  locale: AppLocale = "en",
 ): Promise<WorkspaceContextBundle> {
   const [clients, emigrantDesk, emigrantDriveText, formgrid, knowledgeBaseText] =
     await Promise.all([
@@ -174,9 +176,13 @@ export async function buildWorkspaceContext(
           rowCount: 0,
         }),
     intent.needsKb
-      ? getKnowledgeBaseTextForAi(userMessage, {
-          full: intent.needsKbFullText,
-        })
+      ? getKnowledgeBaseTextForAi(
+          userMessage,
+          {
+            full: intent.needsKbFullText,
+          },
+          locale,
+        )
       : Promise.resolve(
           "Knowledge Base: для этого вопроса не подключалась (ускорение ответа).",
         ),

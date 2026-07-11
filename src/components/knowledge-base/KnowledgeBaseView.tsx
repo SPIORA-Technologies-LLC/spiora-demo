@@ -1,96 +1,484 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import type { DriveKbListing } from "@/lib/google-drive/kb-drive";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useRouter, useSearchParams } from "next/navigation";
+import type { AppLocale } from "@/i18n/config";
+import type {
+  DriveKbItem,
+  DriveKbListing,
+} from "@/lib/google-drive/kb-drive";
+import type {
+  KbArticleDetail,
+  KbArticleListItem,
+  KbListingResponse,
+} from "@/lib/knowledge-base/types";
 import { Card } from "@/components/ui/Card";
+import { KbArticleMarkdown } from "./KbArticleMarkdown";
 
 import styles from "./KnowledgeBaseView.module.css";
 
+type ApiResponse = KbListingResponse & Partial<Omit<DriveKbListing, "source">>;
+
+function isDemoListing(data: ApiResponse): boolean {
+  return data.source === "demo";
+}
+
+function isDriveListing(data: ApiResponse): boolean {
+  return data.source === "google_drive";
+}
+
+function buildQueryString(params: Record<string, string | undefined>): string {
+  const search = new URLSearchParams();
+  for (const [key, value] of Object.entries(params)) {
+    if (value) search.set(key, value);
+  }
+  const qs = search.toString();
+  return qs ? `?${qs}` : "";
+}
+
 export function KnowledgeBaseView() {
-  const [listing, setListing] = useState<DriveKbListing | null>(null);
+  const t = useTranslations("knowledgeBase");
+  const locale = useLocale() as AppLocale;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [listing, setListing] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") ?? "");
+  const [searchError, setSearchError] = useState(false);
   const [currentFolderId, setCurrentFolderId] = useState<string | undefined>(
-    undefined,
+    searchParams.get("folderId") ?? undefined,
   );
   const [history, setHistory] = useState<string[]>([]);
 
-  const fetchFolder = useCallback(async (folderId?: string) => {
+  const category = searchParams.get("category") ?? undefined;
+  const tag = searchParams.get("tag") ?? undefined;
+  const articleSlug = searchParams.get("article") ?? undefined;
+  const query = searchParams.get("q") ?? undefined;
+
+  const updateRoute = useCallback(
+    (next: Record<string, string | undefined>) => {
+      router.replace(`/knowledge-base${buildQueryString(next)}`, {
+        scroll: false,
+      });
+    },
+    [router],
+  );
+
+  const fetchListing = useCallback(async () => {
     setLoading(true);
+    setSearchError(false);
     try {
-      const params = folderId ? `?folderId=${encodeURIComponent(folderId)}` : "";
-      const res = await fetch(`/api/knowledge-base${params}`);
+      const params = new URLSearchParams();
+      if (query) params.set("q", query);
+      if (category) params.set("category", category);
+      if (tag) params.set("tag", tag);
+      if (articleSlug) params.set("article", articleSlug);
+      if (currentFolderId) params.set("folderId", currentFolderId);
+      const qs = params.toString();
+      const res = await fetch(`/api/knowledge-base${qs ? `?${qs}` : ""}`);
       if (!res.ok) throw new Error("fetch failed");
-      const data = (await res.json()) as DriveKbListing;
+      const data = (await res.json()) as ApiResponse;
       setListing(data);
     } catch {
       setListing(null);
+      setSearchError(true);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [query, category, tag, articleSlug, currentFolderId]);
 
   useEffect(() => {
-    void fetchFolder(currentFolderId);
-    const interval = setInterval(() => {
-      void fetchFolder(currentFolderId);
-    }, 60_000);
-    return () => clearInterval(interval);
-  }, [fetchFolder, currentFolderId]);
+    void fetchListing();
+  }, [fetchListing]);
 
-  const openFolder = (folderId: string) => {
-    if (!listing) return;
-    setHistory((prev) => [...prev, listing.folderId]);
-    setCurrentFolderId(folderId);
+  useEffect(() => {
+    setSearchInput(query ?? "");
+  }, [query]);
+
+  const selectedArticle = useMemo(() => {
+    if (!listing || !isDemoListing(listing)) return null;
+    return listing.selectedArticle ?? null;
+  }, [listing]);
+
+  const handleSearchSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    updateRoute({
+      q: searchInput.trim() || undefined,
+      category,
+      tag,
+      article: undefined,
+    });
   };
 
-  const goToFolder = (folderId: string | null, index: number) => {
-    if (folderId === null) {
-      setHistory([]);
-      setCurrentFolderId(undefined);
-      return;
+  const handleClearSearch = () => {
+    setSearchInput("");
+    updateRoute({ category, tag, article: articleSlug });
+  };
+
+  const handleCopyLink = async (slug: string) => {
+    const url = `${window.location.origin}/knowledge-base?article=${encodeURIComponent(slug)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      /* ignore */
     }
-    setHistory((prev) => prev.slice(0, index));
-    setCurrentFolderId(folderId);
   };
 
-  const goUp = () => {
-    if (!listing?.parentId) {
-      setHistory([]);
-      setCurrentFolderId(undefined);
-      return;
-    }
-    setHistory((prev) => prev.slice(0, -1));
-    setCurrentFolderId(listing.parentId);
-  };
+  if (listing && isDriveListing(listing) && listing.source === "google_drive") {
+    return (
+      <DriveBrowserView
+        listing={listing as DriveKbListing}
+        loading={loading}
+        locale={locale}
+        currentFolderId={currentFolderId}
+        history={history}
+        onOpenFolder={(folderId) => {
+          setHistory((prev) => [...prev, listing.folderId!]);
+          setCurrentFolderId(folderId);
+          updateRoute({ folderId });
+        }}
+        onGoRoot={() => {
+          setHistory([]);
+          setCurrentFolderId(undefined);
+          updateRoute({});
+        }}
+        onGoUp={() => {
+          if (!listing.parentId) {
+            setHistory([]);
+            setCurrentFolderId(undefined);
+            updateRoute({});
+            return;
+          }
+          setHistory((prev) => prev.slice(0, -1));
+          setCurrentFolderId(listing.parentId ?? undefined);
+          updateRoute({ folderId: listing.parentId ?? undefined });
+        }}
+        t={t}
+      />
+    );
+  }
 
-  const rootUrl = listing
-    ? `https://drive.google.com/drive/folders/${listing.rootFolderId}`
-    : "https://drive.google.com";
+  const demoListing = listing && isDemoListing(listing) ? listing : null;
+  const articles = demoListing?.articles ?? [];
+  const categories = demoListing?.categories ?? [];
+  const tags = demoListing?.tags ?? [];
+
+  return (
+    <div className={styles.wrap}>
+      <div className={styles.demoHeader}>
+        {demoListing?.demo ? (
+          <span className={styles.demoBadge}>{t("demoBadge")}</span>
+        ) : null}
+        <span className={styles.source}>
+          {t(`sources.${demoListing?.source ?? "unconfigured"}`)}
+        </span>
+      </div>
+
+      <form className={styles.searchRow} onSubmit={handleSearchSubmit}>
+        <label className={styles.searchLabel} htmlFor="kb-search">
+          {t("search.label")}
+        </label>
+        <div className={styles.searchFieldWrap}>
+          <input
+            id="kb-search"
+            className={styles.searchInput}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={t("search.placeholder")}
+          />
+          {searchInput ? (
+            <button
+              type="button"
+              className={styles.clearBtn}
+              onClick={handleClearSearch}
+            >
+              {t("search.clear")}
+            </button>
+          ) : null}
+          <button type="submit" className={styles.searchBtn}>
+            <i className="fa-solid fa-magnifying-glass" aria-hidden />
+          </button>
+        </div>
+        <p className={styles.searchHint}>{t("search.hint")}</p>
+      </form>
+
+      <div className={styles.demoLayout}>
+        <aside className={styles.sidebar}>
+          <div className={styles.filterBlock}>
+            <p className={styles.filterTitle}>{t("filters.categoryLabel")}</p>
+            <button
+              type="button"
+              className={`${styles.filterBtn} ${!category ? styles.filterActive : ""}`}
+              onClick={() =>
+                updateRoute({ q: query, tag, article: undefined })
+              }
+            >
+              {t("filters.allCategories")}
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                className={`${styles.filterBtn} ${category === cat.id ? styles.filterActive : ""}`}
+                onClick={() =>
+                  updateRoute({
+                    q: query,
+                    category: cat.id,
+                    tag: undefined,
+                    article: undefined,
+                  })
+                }
+              >
+                {cat.label}
+                <span className={styles.filterCount}>{cat.count}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className={styles.filterBlock}>
+            <p className={styles.filterTitle}>{t("filters.tagLabel")}</p>
+            <button
+              type="button"
+              className={`${styles.filterBtn} ${!tag ? styles.filterActive : ""}`}
+              onClick={() =>
+                updateRoute({ q: query, category, article: undefined })
+              }
+            >
+              {t("filters.allTags")}
+            </button>
+            {tags.map((tagItem) => (
+              <button
+                key={tagItem.id}
+                type="button"
+                className={`${styles.filterBtn} ${tag === tagItem.id ? styles.filterActive : ""}`}
+                onClick={() =>
+                  updateRoute({
+                    q: query,
+                    category,
+                    tag: tagItem.id,
+                    article: undefined,
+                  })
+                }
+              >
+                {tagItem.label}
+              </button>
+            ))}
+          </div>
+
+          {demoListing?.uploadDisabled ? (
+            <p className={styles.uploadDisabled}>{t("upload.disabled")}</p>
+          ) : null}
+        </aside>
+
+        <main className={styles.mainPanel}>
+          <nav className={styles.breadcrumb} aria-label={t("breadcrumbAria")}>
+            <button
+              type="button"
+              className={styles.crumbBtn}
+              onClick={() =>
+                updateRoute({ q: query, category, tag, article: undefined })
+              }
+            >
+              {t("breadcrumbRoot")}
+            </button>
+            {category ? (
+              <>
+                <span className={styles.crumbSep}>/</span>
+                <button
+                  type="button"
+                  className={styles.crumbBtn}
+                  onClick={() =>
+                    updateRoute({ q: query, category, tag, article: undefined })
+                  }
+                >
+                  {categories.find((c) => c.id === category)?.label ?? category}
+                </button>
+              </>
+            ) : null}
+            {selectedArticle ? (
+              <>
+                <span className={styles.crumbSep}>/</span>
+                <span>{selectedArticle.title}</span>
+              </>
+            ) : null}
+          </nav>
+
+          {loading ? (
+            <p className={styles.meta}>{t("loading.list")}</p>
+          ) : searchError ? (
+            <p className={styles.emptyState}>{t("search.unavailable")}</p>
+          ) : demoListing?.source === "unconfigured" ? (
+            <p className={styles.emptyState}>
+              {demoListing.errorMessage ?? t("empty.unconfigured")}
+            </p>
+          ) : selectedArticle ? (
+            <ArticleDetailView
+              article={selectedArticle}
+              onBack={() =>
+                updateRoute({ q: query, category, tag, article: undefined })
+              }
+              onCopyLink={handleCopyLink}
+              t={t}
+            />
+          ) : (
+            <>
+              <p className={styles.meta}>
+                {query
+                  ? t("search.resultsCount", { count: articles.length })
+                  : null}
+              </p>
+              {articles.length === 0 ? (
+                <p className={styles.emptyState}>
+                  {query ? t("search.noResults") : t("empty.selectArticle")}
+                </p>
+              ) : (
+                <div className={styles.articleList}>
+                  {articles.map((article) => (
+                    <ArticleCard
+                      key={article.id}
+                      article={article}
+                      onOpen={() =>
+                        updateRoute({
+                          q: query,
+                          category,
+                          tag,
+                          article: article.slug,
+                        })
+                      }
+                      t={t}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function ArticleCard({
+  article,
+  onOpen,
+  t,
+}: {
+  article: KbArticleListItem;
+  onOpen: () => void;
+  t: ReturnType<typeof useTranslations<"knowledgeBase">>;
+}) {
+  return (
+    <Card className={styles.articleCard}>
+      <div className={styles.articleCardHead}>
+        <span className={styles.articleCategory}>{article.categoryLabel}</span>
+        <span className={styles.articleDate}>
+          {t("article.updated", { date: article.updatedAt })}
+        </span>
+      </div>
+      <h3 className={styles.articleTitle}>{article.title}</h3>
+      <p className={styles.articleSummary}>{article.summary}</p>
+      <div className={styles.tagRow}>
+        {article.tagLabels.map((label) => (
+          <span key={label} className={styles.tagChip}>
+            {label}
+          </span>
+        ))}
+      </div>
+      <div className={styles.cardActions}>
+        <button type="button" className={styles.primaryBtn} onClick={onOpen}>
+          {t("actions.open")}
+        </button>
+        <button type="button" className={styles.linkBtn} onClick={onOpen}>
+          {t("actions.preview")}
+        </button>
+      </div>
+    </Card>
+  );
+}
+
+function ArticleDetailView({
+  article,
+  onBack,
+  onCopyLink,
+  t,
+}: {
+  article: KbArticleDetail;
+  onBack: () => void;
+  onCopyLink: (slug: string) => void;
+  t: ReturnType<typeof useTranslations<"knowledgeBase">>;
+}) {
+  return (
+    <Card className={styles.articleDetail}>
+      <div className={styles.detailToolbar}>
+        <button type="button" className={styles.linkBtn} onClick={onBack}>
+          <i className="fa-solid fa-arrow-left" aria-hidden /> {t("actions.back")}
+        </button>
+        <button
+          type="button"
+          className={styles.linkBtn}
+          onClick={() => void onCopyLink(article.slug)}
+        >
+          {t("actions.copyLink")}
+        </button>
+      </div>
+      <p className={styles.detailMeta}>
+        {t("article.updated", { date: article.updatedAt })} · {t("article.author")}:{" "}
+        {article.authorName}
+      </p>
+      <h2 className={styles.detailTitle}>{article.title}</h2>
+      <p className={styles.detailSummary}>{article.summary}</p>
+      <div className={styles.tagRow}>
+        {article.tagLabels.map((label) => (
+          <span key={label} className={styles.tagChip}>
+            {label}
+          </span>
+        ))}
+      </div>
+      <KbArticleMarkdown content={article.content} />
+    </Card>
+  );
+}
+
+function DriveBrowserView({
+  listing,
+  loading,
+  currentFolderId,
+  history,
+  onOpenFolder,
+  onGoRoot,
+  onGoUp,
+  t,
+}: {
+  listing: DriveKbListing;
+  loading: boolean;
+  locale: AppLocale;
+  currentFolderId?: string;
+  history: string[];
+  onOpenFolder: (folderId: string) => void;
+  onGoRoot: () => void;
+  onGoUp: () => void;
+  t: ReturnType<typeof useTranslations<"knowledgeBase">>;
+}) {
+  const rootUrl = `https://drive.google.com/drive/folders/${listing.rootFolderId}`;
 
   return (
     <div className={styles.wrap}>
       <div className={styles.toolbar}>
-        <nav className={styles.breadcrumb} aria-label="Путь по папкам">
-          <button
-            type="button"
-            className={styles.crumbBtn}
-            onClick={() => goToFolder(null, -1)}
-          >
-            Knowledge Base
+        <nav className={styles.breadcrumb} aria-label={t("breadcrumbAria")}>
+          <button type="button" className={styles.crumbBtn} onClick={onGoRoot}>
+            {t("breadcrumbRoot")}
           </button>
-          {history.map((folderId, index) => (
+          {history.map((folderId) => (
             <span key={folderId} className={styles.crumbSep}>
               /
-              <button
-                type="button"
-                className={styles.crumbBtn}
-                onClick={() => goToFolder(folderId, index)}
-              >
+              <button type="button" className={styles.crumbBtn}>
                 …
               </button>
             </span>
           ))}
-          {listing ? (
+          {listing.folderName ? (
             <>
               <span className={styles.crumbSep}>/</span>
               <span>{listing.folderName}</span>
@@ -99,9 +487,9 @@ export function KnowledgeBaseView() {
         </nav>
 
         <div className={styles.actions}>
-          {listing?.parentId !== null ? (
-            <button type="button" className={styles.linkBtn} onClick={goUp}>
-              <i className="fa-solid fa-arrow-left" aria-hidden /> Назад
+          {listing.parentId !== null ? (
+            <button type="button" className={styles.linkBtn} onClick={onGoUp}>
+              <i className="fa-solid fa-arrow-left" aria-hidden /> {t("actions.backToCategory")}
             </button>
           ) : null}
           <a
@@ -111,63 +499,52 @@ export function KnowledgeBaseView() {
             className={styles.linkBtn}
           >
             <i className="fa-solid fa-folder-open" aria-hidden />
-            Открыть в Google Drive
+            {t("drive.openInDrive")}
           </a>
         </div>
       </div>
 
       <p className={styles.meta}>
         {loading
-          ? "Загрузка…"
-          : `${listing?.items.length ?? 0} элементов`}
-        <span className={styles.source}>
-          {listing?.source === "google_drive"
-            ? "Google Drive"
-            : listing?.source === "error"
-              ? "Ошибка подключения"
-              : "Не настроено"}
-        </span>
+          ? t("loading.drive")
+          : t("drive.itemsCount", { count: listing.items.length })}
+        <span className={styles.source}>{t("sources.google_drive")}</span>
       </p>
 
-      <p className={styles.hint}>
-        Файлы остаются в Google Drive — платформа показывает актуальную структуру
-        папок и ссылки. Обновление каждые 60 секунд.
-      </p>
+      <p className={styles.hint}>{t("drive.hint")}</p>
 
       <Card className={styles.tableCard}>
         <div className={styles.tableScroll}>
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Название</th>
-                <th>Тип</th>
-                <th>Изменён</th>
-                <th>Открыть</th>
+                <th>{t("drive.tableName")}</th>
+                <th>{t("drive.tableType")}</th>
+                <th>{t("drive.tableModified")}</th>
+                <th>{t("drive.tableOpen")}</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={4} className={styles.empty}>
-                    Загрузка базы знаний…
+                    {t("loading.drive")}
                   </td>
                 </tr>
-              ) : !listing || listing.source === "error" ? (
+              ) : listing.source === "error" ? (
                 <tr>
                   <td colSpan={4} className={styles.empty}>
-                    {listing?.errorMessage ??
-                      "Не удалось загрузить данные из Google Drive."}
+                    {listing.errorMessage ?? t("errors.loadFailed")}
                   </td>
                 </tr>
               ) : listing.items.length === 0 ? (
                 <tr>
                   <td colSpan={4} className={styles.empty}>
-                    Папка пуста. Если файлы есть в Drive — расшарьте папку на{" "}
-                    <code>demo-sa@demo-project.iam.gserviceaccount.com</code>
+                    {t("empty.folderEmpty")}
                   </td>
                 </tr>
               ) : (
-                listing.items.map((item) => (
+                listing.items.map((item: DriveKbItem) => (
                   <tr key={item.id}>
                     <td>
                       <div className={styles.nameCell}>
@@ -183,7 +560,7 @@ export function KnowledgeBaseView() {
                           <button
                             type="button"
                             className={styles.nameBtn}
-                            onClick={() => openFolder(item.id)}
+                            onClick={() => onOpenFolder(item.id)}
                           >
                             {item.name}
                           </button>
@@ -208,7 +585,7 @@ export function KnowledgeBaseView() {
                         rel="noopener noreferrer"
                         className={styles.openLink}
                       >
-                        Google Drive
+                        {t("actions.open")}
                         <i
                           className="fa-solid fa-arrow-up-right-from-square"
                           aria-hidden

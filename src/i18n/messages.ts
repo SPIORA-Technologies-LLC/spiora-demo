@@ -1,23 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import type { AppLocale } from "./config";
+import enCatalog from "./dictionaries/en.json" with { type: "json" };
+import ruCatalog from "./dictionaries/ru.json" with { type: "json" };
 
 type MessageTree = Record<string, unknown>;
-
-const dictionariesDir = path.join(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "dictionaries",
-);
-
-function readDictionary(filename: string): MessageTree {
-  return JSON.parse(
-    fs.readFileSync(path.join(dictionariesDir, filename), "utf8"),
-  ) as MessageTree;
-}
-
-export const enCatalog = readDictionary("en.json");
-export const ruCatalog = readDictionary("ru.json");
 
 const catalogs: Record<AppLocale, MessageTree> = {
   en: enCatalog,

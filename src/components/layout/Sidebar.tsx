@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
 import { getNavItemsForRole } from "@/lib/auth/permissions";
 import type { UserRole } from "@/lib/auth/types";
@@ -150,10 +149,6 @@ export function Sidebar({ role }: { role: UserRole }) {
           })}
         </ul>
       </nav>
-
-      <div className={styles.mobileLocale}>
-        <LanguageSwitcher compact />
-      </div>
     </aside>
   );
 }

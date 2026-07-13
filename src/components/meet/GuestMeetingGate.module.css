@@ -11,7 +11,7 @@
   width: min(100%, 28rem);
   padding: 1.75rem;
   border-radius: var(--radius-md);
-  background: rgba(45, 55, 72, 0.96);
+  background: rgba(34, 34, 34, 0.96);
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-card);
 }
@@ -27,7 +27,7 @@
 
 .title {
   margin: 0 0 0.75rem;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.35rem;
 }
 

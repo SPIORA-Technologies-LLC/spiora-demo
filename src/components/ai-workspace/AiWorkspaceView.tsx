@@ -47,7 +47,7 @@ const RESPONSE_MODE_IDS: {
 
 const MODE_STORAGE_KEY = "ai-workspace-response-mode";
 const showWorkspaceDiagnostics =
-  !branding.demoMode || branding.aiWorkspaceDebug;
+  !branding.demoMode && branding.aiWorkspaceDebug;
 
 type ChatEntry = WorkspaceChatTurn;
 

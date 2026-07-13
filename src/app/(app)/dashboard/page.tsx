@@ -1,9 +1,6 @@
 import { AppShell } from "@/components/layout/AppShell";
-import { DashboardView } from "@/components/dashboard/DashboardView";
+import { FirstImpressionView } from "@/components/dashboard/FirstImpressionView";
 import { getSession } from "@/lib/auth/session";
-import { getDashboardStats } from "@/lib/dashboard/stats";
-import { getTaskStats } from "@/lib/tasks/store";
-import { listLatestTeamChatForDashboard } from "@/lib/team-chat/store";
 import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 
@@ -13,22 +10,11 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const t = await getTranslations("dashboard");
-
-  const [taskStats, teamRecentMessages, dashboardStats] = await Promise.all([
-    getTaskStats(session),
-    listLatestTeamChatForDashboard(5),
-    getDashboardStats(),
-  ]);
+  const t = await getTranslations("commandCenter");
 
   return (
     <AppShell sectionTitle={t("pageTitle")}>
-      <DashboardView
-        user={session}
-        taskStats={taskStats}
-        teamRecentMessages={teamRecentMessages}
-        dashboardStats={dashboardStats}
-      />
+      <FirstImpressionView user={session} />
     </AppShell>
   );
 }

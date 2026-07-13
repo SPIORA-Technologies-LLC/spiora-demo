@@ -38,7 +38,7 @@
   gap: 1rem;
   padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.96);
+  background: rgba(0, 0, 0, 0.96);
 }
 
 .backLink {
@@ -60,7 +60,7 @@
 }
 
 .eventTitle {
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -268,7 +268,7 @@
   flex: 0 0 auto;
   padding: 0.45rem 0.85rem;
   border-bottom: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.96);
+  background: rgba(0, 0, 0, 0.96);
   color: #c7d2fe;
   font-size: 0.85rem;
   font-weight: 500;
@@ -295,7 +295,7 @@
   max-height: none;
   padding: 0.5rem 0.65rem calc(0.5rem + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.96);
+  background: rgba(0, 0, 0, 0.96);
 }
 
 .filmstripScreenShare .filmstripCarousel {

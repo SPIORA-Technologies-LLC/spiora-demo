@@ -38,7 +38,7 @@
   padding: 0.65rem 0.85rem;
   border-radius: 10px;
   border: 1px solid var(--border-soft, rgba(255, 255, 255, 0.08));
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
   color: var(--gray-300);
   font-family: Inter, sans-serif;
   text-align: left;
@@ -46,13 +46,13 @@
 }
 
 .tab:hover {
-  border-color: var(--border-burgundy, rgba(145, 13, 13, 0.45));
+  border-color: var(--border-burgundy, rgba(var(--brand-red-rgb), 0.45));
   color: var(--white);
 }
 
 .tabActive {
-  background: rgba(145, 13, 13, 0.2);
-  border-color: rgba(145, 13, 13, 0.45);
+  background: rgba(var(--brand-red-rgb), 0.2);
+  border-color: rgba(var(--brand-red-rgb), 0.45);
   color: var(--white);
 }
 
@@ -81,7 +81,7 @@
 
 .sectionTitle {
   margin: 0 0 0.35rem;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.125rem;
   font-weight: 700;
   color: var(--white);
@@ -127,7 +127,7 @@
   padding: 0.75rem 0.85rem;
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 20, 28, 0.35);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .integrationMain {
@@ -227,7 +227,7 @@
 
 .modalTitle {
   margin: 0 0 0.5rem;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.125rem;
   color: var(--white);
 }
@@ -255,7 +255,7 @@
   padding: 0.7rem 0.85rem;
   border-radius: 10px;
   border: 1px solid var(--gray-600);
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
   color: var(--white);
   font-family: Inter, sans-serif;
 }

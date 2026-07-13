@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "description": "Corporate Digital Workspace — Spiora"
+    "description": "The AI Operating System for Business — Spiora"
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Command Center",
     "clients": "Clients",
     "tasks": "Tasks",
     "calendar": "Calendar",
@@ -14,7 +14,12 @@
     "team": "Team",
     "settings": "Settings",
     "notifications": "Notifications",
-    "logout": "Logout"
+    "logout": "Logout",
+    "crmLeads": "Lead Review",
+    "newFormgridClients": "Formgrid Clients",
+    "meetingRecordings": "Meeting Recordings",
+    "relocation": "Relocation",
+    "checkupsErevan": "Checkups in Yerevan"
   },
   "actions": {
     "save": "Save",
@@ -52,7 +57,8 @@
     "demoEnvironment": "Demo environment",
     "demoAccountsTitle": "Demo accounts (local development)",
     "demoPasswordHint": "Password is set in AUTH_PASSWORD_* variables in .env.local (not stored in source code). Other emails will not work.",
-    "forgotPasswordHint": "Forgot your password? Contact your platform administrator — they can reset it in Settings."
+    "forgotPasswordHint": "Forgot your password? Contact your platform administrator — they can reset it in Settings.",
+    "rateLimitExceeded": "Too many sign-in attempts. Please wait a minute and try again."
   },
   "shell": {
     "search": "Search…",
@@ -245,6 +251,60 @@
       "image": "Image",
       "file": "File",
       "empty": "No messages yet."
+    }
+  },
+  "commandCenter": {
+    "pageTitle": "Command Center",
+    "greeting": "Good morning, {name} 👋",
+    "calmHeadline": "Everything is under control.",
+    "heroLead": "AI analyzed overnight activity and prepared today's executive briefing.",
+    "executiveSummary": {
+      "title": "Today's Executive Summary",
+      "line1": "Your company is operating normally.",
+      "line2": "Three client cases require attention before Friday.",
+      "line3": "No critical risks detected overnight.",
+      "line4": "AI recommends prioritizing residence permit applications."
+    },
+    "priorities": {
+      "title": "Your Priorities",
+      "meetings": "4 meetings scheduled — everything is on schedule",
+      "documents": "3 clients are waiting for documents",
+      "overdue": "2 items require your attention",
+      "permit": "1 residence permit approved"
+    },
+    "insights": {
+      "title": "AI Insights",
+      "sofiaDocument": "Sofia Martins is missing one document",
+      "danielOverdue": "Daniel has 6 overdue items",
+      "mergeConsultations": "Two consultations can be merged"
+    },
+    "askSpiora": {
+      "title": "Ask Spiora",
+      "lead": "Your AI command layer — one click to the right view.",
+      "priorities": "Show today's priorities",
+      "atRisk": "Find clients at risk",
+      "draftEmail": "Draft an email",
+      "deadlines": "Upcoming deadlines",
+      "schedule": "Review my schedule"
+    },
+    "companyHealth": {
+      "title": "Company Health",
+      "status": {
+        "excellent": "Excellent"
+      },
+      "clients": "Clients",
+      "documents": "Documents",
+      "meetings": "Meetings",
+      "tasksCompleted": "Tasks completed",
+      "aiConversations": "AI conversations"
+    },
+    "activity": {
+      "title": "Team Activity",
+      "emmaPassport": "Emma uploaded a passport",
+      "danielConsultation": "Daniel scheduled a consultation",
+      "lucasChecklist": "Lucas completed a checklist",
+      "aiSummarized": "AI summarized 12 documents",
+      "oliviaAssigned": "Olivia assigned a new case"
     }
   },
   "clients": {
@@ -1612,6 +1672,302 @@
         "summary": "Peer review steps before submitting client packages or AI-generated drafts.",
         "content": "## When to review\n\n- Before submitting a document package to authorities\n- Before sending AI-drafted client emails\n- After updating a Knowledge Base article (production only)\n\n## Reviewer checklist\n\n1. Facts match CRM and uploaded documents.\n2. No internal jargon or demo placeholders in client text.\n3. Dates and names are consistent.\n\n## Demo note\n\nIn public demo, edits are read-only — use this process as reference only."
       }
+    }
+  },
+  "tasks": {
+    "title": "Team tasks",
+    "subtitle": "Shared task list for {companyName}",
+    "demoBadge": "Demo data",
+    "newTask": "New task",
+    "createTask": "Create task",
+    "notAssigned": "Not assigned",
+    "search": {
+      "placeholder": "Search by title, description, author, assignee…",
+      "label": "Search tasks"
+    },
+    "filters": {
+      "allStatuses": "All statuses",
+      "allAuthors": "All authors",
+      "allAssignees": "All assignees",
+      "statusLabel": "Filter by status",
+      "authorLabel": "Filter by author",
+      "assigneeLabel": "Filter by assignee"
+    },
+    "statuses": {
+      "new": "To Do",
+      "in_progress": "In Progress",
+      "pending_approval": "Waiting",
+      "needs_revision": "Blocked",
+      "completed": "Completed"
+    },
+    "priorities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    },
+    "meta": {
+      "author": "Author",
+      "assignees": "Assignees",
+      "created": "Created",
+      "due": "Due",
+      "completed": "Approved",
+      "dueLabel": "Due: {date}",
+      "assigneeLabel": "Assignee: {name}",
+      "comment": "Comment"
+    },
+    "actions": {
+      "open": "Open",
+      "edit": "Edit",
+      "delete": "Delete",
+      "close": "Close",
+      "cancel": "Cancel",
+      "save": "Save",
+      "create": "Create",
+      "start": "In progress",
+      "submitForApproval": "Submit for review",
+      "complete": "Mark done",
+      "approve": "Approve task",
+      "requestRevision": "Send back for revision",
+      "quickActions": "Quick actions:",
+      "assigneeActions": "Assignee actions:",
+      "markAllRead": "Mark all read"
+    },
+    "quickFilters": {
+      "all": "All",
+      "overdue": "Overdue",
+      "createdByMe": "Assigned by me",
+      "pendingReview": "Awaiting review",
+      "needsRevision": "Needs revision",
+      "completed": "Approved"
+    },
+    "toast": {
+      "created": "Task created successfully.",
+      "updated": "Task updated.",
+      "completed": "Task marked as completed.",
+      "deleted": "Task deleted.",
+      "submittedForApproval": "Task submitted to the author for review.",
+      "approved": "Task approved and completed.",
+      "revisionRequested": "Task sent back for revision.",
+      "inProgress": "Task is now in progress.",
+      "statusUpdated": "Task status updated.",
+      "createAttachmentPartial": "Task created, but files could not be attached.",
+      "createAttachmentPartialWithError": "Task created, but files could not be attached: {error}",
+      "insufficientPermissions": "You do not have permission for this action.",
+      "commentRequired": "Add a comment for revision.",
+      "updateFailed": "Could not update the task.",
+      "deleteForbidden": "Only the task creator or platform owner can delete this task.",
+      "deleteFailed": "Could not delete the task."
+    },
+    "errors": {
+      "saveFailed": "Could not save the task.",
+      "updateFailed": "Could not update the task.",
+      "loadFailed": "Could not load tasks.",
+      "uploadFailed": "Could not upload the file.",
+      "deleteFileFailed": "Could not delete the file.",
+      "attachFailed": "Could not attach the file.",
+      "reportFailed": "Could not submit the report.",
+      "deleteReportFailed": "Could not delete the report.",
+      "forbidden": "You do not have permission for this action.",
+      "commentRequired": "Comment is required.",
+      "supabaseAssignees": "Could not load assignees from the directory."
+    },
+    "validation": {
+      "titleRequired": "Enter a task title.",
+      "commentRequired": "Add a comment for revision.",
+      "revisionCommentRequired": "Add a comment for the assignee.",
+      "reportCommentRequired": "Write a comment for the progress report."
+    },
+    "empty": {
+      "list": "No tasks yet. Create the first one — the whole team will see it.",
+      "filtered": "Nothing matches the current filters.",
+      "noDescription": "No description provided.",
+      "attachments": "No files attached.",
+      "reportsCanAdd": "No reports yet. Leave a comment about work completed.",
+      "reportsReadOnly": "Assignees have not submitted any reports yet."
+    },
+    "loading": {
+      "list": "Loading tasks…",
+      "upload": "Uploading…",
+      "submit": "Submitting…"
+    },
+    "confirm": {
+      "deleteTaskTitle": "Delete task?",
+      "deleteTaskBody": "Are you sure?",
+      "deleteFile": "Delete file \"{fileName}\"?",
+      "deleteReport": "Delete this report?",
+      "confirm": "Confirm",
+      "cancel": "Cancel"
+    },
+    "workflow": {
+      "submitted": "Submitted for review",
+      "approved": "Approved by author",
+      "revisionRequested": "Sent back for revision",
+      "reviewHint": "Open the task to approve or send it back for revision."
+    },
+    "review": {
+      "title": "Task review",
+      "approve": "Approve task",
+      "revisionLabel": "Comment for revision",
+      "revisionPlaceholder": "What needs to be fixed or clarified…",
+      "revisionError": "Add a comment for the assignee.",
+      "authorComment": "Author comment",
+      "historyTitle": "Review history",
+      "pendingNotice": "The assignee submitted this task for review. Approve the work or send it back with a comment.",
+      "completedNotice": "Task approved and completed{completedAt}. You can remove it from the list."
+    },
+    "attachments": {
+      "title": "Files",
+      "attach": "Attach",
+      "uploading": "Uploading…",
+      "selectFiles": "Choose files",
+      "openFile": "Open file",
+      "deleteFile": "Delete file",
+      "removeFile": "Remove file",
+      "hint": "PDF, Word, Excel, PowerPoint, images (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — up to 25 MB each",
+      "pickerLabel": "Files"
+    },
+    "progressReports": {
+      "title": "Assignee reports",
+      "yourReport": "Your report",
+      "placeholder": "Describe what you completed for your part of the task…",
+      "attachFile": "Attach file",
+      "replaceFile": "Replace file",
+      "optionalFileHint": "File is optional.",
+      "submit": "Submit report",
+      "submitting": "Submitting…",
+      "deleteReport": "Delete report"
+    },
+    "form": {
+      "titleLabel": "Task title *",
+      "titlePlaceholder": "For example: Update Croatia checklist",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Task details…",
+      "dueDateLabel": "Due date",
+      "assigneesLabel": "Assignees",
+      "assigneesHint": "Select one or more people. Assignees can update the task status.",
+      "statusLabel": "Status",
+      "statusEditHint": "Status changes through In progress, Submit for review, and author approval.",
+      "saving": "Saving…"
+    },
+    "modal": {
+      "createTitle": "New task",
+      "editTitle": "Edit task",
+      "deleteTitle": "Delete task?",
+      "closeAria": "Close"
+    },
+    "banners": {
+      "overdueCount": "Overdue tasks: {count}",
+      "showOverdueOnly": "Show overdue only",
+      "showAll": "Show all",
+      "pendingReviewCount": "Awaiting your review: {count}",
+      "showPendingReview": "Show tasks awaiting review",
+      "needsRevisionCount": "Needs your revision: {count}",
+      "showNeedsRevision": "Show tasks needing revision",
+      "completedAssignedCount": "Tasks you assigned that were completed: {count}",
+      "showCreatedByMe": "Show assigned by me",
+      "notificationsTitle": "Task notifications: {count}",
+      "overdue": "Overdue",
+      "onYourReview": "Awaiting your review",
+      "needsRevision": "Needs revision",
+      "approved": "Approved",
+      "completed": "Completed",
+      "awaitingDecision": "Awaiting your decision"
+    },
+    "demoTasks": {
+      "review-sofia-documents": {
+        "title": "Review Sofia Martins' Spain documents",
+        "description": "Check passport copy, proof of remote income, and health insurance for Sofia Martins' Digital Nomad Visa application. Flag missing apostilles before the consultation."
+      },
+      "schedule-immigration-consultation": {
+        "title": "Schedule immigration consultation for John Carter",
+        "description": "Book a 45-minute intake call with John Carter about Portugal D7 options. Send calendar invite and pre-call questionnaire via the client portal."
+      },
+      "verify-passport-copy": {
+        "title": "Verify Anna Kowalska passport copy",
+        "description": "Confirm scan quality, expiry date, and name match against CRM for Anna Kowalska. Request a new upload if pages are cropped or unreadable."
+      },
+      "ai-review-application": {
+        "title": "Run AI review on Marco Rossi application",
+        "description": "Use AI Workspace to summarize Marco Rossi's Slovakia relocation questionnaire and highlight gaps in employment history and supporting documents."
+      },
+      "prepare-residence-permit-package": {
+        "title": "Prepare residence permit package for Sofia Martins",
+        "description": "Assemble the Spain DNV submission folder: application form, income proof, insurance, and cover letter. Assign final QC before courier dispatch."
+      },
+      "client-follow-up-carter": {
+        "title": "Follow up with John Carter on missing bank statements",
+        "description": "Send a reminder to John Carter about three months of bank statements still needed for the Portugal D7 file. Include secure upload link and deadline."
+      },
+      "proof-of-address-review": {
+        "title": "Review proof of address for Anna Kowalska",
+        "description": "Validate lease agreement and utility bill for Anna Kowalska's Croatia case. Ensure documents are dated within the last 90 days and show full address."
+      },
+      "monthly-pipeline-summary": {
+        "title": "Draft monthly pipeline summary",
+        "description": "Compile active cases, overdue milestones, and consultation load for Northstar Mobility leadership. Include Sofia Martins and Marco Rossi as priority examples."
+      },
+      "update-croatia-checklist": {
+        "title": "Update Croatia relocation checklist",
+        "description": "Refresh the internal Croatia checklist with latest temporary stay requirements and link the Anna Kowalska document set as a reference example."
+      },
+      "team-chat-kb-announcement": {
+        "title": "Announce new KB article in Team Chat",
+        "description": "Post a short Team Chat message about the updated client onboarding checklist and pin the Knowledge Base link for new case managers."
+      },
+      "marco-rossi-intake-review": {
+        "title": "Review Marco Rossi intake form",
+        "description": "Complete first-pass review of Marco Rossi's Slovakia intake: family members, employment contract, and preferred relocation timeline. Note open questions for the call."
+      },
+      "anna-kowalska-document-check": {
+        "title": "Document check for Anna Kowalska",
+        "description": "Cross-check Anna Kowalska's uploaded bundle against the Croatia checklist. Escalate any missing criminal record certificate or translation."
+      },
+      "calendar-prep-client-call": {
+        "title": "Prep calendar notes for Sofia Martins call",
+        "description": "Add agenda, open document gaps, and CRM links to tomorrow's consultation with Sofia Martins. Share prep notes with Daniel Cooper."
+      },
+      "escalation-policy-review": {
+        "title": "Review client escalation policy",
+        "description": "Read the updated escalation SOP in Knowledge Base and confirm overdue visa cases—such as John Carter's extension—are routed correctly."
+      },
+      "demo-data-security-quiz": {
+        "title": "Complete demo data security quiz",
+        "description": "Finish the quarterly security awareness quiz covering client PII handling, demo environment rules, and secure file sharing for Northstar Mobility."
+      },
+      "portugal-d7-questionnaire": {
+        "title": "Send Portugal D7 questionnaire to John Carter",
+        "description": "Email John Carter the Portugal D7 pre-assessment form and track completion in CRM. Follow up if not returned within 48 hours."
+      },
+      "overdue-visa-extension": {
+        "title": "Resolve overdue visa extension for Anna Kowalska",
+        "description": "Anna Kowalska's temporary stay extension paperwork is two days past internal deadline. Contact the client, update status in CRM, and propose a recovery plan."
+      },
+      "ai-workspace-prompt-audit": {
+        "title": "Audit AI Workspace prompts for client cases",
+        "description": "Review default AI prompts used for client summaries and ensure they reference Northstar Mobility programs correctly. Test with Sofia Martins and Marco Rossi cases."
+      },
+      "client-welcome-email-template": {
+        "title": "Refresh client welcome email template",
+        "description": "Update the welcome email template with portal login steps, document upload tips, and Northstar Mobility contact details. Use John Carter onboarding as QA example."
+      },
+      "spain-remote-work-file": {
+        "title": "Open Spain remote work file for Sofia Martins",
+        "description": "Create the CRM case file for Sofia Martins' Spain remote work route, tag direction and urgency, and attach the initial document checklist."
+      }
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist or has been moved.",
+      "backHome": "Back to dashboard"
+    },
+    "serverError": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Please try again later.",
+      "retry": "Try again",
+      "backHome": "Back to dashboard"
     }
   }
 }

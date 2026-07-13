@@ -1,7 +1,9 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import type { AppLocale } from "@/i18n/config";
 import type { SessionUser } from "@/lib/auth/types";
 import { formatAssigneeNames } from "@/lib/tasks/assignees";
 import { formatTaskDate, formatTaskDateTime } from "@/lib/tasks/format";
@@ -46,6 +48,8 @@ export function TaskCard({
   onEdit,
   onDelete,
 }: TaskCardProps) {
+  const t = useTranslations("tasks");
+  const locale = useLocale() as AppLocale;
   const isCompleted = task.status === "completed";
   const isPendingApproval = task.status === "pending_approval";
   const isNeedsRevision = task.status === "needs_revision";
@@ -59,6 +63,10 @@ export function TaskCard({
   const canCompleteDirect = canDirectComplete(task, user);
   const canReview = canReviewTask(task, user);
   const latestRevision = getLatestRevisionComment(task);
+
+  const completedAtSuffix = task.completedAt
+    ? ` · ${formatTaskDateTime(task.completedAt, locale)}`
+    : "";
 
   return (
     <Card
@@ -75,22 +83,18 @@ export function TaskCard({
         .filter(Boolean)
         .join(" ")}
     >
-      {overdue ? <div className={styles.overdueBanner}>Просрочена</div> : null}
+      {overdue ? <div className={styles.overdueBanner}>{t("banners.overdue")}</div> : null}
       {isPendingApproval && createdByMe ? (
-        <div className={styles.pendingBanner}>На вашей проверке</div>
+        <div className={styles.pendingBanner}>{t("banners.onYourReview")}</div>
       ) : null}
       {isNeedsRevision && assignedToMe ? (
-        <div className={styles.revisionBanner}>Нужна доработка</div>
+        <div className={styles.revisionBanner}>{t("banners.needsRevision")}</div>
       ) : null}
       {isCompleted ? (
         <div className={styles.completedBanner}>
           {createdByMe && !assignedToMe
-            ? `Принята${
-                task.completedAt ? ` · ${formatTaskDateTime(task.completedAt)}` : ""
-              }`
-            : `Завершена${
-                task.completedAt ? ` · ${formatTaskDateTime(task.completedAt)}` : ""
-              }`}
+            ? `${t("banners.approved")}${completedAtSuffix}`
+            : `${t("banners.completed")}${completedAtSuffix}`}
         </div>
       ) : null}
 
@@ -108,12 +112,19 @@ export function TaskCard({
             {task.title}
           </h3>
         </button>
-        <TaskStatusBadge status={task.status} />
+        <div className={styles.headerBadges}>
+          {task.priority ? (
+            <span className={styles.priorityBadge}>
+              {t(`priorities.${task.priority}`)}
+            </span>
+          ) : null}
+          <TaskStatusBadge status={task.status} />
+        </div>
       </div>
 
       {isNeedsRevision && latestRevision ? (
         <p className={styles.revisionPreview}>
-          <strong>Комментарий:</strong> {latestRevision}
+          <strong>{t("meta.comment")}:</strong> {latestRevision}
         </p>
       ) : null}
 
@@ -130,34 +141,36 @@ export function TaskCard({
 
       <dl className={styles.meta}>
         <div>
-          <dt>Автор</dt>
+          <dt>{t("meta.author")}</dt>
           <dd>{task.createdByName}</dd>
         </div>
         <div>
-          <dt>Исполнители</dt>
-          <dd>{formatAssigneeNames(task.assignees)}</dd>
+          <dt>{t("meta.assignees")}</dt>
+          <dd>{formatAssigneeNames(task.assignees, t("notAssigned"))}</dd>
         </div>
         <div>
-          <dt>Создано</dt>
-          <dd>{formatTaskDateTime(task.createdAt)}</dd>
+          <dt>{t("meta.created")}</dt>
+          <dd>{formatTaskDateTime(task.createdAt, locale)}</dd>
         </div>
         <div>
-          <dt>Срок</dt>
+          <dt>{t("meta.due")}</dt>
           <dd className={overdue ? styles.dueOverdue : ""}>
-            {formatTaskDate(task.dueDate)}
+            {formatTaskDate(task.dueDate, locale)}
           </dd>
         </div>
         {isCompleted && task.completedAt ? (
           <div>
-            <dt>Принято</dt>
-            <dd className={styles.completedAt}>{formatTaskDateTime(task.completedAt)}</dd>
+            <dt>{t("meta.completed")}</dt>
+            <dd className={styles.completedAt}>
+              {formatTaskDateTime(task.completedAt, locale)}
+            </dd>
           </div>
         ) : null}
       </dl>
 
       {!isCompleted && !isPendingApproval ? (
         <div className={styles.statusActions}>
-          <span className={styles.statusActionsLabel}>Быстрые действия:</span>
+          <span className={styles.statusActionsLabel}>{t("actions.quickActions")}</span>
           <div className={styles.statusButtons}>
             {canStart ? (
               <Button
@@ -167,7 +180,7 @@ export function TaskCard({
                 onClick={() => onStartTask(task)}
                 disabled={workflowLoading}
               >
-                ▶ В работе
+                ▶ {t("actions.start")}
               </Button>
             ) : null}
             {canSubmit ? (
@@ -178,7 +191,7 @@ export function TaskCard({
                 onClick={() => onSubmitForApproval(task)}
                 disabled={workflowLoading}
               >
-                ✅ На проверку
+                ✅ {t("actions.submitForApproval")}
               </Button>
             ) : null}
             {canCompleteDirect ? (
@@ -189,7 +202,7 @@ export function TaskCard({
                 onClick={() => onComplete(task)}
                 disabled={workflowLoading}
               >
-                ✅ Выполнено
+                ✅ {t("actions.complete")}
               </Button>
             ) : null}
           </div>
@@ -197,23 +210,21 @@ export function TaskCard({
       ) : null}
 
       {canReview ? (
-        <div className={styles.reviewHint}>
-          Откройте задачу, чтобы принять или отправить на доработку.
-        </div>
+        <div className={styles.reviewHint}>{t("workflow.reviewHint")}</div>
       ) : null}
 
       <div className={styles.actions}>
         <Button type="button" variant="secondary" onClick={() => onOpen(task)}>
-          Открыть
+          {t("actions.open")}
         </Button>
         {canEdit && !isPendingApproval ? (
           <Button type="button" variant="secondary" onClick={() => onEdit(task)}>
-            ✏️ Редактировать
+            ✏️ {t("actions.edit")}
           </Button>
         ) : null}
         {canDelete ? (
           <Button type="button" variant="danger" onClick={() => onDelete(task)}>
-            🗑 Удалить
+            🗑 {t("actions.delete")}
           </Button>
         ) : null}
       </div>

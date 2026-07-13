@@ -1,29 +1,26 @@
-import type { TaskStatus } from "@/lib/tasks/types";
-import { TASK_STATUS_LABELS } from "@/lib/tasks/types";
+import type { AppLocale } from "@/i18n/config";
+import { formatAppDate } from "@/i18n/format";
 
-export function formatTaskDate(iso: string | null): string {
+export function formatTaskDate(iso: string | null, locale: AppLocale): string {
   if (!iso) return "—";
   const datePart = iso.slice(0, 10);
-  const [y, m, d] = datePart.split("-");
+  const [y, m, d] = datePart.split("-").map(Number);
   if (!y || !m || !d) return iso;
-  return `${d}.${m}.${y}`;
+  return formatAppDate(new Date(y, m - 1, d), locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 }
 
-export function formatTaskDateTime(iso: string): string {
-  return formatTaskDate(iso);
+export function formatTaskDateTime(iso: string, locale: AppLocale): string {
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) return formatTaskDate(iso, locale);
+  return formatAppDate(parsed, locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
-
-export const TASK_STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
-  { value: "new", label: TASK_STATUS_LABELS.new },
-  { value: "in_progress", label: TASK_STATUS_LABELS.in_progress },
-];
-
-export const TASK_FILTER_STATUS_OPTIONS: { value: TaskStatus | "all"; label: string }[] =
-  [
-    { value: "all", label: "Все статусы" },
-    { value: "new", label: TASK_STATUS_LABELS.new },
-    { value: "in_progress", label: TASK_STATUS_LABELS.in_progress },
-    { value: "pending_approval", label: TASK_STATUS_LABELS.pending_approval },
-    { value: "needs_revision", label: TASK_STATUS_LABELS.needs_revision },
-    { value: "completed", label: TASK_STATUS_LABELS.completed },
-  ];

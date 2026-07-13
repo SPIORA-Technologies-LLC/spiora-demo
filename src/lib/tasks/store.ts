@@ -46,6 +46,8 @@ import {
 import { taskNeedsApprovalWorkflow } from "./workflow";
 import { listTeamMembers } from "@/lib/team/store";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { isDemoMode } from "@/lib/demo/demo-mode";
+import { buildDemoTasks } from "./demo-tasks-builder";
 import * as sbTasks from "@/lib/supabase/tasks-repo";
 
 const STORE_PATH = path.join(process.cwd(), ".data", "tasks.json");
@@ -146,11 +148,21 @@ function normalizeReviewHistory(raw: unknown): TaskReviewEvent[] {
 function normalizeTask(task: Task): Task {
   return {
     ...task,
+    priority: task.priority ?? "medium",
     assignees: normalizeAssignees(task.assignees),
     reviewHistory: normalizeReviewHistory(task.reviewHistory),
     attachments: normalizeAttachments(task.attachments),
     progressReports: normalizeProgressReports(task.progressReports),
   };
+}
+
+async function seedDemoTasksIfNeeded(store: TaskStore): Promise<TaskStore> {
+  if (!isDemoMode() || isSupabaseConfigured() || store.tasks.length > 0) {
+    return store;
+  }
+  const tasks = buildDemoTasks();
+  await writeStore({ tasks });
+  return { tasks };
 }
 
 export function findTaskAttachment(
@@ -177,12 +189,15 @@ async function readStore(): Promise<TaskStore> {
   try {
     const raw = await readFile(STORE_PATH, "utf8");
     const data = JSON.parse(raw) as TaskStore;
-    if (!Array.isArray(data.tasks)) return { tasks: [] };
-    return {
+    if (!Array.isArray(data.tasks)) {
+      return seedDemoTasksIfNeeded({ tasks: [] });
+    }
+    const store = {
       tasks: data.tasks.map((task) => normalizeTask(task)),
     };
+    return seedDemoTasksIfNeeded(store);
   } catch {
-    return { tasks: [] };
+    return seedDemoTasksIfNeeded({ tasks: [] });
   }
 }
 

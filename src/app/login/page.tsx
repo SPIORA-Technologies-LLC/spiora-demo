@@ -4,7 +4,7 @@ import { DemoCredentials } from "@/components/auth/DemoCredentials";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
-import { branding, getProductDescription } from "@/config/branding";
+import { getProductDescription } from "@/config/branding";
 import type { BrandingLocale } from "@/config/branding";
 import { getSession } from "@/lib/auth/session";
 import styles from "./login.module.css";
@@ -13,15 +13,13 @@ type LoginPageProps = {
   searchParams: Promise<{ next?: string }>;
 };
 
-/** Запасные стили, если встроенный браузер не подгрузил CSS-модули */
 const pageFallback = {
   minHeight: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   padding: "1.5rem",
-  background:
-    "linear-gradient(168deg, #0f141c 0%, #141b26 42%, #1a202c 100%)",
+  background: "linear-gradient(168deg, #000000 0%, #0a0a0a 42%, #111111 100%)",
   color: "#ffffff",
   fontFamily: "Inter, system-ui, sans-serif",
 } as const;
@@ -30,10 +28,10 @@ const cardFallback = {
   width: "100%",
   maxWidth: "440px",
   padding: "2rem",
-  background: "#2d3748",
+  background: "#1a1a1a",
   border: "1px solid rgba(255, 255, 255, 0.08)",
   borderRadius: "24px",
-  boxShadow: "0 16px 35px rgba(0, 0, 0, 0.22)",
+  boxShadow: "0 16px 40px rgba(0, 0, 0, 0.28)",
   textAlign: "center" as const,
 };
 
@@ -57,12 +55,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
         <div className={styles.logoWrap}>
           <Logo priority size="lg" />
         </div>
-        <h1 className={styles.title} style={{ color: "#fff", margin: 0 }}>
-          {branding.productName}
-        </h1>
-        <p className={styles.subtitle} style={{ color: "#cbd5e0" }}>
-          {getProductDescription(locale)}
-        </p>
+        <p className={styles.positioning}>{getProductDescription(locale)}</p>
         <LoginForm nextPath={nextPath} />
         {process.env.NODE_ENV !== "production" ? <DemoCredentials /> : null}
       </div>

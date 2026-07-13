@@ -46,7 +46,7 @@
 
   border-radius: 14px;
 
-  background: rgba(15, 20, 28, 0.55);
+  background: rgba(0, 0, 0, 0.55);
 
   border: 1px solid var(--border-soft);
 
@@ -148,7 +148,7 @@
 
   scrollbar-width: thin;
 
-  scrollbar-color: rgba(145, 13, 13, 0.4) transparent;
+  scrollbar-color: rgba(var(--brand-red-rgb), 0.4) transparent;
 
 }
 
@@ -164,7 +164,7 @@
 
 .historyScroll::-webkit-scrollbar-thumb {
 
-  background: rgba(145, 13, 13, 0.35);
+  background: rgba(var(--brand-red-rgb), 0.35);
 
   border-radius: 999px;
 
@@ -236,9 +236,9 @@
 
 .chatChipActive {
 
-  background: rgba(145, 13, 13, 0.18);
+  background: rgba(var(--brand-red-rgb), 0.18);
 
-  border-color: rgba(145, 13, 13, 0.4);
+  border-color: rgba(var(--brand-red-rgb), 0.4);
 
 }
 
@@ -326,7 +326,7 @@
 
 .chatChipDelete:hover {
 
-  background: rgba(145, 13, 13, 0.35);
+  background: rgba(var(--brand-red-rgb), 0.35);
 
   color: var(--white);
 
@@ -358,9 +358,9 @@
 
     160deg,
 
-    rgba(45, 55, 72, 0.45) 0%,
+    rgba(34, 34, 34, 0.45) 0%,
 
-    rgba(26, 32, 44, 0.85) 100%
+    rgba(26, 26, 26, 0.85) 100%
 
   );
 
@@ -386,7 +386,7 @@
 
   border-bottom: 1px solid var(--border-soft);
 
-  background: rgba(15, 20, 28, 0.35);
+  background: rgba(0, 0, 0, 0.35);
 
 }
 
@@ -414,7 +414,7 @@
 
   gap: 0.375rem;
 
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
 
   font-size: 0.9375rem;
 
@@ -514,11 +514,11 @@
 
   border-radius: 999px;
 
-  background: rgba(145, 13, 13, 0.15);
+  background: rgba(var(--brand-red-rgb), 0.15);
 
   color: var(--accent-burgundy-light);
 
-  border: 1px solid rgba(145, 13, 13, 0.28);
+  border: 1px solid rgba(var(--brand-red-rgb), 0.28);
 
   white-space: nowrap;
 
@@ -612,7 +612,7 @@
 
   font-size: 1.125rem;
 
-  box-shadow: 0 0 24px rgba(145, 13, 13, 0.35);
+  box-shadow: 0 0 24px rgba(var(--brand-red-rgb), 0.35);
 
   margin-bottom: 0.25rem;
 
@@ -624,7 +624,7 @@
 
   margin: 0;
 
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
 
   font-size: 1.125rem;
 
@@ -684,7 +684,7 @@
 
   border: 1px solid var(--border-soft);
 
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 
   color: var(--gray-200);
 
@@ -724,7 +724,7 @@
 
   border-color: var(--border-burgundy);
 
-  background: rgba(145, 13, 13, 0.1);
+  background: rgba(var(--brand-red-rgb), 0.1);
 
   transform: translateY(-1px);
 
@@ -816,9 +816,9 @@
 
 .msgAvatarAi {
 
-  background: rgba(145, 13, 13, 0.2);
+  background: rgba(var(--brand-red-rgb), 0.2);
 
-  border: 1px solid rgba(145, 13, 13, 0.35);
+  border: 1px solid rgba(var(--brand-red-rgb), 0.35);
 
   color: var(--accent-burgundy-light);
 
@@ -852,7 +852,7 @@
 
   white-space: pre-wrap;
 
-  background: rgba(145, 13, 13, 0.32);
+  background: rgba(var(--brand-red-rgb), 0.32);
 
   color: var(--white);
 
@@ -864,7 +864,7 @@
 
 .msgAssistant {
 
-  background: rgba(15, 20, 28, 0.55);
+  background: rgba(0, 0, 0, 0.55);
 
   color: var(--gray-100);
 
@@ -1032,7 +1032,7 @@
 
 .msgMarkdown th {
 
-  background: rgba(145, 13, 13, 0.18);
+  background: rgba(var(--brand-red-rgb), 0.18);
 
   font-weight: 600;
 
@@ -1086,7 +1086,7 @@
 
   border-bottom-left-radius: 4px;
 
-  background: rgba(15, 20, 28, 0.55);
+  background: rgba(0, 0, 0, 0.55);
 
   border: 1px solid var(--border-soft);
 
@@ -1182,7 +1182,7 @@
 
   border-top: 1px solid var(--border-soft);
 
-  background: rgba(15, 20, 28, 0.5);
+  background: rgba(0, 0, 0, 0.5);
 
 }
 
@@ -1215,7 +1215,7 @@
 
   border: 1px solid var(--border-soft);
 
-  background: rgba(26, 32, 44, 0.65);
+  background: rgba(26, 26, 26, 0.65);
 
   color: var(--gray-300);
 
@@ -1238,7 +1238,7 @@
 
 .modeChip:hover:not(:disabled) {
 
-  border-color: rgba(145, 13, 13, 0.45);
+  border-color: rgba(var(--brand-red-rgb), 0.45);
 
   color: var(--white);
 
@@ -1248,9 +1248,9 @@
 
 .modeChipActive {
 
-  border-color: rgba(145, 13, 13, 0.55);
+  border-color: rgba(var(--brand-red-rgb), 0.55);
 
-  background: rgba(145, 13, 13, 0.22);
+  background: rgba(var(--brand-red-rgb), 0.22);
 
   color: #fecaca;
 
@@ -1295,7 +1295,7 @@
 
   border: 1px solid var(--gray-600);
 
-  background: rgba(26, 32, 44, 0.8);
+  background: rgba(26, 26, 26, 0.8);
 
   color: var(--white);
 

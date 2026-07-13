@@ -1,6 +1,8 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import styles from "./TaskStatusBadge.module.css";
 import type { TaskStatus } from "@/lib/tasks/types";
-import { TASK_STATUS_LABELS } from "@/lib/tasks/types";
 
 const STATUS_ICONS: Partial<Record<TaskStatus, string>> = {
   completed: "✅",
@@ -9,14 +11,14 @@ const STATUS_ICONS: Partial<Record<TaskStatus, string>> = {
 };
 
 export function TaskStatusBadge({ status }: { status: TaskStatus }) {
+  const t = useTranslations("tasks");
   const icon = STATUS_ICONS[status];
-  const label = icon
-    ? `${icon} ${TASK_STATUS_LABELS[status]}`
-    : TASK_STATUS_LABELS[status];
+  const label = t(`statuses.${status}`);
+  const text = icon ? `${icon} ${label}` : label;
 
   return (
     <span className={[styles.badge, styles[status]].join(" ")}>
-      {label}
+      {text}
     </span>
   );
 }

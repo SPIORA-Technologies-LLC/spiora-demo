@@ -2,20 +2,20 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--space-1);
   padding: 0.625rem 1.25rem;
   border: none;
   border-radius: var(--radius-sm);
-  font-family: Inter, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9375rem;
   line-height: 1.4;
   cursor: pointer;
   transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    background var(--transition-base),
+    color var(--transition-base),
+    border-color var(--transition-base),
+    transform var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .button:disabled {
@@ -25,26 +25,29 @@
 }
 
 .primary {
-  background: var(--gradient-brand);
+  background: var(--gradient-brand-diag);
   color: #fff;
   font-weight: 600;
+  box-shadow: var(--shadow-brand);
 }
 
 .primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #910d0d, #b32424);
+  background: linear-gradient(135deg, #f4981a, #c41f10);
   transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(var(--brand-red-rgb), 0.35);
 }
 
 .secondary {
   background: transparent;
   color: var(--white);
   font-weight: 500;
-  border: 1px solid var(--border-burgundy);
+  border: 1px solid var(--border-brand);
 }
 
 .secondary:hover:not(:disabled) {
   background: var(--hero-glow);
-  box-shadow: 0 0 20px rgba(145, 13, 13, 0.25);
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 20px rgba(var(--brand-red-rgb), 0.2);
 }
 
 .ghost {
@@ -61,13 +64,25 @@
 }
 
 .danger {
-  background: rgba(145, 13, 13, 0.2);
+  background: rgba(var(--brand-red-rgb), 0.18);
   color: #fca5a5;
   font-weight: 600;
-  border: 1px solid rgba(145, 13, 13, 0.45);
+  border: 1px solid rgba(var(--brand-red-rgb), 0.45);
 }
 
 .danger:hover:not(:disabled) {
-  background: rgba(145, 13, 13, 0.35);
+  background: rgba(var(--brand-red-rgb), 0.32);
+  transform: translateY(-1px);
+}
+
+.success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #86efac;
+  font-weight: 600;
+  border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.success:hover:not(:disabled) {
+  background: rgba(34, 197, 94, 0.28);
   transform: translateY(-1px);
 }

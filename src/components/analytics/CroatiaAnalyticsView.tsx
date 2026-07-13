@@ -81,7 +81,7 @@ export function CroatiaAnalyticsView({ data }: CroatiaAnalyticsViewProps) {
             {
               key: "submitted",
               label: t("croatia.overview.charts.submittedMonthly"),
-              color: "rgba(145, 13, 13, 0.85)",
+              color: "rgba(232, 41, 22, 0.85)",
             },
             {
               key: "approved",

@@ -5,10 +5,10 @@ import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const src = path.join(root, "public", "spiora-mark.svg");
+const src = path.join(root, "public", "logo1.svg");
 const outDir = path.join(root, "public", "icons");
 
-const ICON_BG = "#1a202c";
+const ICON_BG = "#000000";
 const CORNER_RADIUS_RATIO = 0.18;
 
 async function loadTrimmedLogo() {
@@ -92,4 +92,4 @@ for (const [size, filename, builder] of tasks) {
   console.log(`created ${filename}`);
 }
 
-console.log("PWA icons generated from public/spiora-mark.svg");
+console.log("PWA icons generated from public/logo1.svg");

@@ -8,13 +8,9 @@ export const TASK_STATUSES = [
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
-export const TASK_STATUS_LABELS: Record<TaskStatus, string> = {
-  new: "Новая",
-  in_progress: "В работе",
-  pending_approval: "На проверке",
-  needs_revision: "На доработке",
-  completed: "Принята",
-};
+export const TASK_PRIORITIES = ["low", "medium", "high", "urgent"] as const;
+
+export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
 export type TaskReviewAction = "submitted" | "approved" | "revision_requested";
 
@@ -56,6 +52,7 @@ export type Task = {
   title: string;
   description: string;
   status: TaskStatus;
+  priority?: TaskPriority;
   createdByUserId: string;
   createdByName: string;
   assignees: TaskAssignee[];

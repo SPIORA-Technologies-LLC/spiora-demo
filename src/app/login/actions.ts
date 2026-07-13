@@ -1,8 +1,10 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { canAccessPath } from "@/lib/auth/permissions";
+import { checkLoginRateLimit } from "@/lib/auth/login-rate-limit";
 import { createSession, destroySession } from "@/lib/auth/session";
 import {
   findUserByEmail,
@@ -26,6 +28,16 @@ export async function signInAction(
 
   if (!email || !password) {
     return { error: t("missingCredentials") };
+  }
+
+  const headerStore = await headers();
+  const ip =
+    headerStore.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    headerStore.get("x-real-ip") ??
+    undefined;
+  const rateLimit = checkLoginRateLimit(email, ip);
+  if (!rateLimit.allowed) {
+    return { error: t("rateLimitExceeded") };
   }
 
   const user = findUserByEmail(email);

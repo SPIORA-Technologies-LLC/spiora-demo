@@ -1,0 +1,89 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(168deg, #000000 0%, #0a0a0a 45%, #111111 100%);
+  animation: splashFadeIn 0.45s ease-out;
+}
+
+.overlayOut {
+  animation: splashFadeOut 0.5s ease-in forwards;
+}
+
+.inner {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.logoWrap {
+  animation: logoRise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.logo {
+  filter: drop-shadow(0 12px 40px rgba(var(--brand-red-rgb), 0.3));
+}
+
+.powerGlow {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(var(--brand-orange-rgb), 0.55) 0%,
+    rgba(var(--brand-red-rgb), 0.2) 45%,
+    transparent 70%
+  );
+  animation: powerPulse 1.2s ease-in-out 0.35s both;
+  margin-top: -2.5rem;
+}
+
+@keyframes splashFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splashFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes logoRise {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes powerPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.35;
+    transform: scale(1.15);
+  }
+}

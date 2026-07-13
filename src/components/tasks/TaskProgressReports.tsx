@@ -1,12 +1,13 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
 import type { SessionUser } from "@/lib/auth/types";
 import {
   formatFileSize,
   getTaskAttachmentUrl,
   TASK_ATTACHMENT_ACCEPT,
-  TASK_ATTACHMENT_HINT,
 } from "@/lib/tasks/attachment-formats";
 import { formatTaskDateTime } from "@/lib/tasks/format";
 import {
@@ -28,6 +29,8 @@ export function TaskProgressReportsSection({
   user,
   onTaskUpdated,
 }: TaskProgressReportsSectionProps) {
+  const t = useTranslations("tasks");
+  const locale = useLocale() as AppLocale;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [comment, setComment] = useState("");
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -42,7 +45,7 @@ export function TaskProgressReportsSection({
   async function handleSubmit() {
     const trimmed = comment.trim();
     if (!trimmed) {
-      setError("Напишите комментарий к отчёту");
+      setError(t("validation.reportCommentRequired"));
       return;
     }
 
@@ -59,22 +62,22 @@ export function TaskProgressReportsSection({
       );
       if (!res.ok) {
         const data = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(data.error ?? "Не удалось отправить отчёт");
+        throw new Error(data.error ?? "report failed");
       }
       const data = (await res.json()) as { task?: Task };
       if (data.task) onTaskUpdated?.(data.task);
       setComment("");
       setPendingFile(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Не удалось отправить отчёт");
+    } catch {
+      setError(t("errors.reportFailed"));
     } finally {
       setSubmitting(false);
     }
   }
 
   async function handleDelete(report: TaskProgressReport) {
-    if (!window.confirm("Удалить этот отчёт?")) return;
+    if (!window.confirm(t("confirm.deleteReport"))) return;
     setError("");
     try {
       const res = await fetch(
@@ -85,14 +88,14 @@ export function TaskProgressReportsSection({
       const data = (await res.json()) as { task?: Task };
       if (data.task) onTaskUpdated?.(data.task);
     } catch {
-      setError("Не удалось удалить отчёт");
+      setError(t("errors.deleteReportFailed"));
     }
   }
 
   return (
     <section className={styles.section}>
       <div className={styles.header}>
-        <h3 className={styles.title}>Отчёты исполнителей</h3>
+        <h3 className={styles.title}>{t("progressReports.title")}</h3>
         {reports.length > 0 ? (
           <span className={styles.count}>{reports.length}</span>
         ) : null}
@@ -101,13 +104,13 @@ export function TaskProgressReportsSection({
       {canAdd ? (
         <div className={styles.form}>
           <label className={styles.field}>
-            <span className={styles.label}>Ваш отчёт</span>
+            <span className={styles.label}>{t("progressReports.yourReport")}</span>
             <textarea
               className={styles.textarea}
               rows={3}
               value={comment}
               disabled={submitting}
-              placeholder="Опишите, что сделано по вашей части задачи…"
+              placeholder={t("progressReports.placeholder")}
               onChange={(e) => {
                 setComment(e.target.value);
                 if (error) setError("");
@@ -134,16 +137,18 @@ export function TaskProgressReportsSection({
                 disabled={submitting}
                 onClick={() => fileInputRef.current?.click()}
               >
-                {pendingFile ? "Заменить файл" : "+ Прикрепить файл"}
+                {pendingFile
+                  ? t("progressReports.replaceFile")
+                  : `+ ${t("progressReports.attachFile")}`}
               </button>
               {pendingFile ? (
                 <span className={styles.pendingFile}>
-                  {pendingFile.name} · {formatFileSize(pendingFile.size)}
+                  {pendingFile.name} · {formatFileSize(pendingFile.size, locale)}
                   <button
                     type="button"
                     className={styles.clearFileBtn}
                     disabled={submitting}
-                    aria-label="Убрать файл"
+                    aria-label={t("attachments.removeFile")}
                     onClick={() => {
                       setPendingFile(null);
                       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -155,7 +160,7 @@ export function TaskProgressReportsSection({
               ) : null}
             </div>
             <p className={styles.hint}>
-              Файл необязателен. {TASK_ATTACHMENT_HINT}
+              {t("progressReports.optionalFileHint")} {t("attachments.hint")}
             </p>
             <button
               type="button"
@@ -163,7 +168,7 @@ export function TaskProgressReportsSection({
               disabled={submitting}
               onClick={() => void handleSubmit()}
             >
-              {submitting ? "Отправка…" : "Отправить отчёт"}
+              {submitting ? t("progressReports.submitting") : t("progressReports.submit")}
             </button>
           </div>
         </div>
@@ -171,9 +176,7 @@ export function TaskProgressReportsSection({
 
       {reports.length === 0 ? (
         <p className={styles.empty}>
-          {canAdd
-            ? "Пока нет отчётов. Оставьте комментарий о проделанной работе."
-            : "Исполнители ещё не оставили отчётов."}
+          {canAdd ? t("empty.reportsCanAdd") : t("empty.reportsReadOnly")}
         </p>
       ) : (
         <ol className={styles.list}>
@@ -184,13 +187,13 @@ export function TaskProgressReportsSection({
                 <div className={styles.itemHead}>
                   <span className={styles.author}>{report.authorName}</span>
                   <time className={styles.time}>
-                    {formatTaskDateTime(report.createdAt)}
+                    {formatTaskDateTime(report.createdAt, locale)}
                   </time>
                   {canDelete ? (
                     <button
                       type="button"
                       className={styles.deleteBtn}
-                      aria-label="Удалить отчёт"
+                      aria-label={t("progressReports.deleteReport")}
                       onClick={() => void handleDelete(report)}
                     >
                       ×
@@ -204,7 +207,7 @@ export function TaskProgressReportsSection({
                     target="_blank"
                     rel="noopener noreferrer"
                     className={styles.fileLink}
-                    title="Открыть файл"
+                    title={t("attachments.openFile")}
                   >
                     <FileTypeIcon
                       contentType={report.attachment.contentType}
@@ -215,7 +218,7 @@ export function TaskProgressReportsSection({
                         {report.attachment.fileName}
                       </span>
                       <span className={styles.fileSub}>
-                        {formatFileSize(report.attachment.size)}
+                        {formatFileSize(report.attachment.size, locale)}
                       </span>
                     </span>
                   </a>

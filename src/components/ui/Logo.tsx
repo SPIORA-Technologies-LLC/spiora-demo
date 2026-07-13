@@ -9,10 +9,10 @@ const LOGO_DIMENSIONS: Record<
   LogoSize,
   { width: number; height: number }
 > = {
-  sm: { width: 104, height: 32 },
-  md: { width: 180, height: 44 },
-  lg: { width: 220, height: 64 },
-  sidebar: { width: 252, height: 108 },
+  sm: { width: 140, height: 31 },
+  md: { width: 200, height: 44 },
+  lg: { width: 280, height: 61 },
+  sidebar: { width: 220, height: 48 },
 };
 
 export type LogoProps = {

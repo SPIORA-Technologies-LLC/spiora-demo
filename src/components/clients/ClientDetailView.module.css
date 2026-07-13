@@ -41,7 +41,7 @@
 
 .panelTitle {
   margin: 0 0 0.75rem;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 600;
   color: var(--white);
@@ -91,7 +91,7 @@
 .item {
   padding: 0.625rem 0.75rem;
   border-radius: var(--radius-sm);
-  background: rgba(15, 20, 28, 0.4);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid var(--border-soft);
 }
 

@@ -31,10 +31,10 @@ describe("workspace demo-safe formatter", () => {
     assert.equal(isWorkspaceDiagnosticsEnabled(), false);
   });
 
-  it("возвращает diagnostics в demo mode с SPIORA_AI_WORKSPACE_DEBUG=true", () => {
+  it("скрывает diagnostics в demo mode даже с SPIORA_AI_WORKSPACE_DEBUG=true", () => {
     process.env.SPIORA_DEMO_MODE = "true";
     process.env.SPIORA_AI_WORKSPACE_DEBUG = "true";
-    assert.equal(isWorkspaceDiagnosticsEnabled(), true);
+    assert.equal(isWorkspaceDiagnosticsEnabled(), false);
   });
 
   it("EN: безопасный текст при найденном клиенте", () => {
@@ -124,7 +124,7 @@ describe("workspace debug command demo safety", () => {
     const { runWorkspaceAi } = await import("./workspace-assistant.ts");
     const result = await runWorkspaceAi("/debug_client Sofia", [], "brief", null, "en");
 
-    assert.match(result.reply, /Demo client data was found/i);
+    assert.match(result.reply, /Diagnostics are not available in demo mode/i);
     assert.doesNotMatch(result.reply, /debug_client|score|resultKind|Raw scan/i);
     assert.equal(result.demo, true);
   });

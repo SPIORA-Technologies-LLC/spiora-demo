@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "description": "Корпоративное цифровое пространство — Spiora"
+    "description": "AI-операционная система для бизнеса — Spiora"
   },
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Центр управления",
     "clients": "Клиенты",
     "tasks": "Задачи",
     "calendar": "Календарь",
@@ -14,7 +14,12 @@
     "team": "Team",
     "settings": "Settings",
     "notifications": "Уведомления",
-    "logout": "Выйти"
+    "logout": "Выйти",
+    "crmLeads": "Новые лиды",
+    "newFormgridClients": "Новые клиенты из анкеты",
+    "meetingRecordings": "Записи встреч",
+    "relocation": "Эмиграция",
+    "checkupsErevan": "Чекапы в Ереване"
   },
   "actions": {
     "save": "Сохранить",
@@ -52,7 +57,8 @@
     "demoEnvironment": "Демо-окружение",
     "demoAccountsTitle": "Демо-учётные записи (локальная разработка)",
     "demoPasswordHint": "Пароль задаётся в переменных AUTH_PASSWORD_* в .env.local (не хранится в исходном коде). Другие email не подойдут.",
-    "forgotPasswordHint": "Забыли пароль? Напишите администратору платформы — он сбросит его в разделе Settings."
+    "forgotPasswordHint": "Забыли пароль? Напишите администратору платформы — он сбросит его в разделе Settings.",
+    "rateLimitExceeded": "Слишком много попыток входа. Подождите минуту и попробуйте снова."
   },
   "shell": {
     "search": "Поиск…",
@@ -245,6 +251,60 @@
       "image": "Изображение",
       "file": "Файл",
       "empty": "Пока нет сообщений."
+    }
+  },
+  "commandCenter": {
+    "pageTitle": "Центр управления",
+    "greeting": "Доброе утро, {name} 👋",
+    "calmHeadline": "Всё под контролем.",
+    "heroLead": "AI проанализировал ночную активность и подготовил сегодняшний executive briefing.",
+    "executiveSummary": {
+      "title": "Сводка на сегодня",
+      "line1": "Компания работает в штатном режиме.",
+      "line2": "Три клиентских кейса требуют внимания до пятницы.",
+      "line3": "Критических рисков за ночь не обнаружено.",
+      "line4": "AI рекомендует в приоритете заняться заявками на вид на жительство."
+    },
+    "priorities": {
+      "title": "Ваши приоритеты",
+      "meetings": "4 встречи — всё по расписанию",
+      "documents": "3 клиента ждут документы",
+      "overdue": "2 пункта требуют вашего внимания",
+      "permit": "1 вид на жительство одобрен"
+    },
+    "insights": {
+      "title": "AI Insights",
+      "sofiaDocument": "У Sofia Martins не хватает одного документа",
+      "danielOverdue": "У Daniel 6 просроченных пунктов",
+      "mergeConsultations": "Две консультации можно объединить"
+    },
+    "askSpiora": {
+      "title": "Ask Spiora",
+      "lead": "AI-слой управления — один клик до нужного экрана.",
+      "priorities": "Показать приоритеты на сегодня",
+      "atRisk": "Клиенты в зоне риска",
+      "draftEmail": "Написать письмо",
+      "deadlines": "Ближайшие дедлайны",
+      "schedule": "Моё расписание"
+    },
+    "companyHealth": {
+      "title": "Здоровье компании",
+      "status": {
+        "excellent": "Отлично"
+      },
+      "clients": "Клиенты",
+      "documents": "Документы",
+      "meetings": "Встречи",
+      "tasksCompleted": "Задач выполнено",
+      "aiConversations": "AI-диалогов"
+    },
+    "activity": {
+      "title": "Активность команды",
+      "emmaPassport": "Emma загрузила паспорт",
+      "danielConsultation": "Daniel назначил консультацию",
+      "lucasChecklist": "Lucas завершил чеклист",
+      "aiSummarized": "AI обработал 12 документов",
+      "oliviaAssigned": "Olivia назначила новый кейс"
     }
   },
   "clients": {
@@ -1610,6 +1670,302 @@
         "summary": "Peer review перед отправкой пакетов клиенту или черновиков от AI.",
         "content": "## Когда проверять\n\n- Перед подачей пакета документов\n- Перед отправкой AI-черновиков клиенту\n- После обновления статьи базы знаний (только production)\n\n## Чек-лист рецензента\n\n1. Факты совпадают с CRM и загруженными документами.\n2. Нет внутреннего жаргона и demo-плейсхолдеров в тексте для клиента.\n3. Даты и имена согласованы.\n\n## Demo\n\nВ публичном demo редактирование недоступно — используйте процесс как справочник."
       }
+    }
+  },
+  "tasks": {
+    "title": "Задачи команды",
+    "subtitle": "Общий список задач {companyName}",
+    "demoBadge": "Демо-данные",
+    "newTask": "Новая задача",
+    "createTask": "Создать задачу",
+    "notAssigned": "Не назначено",
+    "search": {
+      "placeholder": "Поиск по названию, описанию, автору, исполнителю…",
+      "label": "Поиск задач"
+    },
+    "filters": {
+      "allStatuses": "Все статусы",
+      "allAuthors": "Все авторы",
+      "allAssignees": "Все исполнители",
+      "statusLabel": "Фильтр по статусу",
+      "authorLabel": "Фильтр по автору",
+      "assigneeLabel": "Фильтр по исполнителю"
+    },
+    "statuses": {
+      "new": "К выполнению",
+      "in_progress": "В работе",
+      "pending_approval": "На проверке",
+      "needs_revision": "Заблокировано",
+      "completed": "Завершено"
+    },
+    "priorities": {
+      "low": "Низкий",
+      "medium": "Средний",
+      "high": "Высокий",
+      "urgent": "Срочный"
+    },
+    "meta": {
+      "author": "Автор",
+      "assignees": "Исполнители",
+      "created": "Создано",
+      "due": "Срок",
+      "completed": "Принято",
+      "dueLabel": "Срок: {date}",
+      "assigneeLabel": "Исполнитель: {name}",
+      "comment": "Комментарий"
+    },
+    "actions": {
+      "open": "Открыть",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "close": "Закрыть",
+      "cancel": "Отмена",
+      "save": "Сохранить",
+      "create": "Создать",
+      "start": "В работе",
+      "submitForApproval": "На проверку",
+      "complete": "Выполнено",
+      "approve": "Принять задачу",
+      "requestRevision": "Отправить на доработку",
+      "quickActions": "Быстрые действия:",
+      "assigneeActions": "Действия исполнителя:",
+      "markAllRead": "Прочитать все"
+    },
+    "quickFilters": {
+      "all": "Все",
+      "overdue": "Просроченные",
+      "createdByMe": "Назначенные мной",
+      "pendingReview": "На проверке",
+      "needsRevision": "На доработке",
+      "completed": "Принятые"
+    },
+    "toast": {
+      "created": "Задача успешно создана.",
+      "updated": "Задача обновлена.",
+      "completed": "Задача отмечена выполненной.",
+      "deleted": "Задача удалена.",
+      "submittedForApproval": "Задача отправлена автору на проверку.",
+      "approved": "Задача принята и завершена.",
+      "revisionRequested": "Задача отправлена на доработку.",
+      "inProgress": "Задача в работе.",
+      "statusUpdated": "Статус задачи обновлён.",
+      "createAttachmentPartial": "Задача создана, но файлы не прикреплены.",
+      "createAttachmentPartialWithError": "Задача создана, но файлы не прикреплены: {error}",
+      "insufficientPermissions": "Недостаточно прав для этого действия.",
+      "commentRequired": "Добавьте комментарий для доработки.",
+      "updateFailed": "Не удалось обновить задачу.",
+      "deleteForbidden": "Удалить задачу может только тот, кто её назначил, или владелец платформы.",
+      "deleteFailed": "Не удалось удалить задачу."
+    },
+    "errors": {
+      "saveFailed": "Не удалось сохранить задачу.",
+      "updateFailed": "Не удалось обновить задачу.",
+      "loadFailed": "Не удалось загрузить задачи.",
+      "uploadFailed": "Не удалось загрузить файл.",
+      "deleteFileFailed": "Не удалось удалить файл.",
+      "attachFailed": "Не удалось прикрепить файл.",
+      "reportFailed": "Не удалось отправить отчёт.",
+      "deleteReportFailed": "Не удалось удалить отчёт.",
+      "forbidden": "Недостаточно прав для этого действия.",
+      "commentRequired": "Требуется комментарий.",
+      "supabaseAssignees": "Не удалось загрузить исполнителей из справочника."
+    },
+    "validation": {
+      "titleRequired": "Укажите название задачи.",
+      "commentRequired": "Добавьте комментарий для доработки.",
+      "revisionCommentRequired": "Добавьте комментарий для исполнителя.",
+      "reportCommentRequired": "Напишите комментарий к отчёту."
+    },
+    "empty": {
+      "list": "Пока нет задач. Создайте первую — её увидит вся команда.",
+      "filtered": "Ничего не найдено по фильтрам.",
+      "noDescription": "Описание не указано.",
+      "attachments": "Файлы не прикреплены.",
+      "reportsCanAdd": "Пока нет отчётов. Оставьте комментарий о проделанной работе.",
+      "reportsReadOnly": "Исполнители ещё не оставили отчётов."
+    },
+    "loading": {
+      "list": "Загрузка задач…",
+      "upload": "Загрузка…",
+      "submit": "Отправка…"
+    },
+    "confirm": {
+      "deleteTaskTitle": "Удалить задачу?",
+      "deleteTaskBody": "Вы уверены?",
+      "deleteFile": "Удалить файл «{fileName}»?",
+      "deleteReport": "Удалить этот отчёт?",
+      "confirm": "Подтвердить",
+      "cancel": "Отмена"
+    },
+    "workflow": {
+      "submitted": "Сдано на проверку",
+      "approved": "Принято автором",
+      "revisionRequested": "Отправлено на доработку",
+      "reviewHint": "Откройте задачу, чтобы принять или отправить на доработку."
+    },
+    "review": {
+      "title": "Проверка задачи",
+      "approve": "Принять задачу",
+      "revisionLabel": "Комментарий для доработки",
+      "revisionPlaceholder": "Что нужно исправить или уточнить…",
+      "revisionError": "Добавьте комментарий для исполнителя.",
+      "authorComment": "Комментарий автора",
+      "historyTitle": "История согласования",
+      "pendingNotice": "Исполнитель сдал задачу на проверку. Примите работу или отправьте на доработку с комментарием.",
+      "completedNotice": "Задача принята и завершена{completedAt}. Можно удалить её из списка."
+    },
+    "attachments": {
+      "title": "Файлы",
+      "attach": "Прикрепить",
+      "uploading": "Загрузка…",
+      "selectFiles": "Выбрать файлы",
+      "openFile": "Открыть файл",
+      "deleteFile": "Удалить файл",
+      "removeFile": "Убрать файл",
+      "hint": "PDF, Word, Excel, PowerPoint, изображения (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — до 25 МБ каждый",
+      "pickerLabel": "Файлы"
+    },
+    "progressReports": {
+      "title": "Отчёты исполнителей",
+      "yourReport": "Ваш отчёт",
+      "placeholder": "Опишите, что сделано по вашей части задачи…",
+      "attachFile": "Прикрепить файл",
+      "replaceFile": "Заменить файл",
+      "optionalFileHint": "Файл необязателен.",
+      "submit": "Отправить отчёт",
+      "submitting": "Отправка…",
+      "deleteReport": "Удалить отчёт"
+    },
+    "form": {
+      "titleLabel": "Название задачи *",
+      "titlePlaceholder": "Например: Подготовить обновление по Хорватии",
+      "descriptionLabel": "Описание",
+      "descriptionPlaceholder": "Детали задачи…",
+      "dueDateLabel": "Срок выполнения",
+      "assigneesLabel": "Исполнители",
+      "assigneesHint": "Можно выбрать одного или нескольких. Назначенные смогут менять статус задачи.",
+      "statusLabel": "Статус",
+      "statusEditHint": "Статус меняется через действия «В работе», «На проверку» и согласование автором.",
+      "saving": "Сохранение…"
+    },
+    "modal": {
+      "createTitle": "Новая задача",
+      "editTitle": "Редактировать задачу",
+      "deleteTitle": "Удалить задачу?",
+      "closeAria": "Закрыть"
+    },
+    "banners": {
+      "overdueCount": "Просрочено задач: {count}",
+      "showOverdueOnly": "Показать только просроченные",
+      "showAll": "Показать все",
+      "pendingReviewCount": "На вашей проверке: {count}",
+      "showPendingReview": "Показать задачи на проверке",
+      "needsRevisionCount": "Нужна ваша доработка: {count}",
+      "showNeedsRevision": "Показать задачи на доработке",
+      "completedAssignedCount": "Выполнено задач, которые вы поставили другим: {count}",
+      "showCreatedByMe": "Показать назначенные мной",
+      "notificationsTitle": "Уведомления по задачам: {count}",
+      "overdue": "Просрочена",
+      "onYourReview": "На вашей проверке",
+      "needsRevision": "Нужна доработка",
+      "approved": "Принята",
+      "completed": "Завершена",
+      "awaitingDecision": "Ждёт вашего решения"
+    },
+    "demoTasks": {
+      "review-sofia-documents": {
+        "title": "Проверить документы Sofia Martins по Испании",
+        "description": "Проверить копию паспорта, подтверждение удалённого дохода и медстраховку для заявки Sofia Martins на Digital Nomad Visa. Отметить отсутствующие апостили до консультации."
+      },
+      "schedule-immigration-consultation": {
+        "title": "Назначить консультацию для John Carter",
+        "description": "Запланировать 45-минутный intake-звонок с John Carter по программе Portugal D7. Отправить приглашение в календарь и анкету через клиентский портал."
+      },
+      "verify-passport-copy": {
+        "title": "Проверить копию паспорта Anna Kowalska",
+        "description": "Подтвердить качество скана, срок действия и совпадение ФИО с CRM для Anna Kowalska. Запросить повторную загрузку, если страницы обрезаны или нечитаемы."
+      },
+      "ai-review-application": {
+        "title": "AI-проверка заявки Marco Rossi",
+        "description": "Использовать AI Workspace для резюме анкеты Marco Rossi по переезду в Словакию и выделить пробелы в трудовой истории и подтверждающих документах."
+      },
+      "prepare-residence-permit-package": {
+        "title": "Собрать пакет ВНЖ для Sofia Martins",
+        "description": "Подготовить папку подачи Spain DNV: форма заявления, подтверждение дохода, страховка и сопроводительное письмо. Назначить финальную проверку перед отправкой курьером."
+      },
+      "client-follow-up-carter": {
+        "title": "Напомнить John Carter о выписках из банка",
+        "description": "Отправить John Carter напоминание о трёх месяцах банковских выписок, необходимых для дела Portugal D7. Приложить защищённую ссылку на загрузку и дедлайн."
+      },
+      "proof-of-address-review": {
+        "title": "Проверить подтверждение адреса Anna Kowalska",
+        "description": "Проверить договор аренды и счёт за коммунальные услуги по делу Anna Kowalska в Хорватии. Убедиться, что документы датированы последними 90 днями и содержат полный адрес."
+      },
+      "monthly-pipeline-summary": {
+        "title": "Подготовить месячную сводку по pipeline",
+        "description": "Собрать активные кейсы, просроченные этапы и загрузку консультациями для руководства Northstar Mobility. Включить Sofia Martins и Marco Rossi как приоритетные примеры."
+      },
+      "update-croatia-checklist": {
+        "title": "Обновить чек-лист по Хорватии",
+        "description": "Актуализировать внутренний чек-лист по Хорватии с учётом последних требований к временному пребыванию и привязать набор документов Anna Kowalska как эталон."
+      },
+      "team-chat-kb-announcement": {
+        "title": "Анонс новой статьи KB в Team Chat",
+        "description": "Опубликовать короткое сообщение в Team Chat об обновлённом чек-листе онбординга клиентов и закрепить ссылку на Knowledge Base для новых менеджеров."
+      },
+      "marco-rossi-intake-review": {
+        "title": "Проверить intake-форму Marco Rossi",
+        "description": "Провести первичный разбор intake Marco Rossi по Словакии: члены семьи, трудовой договор и желаемые сроки переезда. Зафиксировать открытые вопросы к звонку."
+      },
+      "anna-kowalska-document-check": {
+        "title": "Проверка документов Anna Kowalska",
+        "description": "Сверить загруженный пакет Anna Kowalska с чек-листом по Хорватии. Эскалировать отсутствие справки о несудимости или перевода."
+      },
+      "calendar-prep-client-call": {
+        "title": "Подготовить заметки к звонку с Sofia Martins",
+        "description": "Добавить повестку, открытые пробелы по документам и ссылки CRM к завтрашней консультации с Sofia Martins. Поделиться заметками с Daniel Cooper."
+      },
+      "escalation-policy-review": {
+        "title": "Проверить политику эскалации клиентов",
+        "description": "Изучить обновлённый SOP по эскалации в Knowledge Base и убедиться, что просроченные визовые кейсы — например продление для John Carter — маршрутизируются корректно."
+      },
+      "demo-data-security-quiz": {
+        "title": "Пройти квиз по безопасности демо-данных",
+        "description": "Завершить ежеквартальный квиз по безопасности: работа с PII клиентов, правила демо-среды и безопасный обмен файлами в Northstar Mobility."
+      },
+      "portugal-d7-questionnaire": {
+        "title": "Отправить анкету Portugal D7 John Carter",
+        "description": "Отправить John Carter форму предварительной оценки Portugal D7 и отследить заполнение в CRM. Напомнить, если форма не вернётся в течение 48 часов."
+      },
+      "overdue-visa-extension": {
+        "title": "Закрыть просроченное продление визы Anna Kowalska",
+        "description": "Документы на продление временного пребывания Anna Kowalska просрочены на два дня по внутреннему дедлайну. Связаться с клиентом, обновить статус в CRM и предложить план восстановления."
+      },
+      "ai-workspace-prompt-audit": {
+        "title": "Аудит промптов AI Workspace для клиентских кейсов",
+        "description": "Проверить стандартные AI-промпты для сводок по клиентам и убедиться, что они корректно ссылаются на программы Northstar Mobility. Протестировать на кейсах Sofia Martins и Marco Rossi."
+      },
+      "client-welcome-email-template": {
+        "title": "Обновить шаблон welcome-письма клиенту",
+        "description": "Актуализировать welcome-письмо: вход в портал, советы по загрузке документов и контакты Northstar Mobility. Использовать онбординг John Carter как проверочный пример."
+      },
+      "spain-remote-work-file": {
+        "title": "Открыть дело Spain remote work для Sofia Martins",
+        "description": "Создать CRM-файл по маршруту удалённой работы в Испании для Sofia Martins, проставить направление и срочность, приложить стартовый чек-лист документов."
+      }
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Страница не найдена",
+      "description": "Запрашиваемая страница не существует или была перемещена.",
+      "backHome": "На главную"
+    },
+    "serverError": {
+      "title": "Произошла ошибка",
+      "description": "Произошла непредвиденная ошибка. Попробуйте позже.",
+      "retry": "Попробовать снова",
+      "backHome": "На главную"
     }
   }
 }

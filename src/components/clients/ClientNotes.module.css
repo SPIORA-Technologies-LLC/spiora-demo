@@ -15,7 +15,7 @@
   padding: 0.75rem;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
-  background: rgba(15, 20, 28, 0.5);
+  background: rgba(0, 0, 0, 0.5);
   color: var(--white);
   font-family: Inter, sans-serif;
   font-size: 0.875rem;
@@ -39,7 +39,7 @@
 .note {
   padding: 0.875rem 1rem;
   border-radius: var(--radius-sm);
-  background: rgba(15, 20, 28, 0.4);
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid var(--border-soft);
 }
 

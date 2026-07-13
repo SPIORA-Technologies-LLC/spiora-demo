@@ -10,33 +10,29 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.7rem 0.95rem;
-  border-radius: 12px;
-  border: 1px solid var(--gray-600);
-  background: linear-gradient(
-    180deg,
-    rgba(45, 55, 72, 0.95) 0%,
-    rgba(26, 32, 44, 0.98) 100%
-  );
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-soft);
+  background: var(--surface-2);
   color: var(--white);
-  font-family: Inter, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+    border-color var(--transition-base),
+    box-shadow var(--transition-base),
+    background var(--transition-base);
 }
 
 .trigger:hover {
-  border-color: rgba(145, 13, 13, 0.55);
+  border-color: var(--border-brand);
 }
 
 .triggerOpen,
 .trigger:focus-visible {
   outline: none;
-  border-color: var(--accent-burgundy);
-  box-shadow: 0 0 0 3px rgba(145, 13, 13, 0.18);
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .triggerLabel {
@@ -48,15 +44,17 @@
 
 .chevron {
   flex-shrink: 0;
-  color: var(--gray-400);
+  color: var(--gray-300);
   font-size: 0.9rem;
   line-height: 1;
-  transition: transform 0.2s ease, color 0.2s ease;
+  transition:
+    transform var(--transition-base),
+    color var(--transition-base);
 }
 
 .trigger:hover .chevron,
 .triggerOpen .chevron {
-  color: var(--accent-burgundy-light);
+  color: var(--brand-orange);
 }
 
 .chevronOpen {
@@ -72,12 +70,10 @@
   margin: 0;
   padding: 0.4rem;
   list-style: none;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-soft);
-  background: var(--gray-800);
-  box-shadow:
-    0 16px 40px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-card);
   max-height: 280px;
   overflow-y: auto;
   animation: menuIn 0.16s ease;
@@ -102,25 +98,25 @@
   gap: 0.75rem;
   padding: 0.625rem 0.75rem;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--gray-100);
-  font-family: Inter, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   text-align: left;
   cursor: pointer;
   transition:
-    background 0.15s ease,
-    color 0.15s ease;
+    background var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .option:hover {
-  background: rgba(145, 13, 13, 0.14);
+  background: rgba(var(--brand-red-rgb), 0.14);
   color: var(--white);
 }
 
 .optionSelected {
-  background: rgba(145, 13, 13, 0.22);
+  background: rgba(var(--brand-red-rgb), 0.22);
   color: var(--white);
   font-weight: 600;
 }
@@ -133,7 +129,7 @@
 
 .check {
   flex-shrink: 0;
-  color: var(--accent-burgundy-light);
+  color: var(--brand-orange);
   font-size: 0.8125rem;
   font-weight: 700;
 }

@@ -6,10 +6,10 @@ import type { ClientContext } from "@/lib/ai/client-context";
 export function isWorkspaceDiagnosticsEnabled(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  if (env.SPIORA_DEMO_MODE?.trim().toLowerCase() !== "true") {
-    return true;
+  if (env.SPIORA_DEMO_MODE?.trim().toLowerCase() === "true") {
+    return false;
   }
-  return env.SPIORA_AI_WORKSPACE_DEBUG?.trim().toLowerCase() === "true";
+  return true;
 }
 
 export function formatDemoClientLookupMessage(

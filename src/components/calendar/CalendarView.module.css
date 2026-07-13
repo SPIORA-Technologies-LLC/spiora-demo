@@ -63,7 +63,7 @@
 
 .modalTitle {
   margin: 0;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--white);
@@ -87,7 +87,7 @@
 
 .confirmEvent {
   margin: 0 0 1.25rem;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1rem;
   font-weight: 600;
   color: var(--white);

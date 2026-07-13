@@ -2,7 +2,6 @@
   display: flex;
   height: 100vh;
   overflow: hidden;
-  background: #1a202c;
   background: var(--bg-page);
   color: #ffffff;
   color: var(--white);
@@ -23,7 +22,6 @@
   padding: 1.5rem;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #1a202c;
   background: var(--bg-page);
 }
 

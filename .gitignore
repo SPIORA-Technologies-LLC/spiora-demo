@@ -11,6 +11,10 @@
 # data (AI chat history per user)
 .data/
 
+# supabase CLI link state (tokens, project ref cache)
+supabase/.temp/
+supabase/.branches/
+
 # debug
 npm-debug.log*
 .DS_Store

@@ -3,15 +3,17 @@
 import { branding } from "@/config/branding";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { useNotificationsOptional } from "@/components/notifications/notification-context";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { FilterSelect } from "@/components/ui/FilterSelect";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import type { AppLocale } from "@/i18n/config";
 import type { SessionUser } from "@/lib/auth/types";
 import { isTaskCreator, isTaskAssignee } from "@/lib/tasks/permissions";
 import { isTaskOverdue } from "@/lib/tasks/overdue";
-import { formatTaskDate, TASK_FILTER_STATUS_OPTIONS } from "@/lib/tasks/format";
+import { formatTaskDate } from "@/lib/tasks/format";
 import type { Task, TaskStatus } from "@/lib/tasks/types";
 import { TaskCard } from "./TaskCard";
 import { TaskDetailModal } from "./TaskDetailModal";
@@ -30,7 +32,17 @@ type TasksViewProps = {
 type StatusFilter = "all" | TaskStatus;
 type QuickFilter = "all" | "overdue" | "created_by_me" | "pending_review" | "needs_my_revision" | "completed";
 
+const FILTER_STATUSES: TaskStatus[] = [
+  "new",
+  "in_progress",
+  "pending_approval",
+  "needs_revision",
+  "completed",
+];
+
 export function TasksView({ user, teamMembers }: TasksViewProps) {
+  const t = useTranslations("tasks");
+  const locale = useLocale() as AppLocale;
   const router = useRouter();
   const searchParams = useSearchParams();
   const notificationsCtx = useNotificationsOptional();
@@ -93,16 +105,16 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
     }
 
     if (created === "1") {
-      setToast({ text: "Задача успешно создана." });
+      setToast({ text: t("toast.created") });
       router.replace("/tasks");
     } else if (completed === "1") {
-      setToast({ text: "Задача отмечена выполненной." });
+      setToast({ text: t("toast.completed") });
       router.replace("/tasks");
     } else if (deleted === "1") {
-      setToast({ text: "Задача удалена." });
+      setToast({ text: t("toast.deleted") });
       router.replace("/tasks");
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, t]);
 
   useEffect(() => {
     if (!focusTaskId || tasks.length === 0) return;
@@ -157,28 +169,37 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
     [notificationsCtx?.notifications],
   );
 
-  const statusOptions = useMemo(() => TASK_FILTER_STATUS_OPTIONS, []);
+  const statusOptions = useMemo(
+    () => [
+      { value: "all", label: t("filters.allStatuses") },
+      ...FILTER_STATUSES.map((status) => ({
+        value: status,
+        label: t(`statuses.${status}`),
+      })),
+    ],
+    [t],
+  );
 
   const authorOptions = useMemo(
     () => [
-      { value: "all", label: "Все авторы" },
+      { value: "all", label: t("filters.allAuthors") },
       ...teamMembers.map((member) => ({
         value: member.id,
         label: member.name,
       })),
     ],
-    [teamMembers],
+    [teamMembers, t],
   );
 
   const assigneeOptions = useMemo(
     () => [
-      { value: "all", label: "Все исполнители" },
+      { value: "all", label: t("filters.allAssignees") },
       ...teamMembers.map((member) => ({
         value: member.id,
         label: member.name,
       })),
     ],
-    [teamMembers],
+    [teamMembers, t],
   );
 
   const filtered = useMemo(() => {
@@ -223,7 +244,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
         `${task.title} ${task.description} ${task.createdByName} ${assigneeNames}`.toLowerCase();
       return hay.includes(q);
     });
-  }, [tasks, search, statusFilter, authorFilter, assigneeFilter, quickFilter, user.id]);
+  }, [tasks, search, statusFilter, authorFilter, assigneeFilter, quickFilter, user]);
 
   function applyQuickFilter(filter: QuickFilter) {
     setQuickFilter(filter);
@@ -264,7 +285,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
     });
     if (!res.ok) {
       const data = (await res.json()) as { error?: string };
-      throw new Error(data.error ?? "Не удалось сохранить задачу");
+      throw new Error(data.error ?? t("errors.saveFailed"));
     }
 
     const data = (await res.json()) as { task?: Task };
@@ -276,8 +297,8 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
         setToast({
           text:
             err instanceof Error
-              ? `Задача создана, но файлы не прикреплены: ${err.message}`
-              : "Задача создана, но файлы не прикреплены.",
+              ? t("toast.createAttachmentPartialWithError", { error: err.message })
+              : t("toast.createAttachmentPartial"),
           type: "error",
         });
         await fetchTasks();
@@ -286,7 +307,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
     }
 
     setCreateOpen(false);
-    setToast({ text: "Задача успешно создана." });
+    setToast({ text: t("toast.created") });
     await fetchTasks();
   }
 
@@ -309,7 +330,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
     }
 
     setEditTask(null);
-    setToast({ text: "Задача обновлена." });
+    setToast({ text: t("toast.updated") });
     await fetchTasks();
   }
 
@@ -345,10 +366,10 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
         setToast({
           text:
             res.status === 403
-              ? "Недостаточно прав для этого действия."
+              ? t("toast.insufficientPermissions")
               : data.error === "Comment required"
-                ? "Добавьте комментарий для доработки."
-                : "Не удалось обновить задачу.",
+                ? t("toast.commentRequired")
+                : t("toast.updateFailed"),
           type: "error",
         });
         return;
@@ -359,22 +380,22 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
 
       switch (action) {
         case "submit_for_approval":
-          setToast({ text: "Задача отправлена автору на проверку." });
+          setToast({ text: t("toast.submittedForApproval") });
           break;
         case "approve":
-          setToast({ text: "Задача принята и завершена." });
+          setToast({ text: t("toast.approved") });
           break;
         case "request_revision":
-          setToast({ text: "Задача отправлена на доработку." });
+          setToast({ text: t("toast.revisionRequested") });
           break;
         case "complete":
-          setToast({ text: "Задача отмечена выполненной." });
+          setToast({ text: t("toast.completed") });
           break;
         case "set_status":
           if (extra?.status === "in_progress") {
-            setToast({ text: "Задача в работе." });
+            setToast({ text: t("toast.inProgress") });
           } else {
-            setToast({ text: "Статус задачи обновлён." });
+            setToast({ text: t("toast.statusUpdated") });
           }
           break;
       }
@@ -414,26 +435,26 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
       setToast({
         text:
           res.status === 403
-            ? "Удалить задачу может только тот, кто её назначил, или владелец платформы."
-            : "Не удалось удалить задачу",
+            ? t("toast.deleteForbidden")
+            : t("toast.deleteFailed"),
         type: "error",
       });
       return;
     }
     setDeleteTask(null);
     setViewTask(null);
-    setToast({ text: "Задача удалена." });
+    setToast({ text: t("toast.deleted") });
     await fetchTasks();
   }
 
   return (
     <div className={styles.wrap}>
       <SectionHeader
-        title="Задачи команды"
-        subtitle={`Общий список задач ${branding.companyName}`}
+        title={t("title")}
+        subtitle={t("subtitle", { companyName: branding.companyName })}
         action={
           <Button type="button" onClick={() => setCreateOpen(true)}>
-            ➕ Новая задача
+            ➕ {t("newTask")}
           </Button>
         }
       />
@@ -442,7 +463,9 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
         <Card className={styles.completedNotificationAlert}>
           <div className={styles.completedNotificationHeader}>
             <strong>
-              Уведомления по задачам: {unreadPendingNotifications.length}
+              {t("banners.notificationsTitle", {
+                count: unreadPendingNotifications.length,
+              })}
             </strong>
             <Button
               type="button"
@@ -456,7 +479,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
                 })();
               }}
             >
-              Прочитать все
+              {t("actions.markAllRead")}
             </Button>
           </div>
           <ul className={styles.completedNotificationList}>
@@ -472,7 +495,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
                   </span>
                   {item.author_name ? (
                     <span className={styles.completedNotificationMeta}>
-                      Исполнитель: {item.author_name}
+                      {t("meta.assigneeLabel", { name: item.author_name })}
                     </span>
                   ) : null}
                 </button>
@@ -486,7 +509,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
         <Card className={styles.overdueAlert}>
           <div className={styles.overdueAlertHeader}>
             <strong>
-              Просрочено задач: {overdueTasks.length}
+              {t("banners.overdueCount", { count: overdueTasks.length })}
             </strong>
             {quickFilter !== "overdue" ? (
               <Button
@@ -494,7 +517,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
                 variant="ghost"
                 onClick={() => applyQuickFilter("overdue")}
               >
-                Показать только просроченные
+                {t("banners.showOverdueOnly")}
               </Button>
             ) : (
               <Button
@@ -502,7 +525,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
                 variant="ghost"
                 onClick={() => applyQuickFilter("all")}
               >
-                Показать все
+                {t("banners.showAll")}
               </Button>
             )}
           </div>
@@ -516,7 +539,10 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
                 >
                   <span className={styles.overdueTitle}>{task.title}</span>
                   <span className={styles.overdueMeta}>
-                    Срок: {formatTaskDate(task.dueDate)} · {task.createdByName}
+                    {t("meta.dueLabel", {
+                      date: formatTaskDate(task.dueDate, locale),
+                    })}{" "}
+                    · {task.createdByName}
                   </span>
                 </button>
               </li>
@@ -528,14 +554,14 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
       {!loading && pendingMyReview.length > 0 ? (
         <Card className={styles.pendingAlert}>
           <p className={styles.pendingAlertText}>
-            На вашей проверке: <strong>{pendingMyReview.length}</strong>
+            {t("banners.pendingReviewCount", { count: pendingMyReview.length })}
           </p>
           <Button
             type="button"
             variant="ghost"
             onClick={() => applyQuickFilter("pending_review")}
           >
-            Показать задачи на проверке
+            {t("banners.showPendingReview")}
           </Button>
         </Card>
       ) : null}
@@ -543,14 +569,14 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
       {!loading && needsMyRevision.length > 0 ? (
         <Card className={styles.revisionAlert}>
           <p className={styles.revisionAlertText}>
-            Нужна ваша доработка: <strong>{needsMyRevision.length}</strong>
+            {t("banners.needsRevisionCount", { count: needsMyRevision.length })}
           </p>
           <Button
             type="button"
             variant="ghost"
             onClick={() => applyQuickFilter("needs_my_revision")}
           >
-            Показать задачи на доработке
+            {t("banners.showNeedsRevision")}
           </Button>
         </Card>
       ) : null}
@@ -558,15 +584,16 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
       {!loading && assignedByMeCompleted.length > 0 ? (
         <Card className={styles.completedAlert}>
           <p className={styles.completedAlertText}>
-            Выполнено задач, которые вы поставили другим:{" "}
-            <strong>{assignedByMeCompleted.length}</strong>
+            {t("banners.completedAssignedCount", {
+              count: assignedByMeCompleted.length,
+            })}
           </p>
           <Button
             type="button"
             variant="ghost"
             onClick={() => applyQuickFilter("created_by_me")}
           >
-            Показать назначенные мной
+            {t("banners.showCreatedByMe")}
           </Button>
         </Card>
       ) : null}
@@ -577,42 +604,45 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
           className={[styles.quickFilter, quickFilter === "all" ? styles.quickFilterActive : ""].join(" ")}
           onClick={() => applyQuickFilter("all")}
         >
-          Все
+          {t("quickFilters.all")}
         </button>
         <button
           type="button"
           className={[styles.quickFilter, quickFilter === "overdue" ? styles.quickFilterActive : ""].join(" ")}
           onClick={() => applyQuickFilter("overdue")}
         >
-          Просроченные{overdueTasks.length > 0 ? ` (${overdueTasks.length})` : ""}
+          {t("quickFilters.overdue")}
+          {overdueTasks.length > 0 ? ` (${overdueTasks.length})` : ""}
         </button>
         <button
           type="button"
           className={[styles.quickFilter, quickFilter === "created_by_me" ? styles.quickFilterActive : ""].join(" ")}
           onClick={() => applyQuickFilter("created_by_me")}
         >
-          Назначенные мной
+          {t("quickFilters.createdByMe")}
         </button>
         <button
           type="button"
           className={[styles.quickFilter, quickFilter === "pending_review" ? styles.quickFilterActive : ""].join(" ")}
           onClick={() => applyQuickFilter("pending_review")}
         >
-          На проверке{pendingMyReview.length > 0 ? ` (${pendingMyReview.length})` : ""}
+          {t("quickFilters.pendingReview")}
+          {pendingMyReview.length > 0 ? ` (${pendingMyReview.length})` : ""}
         </button>
         <button
           type="button"
           className={[styles.quickFilter, quickFilter === "needs_my_revision" ? styles.quickFilterActive : ""].join(" ")}
           onClick={() => applyQuickFilter("needs_my_revision")}
         >
-          На доработке{needsMyRevision.length > 0 ? ` (${needsMyRevision.length})` : ""}
+          {t("quickFilters.needsRevision")}
+          {needsMyRevision.length > 0 ? ` (${needsMyRevision.length})` : ""}
         </button>
         <button
           type="button"
           className={[styles.quickFilter, quickFilter === "completed" ? styles.quickFilterActive : ""].join(" ")}
           onClick={() => applyQuickFilter("completed")}
         >
-          Принятые
+          {t("quickFilters.completed")}
         </button>
       </div>
 
@@ -620,13 +650,14 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
         <input
           type="search"
           className={styles.search}
-          placeholder="Поиск по названию, описанию, автору, исполнителю…"
+          placeholder={t("search.placeholder")}
+          aria-label={t("search.label")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className={styles.filters}>
           <FilterSelect
-            ariaLabel="Фильтр по статусу"
+            ariaLabel={t("filters.statusLabel")}
             value={statusFilter}
             options={statusOptions}
             onChange={(value) => {
@@ -640,13 +671,13 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
             }}
           />
           <FilterSelect
-            ariaLabel="Фильтр по автору"
+            ariaLabel={t("filters.authorLabel")}
             value={authorFilter}
             options={authorOptions}
             onChange={setAuthorFilter}
           />
           <FilterSelect
-            ariaLabel="Фильтр по исполнителю"
+            ariaLabel={t("filters.assigneeLabel")}
             value={assigneeFilter}
             options={assigneeOptions}
             onChange={setAssigneeFilter}
@@ -655,12 +686,10 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
       </div>
 
       {loading ? (
-        <p className={styles.empty}>Загрузка задач…</p>
+        <p className={styles.empty}>{t("loading.list")}</p>
       ) : filtered.length === 0 ? (
         <p className={styles.empty}>
-          {tasks.length === 0
-            ? "Пока нет задач. Создайте первую — её увидит вся команда."
-            : "Ничего не найдено по фильтрам."}
+          {tasks.length === 0 ? t("empty.list") : t("empty.filtered")}
         </p>
       ) : (
         <ul className={styles.list}>
@@ -672,9 +701,9 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
                 highlighted={viewTask?.id === task.id || isTaskOverdue(task)}
                 workflowLoading={workflowLoading}
                 onOpen={openTask}
-                onStartTask={(t) => void handleStartTask(t)}
-                onComplete={(t) => void handleComplete(t)}
-                onSubmitForApproval={(t) => void handleSubmitForApproval(t)}
+                onStartTask={(taskItem) => void handleStartTask(taskItem)}
+                onComplete={(taskItem) => void handleComplete(taskItem)}
+                onSubmitForApproval={(taskItem) => void handleSubmitForApproval(taskItem)}
                 onEdit={setEditTask}
                 onDelete={setDeleteTask}
               />
@@ -684,10 +713,10 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
       )}
 
       {createOpen && (
-        <Modal title="Новая задача" onClose={() => setCreateOpen(false)}>
+        <Modal title={t("modal.createTitle")} closeLabel={t("modal.closeAria")} onClose={() => setCreateOpen(false)}>
           <TaskForm
             teamMembers={teamMembers}
-            submitLabel="Создать"
+            submitLabel={t("actions.create")}
             onCancel={() => setCreateOpen(false)}
             onSubmit={handleCreate}
           />
@@ -702,22 +731,22 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
           onClose={closeTaskView}
           onEdit={setEditTask}
           onDelete={setDeleteTask}
-          onStartTask={(t) => void handleStartTask(t)}
-          onComplete={(t) => void handleComplete(t)}
-          onSubmitForApproval={(t) => void handleSubmitForApproval(t)}
-          onApprove={(t) => void handleApprove(t)}
-          onRequestRevision={(t, comment) => void handleRequestRevision(t, comment)}
+          onStartTask={(taskItem) => void handleStartTask(taskItem)}
+          onComplete={(taskItem) => void handleComplete(taskItem)}
+          onSubmitForApproval={(taskItem) => void handleSubmitForApproval(taskItem)}
+          onApprove={(taskItem) => void handleApprove(taskItem)}
+          onRequestRevision={(taskItem, comment) => void handleRequestRevision(taskItem, comment)}
           onTaskUpdated={handleTaskUpdated}
         />
       ) : null}
 
       {editTask && (
-        <Modal title="Редактировать задачу" onClose={() => setEditTask(null)}>
+        <Modal title={t("modal.editTitle")} closeLabel={t("modal.closeAria")} onClose={() => setEditTask(null)}>
           <TaskForm
             initial={taskToFormValues(editTask)}
             teamMembers={teamMembers}
             isEditing
-            submitLabel="Сохранить"
+            submitLabel={t("actions.save")}
             onCancel={() => setEditTask(null)}
             onSubmit={handleUpdate}
           />
@@ -725,15 +754,15 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
       )}
 
       {deleteTask && (
-        <Modal title="Удалить задачу?" onClose={() => setDeleteTask(null)}>
-          <p className={styles.confirmText}>Вы уверены?</p>
+        <Modal title={t("modal.deleteTitle")} closeLabel={t("modal.closeAria")} onClose={() => setDeleteTask(null)}>
+          <p className={styles.confirmText}>{t("confirm.deleteTaskBody")}</p>
           <p className={styles.confirmTask}>{deleteTask.title}</p>
           <div className={styles.confirmActions}>
             <Button type="button" variant="secondary" onClick={() => setDeleteTask(null)}>
-              Отмена
+              {t("confirm.cancel")}
             </Button>
             <Button type="button" variant="danger" onClick={() => void confirmDelete()}>
-              Удалить
+              {t("actions.delete")}
             </Button>
           </div>
         </Modal>
@@ -747,10 +776,12 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
 function Modal({
   title,
   children,
+  closeLabel,
   onClose,
 }: {
   title: string;
   children: React.ReactNode;
+  closeLabel: string;
   onClose: () => void;
 }) {
   return (
@@ -759,7 +790,7 @@ function Modal({
       <Card className={styles.modal}>
         <header className={styles.modalHeader}>
           <h2 className={styles.modalTitle}>{title}</h2>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть">
+          <button type="button" className={styles.close} onClick={onClose} aria-label={closeLabel}>
             ×
           </button>
         </header>

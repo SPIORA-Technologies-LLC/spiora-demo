@@ -13,7 +13,7 @@
   padding: 0.875rem 1rem;
   border-radius: 10px;
   border: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .icon {
@@ -24,8 +24,8 @@
   height: 32px;
   flex-shrink: 0;
   border-radius: 8px;
-  background: rgba(145, 13, 13, 0.12);
-  border: 1px solid rgba(145, 13, 13, 0.25);
+  background: rgba(var(--brand-red-rgb), 0.12);
+  border: 1px solid rgba(var(--brand-red-rgb), 0.25);
   color: var(--accent-burgundy-light);
   font-size: 0.8125rem;
 }
@@ -38,7 +38,7 @@
 }
 
 .value {
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 700;
   line-height: 1.1;

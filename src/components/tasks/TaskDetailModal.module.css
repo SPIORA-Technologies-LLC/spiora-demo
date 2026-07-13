@@ -63,7 +63,7 @@
 
 .title {
   margin: 0;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--white);
@@ -163,14 +163,14 @@
   margin-bottom: 1rem;
   padding: 0.875rem;
   border-radius: 10px;
-  background: rgba(15, 20, 28, 0.35);
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid var(--border-soft);
 }
 
 .historyTitle,
 .reviewTitle {
   margin: 0 0 0.75rem;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--white);
@@ -249,7 +249,7 @@
   padding: 0.625rem 0.75rem;
   border-radius: 8px;
   border: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.55);
+  background: rgba(0, 0, 0, 0.55);
   color: var(--white);
   font-family: Inter, sans-serif;
   font-size: 0.875rem;
@@ -339,7 +339,7 @@
   padding: 0.75rem;
   margin-bottom: 1rem;
   border-radius: 10px;
-  background: rgba(15, 20, 28, 0.35);
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid var(--border-soft);
 }
 

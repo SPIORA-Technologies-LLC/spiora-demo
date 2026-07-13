@@ -30,7 +30,7 @@
 }
 
 .qualified {
-  background: rgba(145, 13, 13, 0.2);
+  background: rgba(var(--brand-red-rgb), 0.2);
   color: #fca5a5;
   border: 1px solid var(--border-burgundy);
 }

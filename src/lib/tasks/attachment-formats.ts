@@ -85,10 +85,14 @@ export function isAllowedTaskAttachment(fileName: string, contentType: string): 
   return Boolean(normalizeTaskAttachmentContentType(contentType, fileName));
 }
 
-export function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} Б`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`;
+export function formatFileSize(bytes: number, locale: "en" | "ru" = "en"): string {
+  const units =
+    locale === "ru"
+      ? { b: "Б", kb: "КБ", mb: "МБ" }
+      : { b: "B", kb: "KB", mb: "MB" };
+  if (bytes < 1024) return `${bytes} ${units.b}`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} ${units.kb}`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} ${units.mb}`;
 }
 
 export function getTaskAttachmentUrl(taskId: string, attachmentId: string): string {
@@ -103,6 +107,3 @@ export function canPreviewInline(contentType: string): boolean {
 export const TASK_ATTACHMENT_ACCEPT = TASK_ATTACHMENT_EXTENSIONS.map(
   (ext) => `.${ext}`,
 ).join(",");
-
-export const TASK_ATTACHMENT_HINT =
-  "PDF, Word, Excel, PowerPoint, изображения (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — до 25 МБ каждый";

@@ -4,6 +4,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 import {
   branding,
+  getBrandSlogan,
   getManifestConfig,
   getMeetingRoomName,
   getProductDescription,
@@ -25,7 +26,7 @@ const BRANDING_SURFACE_FILES = [
   "src/components/pwa/PwaInstallHint.tsx",
   "src/components/meet/GuestMeetingGate.tsx",
   "src/components/meet/GuestMeetRoom.tsx",
-  "src/components/dashboard/DashboardView.tsx",
+  "src/components/dashboard/FirstImpressionView.tsx",
   "public/sw.js",
 ];
 
@@ -51,11 +52,32 @@ describe("branding config", () => {
   });
 
   it("exposes bilingual product descriptions", () => {
-    assert.equal(getProductDescription("en"), "Corporate Digital Workspace");
+    assert.equal(
+      getProductDescription("en"),
+      "The AI Operating System for Business",
+    );
     assert.equal(
       getProductDescription("ru"),
-      "Корпоративное цифровое пространство",
+      "AI-операционная система для бизнеса",
     );
+  });
+
+  it("exposes brand slogan from brand book", () => {
+    assert.equal(
+      getBrandSlogan("en"),
+      "ONE PLATFORM. INFINITE SOLUTIONS.",
+    );
+    assert.equal(
+      getBrandSlogan("ru"),
+      "ONE PLATFORM. INFINITE SOLUTIONS.",
+    );
+  });
+
+  it("uses official brand palette", () => {
+    assert.equal(branding.primaryColor, "#000000");
+    assert.equal(branding.accentColor, "#E82916");
+    assert.equal(branding.brandGradientStart, "#F4981A");
+    assert.equal(branding.brandGradientEnd, "#E82916");
   });
 
   it("builds site metadata with Spiora", () => {
@@ -78,10 +100,10 @@ describe("branding config", () => {
     assert.equal(branding.liveKitRoomPrefix, "spiora-cal");
   });
 
-  it("points assets to Spiora placeholders", () => {
-    assert.equal(branding.logoPath, "/spiora-logo.svg");
-    assert.equal(branding.iconPath, "/spiora-mark.svg");
-    assert.equal(branding.faviconPath, "/spiora-mark.svg");
+  it("points assets to logo1.svg", () => {
+    assert.equal(branding.logoPath, "/logo1.svg");
+    assert.equal(branding.iconPath, "/logo1.svg");
+    assert.equal(branding.faviconPath, "/logo1.svg");
   });
 });
 

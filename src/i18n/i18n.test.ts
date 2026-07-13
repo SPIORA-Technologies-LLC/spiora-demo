@@ -61,7 +61,7 @@ describe("i18n config", () => {
 
 describe("i18n messages", () => {
   it("возвращает английские shared navigation labels", () => {
-    assert.equal(translateMessage("en", "nav.dashboard"), "Dashboard");
+    assert.equal(translateMessage("en", "nav.dashboard"), "Command Center");
     assert.equal(translateMessage("en", "nav.clients"), "Clients");
     assert.equal(translateMessage("en", "nav.logout"), "Logout");
   });
@@ -86,8 +86,8 @@ describe("i18n messages", () => {
   it("загружает словари для en и ru", () => {
     const enMessages = getMessagesForLocale("en");
     const ruMessages = getMessagesForLocale("ru");
-    assert.equal((enMessages.nav as { dashboard: string }).dashboard, "Dashboard");
-    assert.equal((ruMessages.nav as { dashboard: string }).dashboard, "Dashboard");
+    assert.equal((enMessages.nav as { dashboard: string }).dashboard, "Command Center");
+    assert.equal((ruMessages.nav as { dashboard: string }).dashboard, "Центр управления");
     assert.equal((ruMessages.nav as { clients: string }).clients, "Клиенты");
   });
 });
@@ -137,7 +137,35 @@ describe("html lang", () => {
   });
 });
 
-describe("core modules i18n — Dashboard", () => {
+describe("core modules i18n — Command Center", () => {
+  it("возвращает английские command center labels", () => {
+    assert.equal(
+      translateMessage("en", "commandCenter.pageTitle"),
+      "Command Center",
+    );
+    assert.match(
+      translateMessage("en", "commandCenter.calmHeadline"),
+      /under control/i,
+    );
+    assert.match(
+      translateMessage("en", "commandCenter.executiveSummary.title"),
+      /Executive Summary/i,
+    );
+  });
+
+  it("возвращает русские command center labels", () => {
+    assert.equal(
+      translateMessage("ru", "commandCenter.pageTitle"),
+      "Центр управления",
+    );
+    assert.match(
+      translateMessage("ru", "commandCenter.calmHeadline"),
+      /контролем/i,
+    );
+  });
+});
+
+describe("core modules i18n — Dashboard (legacy keys)", () => {
   it("возвращает английские dashboard labels", () => {
     assert.equal(translateMessage("en", "dashboard.pageTitle"), "Dashboard");
     assert.equal(

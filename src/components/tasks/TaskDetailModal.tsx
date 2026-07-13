@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import type { AppLocale } from "@/i18n/config";
 import type { SessionUser } from "@/lib/auth/types";
 import { formatAssigneeNames } from "@/lib/tasks/assignees";
 import { formatTaskDate, formatTaskDateTime } from "@/lib/tasks/format";
@@ -17,11 +19,8 @@ import {
   isTaskAssignee,
   isTaskCreator,
 } from "@/lib/tasks/permissions";
-import type { Task } from "@/lib/tasks/types";
-import {
-  formatReviewActionLabel,
-  getLatestRevisionComment,
-} from "@/lib/tasks/workflow";
+import type { Task, TaskReviewEvent } from "@/lib/tasks/types";
+import { getLatestRevisionComment } from "@/lib/tasks/workflow";
 import { TaskStatusBadge } from "./TaskStatusBadge";
 import { TaskAttachmentsSection } from "./TaskAttachments";
 import { TaskProgressReportsSection } from "./TaskProgressReports";
@@ -42,6 +41,20 @@ type TaskDetailModalProps = {
   workflowLoading?: boolean;
 };
 
+function reviewActionLabel(
+  t: ReturnType<typeof useTranslations<"tasks">>,
+  action: TaskReviewEvent["action"],
+): string {
+  switch (action) {
+    case "submitted":
+      return t("workflow.submitted");
+    case "approved":
+      return t("workflow.approved");
+    case "revision_requested":
+      return t("workflow.revisionRequested");
+  }
+}
+
 export function TaskDetailModal({
   task,
   user,
@@ -56,6 +69,8 @@ export function TaskDetailModal({
   onTaskUpdated,
   workflowLoading = false,
 }: TaskDetailModalProps) {
+  const t = useTranslations("tasks");
+  const locale = useLocale() as AppLocale;
   const [revisionComment, setRevisionComment] = useState("");
   const [revisionError, setRevisionError] = useState("");
 
@@ -73,10 +88,14 @@ export function TaskDetailModal({
   const canReview = canReviewTask(task, user);
   const latestRevision = getLatestRevisionComment(task);
 
+  const completedAtSuffix = task.completedAt
+    ? ` · ${formatTaskDateTime(task.completedAt, locale)}`
+    : "";
+
   function handleRequestRevision() {
     const trimmed = revisionComment.trim();
     if (!trimmed) {
-      setRevisionError("Добавьте комментарий для исполнителя");
+      setRevisionError(t("review.revisionError"));
       return;
     }
     setRevisionError("");
@@ -100,12 +119,12 @@ export function TaskDetailModal({
       >
         <header className={styles.header}>
           <div className={styles.headerMain}>
-            {overdue ? <span className={styles.overdueTag}>Просрочена</span> : null}
+            {overdue ? <span className={styles.overdueTag}>{t("banners.overdue")}</span> : null}
             {isCompleted ? (
-              <span className={styles.completedTag}>Принята</span>
+              <span className={styles.completedTag}>{t("banners.approved")}</span>
             ) : null}
             {isPendingApproval && createdByMe ? (
-              <span className={styles.pendingTag}>Ждёт вашего решения</span>
+              <span className={styles.pendingTag}>{t("banners.awaitingDecision")}</span>
             ) : null}
             <h2
               id="task-detail-title"
@@ -115,29 +134,24 @@ export function TaskDetailModal({
             </h2>
             <TaskStatusBadge status={task.status} />
           </div>
-          <button type="button" className={styles.close} onClick={onClose} aria-label="Закрыть">
+          <button type="button" className={styles.close} onClick={onClose} aria-label={t("modal.closeAria")}>
             ×
           </button>
         </header>
 
         {isCompleted && createdByMe && !assignedToMe ? (
           <p className={styles.completedNotice}>
-            Задача принята и завершена
-            {task.completedAt ? ` · ${formatTaskDateTime(task.completedAt)}` : ""}.
-            Можно удалить её из списка.
+            {t("review.completedNotice", { completedAt: completedAtSuffix })}
           </p>
         ) : null}
 
         {isPendingApproval && createdByMe ? (
-          <p className={styles.pendingNotice}>
-            Исполнитель сдал задачу на проверку. Примите работу или отправьте на доработку с
-            комментарием.
-          </p>
+          <p className={styles.pendingNotice}>{t("review.pendingNotice")}</p>
         ) : null}
 
         {isNeedsRevision && assignedToMe && latestRevision ? (
           <div className={styles.revisionBox}>
-            <strong>Комментарий автора</strong>
+            <strong>{t("review.authorComment")}</strong>
             <p>{latestRevision}</p>
           </div>
         ) : null}
@@ -147,7 +161,7 @@ export function TaskDetailModal({
             {task.description}
           </p>
         ) : (
-          <p className={styles.noDescription}>Описание не указано.</p>
+          <p className={styles.noDescription}>{t("empty.noDescription")}</p>
         )}
 
         <TaskAttachmentsSection
@@ -164,41 +178,43 @@ export function TaskDetailModal({
 
         <dl className={styles.meta}>
           <div>
-            <dt>Автор</dt>
+            <dt>{t("meta.author")}</dt>
             <dd>{task.createdByName}</dd>
           </div>
           <div>
-            <dt>Исполнители</dt>
-            <dd>{formatAssigneeNames(task.assignees)}</dd>
+            <dt>{t("meta.assignees")}</dt>
+            <dd>{formatAssigneeNames(task.assignees, t("notAssigned"))}</dd>
           </div>
           <div>
-            <dt>Создано</dt>
-            <dd>{formatTaskDateTime(task.createdAt)}</dd>
+            <dt>{t("meta.created")}</dt>
+            <dd>{formatTaskDateTime(task.createdAt, locale)}</dd>
           </div>
           <div>
-            <dt>Срок</dt>
-            <dd className={overdue ? styles.dueOverdue : ""}>{formatTaskDate(task.dueDate)}</dd>
+            <dt>{t("meta.due")}</dt>
+            <dd className={overdue ? styles.dueOverdue : ""}>
+              {formatTaskDate(task.dueDate, locale)}
+            </dd>
           </div>
           {isCompleted && task.completedAt ? (
             <div>
-              <dt>Принято</dt>
-              <dd>{formatTaskDateTime(task.completedAt)}</dd>
+              <dt>{t("meta.completed")}</dt>
+              <dd>{formatTaskDateTime(task.completedAt, locale)}</dd>
             </div>
           ) : null}
         </dl>
 
         {task.reviewHistory.length > 0 ? (
           <section className={styles.history}>
-            <h3 className={styles.historyTitle}>История согласования</h3>
+            <h3 className={styles.historyTitle}>{t("review.historyTitle")}</h3>
             <ol className={styles.historyList}>
               {[...task.reviewHistory].reverse().map((event) => (
                 <li key={event.id} className={styles.historyItem}>
                   <div className={styles.historyHead}>
                     <span className={styles.historyAction}>
-                      {formatReviewActionLabel(event.action)}
+                      {reviewActionLabel(t, event.action)}
                     </span>
                     <time className={styles.historyTime}>
-                      {formatTaskDateTime(event.createdAt)}
+                      {formatTaskDateTime(event.createdAt, locale)}
                     </time>
                   </div>
                   <p className={styles.historyMeta}>
@@ -213,18 +229,18 @@ export function TaskDetailModal({
 
         {canReview ? (
           <section className={styles.reviewPanel}>
-            <h3 className={styles.reviewTitle}>Проверка задачи</h3>
+            <h3 className={styles.reviewTitle}>{t("review.title")}</h3>
             <div className={styles.reviewActions}>
               <Button
                 type="button"
                 onClick={() => onApprove(task)}
                 disabled={workflowLoading}
               >
-                ✅ Принять задачу
+                ✅ {t("review.approve")}
               </Button>
             </div>
             <label className={styles.revisionField}>
-              <span>Комментарий для доработки</span>
+              <span>{t("review.revisionLabel")}</span>
               <textarea
                 className={styles.revisionInput}
                 rows={3}
@@ -233,7 +249,7 @@ export function TaskDetailModal({
                   setRevisionComment(e.target.value);
                   if (revisionError) setRevisionError("");
                 }}
-                placeholder="Что нужно исправить или уточнить…"
+                placeholder={t("review.revisionPlaceholder")}
               />
             </label>
             {revisionError ? (
@@ -245,14 +261,14 @@ export function TaskDetailModal({
               onClick={handleRequestRevision}
               disabled={workflowLoading}
             >
-              🔄 Отправить на доработку
+              🔄 {t("actions.requestRevision")}
             </Button>
           </section>
         ) : null}
 
         {!isCompleted && !isPendingApproval ? (
           <div className={styles.statusActions}>
-            <span className={styles.statusActionsLabel}>Действия исполнителя:</span>
+            <span className={styles.statusActionsLabel}>{t("actions.assigneeActions")}</span>
             <div className={styles.statusButtons}>
               {canStart ? (
                 <Button
@@ -261,7 +277,7 @@ export function TaskDetailModal({
                   onClick={() => onStartTask(task)}
                   disabled={workflowLoading}
                 >
-                  ▶ В работе
+                  ▶ {t("actions.start")}
                 </Button>
               ) : null}
               {canSubmit ? (
@@ -271,7 +287,7 @@ export function TaskDetailModal({
                   onClick={() => onSubmitForApproval(task)}
                   disabled={workflowLoading}
                 >
-                  ✅ Сдать на проверку
+                  ✅ {t("actions.submitForApproval")}
                 </Button>
               ) : null}
               {canCompleteDirect ? (
@@ -281,7 +297,7 @@ export function TaskDetailModal({
                   onClick={() => onComplete(task)}
                   disabled={workflowLoading}
                 >
-                  ✅ Выполнено
+                  ✅ {t("actions.complete")}
                 </Button>
               ) : null}
             </div>
@@ -298,7 +314,7 @@ export function TaskDetailModal({
                 onEdit(task);
               }}
             >
-              ✏️ Редактировать
+              ✏️ {t("actions.edit")}
             </Button>
           ) : null}
           {canDelete ? (
@@ -310,11 +326,11 @@ export function TaskDetailModal({
                 onDelete(task);
               }}
             >
-              🗑 Удалить
+              🗑 {t("actions.delete")}
             </Button>
           ) : null}
           <Button type="button" variant="ghost" onClick={onClose}>
-            Закрыть
+            {t("actions.close")}
           </Button>
         </div>
       </Card>

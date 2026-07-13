@@ -39,7 +39,7 @@
   padding: 0.625rem 0.75rem;
   border-radius: 8px;
   border: 1px solid rgba(239, 68, 68, 0.25);
-  background: rgba(15, 20, 28, 0.35);
+  background: rgba(0, 0, 0, 0.35);
   color: inherit;
   text-align: left;
   cursor: pointer;
@@ -52,10 +52,12 @@
 }
 
 .overdueTitle {
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--white);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .overdueMeta {
@@ -121,10 +123,12 @@
 }
 
 .completedNotificationTitle {
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 0.9375rem;
   font-weight: 700;
   color: #f0fdf4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .completedNotificationMeta {
@@ -213,7 +217,7 @@
 
 .quickFilterActive {
   border-color: var(--accent-burgundy);
-  background: rgba(145, 13, 13, 0.18);
+  background: rgba(var(--brand-red-rgb), 0.18);
   color: var(--white);
 }
 
@@ -225,7 +229,7 @@
   padding: 0.875rem;
   border-radius: 16px;
   border: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .search {
@@ -236,8 +240,8 @@
   border: 1px solid var(--gray-600);
   background: linear-gradient(
     180deg,
-    rgba(45, 55, 72, 0.95) 0%,
-    rgba(26, 32, 44, 0.98) 100%
+    rgba(34, 34, 34, 0.95) 0%,
+    rgba(26, 26, 26, 0.98) 100%
   );
   color: var(--white);
   font-family: Inter, sans-serif;
@@ -250,7 +254,7 @@
 .search:focus {
   outline: none;
   border-color: var(--accent-burgundy);
-  box-shadow: 0 0 0 3px rgba(145, 13, 13, 0.18);
+  box-shadow: 0 0 0 3px rgba(var(--brand-red-rgb), 0.18);
 }
 
 .filters {
@@ -314,7 +318,7 @@
 
 .modalTitle {
   margin: 0;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--white);
@@ -342,9 +346,11 @@
 
 .confirmTask {
   margin: 0 0 1.25rem;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-weight: 600;
   color: var(--white);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .confirmActions {

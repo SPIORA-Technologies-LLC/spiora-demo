@@ -2,6 +2,7 @@
 
 import { branding } from "@/config/branding";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Card } from "@/components/ui/Card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { TaskForm, type TaskFormValues } from "@/components/tasks/TaskForm";
@@ -14,6 +15,7 @@ type NewTaskPageViewProps = {
 
 export function NewTaskPageView({ teamMembers }: NewTaskPageViewProps) {
   const router = useRouter();
+  const t = useTranslations("tasks");
 
   async function handleCreate(values: TaskFormValues, files?: File[]) {
     const res = await fetch("/api/tasks", {
@@ -29,7 +31,7 @@ export function NewTaskPageView({ teamMembers }: NewTaskPageViewProps) {
     });
     if (!res.ok) {
       const data = (await res.json()) as { error?: string };
-      throw new Error(data.error ?? "Не удалось сохранить задачу");
+      throw new Error(data.error ?? t("errors.saveFailed"));
     }
 
     const data = (await res.json()) as { task?: { id: string } };
@@ -43,13 +45,13 @@ export function NewTaskPageView({ teamMembers }: NewTaskPageViewProps) {
   return (
     <div className={styles.wrap}>
       <SectionHeader
-        title="Новая задача"
-        subtitle={`Создайте задачу для всей команды ${branding.companyName}`}
+        title={t("newTask")}
+        subtitle={t("subtitle", { companyName: branding.companyName })}
       />
       <Card className={styles.card}>
         <TaskForm
           teamMembers={teamMembers}
-          submitLabel="Создать задачу"
+          submitLabel={t("createTask")}
           onCancel={() => router.push("/tasks")}
           onSubmit={handleCreate}
         />

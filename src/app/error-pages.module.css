@@ -1,0 +1,89 @@
+.page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: var(--gradient-hero);
+}
+
+.card {
+  width: 100%;
+  max-width: 480px;
+  padding: 2rem;
+  text-align: center;
+  background: var(--gray-800);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+}
+
+.code {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 0.875rem;
+  letter-spacing: 0.12em;
+  color: var(--accent-burgundy-light);
+}
+
+.title {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--white);
+}
+
+.description {
+  margin: 0 0 1.5rem;
+  font-family: Inter, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--gray-300);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--border-burgundy);
+  border-radius: var(--radius-sm);
+  background: rgba(var(--brand-red-rgb), 0.35);
+  color: var(--white);
+  font-family: Inter, sans-serif;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.linkButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--gray-200);
+  font-family: Inter, sans-serif;
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+.button:hover,
+.linkButton:hover {
+  background: rgba(var(--brand-red-rgb), 0.22);
+}

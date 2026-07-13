@@ -26,7 +26,7 @@
   padding: 0.5rem 0.875rem;
   border-radius: 10px;
   border: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
   color: var(--gray-300);
   font-family: Inter, sans-serif;
   font-size: 0.8125rem;
@@ -40,8 +40,8 @@
 }
 
 .tabActive {
-  background: rgba(145, 13, 13, 0.2);
-  border-color: rgba(145, 13, 13, 0.45);
+  background: rgba(var(--brand-red-rgb), 0.2);
+  border-color: rgba(var(--brand-red-rgb), 0.45);
   color: var(--white);
 }
 

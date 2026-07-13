@@ -13,7 +13,10 @@ export function normalizeAssignees(value: unknown): TaskAssignee[] {
     .map((item) => ({ id: item.id, name: item.name }));
 }
 
-export function formatAssigneeNames(assignees: TaskAssignee[]): string {
-  if (!assignees.length) return "Не назначено";
+export function formatAssigneeNames(
+  assignees: TaskAssignee[],
+  notAssignedLabel: string,
+): string {
+  if (!assignees.length) return notAssignedLabel;
   return assignees.map((assignee) => assignee.name).join(", ");
 }

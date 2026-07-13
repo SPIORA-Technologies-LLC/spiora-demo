@@ -13,7 +13,7 @@
 
 .title {
   margin: 0 0 0.35rem;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.6rem;
 }
 
@@ -48,7 +48,7 @@
   padding: 0.9rem 1rem;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .itemTitle {

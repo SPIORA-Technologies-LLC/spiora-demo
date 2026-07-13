@@ -5,7 +5,7 @@
   padding: 0.2rem;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .compact {
@@ -42,7 +42,7 @@
 .active {
   color: var(--white);
   background: var(--gradient-brand);
-  box-shadow: 0 2px 10px rgba(145, 13, 13, 0.28);
+  box-shadow: 0 2px 10px rgba(var(--brand-red-rgb), 0.28);
 }
 
 .fallback {

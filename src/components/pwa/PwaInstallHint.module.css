@@ -6,8 +6,8 @@
   max-width: 360px;
   padding: 1rem 1.125rem;
   border-radius: 14px;
-  border: 1px solid rgba(145, 13, 13, 0.45);
-  background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+  border: 1px solid rgba(var(--brand-red-rgb), 0.45);
+  background: var(--gradient-dark);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
 }
 

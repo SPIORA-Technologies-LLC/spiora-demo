@@ -5,7 +5,7 @@
   padding: 0.875rem;
   border-radius: 14px;
   border: 1px solid var(--border-soft);
-  background: rgba(15, 20, 28, 0.45);
+  background: rgba(0, 0, 0, 0.45);
 }
 
 .presets {
@@ -19,7 +19,7 @@
   padding: 0.4375rem 0.75rem;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  background: rgba(26, 32, 44, 0.6);
+  background: rgba(26, 26, 26, 0.6);
   color: var(--gray-300);
   font-family: Inter, sans-serif;
   font-size: 0.75rem;
@@ -37,8 +37,8 @@
 }
 
 .presetActive {
-  background: rgba(145, 13, 13, 0.22);
-  border-color: rgba(145, 13, 13, 0.45);
+  background: rgba(var(--brand-red-rgb), 0.22);
+  border-color: rgba(var(--brand-red-rgb), 0.45);
   color: var(--white);
 }
 
@@ -61,7 +61,7 @@
   padding: 0.4375rem 0.625rem;
   border-radius: 8px;
   border: 1px solid var(--gray-600);
-  background: rgba(26, 32, 44, 0.8);
+  background: rgba(26, 26, 26, 0.8);
   color: var(--white);
   font-family: Inter, sans-serif;
   font-size: 0.8125rem;

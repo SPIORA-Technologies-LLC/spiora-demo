@@ -60,7 +60,7 @@
 }
 
 .timeSeparator {
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.125rem;
   font-weight: 600;
   color: #94a3b8;

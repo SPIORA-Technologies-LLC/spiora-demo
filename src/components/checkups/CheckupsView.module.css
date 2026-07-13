@@ -16,7 +16,7 @@
 
 .sectionTitle {
   margin: 0;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 600;
   color: #ffffff;
@@ -59,7 +59,7 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  background: #2d3748;
+  background: var(--surface-3);
   background: var(--gray-800);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border: 1px solid var(--border-soft);
@@ -69,7 +69,7 @@
 }
 
 .resourceCard_app {
-  border-color: rgba(145, 13, 13, 0.35);
+  border-color: rgba(var(--brand-red-rgb), 0.35);
 }
 
 .resourceCard_website {
@@ -97,7 +97,7 @@
 .resourceCard_app .cardGlow {
   background: radial-gradient(
     circle at 80% 20%,
-    rgba(145, 13, 13, 0.14),
+    rgba(var(--brand-red-rgb), 0.14),
     transparent 55%
   );
 }
@@ -133,7 +133,7 @@
 .icon_app {
   background: linear-gradient(
     135deg,
-    rgba(145, 13, 13, 0.28) 0%,
+    rgba(var(--brand-red-rgb), 0.28) 0%,
     rgba(179, 36, 36, 0.18) 100%
   );
   border: 1px solid var(--border-burgundy);
@@ -190,7 +190,7 @@
 }
 
 .badge_app {
-  background: rgba(145, 13, 13, 0.15);
+  background: rgba(var(--brand-red-rgb), 0.15);
   color: #fca5a5;
 }
 
@@ -210,7 +210,7 @@
   margin: 0 0 0.625rem;
   position: relative;
   z-index: 1;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.125rem;
   font-weight: 700;
   line-height: 1.3;
@@ -258,7 +258,7 @@
 }
 
 .openBtn:hover {
-  background: linear-gradient(135deg, #910d0d, #b32424);
+  background: linear-gradient(135deg, #e82916, #f4981a);
   transform: translateY(-1px);
 }
 

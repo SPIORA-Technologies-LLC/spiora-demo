@@ -4,10 +4,10 @@
   z-index: 100;
   display: flex;
   align-items: center;
-  gap: 1.25rem;
+  gap: 20px;
   min-height: 72px;
-  padding: 0 1.5rem;
-  background: rgba(26, 32, 44, 0.96);
+  padding: 0 var(--space-3);
+  background: var(--navbar-bg);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border-soft);
@@ -16,16 +16,17 @@
 .leading {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
   flex-shrink: 0;
 }
 
 .sectionTitle {
   margin: 0;
-  font-family: Sora, sans-serif;
+  font-family: var(--font-display);
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--white);
+  letter-spacing: -0.01em;
 }
 
 .searchWrap {
@@ -37,7 +38,7 @@
 
 .searchIcon {
   position: absolute;
-  left: 0.875rem;
+  left: 14px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--gray-300);
@@ -47,17 +48,17 @@
 
 .search {
   width: 100%;
-  padding: 0.625rem 0.875rem 0.625rem 2.5rem;
+  padding: 10px 14px 10px 2.5rem;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
-  background: rgba(15, 20, 28, 0.6);
+  background: rgba(0, 0, 0, 0.45);
   color: var(--white);
-  font-family: Inter, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   outline: none;
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .search::placeholder {
@@ -66,14 +67,14 @@
 }
 
 .search:focus {
-  border-color: var(--border-burgundy);
-  box-shadow: 0 0 0 3px var(--hero-glow);
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 .user {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
   flex-shrink: 0;
   margin-left: auto;
 }
@@ -81,24 +82,24 @@
 .logout {
   display: inline-flex;
   align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 0.75rem;
+  gap: 6px;
+  padding: var(--space-1) 12px;
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--gray-300);
-  font-family: Inter, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.8125rem;
   cursor: pointer;
   transition:
-    color 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease;
+    color var(--transition-base),
+    border-color var(--transition-base),
+    background var(--transition-base);
 }
 
 .logout:hover {
   color: var(--white);
-  border-color: var(--border-burgundy);
+  border-color: var(--border-brand);
   background: var(--hero-glow);
 }
 
@@ -109,7 +110,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--gradient-brand);
+  background: var(--gradient-brand-diag);
   color: var(--white);
   font-size: 0.875rem;
 }
@@ -117,11 +118,11 @@
 .userMeta {
   display: flex;
   flex-direction: column;
-  gap: 0.125rem;
+  gap: 2px;
 }
 
 .userName {
-  font-family: Inter, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--white);
@@ -129,7 +130,7 @@
 }
 
 .userRole {
-  font-family: Inter, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.75rem;
   color: var(--gray-300);
   line-height: 1.2;

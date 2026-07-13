@@ -6,17 +6,15 @@
   min-width: 260px;
   height: 100vh;
   overflow: hidden;
-  padding: 0.625rem 0.875rem 1.25rem;
-  background: #2d3748;
-  background: var(--gray-800);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding: var(--space-1) 14px var(--space-3);
+  background: var(--surface-2);
   border-right: 1px solid var(--border-soft);
 }
 
 .brand {
   display: block;
   width: 100%;
-  padding: 0.25rem 0.125rem 0.75rem;
+  padding: var(--space-1) 2px var(--space-2);
 }
 
 .nav {
@@ -30,37 +28,36 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .navLink {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0.875rem;
-  border-radius: 12px;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
   text-decoration: none;
-  font-family: Inter, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--gray-300);
   transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
+    background var(--transition-base),
+    color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 .navLink:hover {
   color: var(--white);
   background: var(--hero-glow);
-  box-shadow: 0 0 18px rgba(145, 13, 13, 0.22);
+  box-shadow: 0 0 18px rgba(var(--brand-red-rgb), 0.18);
 }
 
 .navLink.active {
   color: #ffffff;
-  background: linear-gradient(135deg, #6d0a0a 0%, #910d0d 50%, #b32424 100%);
-  background: var(--gradient-brand);
-  box-shadow: 0 4px 16px rgba(145, 13, 13, 0.35);
+  background: var(--gradient-brand-diag);
+  box-shadow: var(--shadow-brand);
 }
 
 .icon {
@@ -76,24 +73,24 @@
 }
 
 .unreadBadge {
-  color: var(--accent-burgundy-light);
+  color: var(--brand-orange);
   font-weight: 700;
 }
 
 .navItemExternal {
-  margin-top: 0.5rem;
-  padding-top: 0.75rem;
+  margin-top: var(--space-1);
+  padding-top: 12px;
   border-top: 1px solid var(--border-soft);
 }
 
 .navLinkExternal {
-  border: 1px solid rgba(145, 13, 13, 0.22);
-  background: rgba(15, 20, 28, 0.35);
+  border: 1px solid rgba(var(--brand-red-rgb), 0.22);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 .navLinkExternal:hover {
-  border-color: var(--border-burgundy);
-  background: rgba(145, 13, 13, 0.12);
+  border-color: var(--border-brand);
+  background: rgba(var(--brand-red-rgb), 0.1);
 }
 
 .externalIcon {
@@ -104,7 +101,7 @@
 
 .mobileLocale {
   display: none;
-  padding-top: 0.75rem;
+  padding-top: 12px;
   margin-top: auto;
 }
 

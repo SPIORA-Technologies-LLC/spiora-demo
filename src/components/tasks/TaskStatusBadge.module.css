@@ -17,9 +17,9 @@
 }
 
 .in_progress {
-  background: rgba(145, 13, 13, 0.28);
+  background: rgba(var(--brand-red-rgb), 0.28);
   color: #fca5a5;
-  border: 1px solid rgba(145, 13, 13, 0.55);
+  border: 1px solid rgba(var(--brand-red-rgb), 0.55);
 }
 
 .completed {

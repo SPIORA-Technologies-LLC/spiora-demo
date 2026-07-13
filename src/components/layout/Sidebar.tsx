@@ -90,7 +90,7 @@ export function Sidebar({ role }: { role: UserRole }) {
         className={styles.brand}
       />
 
-      <nav className={styles.nav} aria-label={t("shell.mainNavAria")}>
+      <nav className={styles.nav} aria-label={t("mainNavAria")}>
         <ul className={styles.navList}>
           {navItems.map((item) => {
             const active = !item.external && isActive(pathname, item.href);

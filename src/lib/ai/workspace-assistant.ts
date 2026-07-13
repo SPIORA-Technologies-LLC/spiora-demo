@@ -362,17 +362,16 @@ async function prepareWorkspaceRequest(
     null;
 
   if (isDebugClientCommand(trimmed)) {
-    const debugQuery = parseDebugClientQuery(trimmed) || trimmed;
-
     if (!isWorkspaceDiagnosticsEnabled()) {
-      const matches = await lookupAllClientMatches(debugQuery);
       return {
         kind: "direct",
-        reply: formatDemoClientLookupMessage(locale, matches.length > 0),
-        sources: [translateWorkspaceSource(locale, "crm")],
+        reply: translateWorkspaceMessage(locale, "demoSafe.diagnosticsHidden"),
+        sources: [],
         demo: true,
       };
     }
+
+    const debugQuery = parseDebugClientQuery(trimmed) || trimmed;
 
     const searchQuery = buildClientSearchQuery(debugQuery);
     const [matches, rawHits] = await Promise.all([

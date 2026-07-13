@@ -1,0 +1,426 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-bottom: var(--space-4);
+}
+
+.fadeInUp {
+  animation: fadeInUp 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero {
+  position: relative;
+  padding: var(--space-4) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: linear-gradient(
+    145deg,
+    rgba(0, 0, 0, 0.95) 0%,
+    rgba(26, 26, 26, 0.88) 100%
+  );
+  overflow: hidden;
+}
+
+.heroGlow {
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 55%;
+  height: 140%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(var(--brand-orange-rgb), 0.14) 0%,
+    rgba(var(--brand-red-rgb), 0.08) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.greeting {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--gray-300);
+  letter-spacing: 0.01em;
+}
+
+.calmHeadline {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 4vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.heroLead {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.sectionTitle {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.panel {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: rgba(26, 26, 26, 0.72);
+  backdrop-filter: blur(8px);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
+}
+
+.panel:hover {
+  border-color: rgba(var(--brand-orange-rgb), 0.18);
+  box-shadow: var(--shadow-card);
+}
+
+.panelTitle {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.panelLead {
+  margin: -0.5rem 0 1.25rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.executiveSummary {
+  border-color: rgba(var(--brand-orange-rgb), 0.12);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.92) 0%,
+    rgba(17, 17, 17, 0.88) 100%
+  );
+}
+
+.summaryBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.summaryBody p {
+  margin: 0;
+}
+
+.summaryAccent {
+  color: var(--brand-orange);
+  font-weight: 500;
+}
+
+.priorityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.priorityCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  min-height: 5.5rem;
+  padding: 1.25rem 1.35rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-soft);
+  background: rgba(0, 0, 0, 0.55);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.priorityCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.priorityIcon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.priorityText {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.toneGood {
+  border-left: 3px solid #22c55e;
+}
+
+.toneAttention {
+  border-left: 3px solid var(--brand-orange);
+}
+
+.toneCritical {
+  border-left: 3px solid var(--brand-red);
+}
+
+.insightsPanel {
+  border-color: rgba(232, 41, 22, 0.15);
+}
+
+.insightsList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.insightsList li {
+  position: relative;
+  padding-left: 1.1rem;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.insightsList li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #f4981a;
+}
+
+.insightLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.insightLink:hover {
+  color: var(--brand-orange);
+}
+
+.askPanel {
+  border-color: rgba(var(--brand-orange-rgb), 0.22);
+  background: linear-gradient(
+    160deg,
+    rgba(26, 26, 26, 0.95) 0%,
+    rgba(17, 17, 17, 0.9) 100%
+  );
+}
+
+.chipGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--brand-orange-rgb), 0.28);
+  background: rgba(var(--brand-orange-rgb), 0.08);
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background var(--transition-base),
+    transform var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.chip i {
+  color: var(--brand-orange);
+  font-size: 0.85rem;
+}
+
+.chip:hover {
+  background: rgba(var(--brand-orange-rgb), 0.16);
+  border-color: rgba(var(--brand-orange-rgb), 0.45);
+  transform: translateY(-1px);
+}
+
+.healthPanel {
+  border-color: rgba(34, 197, 94, 0.15);
+}
+
+.healthHeader {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.healthHeader .panelTitle {
+  margin: 0;
+}
+
+.healthBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(34, 197, 94, 0.12);
+  border: 1px solid rgba(34, 197, 94, 0.28);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #86efac;
+}
+
+.healthDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+}
+
+.healthGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 0;
+}
+
+.healthGrid div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.healthGrid dt {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.healthGrid dd {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.activityPanel {
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+.activityList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.activityItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.activityDot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  margin-top: 0.45rem;
+  border-radius: 50%;
+  background: var(--gradient-brand-diag);
+}
+
+@media (max-width: 900px) {
+  .healthGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .priorityGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    gap: 1.5rem;
+  }
+
+  .hero,
+  .panel {
+    padding: 1.35rem 1.25rem;
+  }
+
+  .healthGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 390px) {
+  .greeting {
+    font-size: 1rem;
+  }
+
+  .chip {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .healthGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 320px) {
+  .hero,
+  .panel {
+    padding: 1.1rem 1rem;
+  }
+}

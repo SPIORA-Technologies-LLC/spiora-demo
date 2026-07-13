@@ -18,13 +18,15 @@ const NAV_CLIENTS: NavItem = {
 
 const NAV_CRM_LEADS: NavItem = {
   href: "/crm/leads",
-  label: "Новые лиды",
+  labelKey: "crmLeads",
+  labelNs: "nav",
   icon: "fa-solid fa-inbox",
 };
 
 const NAV_NEW_FORMGRID_CLIENTS: NavItem = {
   href: "/new-formgrid-clients",
-  label: "Новые клиенты из анкеты",
+  labelKey: "newFormgridClients",
+  labelNs: "nav",
   icon: "fa-solid fa-user-plus",
 };
 
@@ -65,19 +67,22 @@ const NAV_TEAM_CHAT: NavItem = {
 
 const NAV_MEETING_RECORDINGS: NavItem = {
   href: "/meeting-recordings",
-  label: "Записи встреч",
+  labelKey: "meetingRecordings",
+  labelNs: "nav",
   icon: "fa-solid fa-video",
 };
 
 const NAV_RELOCATION: NavItem = {
   href: "/relocation",
-  label: "Эмиграция",
+  labelKey: "relocation",
+  labelNs: "nav",
   icon: "fa-solid fa-plane-departure",
 };
 
 const NAV_CHECKUPS_EREVAN: NavItem = {
   href: "/checkups-erevan",
-  label: "Чекапы в Ереване",
+  labelKey: "checkupsErevan",
+  labelNs: "nav",
   icon: "fa-solid fa-stethoscope",
 };
 

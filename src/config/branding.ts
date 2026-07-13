@@ -1,17 +1,34 @@
 export type BrandingLocale = "ru" | "en";
 
+/** Official brand book palette */
+export const brandColors = {
+  black: "#000000",
+  red: "#E82916",
+  orange: "#F4981A",
+} as const;
+
 export const branding = {
   productName: "Spiora",
   productShortName: "Spiora",
+  /** Product positioning — site, presentations, metadata */
   productDescription: {
-    en: "Corporate Digital Workspace",
-    ru: "Корпоративное цифровое пространство",
+    en: "The AI Operating System for Business",
+    ru: "AI-операционная система для бизнеса",
+  },
+  productDescriptionShort: {
+    en: "AI Operating System for Business",
+    ru: "AI-операционная система для бизнеса",
+  },
+  /** Brand slogan — logo, splash, login (brand book) */
+  brandSlogan: {
+    en: "ONE PLATFORM. INFINITE SOLUTIONS.",
+    ru: "ONE PLATFORM. INFINITE SOLUTIONS.",
   },
   /** Fictional demo tenant — not the product name. */
   companyName: "Northstar Mobility",
-  logoPath: "/spiora-logo.svg",
-  iconPath: "/spiora-mark.svg",
-  faviconPath: "/spiora-mark.svg",
+  logoPath: "/logo1.svg",
+  iconPath: "/logo1.svg",
+  faviconPath: "/logo1.svg",
   supportEmail: "support@spiora.demo",
   websiteUrl: "https://spiora.demo",
   demoCompanyWebsiteUrl: "https://example.com/northstar-mobility",
@@ -21,8 +38,10 @@ export const branding = {
   aiWorkspaceDebug:
     process.env.SPIORA_AI_WORKSPACE_DEBUG?.trim().toLowerCase() === "true",
   theme: "dark" as const,
-  primaryColor: "#1a202c",
-  accentColor: "#910d0d",
+  primaryColor: brandColors.black,
+  accentColor: brandColors.red,
+  brandGradientStart: brandColors.orange,
+  brandGradientEnd: brandColors.red,
   liveKitRoomPrefix: "spiora-cal",
   openRouterAppTitle: "Spiora",
   httpUserAgent: "spiora-demo/1.0",
@@ -34,6 +53,12 @@ export function getProductDescription(
   locale: BrandingLocale = branding.defaultLocale,
 ): string {
   return branding.productDescription[locale];
+}
+
+export function getBrandSlogan(
+  locale: BrandingLocale = branding.defaultLocale,
+): string {
+  return branding.brandSlogan[locale];
 }
 
 export function getProductTagline(

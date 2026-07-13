@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
 import type { Task, TaskStatus } from "@/lib/tasks/types";
-import { TASK_STATUS_OPTIONS } from "@/lib/tasks/format";
 import { TaskAttachmentPicker } from "./TaskAttachments";
 import styles from "./TaskForm.module.css";
 
@@ -42,6 +42,7 @@ export function TaskForm({
   onSubmit,
   onCancel,
 }: TaskFormProps) {
+  const t = useTranslations("tasks");
   const [values, setValues] = useState<TaskFormValues>({
     ...DEFAULT,
     ...initial,
@@ -50,10 +51,19 @@ export function TaskForm({
   const [error, setError] = useState("");
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
+  const statusOptions = useMemo(
+    () =>
+      (["new", "in_progress"] as const).map((status) => ({
+        value: status,
+        label: t(`statuses.${status}`),
+      })),
+    [t],
+  );
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!values.title.trim()) {
-      setError("Укажите название задачи");
+      setError(t("validation.titleRequired"));
       return;
     }
     setLoading(true);
@@ -62,7 +72,7 @@ export function TaskForm({
       await onSubmit(values, pendingFiles.length ? pendingFiles : undefined);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Не удалось сохранить задачу";
+        err instanceof Error ? err.message : t("errors.saveFailed");
       setError(message);
     } finally {
       setLoading(false);
@@ -72,18 +82,18 @@ export function TaskForm({
   return (
     <form className={styles.form} onSubmit={(e) => void handleSubmit(e)}>
       <label className={styles.field}>
-        <span className={styles.label}>Название задачи *</span>
+        <span className={styles.label}>{t("form.titleLabel")}</span>
         <input
           className={styles.input}
           value={values.title}
           onChange={(e) => setValues({ ...values, title: e.target.value })}
-          placeholder="Например: Подготовить обновление по Хорватии"
+          placeholder={t("form.titlePlaceholder")}
           required
         />
       </label>
 
       <label className={styles.field}>
-        <span className={styles.label}>Описание</span>
+        <span className={styles.label}>{t("form.descriptionLabel")}</span>
         <textarea
           className={styles.textarea}
           value={values.description}
@@ -91,12 +101,12 @@ export function TaskForm({
             setValues({ ...values, description: e.target.value })
           }
           rows={4}
-          placeholder="Детали задачи…"
+          placeholder={t("form.descriptionPlaceholder")}
         />
       </label>
 
       <label className={styles.field}>
-        <span className={styles.label}>Срок выполнения</span>
+        <span className={styles.label}>{t("form.dueDateLabel")}</span>
         <input
           type="date"
           className={styles.input}
@@ -112,11 +122,8 @@ export function TaskForm({
       />
 
       <fieldset className={styles.field}>
-        <legend className={styles.label}>Исполнители</legend>
-        <p className={styles.hint}>
-          Можно выбрать одного или нескольких. Назначенные смогут менять статус
-          задачи.
-        </p>
+        <legend className={styles.label}>{t("form.assigneesLabel")}</legend>
+        <p className={styles.hint}>{t("form.assigneesHint")}</p>
         <div className={styles.assigneeList}>
           {teamMembers.map((member) => {
             const checked = values.assigneeIds.includes(member.id);
@@ -143,7 +150,7 @@ export function TaskForm({
 
       {!isEditing ? (
         <label className={styles.field}>
-          <span className={styles.label}>Статус</span>
+          <span className={styles.label}>{t("form.statusLabel")}</span>
           <select
             className={styles.select}
             value={values.status}
@@ -151,7 +158,7 @@ export function TaskForm({
               setValues({ ...values, status: e.target.value as TaskStatus })
             }
           >
-            {TASK_STATUS_OPTIONS.map((opt) => (
+            {statusOptions.map((opt) => (
               <option key={opt.value} value={opt.value}>
                 {opt.label}
               </option>
@@ -159,19 +166,17 @@ export function TaskForm({
           </select>
         </label>
       ) : (
-        <p className={styles.hint}>
-          Статус меняется через действия «В работе», «На проверку» и согласование автором.
-        </p>
+        <p className={styles.hint}>{t("form.statusEditHint")}</p>
       )}
 
       {error && <p className={styles.error}>{error}</p>}
 
       <div className={styles.actions}>
         <Button type="button" variant="secondary" onClick={onCancel}>
-          Отмена
+          {t("actions.cancel")}
         </Button>
         <Button type="submit" disabled={loading}>
-          {loading ? "…" : submitLabel}
+          {loading ? t("form.saving") : submitLabel}
         </Button>
       </div>
     </form>

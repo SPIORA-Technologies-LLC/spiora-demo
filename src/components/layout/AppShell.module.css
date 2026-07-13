@@ -7,6 +7,11 @@
   color: var(--white);
 }
 
+.sidebarWrap {
+  display: flex;
+  flex-shrink: 0;
+}
+
 .main {
   display: flex;
   flex: 1;
@@ -30,4 +35,44 @@
   flex-direction: column;
   min-height: 0;
   overflow: hidden;
+}
+
+.backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .content {
+    padding: 1rem;
+  }
+
+  .sidebarWrap {
+    position: fixed;
+    z-index: 300;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-110%);
+    transition: transform var(--transition-base);
+  }
+
+  .sidebarWrapOpen {
+    transform: translateX(0);
+  }
+
+  .backdrop {
+    display: block;
+    position: fixed;
+    z-index: 250;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    border: 0;
+    padding: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 0.75rem;
+  }
 }

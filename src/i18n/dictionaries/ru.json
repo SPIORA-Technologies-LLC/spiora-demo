@@ -197,6 +197,11 @@
     "en": "EN",
     "ru": "RU"
   },
+  "pwa": {
+    "installHint": "Установите {productName} как приложение на ноутбук — быстрый доступ с рабочего стола.",
+    "install": "Установить",
+    "dismiss": "Не сейчас"
+  },
   "dashboard": {
     "pageTitle": "Dashboard",
     "hero": {

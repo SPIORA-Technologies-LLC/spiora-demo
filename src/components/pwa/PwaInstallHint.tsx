@@ -1,6 +1,7 @@
 "use client";
 
 import { branding } from "@/config/branding";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import styles from "./PwaInstallHint.module.css";
 
@@ -10,6 +11,7 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 export function PwaInstallHint() {
+  const t = useTranslations("pwa");
   const [deferredPrompt, setDeferredPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -52,8 +54,7 @@ export function PwaInstallHint() {
   return (
     <div className={styles.banner} role="status">
       <p className={styles.text}>
-        Установите {branding.productName} как приложение на ноутбук — быстрый доступ с
-        рабочего стола.
+        {t("installHint", { productName: branding.productName })}
       </p>
       <div className={styles.actions}>
         <button
@@ -66,14 +67,14 @@ export function PwaInstallHint() {
             });
           }}
         >
-          Установить
+          {t("install")}
         </button>
         <button
           type="button"
           className={styles.dismissBtn}
           onClick={() => setDismissed(true)}
         >
-          Не сейчас
+          {t("dismiss")}
         </button>
       </div>
     </div>

@@ -197,6 +197,11 @@
     "en": "EN",
     "ru": "RU"
   },
+  "pwa": {
+    "installHint": "Install {productName} as an app on your laptop — quick access from the desktop.",
+    "install": "Install",
+    "dismiss": "Not now"
+  },
   "dashboard": {
     "pageTitle": "Dashboard",
     "hero": {

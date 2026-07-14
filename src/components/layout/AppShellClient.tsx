@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { branding } from "@/config/branding";
 import { Sidebar } from "./Sidebar";
 import { Topbar, type TopbarProps } from "./Topbar";
 import styles from "./AppShell.module.css";
@@ -13,23 +12,25 @@ export type AppShellClientProps = TopbarProps & {
   role: UserRole;
   children: ReactNode;
   contentClassName?: string;
+  autoOpenMobileNav?: boolean;
 };
 
 export function AppShellClient({
   role,
   children,
   contentClassName,
+  autoOpenMobileNav = false,
   ...topbarProps
 }: AppShellClientProps) {
   const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
-    if (!branding.demoMode) return;
+    if (!autoOpenMobileNav) return;
     const media = window.matchMedia(MOBILE_NAV_MEDIA);
     if (media.matches) {
       setNavOpen(true);
     }
-  }, []);
+  }, [autoOpenMobileNav]);
 
   useEffect(() => {
     if (!navOpen) return;

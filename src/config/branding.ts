@@ -35,7 +35,9 @@ export const branding = {
   demoCompanyWebsiteUrl: "https://example.com/northstar-mobility",
   defaultLocale: "en" as BrandingLocale,
   availableLocales: ["en", "ru"] as const satisfies readonly BrandingLocale[],
-  demoMode: process.env.SPIORA_DEMO_MODE?.trim().toLowerCase() === "true",
+  demoMode:
+    process.env.SPIORA_DEMO_MODE?.trim().toLowerCase() === "true" ||
+    process.env.NEXT_PUBLIC_SPIORA_DEMO_MODE?.trim().toLowerCase() === "true",
   aiWorkspaceDebug:
     process.env.SPIORA_AI_WORKSPACE_DEBUG?.trim().toLowerCase() === "true",
   theme: "dark" as const,

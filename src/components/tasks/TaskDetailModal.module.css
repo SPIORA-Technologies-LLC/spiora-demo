@@ -362,3 +362,71 @@
   gap: 0.5rem;
   justify-content: flex-end;
 }
+
+@media (max-width: 768px) {
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: none;
+    max-height: min(92vh, 100%);
+    padding: 1rem;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .title {
+    font-size: 1.05rem;
+  }
+
+  .meta {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
+
+  .statusActions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .statusButtons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .statusButtons > * {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .reviewActions {
+    width: 100%;
+  }
+
+  .reviewActions > * {
+    width: 100%;
+  }
+
+  .historyHead {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .meta {
+    grid-template-columns: 1fr;
+  }
+}

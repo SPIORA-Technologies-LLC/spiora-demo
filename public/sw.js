@@ -2,7 +2,7 @@ const CACHE_NAME = "spiora-pwa-v1";
 
 const PRECACHE_URLS = [
   "/manifest.json",
-  "/logo1.svg",
+  "/logo2.svg",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
   "/icons/icon-maskable-192x192.png",

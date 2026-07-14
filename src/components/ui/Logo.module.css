@@ -11,24 +11,24 @@
 }
 
 .sm {
-  max-width: 140px;
-  height: 31px;
+  max-width: 100px;
+  height: 71px;
 }
 
 .md {
-  max-width: 200px;
-  height: 44px;
+  max-width: 160px;
+  height: 113px;
 }
 
 .lg {
-  max-width: 280px;
-  height: 61px;
+  max-width: 240px;
+  height: 170px;
 }
 
 .sidebar {
   width: 100%;
-  max-width: 220px;
-  height: 48px;
+  max-width: 200px;
+  height: 141px;
 }
 
 .image {

@@ -5,7 +5,7 @@ import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const src = path.join(root, "public", "logo1.svg");
+const src = path.join(root, "public", "logo2.svg");
 const outDir = path.join(root, "public", "icons");
 
 const ICON_BG = "#000000";
@@ -92,4 +92,4 @@ for (const [size, filename, builder] of tasks) {
   console.log(`created ${filename}`);
 }
 
-console.log("PWA icons generated from public/logo1.svg");
+console.log("PWA icons generated from public/logo2.svg");

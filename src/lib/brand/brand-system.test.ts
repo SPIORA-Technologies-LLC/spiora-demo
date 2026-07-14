@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, it } from "node:test";
 import { brandColors, branding } from "@/config/branding.ts";
 
-const ROOT = path.resolve(import.meta.dirname, "..", "..");
+const ROOT = path.resolve(import.meta.dirname, "..", "..", "..");
 
 const FORBIDDEN_LEGACY_COLORS = [
   "#910d0d",
@@ -43,10 +43,10 @@ describe("PR #12.5 — Brand System", () => {
     assert.equal(brandColors.orange, "#F4981A");
   });
 
-  it("uses logo1.svg as sole logo asset", () => {
-    assert.equal(branding.logoPath, "/logo1.svg");
-    assert.ok(fs.existsSync(path.join(ROOT, "public", "logo1.svg")));
-    assert.ok(fs.existsSync(path.join(ROOT, "logo1.svg")));
+  it("uses logo2.svg as sole logo asset", () => {
+    assert.equal(branding.logoPath, "/logo2.svg");
+    assert.ok(fs.existsSync(path.join(ROOT, "public", "logo2.svg")));
+    assert.ok(fs.existsSync(path.join(ROOT, "logo2.svg")));
     assert.equal(fs.existsSync(path.join(ROOT, "public", "spiora-logo.svg")), false);
     assert.equal(fs.existsSync(path.join(ROOT, "public", "spiora-mark.svg")), false);
   });

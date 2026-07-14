@@ -5,15 +5,24 @@ import styles from "./Logo.module.css";
 
 export type LogoSize = "sm" | "md" | "lg" | "sidebar";
 
+const LOGO_ASPECT = 297 / 210;
+
+const LOGO_WIDTHS: Record<LogoSize, number> = {
+  sm: 100,
+  md: 160,
+  lg: 240,
+  sidebar: 200,
+};
+
 const LOGO_DIMENSIONS: Record<
   LogoSize,
   { width: number; height: number }
-> = {
-  sm: { width: 140, height: 31 },
-  md: { width: 200, height: 44 },
-  lg: { width: 280, height: 61 },
-  sidebar: { width: 220, height: 48 },
-};
+> = Object.fromEntries(
+  (Object.keys(LOGO_WIDTHS) as LogoSize[]).map((size) => {
+    const width = LOGO_WIDTHS[size];
+    return [size, { width, height: Math.round(width / LOGO_ASPECT) }];
+  }),
+) as Record<LogoSize, { width: number; height: number }>;
 
 export type LogoProps = {
   showText?: boolean;

@@ -79,6 +79,7 @@ export function TopbarClient({
             type="submit"
             className={styles.logout}
             title={t("nav.logout")}
+            aria-label={t("nav.logout")}
           >
             <i className="fa-solid fa-right-from-bracket" aria-hidden />
             <span className={styles.logoutLabel}>{t("nav.logout")}</span>

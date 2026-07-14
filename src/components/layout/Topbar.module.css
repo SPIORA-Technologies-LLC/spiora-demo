@@ -175,10 +175,10 @@
 
 @media (max-width: 640px) {
   .topbar {
-    gap: 10px;
+    gap: 8px;
     min-height: 60px;
     padding: 8px var(--space-2);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
   }
 
   .leading {
@@ -199,17 +199,23 @@
   }
 
   .user {
-    gap: 8px;
+    gap: 6px;
+    flex-shrink: 0;
   }
 
   .avatar {
-    width: 36px;
-    height: 36px;
-    font-size: 0.8125rem;
+    display: none;
   }
 
   .logout {
-    padding: 8px 10px;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+    justify-content: center;
+  }
+
+  .logout i {
+    font-size: 0.9375rem;
   }
 }
 
@@ -227,9 +233,5 @@
 
   .sectionTitle {
     font-size: 0.9375rem;
-  }
-
-  .avatar {
-    display: none;
   }
 }

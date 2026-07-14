@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePathname } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { Topbar, type TopbarProps } from "./Topbar";
 import styles from "./AppShell.module.css";
@@ -29,6 +30,7 @@ export function AppShellClient({
   autoOpenMobileNav = false,
   ...topbarProps
 }: AppShellClientProps) {
+  const pathname = usePathname();
   const [navOpen, setNavOpen] = useState(false);
   const [navDismissed, setNavDismissed] = useState(false);
 
@@ -38,18 +40,32 @@ export function AppShellClient({
     sessionStorage.setItem(MOBILE_NAV_INTRO_KEY, "1");
   }, []);
 
-  useLayoutEffect(() => {
+  const openMobileIntroIfNeeded = useCallback(() => {
     if (!autoOpenMobileNav) return;
-
     if (sessionStorage.getItem(MOBILE_NAV_INTRO_KEY)) {
       setNavDismissed(true);
       return;
     }
-
     if (window.matchMedia(MOBILE_NAV_MEDIA).matches) {
       setNavOpen(true);
     }
   }, [autoOpenMobileNav]);
+
+  useLayoutEffect(() => {
+    openMobileIntroIfNeeded();
+  }, [openMobileIntroIfNeeded, pathname]);
+
+  useEffect(() => {
+    if (!autoOpenMobileNav) return;
+    const media = window.matchMedia(MOBILE_NAV_MEDIA);
+    const onViewportChange = () => {
+      if (media.matches) {
+        openMobileIntroIfNeeded();
+      }
+    };
+    media.addEventListener("change", onViewportChange);
+    return () => media.removeEventListener("change", onViewportChange);
+  }, [autoOpenMobileNav, openMobileIntroIfNeeded]);
 
   useEffect(() => {
     if (!navOpen) return;

@@ -15,6 +15,7 @@ import { isUserDeleted } from "@/lib/team/store";
 
 export type SignInState = {
   error?: string;
+  redirectTo?: string;
 };
 
 export async function signInAction(
@@ -57,11 +58,12 @@ export async function signInAction(
   const sessionUser = toSessionUser(user);
   await createSession(sessionUser);
 
-  if (nextPath && canAccessPath(sessionUser.role, nextPath)) {
-    redirect(nextPath);
-  }
+  const destination =
+    nextPath && canAccessPath(sessionUser.role, nextPath)
+      ? nextPath
+      : "/dashboard";
 
-  redirect("/dashboard");
+  return { redirectTo: destination };
 }
 
 export async function signOutAction(): Promise<void> {

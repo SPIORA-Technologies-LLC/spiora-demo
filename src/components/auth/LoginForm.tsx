@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { signInAction, type SignInState } from "@/app/login/actions";
 import styles from "@/app/login/login.module.css";
@@ -16,6 +16,11 @@ type LoginFormProps = {
 export function LoginForm({ nextPath }: LoginFormProps) {
   const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState(signInAction, initialState);
+
+  useEffect(() => {
+    if (!state.redirectTo) return;
+    window.location.assign(state.redirectTo);
+  }, [state.redirectTo]);
 
   return (
     <form className={styles.form} action={formAction}>

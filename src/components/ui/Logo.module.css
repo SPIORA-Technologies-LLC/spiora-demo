@@ -32,10 +32,11 @@
 }
 
 .compact {
-  width: min(260px, 72vw);
+  width: 100%;
   max-width: 100%;
-  aspect-ratio: 226 / 26.2;
+  aspect-ratio: 232 / 27.6;
   height: auto;
+  min-height: 32px;
 }
 
 .image {
@@ -43,6 +44,10 @@
   height: 100% !important;
   object-fit: contain;
   display: block;
+}
+
+.compact .image {
+  height: auto !important;
 }
 
 .withText {

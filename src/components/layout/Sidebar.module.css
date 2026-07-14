@@ -14,6 +14,8 @@
 .brand {
   display: block;
   width: 100%;
+  flex-shrink: 0;
+  overflow: visible;
   padding: var(--space-1) 2px var(--space-2);
 }
 
@@ -27,6 +29,7 @@
 
 .nav {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -151,15 +154,28 @@
   flex-shrink: 0;
 }
 
+.brandMobileLogo {
+  display: none;
+}
+
 @media (max-width: 900px) {
   .sidebar {
     width: 100%;
     min-width: 0;
     max-width: none;
+    height: 100%;
+    min-height: 0;
     box-shadow: none;
     border-right: none;
     padding: max(12px, env(safe-area-inset-top)) 16px
       max(16px, env(safe-area-inset-bottom));
+  }
+
+  .brandMobileLogo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: min(100%, 320px);
   }
 
   .brandDesktop {
@@ -169,11 +185,16 @@
   .brandMobile {
     display: flex;
     justify-content: center;
+    align-items: center;
     width: 100%;
-    padding: 14px 28px 18px;
+    flex-shrink: 0;
+    overflow: visible;
+    padding: 18px 20px 22px;
   }
 
   .nav {
+    flex: 1;
+    min-height: 0;
     padding-top: 2px;
   }
 
@@ -194,7 +215,7 @@
   }
 
   .brandMobile {
-    padding: 12px 24px 16px;
+    padding: 16px 16px 20px;
   }
 
   .navLink {

@@ -99,7 +99,9 @@ export function Sidebar({
         href="/dashboard"
         size="compact"
         priority
-        className={[styles.brand, styles.brandMobile].join(" ")}
+        className={[styles.brand, styles.brandMobile, styles.brandMobileLogo].join(
+          " ",
+        )}
       />
 
       <nav className={styles.nav} aria-label={t("mainNavAria")}>

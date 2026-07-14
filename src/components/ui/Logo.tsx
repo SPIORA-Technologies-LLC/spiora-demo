@@ -6,14 +6,14 @@ import styles from "./Logo.module.css";
 export type LogoSize = "sm" | "md" | "lg" | "sidebar" | "compact";
 
 const LOGO_ASPECT = 297 / 210;
-const LOGO_COMPACT_ASPECT = 22600 / 2620;
+const LOGO_COMPACT_ASPECT = 23200 / 2760;
 
 const LOGO_WIDTHS: Record<LogoSize, number> = {
   sm: 100,
   md: 160,
   lg: 240,
   sidebar: 200,
-  compact: 260,
+  compact: 320,
 };
 
 const LOGO_DIMENSIONS: Record<
@@ -24,7 +24,7 @@ const LOGO_DIMENSIONS: Record<
   md: { width: 160, height: Math.round(160 / LOGO_ASPECT) },
   lg: { width: 240, height: Math.round(240 / LOGO_ASPECT) },
   sidebar: { width: 200, height: Math.round(200 / LOGO_ASPECT) },
-  compact: { width: 260, height: Math.round(260 / LOGO_COMPACT_ASPECT) },
+  compact: { width: 320, height: Math.round(320 / LOGO_COMPACT_ASPECT) },
 };
 
 export type LogoProps = {

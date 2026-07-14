@@ -1,17 +1,81 @@
-const CACHE_NAME = "spiora-pwa-v1";
+const CACHE_VERSION = "spiora-pwa-v2";
+const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
 const PRECACHE_URLS = [
   "/manifest.json",
-  "/logo2.svg",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
   "/icons/icon-maskable-192x192.png",
   "/icons/icon-maskable-512x512.png",
 ];
 
+function isNavigationRequest(request) {
+  return (
+    request.mode === "navigate" ||
+    request.headers.get("accept")?.includes("text/html")
+  );
+}
+
+function isNextAssetRequest(url) {
+  return (
+    url.pathname.startsWith("/_next/") ||
+    url.pathname.startsWith("/api/") ||
+    url.pathname === "/sw.js"
+  );
+}
+
+function isStaticAssetRequest(url) {
+  return (
+    url.pathname.startsWith("/icons/") ||
+    url.pathname.endsWith(".svg") ||
+    url.pathname.endsWith(".png") ||
+    url.pathname.endsWith(".webp") ||
+    url.pathname.endsWith(".woff2")
+  );
+}
+
+async function networkFirst(request) {
+  try {
+    const response = await fetch(request);
+    return response;
+  } catch (error) {
+    const cached = await caches.match(request);
+    if (cached) {
+      return cached;
+    }
+    throw error;
+  }
+}
+
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(STATIC_CACHE);
+  const cached = await cache.match(request);
+
+  const networkPromise = fetch(request)
+    .then((response) => {
+      if (response && response.status === 200 && response.type === "basic") {
+        cache.put(request, response.clone());
+      }
+      return response;
+    })
+    .catch(() => null);
+
+  if (cached) {
+    void networkPromise;
+    return cached;
+  }
+
+  const response = await networkPromise;
+  if (response) {
+    return response;
+  }
+
+  return new Response("Offline", { status: 503, statusText: "Offline" });
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
+    caches.open(STATIC_CACHE).then(async (cache) => {
       await Promise.all(
         PRECACHE_URLS.map(async (url) => {
           try {
@@ -31,7 +95,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => !key.startsWith(CACHE_VERSION))
           .map((key) => caches.delete(key)),
       ),
     ),
@@ -46,34 +110,16 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(event.request.url);
 
-  if (url.pathname.startsWith("/api/")) {
+  if (url.origin !== self.location.origin) {
     return;
   }
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) {
-        return cached;
-      }
+  if (isNavigationRequest(event.request) || isNextAssetRequest(url)) {
+    event.respondWith(networkFirst(event.request));
+    return;
+  }
 
-      return fetch(event.request)
-        .then((response) => {
-          if (
-            !response ||
-            response.status !== 200 ||
-            response.type !== "basic"
-          ) {
-            return response;
-          }
-
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, clone);
-          });
-
-          return response;
-        })
-        .catch(() => cached);
-    }),
-  );
+  if (isStaticAssetRequest(url)) {
+    event.respondWith(staleWhileRevalidate(event.request));
+  }
 });

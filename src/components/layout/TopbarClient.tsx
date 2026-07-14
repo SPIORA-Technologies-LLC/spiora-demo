@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl";
 import { signOutAction } from "@/app/login/actions";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
-import { clearMobileNavIntroSeen } from "@/lib/layout/mobile-nav-intro";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import styles from "./Topbar.module.css";
 
@@ -81,7 +80,6 @@ export function TopbarClient({
             className={styles.logout}
             title={t("nav.logout")}
             aria-label={t("nav.logout")}
-            onClick={clearMobileNavIntroSeen}
           >
             <i className="fa-solid fa-right-from-bracket" aria-hidden />
             <span className={styles.logoutLabel}>{t("nav.logout")}</span>

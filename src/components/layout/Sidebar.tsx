@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/login/actions";
-import { clearMobileNavIntroSeen } from "@/lib/layout/mobile-nav-intro";
 import { Logo } from "@/components/ui/Logo";
 import { getNavItemsForRole } from "@/lib/auth/permissions";
 import type { UserRole } from "@/lib/auth/types";
@@ -171,11 +170,7 @@ export function Sidebar({
 
       <div className={styles.mobileFooter}>
         <form action={signOutAction}>
-          <button
-            type="submit"
-            className={styles.logoutBtn}
-            onClick={clearMobileNavIntroSeen}
-          >
+          <button type="submit" className={styles.logoutBtn}>
             <i className="fa-solid fa-right-from-bracket" aria-hidden />
             {tNav("logout")}
           </button>

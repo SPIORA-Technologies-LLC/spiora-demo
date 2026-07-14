@@ -1,16 +1,13 @@
-export const MOBILE_NAV_INTRO_KEY = "spiora-mobile-nav-intro-seen";
+let mobileNavIntroDismissed = false;
 
-export function clearMobileNavIntroSeen(): void {
-  if (typeof window === "undefined") return;
-  sessionStorage.removeItem(MOBILE_NAV_INTRO_KEY);
+export function isMobileNavIntroDismissed(): boolean {
+  return mobileNavIntroDismissed;
 }
 
-export function markMobileNavIntroSeen(): void {
-  if (typeof window === "undefined") return;
-  sessionStorage.setItem(MOBILE_NAV_INTRO_KEY, "1");
+export function dismissMobileNavIntro(): void {
+  mobileNavIntroDismissed = true;
 }
 
-export function hasSeenMobileNavIntro(): boolean {
-  if (typeof window === "undefined") return false;
-  return sessionStorage.getItem(MOBILE_NAV_INTRO_KEY) === "1";
+export function resetMobileNavIntro(): void {
+  mobileNavIntroDismissed = false;
 }

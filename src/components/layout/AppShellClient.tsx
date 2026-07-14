@@ -7,10 +7,9 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { usePathname } from "next/navigation";
 import {
-  hasSeenMobileNavIntro,
-  markMobileNavIntroSeen,
+  dismissMobileNavIntro,
+  isMobileNavIntroDismissed,
 } from "@/lib/layout/mobile-nav-intro";
 import { Sidebar } from "./Sidebar";
 import { Topbar, type TopbarProps } from "./Topbar";
@@ -33,42 +32,41 @@ export function AppShellClient({
   autoOpenMobileNav = false,
   ...topbarProps
 }: AppShellClientProps) {
-  const pathname = usePathname();
   const [navOpen, setNavOpen] = useState(false);
   const [navDismissed, setNavDismissed] = useState(false);
 
   const dismissNav = useCallback(() => {
     setNavOpen(false);
     setNavDismissed(true);
-    markMobileNavIntroSeen();
+    dismissMobileNavIntro();
   }, []);
 
-  const openMobileIntroIfNeeded = useCallback(() => {
+  const openMobileIntro = useCallback(() => {
     if (!autoOpenMobileNav) return;
-    if (hasSeenMobileNavIntro()) {
+    if (isMobileNavIntroDismissed()) {
       setNavDismissed(true);
       return;
     }
-    if (window.matchMedia(MOBILE_NAV_MEDIA).matches) {
-      setNavOpen(true);
-    }
+    if (!window.matchMedia(MOBILE_NAV_MEDIA).matches) return;
+    setNavDismissed(false);
+    setNavOpen(true);
   }, [autoOpenMobileNav]);
 
   useLayoutEffect(() => {
-    openMobileIntroIfNeeded();
-  }, [openMobileIntroIfNeeded, pathname]);
+    openMobileIntro();
+  }, [openMobileIntro]);
 
   useEffect(() => {
     if (!autoOpenMobileNav) return;
     const media = window.matchMedia(MOBILE_NAV_MEDIA);
     const onViewportChange = () => {
       if (media.matches) {
-        openMobileIntroIfNeeded();
+        openMobileIntro();
       }
     };
     media.addEventListener("change", onViewportChange);
     return () => media.removeEventListener("change", onViewportChange);
-  }, [autoOpenMobileNav, openMobileIntroIfNeeded]);
+  }, [autoOpenMobileNav, openMobileIntro]);
 
   useEffect(() => {
     if (!navOpen) return;

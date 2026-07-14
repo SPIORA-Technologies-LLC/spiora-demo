@@ -3,7 +3,7 @@
 import { useActionState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { signInAction, type SignInState } from "@/app/login/actions";
-import { clearMobileNavIntroSeen } from "@/lib/layout/mobile-nav-intro";
+import { resetMobileNavIntro } from "@/lib/layout/mobile-nav-intro";
 import styles from "@/app/login/login.module.css";
 
 const initialState: SignInState = {};
@@ -19,12 +19,12 @@ export function LoginForm({ nextPath }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(signInAction, initialState);
 
   useEffect(() => {
-    clearMobileNavIntroSeen();
+    resetMobileNavIntro();
   }, []);
 
   useEffect(() => {
     if (!state.redirectTo) return;
-    clearMobileNavIntroSeen();
+    resetMobileNavIntro();
     window.location.assign(state.redirectTo);
   }, [state.redirectTo]);
 

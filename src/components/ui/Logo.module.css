@@ -31,6 +31,19 @@
   height: 141px;
 }
 
+.compact {
+  width: 100%;
+  max-width: 168px;
+  height: 44px;
+  overflow: hidden;
+}
+
+.compact .image {
+  height: 141px !important;
+  object-fit: cover;
+  object-position: center 41%;
+}
+
 .image {
   width: 100% !important;
   height: 100% !important;

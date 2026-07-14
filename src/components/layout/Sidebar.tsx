@@ -48,6 +48,16 @@ export function Sidebar({ role }: { role: UserRole }) {
   const t = useTranslations("shell");
   const [teamChatUnread, setTeamChatUnread] = useState(0);
 
+  const [compactLogo, setCompactLogo] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 900px)");
+    const syncLogoSize = () => setCompactLogo(media.matches);
+    syncLogoSize();
+    media.addEventListener("change", syncLogoSize);
+    return () => media.removeEventListener("change", syncLogoSize);
+  }, []);
+
   useEffect(() => {
     if (pathname === "/team-chat" || pathname.startsWith("/team-chat/")) {
       setTeamChatUnread(0);
@@ -84,7 +94,7 @@ export function Sidebar({ role }: { role: UserRole }) {
     <aside className={styles.sidebar}>
       <Logo
         href="/dashboard"
-        size="sidebar"
+        size={compactLogo ? "compact" : "sidebar"}
         priority
         className={styles.brand}
       />

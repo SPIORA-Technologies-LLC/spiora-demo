@@ -175,16 +175,61 @@
 
 @media (max-width: 640px) {
   .topbar {
-    gap: 12px;
-    padding: 0 var(--space-2);
+    gap: 10px;
+    min-height: 60px;
+    padding: 8px var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .leading {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 10px;
   }
 
   .sectionTitle {
-    font-size: 1.05rem;
+    font-size: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .searchWrap {
-    max-width: none;
-    margin: 0;
+    display: none;
+  }
+
+  .user {
+    gap: 8px;
+  }
+
+  .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 0.8125rem;
+  }
+
+  .logout {
+    padding: 8px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar {
+    min-height: 56px;
+    padding: 6px 0.75rem;
+  }
+
+  .navToggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .sectionTitle {
+    font-size: 0.9375rem;
+  }
+
+  .avatar {
+    display: none;
   }
 }

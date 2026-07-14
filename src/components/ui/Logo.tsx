@@ -3,7 +3,7 @@ import Link from "next/link";
 import { branding } from "@/config/branding";
 import styles from "./Logo.module.css";
 
-export type LogoSize = "sm" | "md" | "lg" | "sidebar";
+export type LogoSize = "sm" | "md" | "lg" | "sidebar" | "compact";
 
 const LOGO_ASPECT = 297 / 210;
 
@@ -12,17 +12,19 @@ const LOGO_WIDTHS: Record<LogoSize, number> = {
   md: 160,
   lg: 240,
   sidebar: 200,
+  compact: 168,
 };
 
 const LOGO_DIMENSIONS: Record<
   LogoSize,
   { width: number; height: number }
-> = Object.fromEntries(
-  (Object.keys(LOGO_WIDTHS) as LogoSize[]).map((size) => {
-    const width = LOGO_WIDTHS[size];
-    return [size, { width, height: Math.round(width / LOGO_ASPECT) }];
-  }),
-) as Record<LogoSize, { width: number; height: number }>;
+> = {
+  sm: { width: 100, height: Math.round(100 / LOGO_ASPECT) },
+  md: { width: 160, height: Math.round(160 / LOGO_ASPECT) },
+  lg: { width: 240, height: Math.round(240 / LOGO_ASPECT) },
+  sidebar: { width: 200, height: Math.round(200 / LOGO_ASPECT) },
+  compact: { width: 168, height: 44 },
+};
 
 export type LogoProps = {
   showText?: boolean;

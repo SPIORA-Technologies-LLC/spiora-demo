@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { branding } from "@/config/branding";
 import { Sidebar } from "./Sidebar";
 import { Topbar, type TopbarProps } from "./Topbar";
 import styles from "./AppShell.module.css";
 import type { UserRole } from "@/lib/auth/types";
+
+const MOBILE_NAV_MEDIA = "(max-width: 900px)";
 
 export type AppShellClientProps = TopbarProps & {
   role: UserRole;
@@ -19,6 +22,14 @@ export function AppShellClient({
   ...topbarProps
 }: AppShellClientProps) {
   const [navOpen, setNavOpen] = useState(false);
+
+  useEffect(() => {
+    if (!branding.demoMode) return;
+    const media = window.matchMedia(MOBILE_NAV_MEDIA);
+    if (media.matches) {
+      setNavOpen(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!navOpen) return;
@@ -40,17 +51,8 @@ export function AppShellClient({
           .join(" ")}
         aria-hidden={!navOpen ? true : undefined}
       >
-        <Sidebar role={role} />
+        <Sidebar role={role} onNavigate={() => setNavOpen(false)} />
       </div>
-
-      {navOpen ? (
-        <button
-          type="button"
-          className={styles.backdrop}
-          aria-label="Close navigation"
-          onClick={() => setNavOpen(false)}
-        />
-      ) : null}
 
       <div className={styles.main}>
         <Topbar

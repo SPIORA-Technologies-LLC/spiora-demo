@@ -40,7 +40,13 @@ function resolveNavLabel(
   return item.label ?? item.href;
 }
 
-export function Sidebar({ role }: { role: UserRole }) {
+export function Sidebar({
+  role,
+  onNavigate,
+}: {
+  role: UserRole;
+  onNavigate?: () => void;
+}) {
   const pathname = usePathname();
   const navItems = getNavItemsForRole(role);
   const tNav = useTranslations("nav");
@@ -150,6 +156,7 @@ export function Sidebar({ role }: { role: UserRole }) {
                     href={item.href}
                     className={className}
                     aria-current={active ? "page" : undefined}
+                    onClick={onNavigate}
                   >
                     {content}
                   </Link>

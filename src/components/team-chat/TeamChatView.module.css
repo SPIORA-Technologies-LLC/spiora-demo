@@ -752,16 +752,224 @@
   border-color: var(--border-burgundy);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+  .wrap {
+    gap: 0.75rem;
+  }
+
   .searchRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .search {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .viewToggleBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .messageCard {
+    padding: 0.875rem 1rem;
+    border-radius: 14px;
+  }
+
+  .messageTop {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .messageActions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.35rem;
+  }
+
+  .actionBtn {
+    flex: 1 1 auto;
+    justify-content: center;
+    min-width: 2.5rem;
+    font-size: 0;
+    padding: 0.45rem 0.55rem;
+  }
+
+  .actionIcon {
+    font-size: 0.85rem;
+  }
+
+  .deleteBtn {
+    flex: 1 1 100%;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .messageTime {
+    font-size: 0.8125rem;
+  }
+
+  .chatImage {
+    max-width: 100%;
+    max-height: 240px;
+  }
+
+  .fileLink {
+    max-width: 100%;
+  }
+
+  .voiceMessage {
     flex-direction: column;
     align-items: stretch;
   }
 
+  .voicePlayer {
+    min-width: 0;
+    width: 100%;
+  }
+
   .composer {
-    position: sticky;
-    bottom: 0;
-    z-index: 10;
-    padding-bottom: 1rem;
+    padding: 0.65rem;
+    border-radius: 14px;
+  }
+
+  .composerActions {
+    flex-wrap: wrap;
+    justify-content: stretch;
+    gap: 0.4rem;
+  }
+
+  .composerActions > :last-child {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .micBtn {
+    flex: 1 1 calc(33.333% - 0.3rem);
+    min-width: 0;
+  }
+
+  .recordingBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .recordingLabel {
+    min-width: 0;
+  }
+
+  .recordingActions {
+    width: 100%;
+    margin-left: 0;
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .recordingActions > * {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .attachmentPreview {
+    flex-wrap: wrap;
+  }
+
+  .attachmentRemove {
+    margin-left: auto;
+  }
+
+  .composerHint {
+    display: none;
+  }
+
+  .pinnedBar {
+    padding: 0.65rem;
+  }
+
+  .sharedTabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.15rem;
+    gap: 0.35rem;
+  }
+
+  .sharedTab,
+  .sharedTabActive {
+    flex-shrink: 0;
+  }
+
+  .sharedMediaGrid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .sharedItemMeta,
+  .sharedLinkMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+  }
+
+  .sharedOpenMessageBtn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-width: none;
+    max-height: min(92vh, 100%);
+    padding: 1rem;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .modalTitle {
+    font-size: 1.05rem;
+  }
+
+  .confirmActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .confirmActions > * {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .messageCard {
+    padding: 0.75rem 0.875rem;
+  }
+
+  .messageActions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .deleteBtn {
+    grid-column: 1 / -1;
+  }
+
+  .sharedMediaGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .composerInput {
+    font-size: 16px;
+  }
+
+  .search {
+    font-size: 16px;
   }
 }

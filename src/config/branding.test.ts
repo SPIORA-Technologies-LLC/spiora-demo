@@ -102,6 +102,7 @@ describe("branding config", () => {
 
   it("points assets to logo2.svg", () => {
     assert.equal(branding.logoPath, "/logo2.svg");
+    assert.equal(branding.logoCompactPath, "/logo2-compact.svg");
     assert.equal(branding.iconPath, "/logo2.svg");
     assert.equal(branding.faviconPath, "/logo2.svg");
   });

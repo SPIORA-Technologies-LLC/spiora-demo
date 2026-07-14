@@ -6,6 +6,7 @@ import styles from "./Logo.module.css";
 export type LogoSize = "sm" | "md" | "lg" | "sidebar" | "compact";
 
 const LOGO_ASPECT = 297 / 210;
+const LOGO_COMPACT_ASPECT = 22600 / 2620;
 
 const LOGO_WIDTHS: Record<LogoSize, number> = {
   sm: 100,
@@ -23,7 +24,7 @@ const LOGO_DIMENSIONS: Record<
   md: { width: 160, height: Math.round(160 / LOGO_ASPECT) },
   lg: { width: 240, height: Math.round(240 / LOGO_ASPECT) },
   sidebar: { width: 200, height: Math.round(200 / LOGO_ASPECT) },
-  compact: { width: 168, height: 44 },
+  compact: { width: 168, height: Math.round(168 / LOGO_COMPACT_ASPECT) },
 };
 
 export type LogoProps = {
@@ -44,7 +45,8 @@ export function LogoMark({
   size?: LogoSize;
 }) {
   const dims = LOGO_DIMENSIONS[size];
-  const assetPath = branding.logoPath;
+  const assetPath =
+    size === "compact" ? branding.logoCompactPath : branding.logoPath;
   const isSvg = assetPath.toLowerCase().endsWith(".svg");
 
   return (

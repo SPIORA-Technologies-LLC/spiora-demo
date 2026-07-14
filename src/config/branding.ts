@@ -27,6 +27,7 @@ export const branding = {
   /** Fictional demo tenant — not the product name. */
   companyName: "Northstar Mobility",
   logoPath: "/logo2.svg",
+  logoCompactPath: "/logo2-compact.svg",
   iconPath: "/logo2.svg",
   faviconPath: "/logo2.svg",
   supportEmail: "support@spiora.demo",

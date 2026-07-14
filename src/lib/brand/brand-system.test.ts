@@ -45,7 +45,9 @@ describe("PR #12.5 — Brand System", () => {
 
   it("uses logo2.svg as sole logo asset", () => {
     assert.equal(branding.logoPath, "/logo2.svg");
+    assert.equal(branding.logoCompactPath, "/logo2-compact.svg");
     assert.ok(fs.existsSync(path.join(ROOT, "public", "logo2.svg")));
+    assert.ok(fs.existsSync(path.join(ROOT, "public", "logo2-compact.svg")));
     assert.ok(fs.existsSync(path.join(ROOT, "logo2.svg")));
     assert.equal(fs.existsSync(path.join(ROOT, "public", "spiora-logo.svg")), false);
     assert.equal(fs.existsSync(path.join(ROOT, "public", "spiora-mark.svg")), false);

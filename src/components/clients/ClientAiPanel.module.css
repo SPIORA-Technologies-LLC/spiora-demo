@@ -130,3 +130,50 @@
   font-size: 0.875rem;
   color: var(--gray-300);
 }
+
+@media (max-width: 640px) {
+  .overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .panel {
+    max-width: none;
+    max-height: min(92vh, 100%);
+    padding: 1rem;
+    border-radius: 16px 16px 0 0;
+  }
+
+  .title {
+    font-size: 1.05rem;
+  }
+
+  .subtitle {
+    font-size: 0.8125rem;
+  }
+
+  .triggers {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .triggers > * {
+    width: 100%;
+  }
+
+  .inputRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inputRow > * {
+    width: 100%;
+  }
+
+  .preset {
+    font-size: 0.6875rem;
+    padding: 0.35rem 0.55rem;
+  }
+}

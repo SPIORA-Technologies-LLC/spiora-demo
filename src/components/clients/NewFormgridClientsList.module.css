@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-width: 0;
 }
 
 .toolbar {
@@ -100,4 +101,23 @@
   text-align: center;
   padding: 2rem !important;
   color: var(--gray-300);
+}
+
+@media (max-width: 768px) {
+  .meta {
+    flex-wrap: wrap;
+    line-height: 1.45;
+  }
+
+  .tableScroll {
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -0.25rem;
+    padding: 0 0.25rem;
+  }
+
+  .table th,
+  .table td {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.8125rem;
+  }
 }

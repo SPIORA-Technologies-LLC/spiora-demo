@@ -81,3 +81,14 @@
   font-family: Inter, sans-serif;
   font-size: 0.8125rem;
 }
+
+@media (max-width: 640px) {
+  .noteMeta {
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+  }
+
+  .note {
+    padding: 0.75rem;
+  }
+}

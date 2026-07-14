@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { AppLocale } from "@/i18n/config";
+import { translateClientStatus } from "@/i18n/statuses";
 import {
   type Client,
   type ClientsListResult,
@@ -33,6 +35,7 @@ const TABLE_COLUMNS = [
 
 export function ClientsList() {
   const router = useRouter();
+  const locale = useLocale() as AppLocale;
   const t = useTranslations("clients");
   const [clients, setClients] = useState<Client[]>([]);
   const [total, setTotal] = useState(0);
@@ -96,6 +99,70 @@ export function ClientsList() {
     },
     [router],
   );
+
+  const renderMobileCards = () => {
+    if (loading) {
+      return <p className={styles.mobileEmpty}>{t("empty.loading")}</p>;
+    }
+
+    if (clients.length === 0) {
+      return (
+        <p className={styles.mobileEmpty}>
+          {loadError ? t("errors.loadFailed") : t("empty.notFound")}
+        </p>
+      );
+    }
+
+    return (
+      <ul className={styles.mobileCards}>
+        {clients.map((client) => (
+          <li key={client.id}>
+            <article
+              className={styles.clientCard}
+              onClick={() => openClient(client.id)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  openClient(client.id);
+                }
+              }}
+              tabIndex={0}
+              role="link"
+              aria-label={t("openCardAria", { name: client.name })}
+            >
+              <div className={styles.clientCardHeader}>
+                <h3 className={styles.clientCardName}>{client.name}</h3>
+                <span className={styles.clientCardStatus}>
+                  {translateClientStatus(locale, client.status)}
+                </span>
+              </div>
+
+              <dl className={styles.clientCardMeta}>
+                <div className={styles.clientCardRow}>
+                  <dt>{t("table.passport")}</dt>
+                  <dd>{client.passportNumber ?? client.id}</dd>
+                </div>
+                <div className={styles.clientCardRow}>
+                  <dt>{t("table.email")}</dt>
+                  <dd>{client.email || "—"}</dd>
+                </div>
+                <div className={styles.clientCardRow}>
+                  <dt>{t("table.referent")}</dt>
+                  <dd>{client.referentName ?? client.manager}</dd>
+                </div>
+                {client.submittedAt ? (
+                  <div className={styles.clientCardRow}>
+                    <dt>{t("table.submittedAt")}</dt>
+                    <dd>{client.submittedAt}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </article>
+          </li>
+        ))}
+      </ul>
+    );
+  };
 
   return (
     <div className={styles.wrap}>
@@ -193,6 +260,7 @@ export function ClientsList() {
             </tbody>
           </table>
         </div>
+        <div className={styles.mobileList}>{renderMobileCards()}</div>
       </Card>
 
       {totalPages > 1 ? (

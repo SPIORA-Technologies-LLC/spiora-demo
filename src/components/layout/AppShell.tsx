@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { AppShellNotifications } from "./AppShellNotifications";
 import { AppShellClient } from "./AppShellClient";
 import type { TopbarProps } from "./Topbar";
-import { isDemoMode } from "@/lib/demo/demo-mode";
 import { getSession } from "@/lib/auth/session";
 
 export type AppShellProps = Omit<TopbarProps, "userName" | "userRole"> & {
@@ -31,7 +30,7 @@ export async function AppShell({
     <AppShellNotifications>
       <AppShellClient
         role={session.role}
-        autoOpenMobileNav={isDemoMode()}
+        autoOpenMobileNav
         sectionTitle={sectionTitle}
         userName={session?.name ?? t("userFallback")}
         userRole={

@@ -1,12 +1,19 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  type ReactNode,
+} from "react";
 import { Sidebar } from "./Sidebar";
 import { Topbar, type TopbarProps } from "./Topbar";
 import styles from "./AppShell.module.css";
 import type { UserRole } from "@/lib/auth/types";
 
 const MOBILE_NAV_MEDIA = "(max-width: 900px)";
+const MOBILE_NAV_INTRO_KEY = "spiora-mobile-nav-intro-seen";
 
 export type AppShellClientProps = TopbarProps & {
   role: UserRole;
@@ -23,11 +30,23 @@ export function AppShellClient({
   ...topbarProps
 }: AppShellClientProps) {
   const [navOpen, setNavOpen] = useState(false);
+  const [navDismissed, setNavDismissed] = useState(false);
 
-  useEffect(() => {
+  const dismissNav = useCallback(() => {
+    setNavOpen(false);
+    setNavDismissed(true);
+    sessionStorage.setItem(MOBILE_NAV_INTRO_KEY, "1");
+  }, []);
+
+  useLayoutEffect(() => {
     if (!autoOpenMobileNav) return;
-    const media = window.matchMedia(MOBILE_NAV_MEDIA);
-    if (media.matches) {
+
+    if (sessionStorage.getItem(MOBILE_NAV_INTRO_KEY)) {
+      setNavDismissed(true);
+      return;
+    }
+
+    if (window.matchMedia(MOBILE_NAV_MEDIA).matches) {
       setNavOpen(true);
     }
   }, [autoOpenMobileNav]);
@@ -41,8 +60,14 @@ export function AppShellClient({
     };
   }, [navOpen]);
 
+  const showMobileIntro = autoOpenMobileNav && !navDismissed;
+
   return (
-    <div className={styles.shell}>
+    <div
+      className={styles.shell}
+      data-mobile-nav-intro={showMobileIntro ? "" : undefined}
+      data-nav-dismissed={navDismissed ? "" : undefined}
+    >
       <div
         className={[
           styles.sidebarWrap,
@@ -50,9 +75,9 @@ export function AppShellClient({
         ]
           .filter(Boolean)
           .join(" ")}
-        aria-hidden={!navOpen ? true : undefined}
+        aria-hidden={!navOpen && navDismissed ? true : undefined}
       >
-        <Sidebar role={role} onNavigate={() => setNavOpen(false)} />
+        <Sidebar role={role} onNavigate={dismissNav} />
       </div>
 
       <div className={styles.main}>
@@ -63,7 +88,7 @@ export function AppShellClient({
         <main
           className={[styles.content, contentClassName].filter(Boolean).join(" ")}
           onClick={() => {
-            if (navOpen) setNavOpen(false);
+            if (navOpen) dismissNav();
           }}
         >
           {children}
@@ -72,4 +97,3 @@ export function AppShellClient({
     </div>
   );
 }
-

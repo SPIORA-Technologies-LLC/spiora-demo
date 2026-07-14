@@ -46,6 +46,15 @@
     padding: 1rem;
   }
 
+  .shell[data-mobile-nav-intro]:not([data-nav-dismissed]) .sidebarWrap {
+    transform: translateX(0);
+  }
+
+  .shell[data-mobile-nav-intro]:not([data-nav-dismissed]) .main {
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .sidebarWrap {
     position: fixed;
     z-index: 300;

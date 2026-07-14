@@ -8,13 +8,16 @@ import {
   type ReactNode,
 } from "react";
 import { usePathname } from "next/navigation";
+import {
+  hasSeenMobileNavIntro,
+  markMobileNavIntroSeen,
+} from "@/lib/layout/mobile-nav-intro";
 import { Sidebar } from "./Sidebar";
 import { Topbar, type TopbarProps } from "./Topbar";
 import styles from "./AppShell.module.css";
 import type { UserRole } from "@/lib/auth/types";
 
 const MOBILE_NAV_MEDIA = "(max-width: 900px)";
-const MOBILE_NAV_INTRO_KEY = "spiora-mobile-nav-intro-seen";
 
 export type AppShellClientProps = TopbarProps & {
   role: UserRole;
@@ -37,12 +40,12 @@ export function AppShellClient({
   const dismissNav = useCallback(() => {
     setNavOpen(false);
     setNavDismissed(true);
-    sessionStorage.setItem(MOBILE_NAV_INTRO_KEY, "1");
+    markMobileNavIntroSeen();
   }, []);
 
   const openMobileIntroIfNeeded = useCallback(() => {
     if (!autoOpenMobileNav) return;
-    if (sessionStorage.getItem(MOBILE_NAV_INTRO_KEY)) {
+    if (hasSeenMobileNavIntro()) {
       setNavDismissed(true);
       return;
     }

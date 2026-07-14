@@ -32,9 +32,10 @@
 }
 
 .compact {
-  width: 100%;
-  max-width: 168px;
-  height: 19px;
+  width: min(260px, 72vw);
+  max-width: 100%;
+  aspect-ratio: 226 / 26.2;
+  height: auto;
 }
 
 .image {
@@ -53,6 +54,12 @@
 }
 
 .markOnly {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.markOnlyFullWidth {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;

@@ -43,6 +43,11 @@
   box-shadow: 0 0 0 3px rgba(var(--brand-red-rgb), 0.18);
 }
 
+.navToggleHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .sectionTitle {
   margin: 0;
   font-family: var(--font-display);

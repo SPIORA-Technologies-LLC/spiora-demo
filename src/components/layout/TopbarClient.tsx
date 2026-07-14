@@ -14,6 +14,7 @@ export type TopbarClientProps = {
   defaultSearchValue?: string;
   onSearchChange?: (value: string) => void;
   onToggleNav?: () => void;
+  navOpen?: boolean;
 };
 
 export function TopbarClient({
@@ -24,6 +25,7 @@ export function TopbarClient({
   defaultSearchValue,
   onSearchChange,
   onToggleNav,
+  navOpen = false,
 }: TopbarClientProps) {
   const t = useTranslations();
 
@@ -32,8 +34,15 @@ export function TopbarClient({
       <div className={styles.leading}>
         <button
           type="button"
-          className={styles.navToggle}
+          className={[
+            styles.navToggle,
+            navOpen ? styles.navToggleHidden : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
           aria-label={t("shell.mainNavAria")}
+          aria-hidden={navOpen}
+          tabIndex={navOpen ? -1 : 0}
           onClick={onToggleNav}
         >
           <i className="fa-solid fa-bars" aria-hidden />

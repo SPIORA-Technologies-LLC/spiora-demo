@@ -100,6 +100,7 @@ export function AppShellClient({
       <div className={styles.main}>
         <Topbar
           {...topbarProps}
+          navOpen={navOpen}
           onToggleNav={() => setNavOpen((open) => !open)}
         />
         <main

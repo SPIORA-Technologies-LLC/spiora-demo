@@ -55,16 +55,6 @@ export function Sidebar({
   const t = useTranslations("shell");
   const [teamChatUnread, setTeamChatUnread] = useState(0);
 
-  const [compactLogo, setCompactLogo] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(max-width: 900px)");
-    const syncLogoSize = () => setCompactLogo(media.matches);
-    syncLogoSize();
-    media.addEventListener("change", syncLogoSize);
-    return () => media.removeEventListener("change", syncLogoSize);
-  }, []);
-
   useEffect(() => {
     if (pathname === "/team-chat" || pathname.startsWith("/team-chat/")) {
       setTeamChatUnread(0);
@@ -101,9 +91,15 @@ export function Sidebar({
     <aside className={styles.sidebar}>
       <Logo
         href="/dashboard"
-        size={compactLogo ? "compact" : "sidebar"}
+        size="sidebar"
         priority
-        className={styles.brand}
+        className={[styles.brand, styles.brandDesktop].join(" ")}
+      />
+      <Logo
+        href="/dashboard"
+        size="compact"
+        priority
+        className={[styles.brand, styles.brandMobile].join(" ")}
       />
 
       <nav className={styles.nav} aria-label={t("mainNavAria")}>
@@ -171,7 +167,10 @@ export function Sidebar({
       <div className={styles.mobileFooter}>
         <form action={signOutAction}>
           <button type="submit" className={styles.logoutBtn}>
-            <i className="fa-solid fa-right-from-bracket" aria-hidden />
+            <i
+              className={`fa-solid fa-right-from-bracket ${styles.logoutIcon}`}
+              aria-hidden
+            />
             {tNav("logout")}
           </button>
         </form>

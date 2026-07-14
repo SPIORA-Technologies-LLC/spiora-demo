@@ -13,7 +13,7 @@ const LOGO_WIDTHS: Record<LogoSize, number> = {
   md: 160,
   lg: 240,
   sidebar: 200,
-  compact: 168,
+  compact: 260,
 };
 
 const LOGO_DIMENSIONS: Record<
@@ -24,7 +24,7 @@ const LOGO_DIMENSIONS: Record<
   md: { width: 160, height: Math.round(160 / LOGO_ASPECT) },
   lg: { width: 240, height: Math.round(240 / LOGO_ASPECT) },
   sidebar: { width: 200, height: Math.round(200 / LOGO_ASPECT) },
-  compact: { width: 168, height: Math.round(168 / LOGO_COMPACT_ASPECT) },
+  compact: { width: 260, height: Math.round(260 / LOGO_COMPACT_ASPECT) },
 };
 
 export type LogoProps = {
@@ -52,7 +52,11 @@ export function LogoMark({
   return (
     <span
       className={[styles.frame, styles[size], className].filter(Boolean).join(" ")}
-      style={{ width: dims.width, height: dims.height }}
+      style={
+        size === "compact"
+          ? undefined
+          : { width: dims.width, height: dims.height }
+      }
       aria-hidden={false}
     >
       {isSvg ? (
@@ -99,6 +103,7 @@ export function Logo({
 
   const rootClass = [
     showText ? styles.withText : styles.markOnly,
+    size === "sidebar" ? styles.markOnlyFullWidth : "",
     className,
   ]
     .filter(Boolean)

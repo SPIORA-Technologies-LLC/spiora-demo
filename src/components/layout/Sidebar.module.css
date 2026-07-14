@@ -17,6 +17,14 @@
   padding: var(--space-1) 2px var(--space-2);
 }
 
+.brandDesktop {
+  display: block;
+}
+
+.brandMobile {
+  display: none;
+}
+
 .nav {
   flex: 1;
   overflow-y: auto;
@@ -109,33 +117,38 @@
   display: none;
   flex-shrink: 0;
   margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--border-soft);
+  padding-top: 8px;
 }
 
 .logoutBtn {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(var(--brand-red-rgb), 0.35);
-  background: rgba(var(--brand-red-rgb), 0.1);
-  color: var(--white);
+  border: none;
+  background: transparent;
+  color: var(--gray-400);
   font-family: var(--font-body);
   font-size: 0.9375rem;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   transition:
     background var(--transition-base),
-    border-color var(--transition-base);
+    color var(--transition-base);
 }
 
 .logoutBtn:hover {
-  border-color: var(--border-brand);
-  background: rgba(var(--brand-red-rgb), 0.18);
+  color: var(--gray-200);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.logoutIcon {
+  width: 1.125rem;
+  text-align: center;
+  font-size: 0.9375rem;
+  flex-shrink: 0;
 }
 
 @media (max-width: 900px) {
@@ -149,8 +162,15 @@
       max(16px, env(safe-area-inset-bottom));
   }
 
-  .brand {
-    padding: 10px 2px 16px;
+  .brandDesktop {
+    display: none;
+  }
+
+  .brandMobile {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 14px 28px 18px;
   }
 
   .nav {
@@ -173,8 +193,8 @@
       max(14px, env(safe-area-inset-bottom));
   }
 
-  .brand {
-    padding: 8px 2px 14px;
+  .brandMobile {
+    padding: 12px 24px 16px;
   }
 
   .navLink {

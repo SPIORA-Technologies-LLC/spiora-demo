@@ -102,3 +102,26 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+@media (max-width: 640px) {
+  .chip {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+    padding: 0.75rem 0.85rem 0.75rem 1rem;
+  }
+
+  .time {
+    min-width: 0;
+    font-size: 0.75rem;
+  }
+
+  .title {
+    font-size: 0.9rem;
+  }
+
+  .accent {
+    top: 0.75rem;
+    right: 0.75rem;
+  }
+}

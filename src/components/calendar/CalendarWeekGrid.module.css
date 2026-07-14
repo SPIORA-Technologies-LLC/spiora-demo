@@ -215,5 +215,26 @@
 @media (max-width: 900px) {
   .scrollBody {
     padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .wrap {
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header,
+  .allDayRow,
+  .grid {
+    gap: 0.25rem;
+  }
+
+  .weekdayLabel {
+    font-size: 0.625rem;
+  }
+
+  .dayNumber {
+    font-size: 0.875rem;
   }
 }

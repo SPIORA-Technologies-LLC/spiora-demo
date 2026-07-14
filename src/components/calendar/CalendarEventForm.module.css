@@ -288,4 +288,13 @@
   .dateTimeGrid {
     grid-template-columns: 1fr;
   }
+
+  .actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .actions > * {
+    width: 100%;
+  }
 }

@@ -5,26 +5,26 @@ import styles from "./Logo.module.css";
 
 export type LogoSize = "sm" | "md" | "lg" | "sidebar" | "compact";
 
-const LOGO_ASPECT = 297 / 210;
-const LOGO_COMPACT_ASPECT = 23200 / 2760;
+const LOGO_ASPECT = 600 / 130;
+const LOGO_COMPACT_ASPECT = 600 / 82;
 
 const LOGO_WIDTHS: Record<LogoSize, number> = {
-  sm: 100,
-  md: 160,
-  lg: 240,
-  sidebar: 200,
-  compact: 190,
+  sm: 120,
+  md: 180,
+  lg: 260,
+  sidebar: 220,
+  compact: 172,
 };
 
 const LOGO_DIMENSIONS: Record<
   LogoSize,
   { width: number; height: number }
 > = {
-  sm: { width: 100, height: Math.round(100 / LOGO_ASPECT) },
-  md: { width: 160, height: Math.round(160 / LOGO_ASPECT) },
-  lg: { width: 240, height: Math.round(240 / LOGO_ASPECT) },
-  sidebar: { width: 200, height: Math.round(200 / LOGO_ASPECT) },
-  compact: { width: 190, height: Math.round(190 / LOGO_COMPACT_ASPECT) },
+  sm: { width: 120, height: Math.round(120 / LOGO_ASPECT) },
+  md: { width: 180, height: Math.round(180 / LOGO_ASPECT) },
+  lg: { width: 260, height: Math.round(260 / LOGO_ASPECT) },
+  sidebar: { width: 220, height: Math.round(220 / LOGO_ASPECT) },
+  compact: { width: 172, height: Math.round(172 / LOGO_COMPACT_ASPECT) },
 };
 
 export type LogoProps = {
@@ -52,11 +52,7 @@ export function LogoMark({
   return (
     <span
       className={[styles.frame, styles[size], className].filter(Boolean).join(" ")}
-      style={
-        size === "compact"
-          ? undefined
-          : { width: dims.width, height: dims.height }
-      }
+      style={isSvg ? { width: dims.width, height: dims.height } : undefined}
       aria-hidden={false}
     >
       {isSvg ? (

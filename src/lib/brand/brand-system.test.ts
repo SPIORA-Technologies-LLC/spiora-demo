@@ -43,12 +43,12 @@ describe("PR #12.5 — Brand System", () => {
     assert.equal(brandColors.orange, "#F4981A");
   });
 
-  it("uses logo2.svg as sole logo asset", () => {
-    assert.equal(branding.logoPath, "/logo2.svg");
-    assert.equal(branding.logoCompactPath, "/logo2-compact.svg");
-    assert.ok(fs.existsSync(path.join(ROOT, "public", "logo2.svg")));
-    assert.ok(fs.existsSync(path.join(ROOT, "public", "logo2-compact.svg")));
-    assert.ok(fs.existsSync(path.join(ROOT, "logo2.svg")));
+  it("uses logo3.png as sole logo asset", () => {
+    assert.equal(branding.logoPath, "/logo3.png");
+    assert.equal(branding.logoCompactPath, "/logo3-compact.png");
+    assert.ok(fs.existsSync(path.join(ROOT, "public", "logo3.png")));
+    assert.ok(fs.existsSync(path.join(ROOT, "public", "logo3-compact.png")));
+    assert.ok(fs.existsSync(path.join(ROOT, "logo3.png")));
     assert.equal(fs.existsSync(path.join(ROOT, "public", "spiora-logo.svg")), false);
     assert.equal(fs.existsSync(path.join(ROOT, "public", "spiora-mark.svg")), false);
   });

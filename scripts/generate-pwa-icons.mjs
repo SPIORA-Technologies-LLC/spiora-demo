@@ -5,14 +5,14 @@ import sharp from "sharp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const src = path.join(root, "public", "logo2.svg");
+const src = path.join(root, "public", "logo3-compact.png");
 const outDir = path.join(root, "public", "icons");
 
 const ICON_BG = "#000000";
 const CORNER_RADIUS_RATIO = 0.18;
 
 async function loadTrimmedLogo() {
-  return sharp(src).trim({ threshold: 12 }).png().toBuffer();
+  return sharp(src).png().toBuffer();
 }
 
 function roundedRectMask(size) {
@@ -92,4 +92,4 @@ for (const [size, filename, builder] of tasks) {
   console.log(`created ${filename}`);
 }
 
-console.log("PWA icons generated from public/logo2.svg");
+console.log("PWA icons generated from public/logo3-compact.png");

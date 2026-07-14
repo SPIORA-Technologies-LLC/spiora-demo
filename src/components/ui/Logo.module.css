@@ -11,30 +11,34 @@
 }
 
 .sm {
-  max-width: 100px;
-  height: 71px;
+  width: min(120px, 100%);
+  aspect-ratio: 600 / 130;
+  height: auto;
 }
 
 .md {
-  max-width: 160px;
-  height: 113px;
+  width: min(180px, 100%);
+  aspect-ratio: 600 / 130;
+  height: auto;
 }
 
 .lg {
-  max-width: 240px;
-  height: 170px;
+  width: min(260px, 100%);
+  aspect-ratio: 600 / 130;
+  height: auto;
 }
 
 .sidebar {
   width: 100%;
-  max-width: 200px;
-  height: 141px;
+  max-width: 220px;
+  aspect-ratio: 600 / 130;
+  height: auto;
 }
 
 .compact {
-  width: min(190px, 100%);
-  max-width: calc(100vw - 72px);
-  aspect-ratio: 232 / 27.6;
+  width: min(172px, calc(100vw - 72px));
+  max-width: 100%;
+  aspect-ratio: 600 / 82;
   height: auto;
 }
 
@@ -45,7 +49,11 @@
   display: block;
 }
 
-.compact .image {
+.compact .image,
+.sm .image,
+.md .image,
+.lg .image,
+.sidebar .image {
   height: auto !important;
 }
 

@@ -13,7 +13,7 @@ const LOGO_WIDTHS: Record<LogoSize, number> = {
   md: 160,
   lg: 240,
   sidebar: 200,
-  compact: 320,
+  compact: 190,
 };
 
 const LOGO_DIMENSIONS: Record<
@@ -24,7 +24,7 @@ const LOGO_DIMENSIONS: Record<
   md: { width: 160, height: Math.round(160 / LOGO_ASPECT) },
   lg: { width: 240, height: Math.round(240 / LOGO_ASPECT) },
   sidebar: { width: 200, height: Math.round(200 / LOGO_ASPECT) },
-  compact: { width: 320, height: Math.round(320 / LOGO_COMPACT_ASPECT) },
+  compact: { width: 190, height: Math.round(190 / LOGO_COMPACT_ASPECT) },
 };
 
 export type LogoProps = {
@@ -104,6 +104,7 @@ export function Logo({
   const rootClass = [
     showText ? styles.withText : styles.markOnly,
     size === "sidebar" ? styles.markOnlyFullWidth : "",
+    size === "compact" ? styles.markOnlyCompact : "",
     className,
   ]
     .filter(Boolean)

@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  min-width: 0;
 }
 
 .split {
@@ -13,5 +14,12 @@
 @media (max-width: 960px) {
   .split {
     grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    gap: 1rem;
   }
 }

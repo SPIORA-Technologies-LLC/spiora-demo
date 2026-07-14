@@ -117,3 +117,30 @@
   border: 1px dashed var(--border-soft);
   border-radius: 10px;
 }
+
+@media (max-width: 768px) {
+  .grid {
+    gap: 0.35rem;
+    padding-bottom: 0.15rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .group {
+    min-width: 48px;
+  }
+
+  .barCol {
+    width: 14px;
+  }
+
+  .label {
+    font-size: 0.625rem;
+    max-width: 3.5rem;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  .legendItem {
+    font-size: 0.6875rem;
+  }
+}

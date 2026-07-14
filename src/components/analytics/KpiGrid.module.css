@@ -64,6 +64,20 @@
   }
 }
 
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .card {
+    padding: 0.75rem 0.875rem;
+  }
+
+  .value {
+    font-size: 1.125rem;
+  }
+}
+
 @media (max-width: 560px) {
   .grid {
     grid-template-columns: 1fr !important;

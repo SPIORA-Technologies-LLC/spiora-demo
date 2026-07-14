@@ -95,3 +95,25 @@
   border: 1px dashed var(--border-soft);
   border-radius: 10px;
 }
+
+@media (max-width: 768px) {
+  .grid {
+    gap: 0.35rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .column {
+    min-width: 40px;
+    max-width: 64px;
+  }
+
+  .label {
+    font-size: 0.625rem;
+    white-space: normal;
+    line-height: 1.2;
+  }
+
+  .value {
+    font-size: 0.625rem;
+  }
+}

@@ -32,32 +32,59 @@ export function AnalyticsTable<T>({
   }
 
   return (
-    <div className={styles.wrap}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            {columns.map((col) => (
-              <th key={col.key} className={styles[`align_${col.align ?? "left"}`]}>
-                {col.header}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={getRowKey(row)}>
+    <>
+      <div className={styles.wrap}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
               {columns.map((col) => (
-                <td
+                <th
                   key={col.key}
                   className={styles[`align_${col.align ?? "left"}`]}
                 >
-                  {col.render(row)}
-                </td>
+                  {col.header}
+                </th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={getRowKey(row)}>
+                {columns.map((col) => (
+                  <td
+                    key={col.key}
+                    className={styles[`align_${col.align ?? "left"}`]}
+                  >
+                    {col.render(row)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <ul className={styles.mobileCards}>
+        {rows.map((row) => (
+          <li key={getRowKey(row)} className={styles.mobileCard}>
+            {columns.map((col) => (
+              <div key={col.key} className={styles.mobileRow}>
+                <span className={styles.mobileLabel}>{col.header}</span>
+                <span
+                  className={[
+                    styles.mobileValue,
+                    styles[`align_${col.align ?? "left"}`],
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {col.render(row)}
+                </span>
+              </div>
+            ))}
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { MouseEventHandler } from "react";
 import { branding } from "@/config/branding";
 import styles from "./Logo.module.css";
 
@@ -33,6 +34,7 @@ export type LogoProps = {
   priority?: boolean;
   className?: string;
   size?: LogoSize;
+  onNavigate?: MouseEventHandler<HTMLAnchorElement>;
 };
 
 export function LogoMark({
@@ -85,6 +87,7 @@ export function Logo({
   priority = false,
   className,
   size = "md",
+  onNavigate,
 }: LogoProps) {
   const mark = <LogoMark priority={priority} size={size} />;
 
@@ -108,7 +111,7 @@ export function Logo({
 
   if (href) {
     return (
-      <Link href={href} className={rootClass}>
+      <Link href={href} className={rootClass} onClick={onNavigate}>
         {content}
       </Link>
     );

@@ -22,6 +22,22 @@
   overflow: hidden;
 }
 
+@media (max-width: 900px) {
+  .main {
+    transition:
+      opacity var(--transition-slow),
+      transform var(--transition-slow);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @media (max-width: 900px) {
+    .main {
+      transition: none;
+    }
+  }
+}
+
 .content {
   flex: 1;
   min-height: 0;
@@ -45,6 +61,7 @@
 @media (max-width: 900px) {
   .content {
     padding: 1rem;
+    transition: opacity var(--transition-slow);
   }
 
   .shell[data-mobile-nav-intro]:not([data-nav-dismissed]) .sidebarWrap {
@@ -52,8 +69,33 @@
   }
 
   .shell[data-mobile-nav-intro]:not([data-nav-dismissed]) .main {
+    opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    transform: translateX(12px);
+  }
+
+  .shell[data-nav-dismissed] .main,
+  .shell:not([data-mobile-nav-intro]) .main {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+  .shell[data-nav-enter] .main {
+    animation: mobileMainEnter 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  @keyframes mobileMainEnter {
+    from {
+      opacity: 0;
+      transform: translateX(14px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 
   .sidebarWrap {
@@ -66,7 +108,8 @@
     height: 100vh;
     height: 100dvh;
     transform: translateX(-110%);
-    transition: transform var(--transition-base);
+    transition: transform var(--transition-slow);
+    will-change: transform;
   }
 
   .sidebarWrapOpen {
@@ -75,6 +118,19 @@
 
   .backdrop {
     display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @media (max-width: 900px) {
+    .sidebarWrap {
+      transition: none;
+      will-change: auto;
+    }
+
+    .shell[data-nav-enter] .main {
+      animation: none;
+    }
   }
 }
 

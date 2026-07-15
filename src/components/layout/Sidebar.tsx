@@ -43,10 +43,10 @@ function resolveNavLabel(
 
 export function Sidebar({
   role,
-  onNavigate,
+  onNavItemClick,
 }: {
   role: UserRole;
-  onNavigate?: () => void;
+  onNavItemClick?: (href: string) => void;
 }) {
   const pathname = usePathname();
   const navItems = getNavItemsForRole(role);
@@ -87,6 +87,22 @@ export function Sidebar({
     };
   }, [pathname]);
 
+  const handleInternalNavClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    if (
+      !onNavItemClick ||
+      typeof window === "undefined" ||
+      !window.matchMedia("(max-width: 900px)").matches
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    onNavItemClick(href);
+  };
+
   return (
     <aside className={styles.sidebar}>
       <Logo
@@ -94,6 +110,11 @@ export function Sidebar({
         size="sidebar"
         priority
         className={[styles.brand, styles.brandDesktop].join(" ")}
+        onNavigate={
+          onNavItemClick
+            ? (event) => handleInternalNavClick(event, "/dashboard")
+            : undefined
+        }
       />
       <Logo
         href="/dashboard"
@@ -102,6 +123,11 @@ export function Sidebar({
         className={[styles.brand, styles.brandMobile, styles.brandMobileLogo].join(
           " ",
         )}
+        onNavigate={
+          onNavItemClick
+            ? (event) => handleInternalNavClick(event, "/dashboard")
+            : undefined
+        }
       />
 
       <nav className={styles.nav} aria-label={t("mainNavAria")}>
@@ -155,7 +181,7 @@ export function Sidebar({
                     href={item.href}
                     className={className}
                     aria-current={active ? "page" : undefined}
-                    onClick={onNavigate}
+                    onClick={(event) => handleInternalNavClick(event, item.href)}
                   >
                     {content}
                   </Link>

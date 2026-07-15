@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { SessionUser } from "@/lib/auth/types";
+import type { CompanyHealthMetrics } from "@/lib/dashboard/company-health";
 import {
   AI_INSIGHTS,
-  COMPANY_HEALTH,
   PRIORITY_CARDS,
   TEAM_ACTIVITY,
 } from "@/lib/dashboard/first-impression-seed";
@@ -12,6 +12,7 @@ import styles from "./FirstImpressionView.module.css";
 
 type FirstImpressionViewProps = {
   user: SessionUser;
+  health: CompanyHealthMetrics;
 };
 
 function toneClass(tone: "good" | "attention" | "critical"): string {
@@ -26,7 +27,7 @@ function toneIcon(tone: "good" | "attention" | "critical"): string {
   return "🔴";
 }
 
-export async function FirstImpressionView({ user }: FirstImpressionViewProps) {
+export async function FirstImpressionView({ user, health }: FirstImpressionViewProps) {
   const t = await getTranslations("commandCenter");
   const firstName = user.name.trim().split(/\s+/)[0] ?? user.name;
 
@@ -119,31 +120,34 @@ export async function FirstImpressionView({ user }: FirstImpressionViewProps) {
           </h2>
           <span className={styles.healthBadge}>
             <span className={styles.healthDot} aria-hidden />
-            {t(`companyHealth.status.${COMPANY_HEALTH.statusKey}`)}
+            {t(`companyHealth.status.${health.statusKey}`)}
           </span>
         </div>
         <dl className={styles.healthGrid}>
           <div>
             <dt>{t("companyHealth.clients")}</dt>
-            <dd>{COMPANY_HEALTH.clients.toLocaleString("en-US")}</dd>
+            <dd>{health.clients.toLocaleString("en-US")}</dd>
           </div>
           <div>
             <dt>{t("companyHealth.documents")}</dt>
-            <dd>{COMPANY_HEALTH.documents.toLocaleString("en-US")}</dd>
+            <dd>{health.documents.toLocaleString("en-US")}</dd>
           </div>
           <div>
             <dt>{t("companyHealth.meetings")}</dt>
-            <dd>{COMPANY_HEALTH.meetings}</dd>
+            <dd>{health.meetings}</dd>
           </div>
           <div>
             <dt>{t("companyHealth.tasksCompleted")}</dt>
-            <dd>{COMPANY_HEALTH.tasksCompletedPercent}%</dd>
+            <dd>{health.tasksCompletedPercent}%</dd>
           </div>
           <div>
             <dt>{t("companyHealth.aiConversations")}</dt>
-            <dd>{COMPANY_HEALTH.aiConversations}</dd>
+            <dd>{health.aiConversations}</dd>
           </div>
         </dl>
+        {health.statusKey === "empty" ? (
+          <p className={styles.summaryAccent}>{t("companyHealth.emptyState")}</p>
+        ) : null}
       </section>
 
       <section

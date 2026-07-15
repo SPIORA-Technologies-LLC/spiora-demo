@@ -295,8 +295,11 @@
     "companyHealth": {
       "title": "Company Health",
       "status": {
-        "excellent": "Excellent"
+        "excellent": "Excellent",
+        "stable": "Stable",
+        "empty": "No data yet"
       },
+      "emptyState": "KPI loaded from PostgreSQL. Add clients, tasks, or calendar events to populate metrics.",
       "clients": "Clients",
       "documents": "Documents",
       "meetings": "Meetings",

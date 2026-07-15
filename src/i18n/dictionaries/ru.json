@@ -295,8 +295,11 @@
     "companyHealth": {
       "title": "Здоровье компании",
       "status": {
-        "excellent": "Отлично"
+        "excellent": "Отлично",
+        "stable": "Стабильно",
+        "empty": "Нет данных"
       },
+      "emptyState": "KPI загружены из PostgreSQL. Добавьте клиентов, задачи или события календаря.",
       "clients": "Клиенты",
       "documents": "Документы",
       "meetings": "Встречи",

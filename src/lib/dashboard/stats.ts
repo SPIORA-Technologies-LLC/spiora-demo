@@ -4,7 +4,7 @@ import { isClientStatus } from "@/i18n/statuses";
 import { parseFlexibleDate } from "@/lib/analytics/dates";
 import { countFormgridRowsSince } from "@/lib/google-sheets/formgrid-dates";
 import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
-import { listAllClients } from "@/lib/google-sheets/service";
+import { listAllClients } from "@/lib/clients/store";
 import {
   AI_REQUEST_STATS_DAYS,
   countAiUserMessagesLastDaysForDashboard,

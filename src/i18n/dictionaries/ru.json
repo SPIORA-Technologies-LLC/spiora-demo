@@ -1273,6 +1273,110 @@
       "saveFailed": "Не удалось сохранить изменения."
     }
   },
+  "teamMembers": {
+    "olivia-bennett": "Оливия Беннетт",
+    "daniel-cooper": "Даниэл Купер",
+    "emma-wilson": "Эмма Уилсон",
+    "lucas-martin": "Лукас Мартин"
+  },
+  "relocationPage": {
+    "title": "Эмиграция",
+    "headerSubtitle": "Хорватия, Европа: анкеты, данные, сайт Emigrant-SK и Telegram",
+    "sections": {
+      "croatia": {
+        "title": "Демо-хаб по эмиграции",
+        "subtitle": "Примеры ресурсов для демонстраций {company}"
+      },
+      "emigrant-eu": {
+        "title": "Демо внешние ссылки",
+        "subtitle": "Заглушки сайта и канала для демонстраций"
+      }
+    },
+    "resources": {
+      "croatia-clients-sheet": {
+        "title": "Демо-таблица клиентов",
+        "description": "Ссылка-заглушка на региональную таблицу клиентов в demo-режиме.",
+        "country": "Демо-регион",
+        "audience": "Демо-данные",
+        "actionLabel": "Открыть demo-таблицу"
+      },
+      "croatia-digital-nomad-form": {
+        "title": "Демо-анкета",
+        "description": "Пример ссылки на клиентскую анкету для демонстраций.",
+        "country": "Демо-регион",
+        "audience": "Для клиентов",
+        "actionLabel": "Открыть demo-анкету"
+      },
+      "croatia-formgrid-results": {
+        "title": "Демо-результаты форм",
+        "description": "Заглушка админ-представления отправленных demo-форм.",
+        "country": "Демо-регион",
+        "audience": "Админы",
+        "actionLabel": "Открыть demo-результаты"
+      },
+      "croatia-emigrant-app": {
+        "title": "Демо-приложение desk",
+        "description": "Заглушка внутреннего приложения для ведения кейсов.",
+        "country": "Демо-регион",
+        "audience": "Для команды",
+        "actionLabel": "Открыть demo-приложение"
+      },
+      "croatia-formgrid-sheet": {
+        "title": "Демо-таблица ответов",
+        "description": "Заглушка таблицы ответов demo-форм.",
+        "country": "Демо-регион",
+        "audience": "Данные форм",
+        "actionLabel": "Открыть demo-таблицу"
+      },
+      "emigrant-sk-website": {
+        "title": "Демо публичный сайт",
+        "description": "Заглушка маркетингового сайта программ релокации.",
+        "country": "Европа",
+        "audience": "Публичный",
+        "actionLabel": "Открыть demo-сайт"
+      },
+      "emigrant-telegram": {
+        "title": "Демо-канал Telegram",
+        "description": "Заглушка ссылки на соцканал для демонстраций.",
+        "country": "Европа",
+        "audience": "Демо-канал",
+        "actionLabel": "Открыть demo-ссылку"
+      }
+    }
+  },
+  "checkupsPage": {
+    "title": "Чекапы в Ереване",
+    "headerSubtitle": "Сайт с информацией о чекапах, документы команды и приложение «Формула Здоровья»",
+    "sections": {
+      "yerevan": {
+        "title": "Демо-хаб чекапов",
+        "subtitle": "Примеры ссылок для демонстраций wellness-программ"
+      }
+    },
+    "resources": {
+      "yerevan-checkups-site": {
+        "title": "Демо-обзор чекапов",
+        "description": "Заглушка презентационной страницы корпоративных wellness-программ.",
+        "location": "Демо-город",
+        "audience": "Для клиентов",
+        "actionLabel": "Открыть demo-сайт"
+      },
+      "yerevan-checkups-docs": {
+        "title": "Демо-документы по чекапам",
+        "description": "Заглушка папки с примерами прайсов и описаний программ.",
+        "location": "Демо-город",
+        "audience": "Для команды",
+        "actionLabel": "Открыть demo-папку"
+      },
+      "formula-health-app": {
+        "title": "Демо-приложение партнёра",
+        "description": "Заглушка страницы входа в wellness-приложение стороннего партнёра.",
+        "location": "Демо-город",
+        "audience": "Демо-портал",
+        "actionLabel": "Открыть demo-приложение"
+      }
+    }
+  },
   "settings": {
     "title": "Настройки",
     "subtitle": "Управление доступом команды",
@@ -1594,10 +1698,10 @@
       "reporting": "Отчётность"
     },
     "authors": {
-      "olivia-bennett": "Olivia Bennett",
-      "daniel-cooper": "Daniel Cooper",
-      "emma-wilson": "Emma Wilson",
-      "lucas-martin": "Lucas Martin"
+      "olivia-bennett": "Оливия Беннетт",
+      "daniel-cooper": "Даниэл Купер",
+      "emma-wilson": "Эмма Уилсон",
+      "lucas-martin": "Лукас Мартин"
     },
     "articles": {
       "client-onboarding-checklist": {

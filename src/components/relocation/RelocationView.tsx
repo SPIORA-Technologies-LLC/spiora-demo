@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+import { branding } from "@/config/branding";
 import {
   RELOCATION_SECTIONS,
   type RelocationResource,
@@ -5,7 +9,15 @@ import {
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import styles from "./RelocationView.module.css";
 
-function ResourceCard({ resource }: { resource: RelocationResource }) {
+function ResourceCard({
+  resource,
+  t,
+}: {
+  resource: RelocationResource;
+  t: ReturnType<typeof useTranslations<"relocationPage">>;
+}) {
+  const prefix = `resources.${resource.id}` as const;
+
   return (
     <li className={styles.gridItem}>
       <article
@@ -25,20 +37,22 @@ function ResourceCard({ resource }: { resource: RelocationResource }) {
             <i className={resource.icon} />
           </span>
           <div className={styles.badges}>
-            <span className={styles.badgeCountry}>{resource.country}</span>
+            <span className={styles.badgeCountry}>
+              {t(`${prefix}.country`)}
+            </span>
             <span
               className={[
                 styles.badgeAudience,
                 styles[`badge_${resource.type}`],
               ].join(" ")}
             >
-              {resource.audience}
+              {t(`${prefix}.audience`)}
             </span>
           </div>
         </div>
 
-        <h3 className={styles.cardTitle}>{resource.title}</h3>
-        <p className={styles.cardDesc}>{resource.description}</p>
+        <h3 className={styles.cardTitle}>{t(`${prefix}.title`)}</h3>
+        <p className={styles.cardDesc}>{t(`${prefix}.description`)}</p>
 
         <div className={styles.actions}>
           <a
@@ -51,7 +65,7 @@ function ResourceCard({ resource }: { resource: RelocationResource }) {
             ].join(" ")}
             title={resource.url}
           >
-            {resource.actionLabel}
+            {t(`${prefix}.actionLabel`)}
             <i
               className="fa-solid fa-arrow-up-right-from-square"
               aria-hidden
@@ -64,12 +78,11 @@ function ResourceCard({ resource }: { resource: RelocationResource }) {
 }
 
 export function RelocationView() {
+  const t = useTranslations("relocationPage");
+
   return (
     <div className={styles.page}>
-      <SectionHeader
-        title="Эмиграция"
-        subtitle="Хорватия, Европа: анкеты, данные, сайт Emigrant-SK и Telegram"
-      />
+      <SectionHeader title={t("title")} subtitle={t("headerSubtitle")} />
 
       {RELOCATION_SECTIONS.map((section) => (
         <section
@@ -79,15 +92,17 @@ export function RelocationView() {
         >
           <div className={styles.sectionHead}>
             <h2 id={`section-${section.id}`} className={styles.sectionTitle}>
-              {section.title}
+              {t(`sections.${section.id}.title`)}
             </h2>
-            {section.subtitle ? (
-              <p className={styles.sectionSubtitle}>{section.subtitle}</p>
-            ) : null}
+            <p className={styles.sectionSubtitle}>
+              {t(`sections.${section.id}.subtitle`, {
+                company: branding.companyName,
+              })}
+            </p>
           </div>
           <ul className={styles.grid}>
             {section.items.map((resource) => (
-              <ResourceCard key={resource.id} resource={resource} />
+              <ResourceCard key={resource.id} resource={resource} t={t} />
             ))}
           </ul>
         </section>

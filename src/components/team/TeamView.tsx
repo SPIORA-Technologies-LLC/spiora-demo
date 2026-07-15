@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { OnlineIndicator } from "@/components/presence/OnlineIndicator";
 import type { AppLocale } from "@/i18n/config";
 import { translateRole } from "@/i18n/roles";
+import { translateTeamMemberName } from "@/i18n/team-members";
 import type { SessionUser } from "@/lib/auth/types";
 import { PRESENCE_POLL_INTERVAL_MS } from "@/lib/presence/constants";
 import type { TeamMember } from "@/lib/team/types";
@@ -75,7 +76,15 @@ export function TeamView({ user }: TeamViewProps) {
         }
         return;
       }
-      setToast({ text: t("toasts.memberDeleted", { name: deleteTarget.name }) });
+      setToast({
+        text: t("toasts.memberDeleted", {
+          name: translateTeamMemberName(
+            locale,
+            deleteTarget.id,
+            deleteTarget.name,
+          ),
+        }),
+      });
       setDeleteTarget(null);
       await fetchMembers();
     } catch {
@@ -108,6 +117,11 @@ export function TeamView({ user }: TeamViewProps) {
         <ul className={styles.list}>
           {members.map((member) => {
             const isSelf = member.id === user.id;
+            const memberName = translateTeamMemberName(
+              locale,
+              member.id,
+              member.name,
+            );
             const showDelete =
               canDelete &&
               !isSelf &&
@@ -119,7 +133,7 @@ export function TeamView({ user }: TeamViewProps) {
                   <div className={styles.main}>
                     <p className={styles.name}>
                       <span className={styles.nameRow}>
-                        {member.name}
+                        {memberName}
                         <OnlineIndicator online={Boolean(member.isOnline)} />
                       </span>
                       {isSelf ? (
@@ -166,7 +180,7 @@ export function TeamView({ user }: TeamViewProps) {
           <Card className={styles.modal}>
             <h2 className={styles.modalTitle}>{t("modal.title")}</h2>
             <p className={styles.confirmText}>{t("modal.body")}</p>
-            <p className={styles.confirmName}>{deleteTarget.name}</p>
+            <p className={styles.confirmName}>{deleteTarget ? translateTeamMemberName(locale, deleteTarget.id, deleteTarget.name) : ""}</p>
             <div className={styles.confirmActions}>
               <Button
                 type="button"

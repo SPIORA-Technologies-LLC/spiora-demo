@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import {
   CHECKUP_SECTIONS,
   type CheckupResource,
@@ -5,7 +8,15 @@ import {
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import styles from "./CheckupsView.module.css";
 
-function ResourceCard({ resource }: { resource: CheckupResource }) {
+function ResourceCard({
+  resource,
+  t,
+}: {
+  resource: CheckupResource;
+  t: ReturnType<typeof useTranslations<"checkupsPage">>;
+}) {
+  const prefix = `resources.${resource.id}` as const;
+
   return (
     <li className={styles.gridItem}>
       <article
@@ -25,20 +36,22 @@ function ResourceCard({ resource }: { resource: CheckupResource }) {
             <i className={resource.icon} />
           </span>
           <div className={styles.badges}>
-            <span className={styles.badgeLocation}>{resource.location}</span>
+            <span className={styles.badgeLocation}>
+              {t(`${prefix}.location`)}
+            </span>
             <span
               className={[
                 styles.badgeAudience,
                 styles[`badge_${resource.type}`],
               ].join(" ")}
             >
-              {resource.audience}
+              {t(`${prefix}.audience`)}
             </span>
           </div>
         </div>
 
-        <h3 className={styles.cardTitle}>{resource.title}</h3>
-        <p className={styles.cardDesc}>{resource.description}</p>
+        <h3 className={styles.cardTitle}>{t(`${prefix}.title`)}</h3>
+        <p className={styles.cardDesc}>{t(`${prefix}.description`)}</p>
 
         <div className={styles.actions}>
           <a
@@ -51,7 +64,7 @@ function ResourceCard({ resource }: { resource: CheckupResource }) {
             ].join(" ")}
             title={resource.url}
           >
-            {resource.actionLabel}
+            {t(`${prefix}.actionLabel`)}
             <i
               className="fa-solid fa-arrow-up-right-from-square"
               aria-hidden
@@ -64,12 +77,11 @@ function ResourceCard({ resource }: { resource: CheckupResource }) {
 }
 
 export function CheckupsView() {
+  const t = useTranslations("checkupsPage");
+
   return (
     <div className={styles.page}>
-      <SectionHeader
-        title="Чекапы в Ереване"
-        subtitle="Сайт с информацией о чекапах, документы команды и приложение «Формула Здоровья»"
-      />
+      <SectionHeader title={t("title")} subtitle={t("headerSubtitle")} />
 
       {CHECKUP_SECTIONS.map((section) => (
         <section
@@ -82,15 +94,15 @@ export function CheckupsView() {
               id={`checkups-section-${section.id}`}
               className={styles.sectionTitle}
             >
-              {section.title}
+              {t(`sections.${section.id}.title`)}
             </h2>
-            {section.subtitle ? (
-              <p className={styles.sectionSubtitle}>{section.subtitle}</p>
-            ) : null}
+            <p className={styles.sectionSubtitle}>
+              {t(`sections.${section.id}.subtitle`)}
+            </p>
           </div>
           <ul className={styles.grid}>
             {section.items.map((resource) => (
-              <ResourceCard key={resource.id} resource={resource} />
+              <ResourceCard key={resource.id} resource={resource} t={t} />
             ))}
           </ul>
         </section>

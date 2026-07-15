@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import type { AppLocale } from "@/i18n/config";
 import { translateRole } from "@/i18n/roles";
+import { translateTeamMemberName } from "@/i18n/team-members";
 import { branding } from "@/config/branding";
 import type { SessionUser } from "@/lib/auth/types";
 import type {
@@ -244,7 +245,7 @@ export function SettingsView({
         {renderDemoNotice()}
         <ReadOnlyField
           label={t("demoContent.profile.name")}
-          value={user.name}
+          value={translateTeamMemberName(locale, user.id, user.name)}
         />
         <ReadOnlyField
           label={t("demoContent.profile.email")}
@@ -435,7 +436,13 @@ export function SettingsView({
                 members.map((member) => (
                   <tr key={member.id}>
                     <td>
-                      <span className={styles.memberName}>{member.name}</span>
+                      <span className={styles.memberName}>
+                        {translateTeamMemberName(
+                          locale,
+                          member.id,
+                          member.name,
+                        )}
+                      </span>
                       <div className={styles.memberEmail}>{member.email}</div>
                     </td>
                     <td>{translateRole(locale, member.role)}</td>
@@ -574,7 +581,11 @@ export function SettingsView({
               <>
                 <h3 className={styles.modalTitle}>
                   {t("security.password.modal.resetTitle", {
-                    name: resetTarget.name,
+                    name: translateTeamMemberName(
+                      locale,
+                      resetTarget.id,
+                      resetTarget.name,
+                    ),
                   })}
                 </h3>
                 <p className={styles.modalText}>

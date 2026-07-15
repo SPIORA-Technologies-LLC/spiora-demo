@@ -1,9 +1,12 @@
+import { getTranslations } from "next-intl/server";
 import { AppShell } from "@/components/layout/AppShell";
 import { CheckupsView } from "@/components/checkups/CheckupsView";
 
-export default function CheckupsErevanPage() {
+export default async function CheckupsErevanPage() {
+  const t = await getTranslations("checkupsPage");
+
   return (
-    <AppShell sectionTitle="Чекапы в Ереване">
+    <AppShell sectionTitle={t("title")}>
       <CheckupsView />
     </AppShell>
   );

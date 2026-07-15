@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { OnlineIndicator } from "@/components/presence/OnlineIndicator";
 import type { AppLocale } from "@/i18n/config";
+import { translateTeamMemberName } from "@/i18n/team-members";
 import { Card } from "@/components/ui/Card";
 import { PRESENCE_POLL_INTERVAL_MS } from "@/lib/presence/constants";
 import type { TeamMember } from "@/lib/team/types";
@@ -28,7 +29,12 @@ export function TeamOnlineBar({ variant = "default" }: TeamOnlineBarProps) {
       if (!res.ok) throw new Error("fetch failed");
       const data = (await res.json()) as { members?: TeamMember[] };
       const online = (data.members ?? []).filter((member) => member.isOnline);
-      online.sort((a, b) => a.name.localeCompare(b.name, locale));
+      online.sort((a, b) =>
+        translateTeamMemberName(locale, a.id, a.name).localeCompare(
+          translateTeamMemberName(locale, b.id, b.name),
+          locale,
+        ),
+      );
       setOnlineMembers(online);
     } catch {
       setOnlineMembers([]);
@@ -95,17 +101,25 @@ export function TeamOnlineBar({ variant = "default" }: TeamOnlineBarProps) {
           <p className={styles.membersLabel}>{t("membersOnline")}</p>
         ) : null}
         <ul className={styles.list}>
-          {onlineMembers.map((member) => (
+          {onlineMembers.map((member) => {
+            const memberName = translateTeamMemberName(
+              locale,
+              member.id,
+              member.name,
+            );
+
+            return (
             <li key={member.id}>
               <span className={styles.chip}>
                 <OnlineIndicator
                   online
-                  title={t("memberOnlineTitle", { name: member.name })}
+                  title={t("memberOnlineTitle", { name: memberName })}
                 />
-                <span className={styles.chipName}>{member.name}</span>
+                <span className={styles.chipName}>{memberName}</span>
               </span>
             </li>
-          ))}
+            );
+          })}
         </ul>
       </div>
     </div>

@@ -1,10 +1,12 @@
 import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { AppShellNotifications } from "./AppShellNotifications";
 import { AppShellClient } from "./AppShellClient";
 import type { TopbarProps } from "./Topbar";
 import { getSession } from "@/lib/auth/session";
+import type { AppLocale } from "@/i18n/config";
+import { translateTeamMemberName } from "@/i18n/team-members";
 
 export type AppShellProps = Omit<TopbarProps, "userName" | "userRole"> & {
   children: ReactNode;
@@ -24,6 +26,7 @@ export async function AppShell({
     redirect("/login");
   }
 
+  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("shell");
 
   return (
@@ -32,7 +35,7 @@ export async function AppShell({
         role={session.role}
         autoOpenMobileNav
         sectionTitle={sectionTitle}
-        userName={session?.name ?? t("userFallback")}
+        userName={translateTeamMemberName(locale, session.id, session.name)}
         userRole={
           session
             ? session.role === "owner"

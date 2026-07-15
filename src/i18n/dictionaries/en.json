@@ -1275,6 +1275,110 @@
       "saveFailed": "Failed to save changes."
     }
   },
+  "teamMembers": {
+    "olivia-bennett": "Olivia Bennett",
+    "daniel-cooper": "Daniel Cooper",
+    "emma-wilson": "Emma Wilson",
+    "lucas-martin": "Lucas Martin"
+  },
+  "relocationPage": {
+    "title": "Relocation",
+    "headerSubtitle": "Croatia, Europe: forms, data, Emigrant-SK website and Telegram",
+    "sections": {
+      "croatia": {
+        "title": "Demo relocation hub",
+        "subtitle": "Sample resources for {company} demonstrations"
+      },
+      "emigrant-eu": {
+        "title": "Demo external links",
+        "subtitle": "Placeholder website and channel links"
+      }
+    },
+    "resources": {
+      "croatia-clients-sheet": {
+        "title": "Demo clients sheet",
+        "description": "Placeholder link for a regional client tracker spreadsheet in demo mode.",
+        "country": "Demo region",
+        "audience": "Demo data",
+        "actionLabel": "Open demo sheet"
+      },
+      "croatia-digital-nomad-form": {
+        "title": "Demo intake form",
+        "description": "Sample client intake form link for demonstrations.",
+        "country": "Demo region",
+        "audience": "For clients",
+        "actionLabel": "Open demo form"
+      },
+      "croatia-formgrid-results": {
+        "title": "Demo form results",
+        "description": "Placeholder admin view for submitted demo forms.",
+        "country": "Demo region",
+        "audience": "Admins",
+        "actionLabel": "Open demo results"
+      },
+      "croatia-emigrant-app": {
+        "title": "Demo desk application",
+        "description": "Placeholder internal case management app for demos.",
+        "country": "Demo region",
+        "audience": "For team",
+        "actionLabel": "Open demo app"
+      },
+      "croatia-formgrid-sheet": {
+        "title": "Demo responses sheet",
+        "description": "Placeholder spreadsheet for demo form responses.",
+        "country": "Demo region",
+        "audience": "Form data",
+        "actionLabel": "Open demo sheet"
+      },
+      "emigrant-sk-website": {
+        "title": "Demo public website",
+        "description": "Placeholder marketing site for relocation programs.",
+        "country": "Europe",
+        "audience": "Public",
+        "actionLabel": "Open demo site"
+      },
+      "emigrant-telegram": {
+        "title": "Demo Telegram channel",
+        "description": "Placeholder social channel link for demonstrations.",
+        "country": "Europe",
+        "audience": "Demo channel",
+        "actionLabel": "Open demo link"
+      }
+    }
+  },
+  "checkupsPage": {
+    "title": "Checkups in Yerevan",
+    "headerSubtitle": "Checkups info site, team documents, and Formula Health app",
+    "sections": {
+      "yerevan": {
+        "title": "Demo checkups hub",
+        "subtitle": "Sample links for wellness program demonstrations"
+      }
+    },
+    "resources": {
+      "yerevan-checkups-site": {
+        "title": "Demo checkups overview",
+        "description": "Placeholder presentation page for corporate wellness checkup programs.",
+        "location": "Demo city",
+        "audience": "For clients",
+        "actionLabel": "Open demo site"
+      },
+      "yerevan-checkups-docs": {
+        "title": "Demo checkups documents",
+        "description": "Placeholder folder with sample pricing sheets and program outlines.",
+        "location": "Demo city",
+        "audience": "For team",
+        "actionLabel": "Open demo folder"
+      },
+      "formula-health-app": {
+        "title": "Demo partner app",
+        "description": "Placeholder login page for a third-party wellness partner application.",
+        "location": "Demo city",
+        "audience": "Demo portal",
+        "actionLabel": "Open demo app"
+      }
+    }
+  },
   "settings": {
     "title": "Settings",
     "subtitle": "Team access management",

@@ -4,6 +4,7 @@ import {
   translateMessage,
   getMessagesForLocale,
 } from "@/i18n/messages.ts";
+import { translateTeamMemberName } from "@/i18n/team-members.ts";
 import {
   countTasksLeafKeys,
   translateTasksMessage,
@@ -168,6 +169,28 @@ describe("PR #11 — Sidebar nav i18n", () => {
     assert.equal(translateMessage("ru", "nav.crmLeads"), "Новые лиды");
     assert.equal(translateMessage("ru", "nav.relocation"), "Эмиграция");
     assert.match(translateMessage("ru", "nav.checkupsErevan"), /Ереван/);
+  });
+
+  it("RU: страницы Эмиграция и Чекапы переведены", () => {
+    assert.match(
+      translateMessage("ru", "relocationPage.resources.croatia-clients-sheet.title"),
+      /[а-яА-ЯёЁ]/,
+    );
+    assert.match(
+      translateMessage("ru", "checkupsPage.resources.yerevan-checkups-site.title"),
+      /[а-яА-ЯёЁ]/,
+    );
+  });
+
+  it("RU: имена команды на кириллице", () => {
+    assert.equal(
+      translateTeamMemberName("ru", "olivia-bennett", "Olivia Bennett"),
+      "Оливия Беннетт",
+    );
+    assert.match(
+      translateTeamMemberName("ru", "daniel-cooper", "Daniel Cooper"),
+      /[а-яА-ЯёЁ]/,
+    );
   });
 
   it("nav items используют labelKey вместо hardcoded label", () => {

@@ -15,7 +15,8 @@ export type ApiMessageKey =
   | "updateClientFailed"
   | "archiveClientFailed"
   | "validationFailed"
-  | "crmStorageUnavailable";
+  | "crmStorageUnavailable"
+  | "documentCreateConflict";
 
 export async function getRequestLocale(): Promise<AppLocale> {
   const cookieStore = await cookies();

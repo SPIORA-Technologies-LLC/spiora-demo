@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import {
   ClientDocumentsAccessError,
+  ClientDocumentsConflictError,
   ClientDocumentsStorageError,
   createClientDocumentMetadata,
   listClientDocuments,
@@ -23,6 +24,12 @@ function handleError(error: unknown, locale: Awaited<ReturnType<typeof getReques
     return NextResponse.json(
       { error: translateApiMessage(locale, "validationFailed") },
       { status: 400 },
+    );
+  }
+  if (error instanceof ClientDocumentsConflictError) {
+    return NextResponse.json(
+      { error: translateApiMessage(locale, "documentCreateConflict") },
+      { status: 409 },
     );
   }
   if (error instanceof ClientDocumentsStorageError) {

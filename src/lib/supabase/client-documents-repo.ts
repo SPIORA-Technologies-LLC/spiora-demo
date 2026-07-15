@@ -5,6 +5,12 @@ import type {
   ClientDocumentPublic,
   ClientDocumentRecord,
 } from "@/lib/clients/client-data-types";
+import {
+  computeNextDemoDocumentExternalId,
+  isDuplicateDocumentExternalIdError,
+} from "@/lib/clients/document-external-id";
+
+export { isDuplicateDocumentExternalIdError };
 
 type DocumentRow = {
   id: string;
@@ -187,28 +193,32 @@ export async function sbArchiveClientDocument(
   clientUuid: string,
 ): Promise<boolean> {
   const now = new Date().toISOString();
-  const { error, count } = await getSupabaseAdmin()
+  // Returning rows — PostgREST `count` is null unless count option is set.
+  const { data, error } = await getSupabaseAdmin()
     .from("client_documents")
     .update({ archived_at: now, updated_at: now })
     .eq("id", documentId)
     .eq("client_uuid", clientUuid)
-    .is("archived_at", null);
+    .is("archived_at", null)
+    .select("id");
 
   if (error) throw error;
-  return (count ?? 0) > 0;
+  return (data?.length ?? 0) > 0;
 }
 
+/**
+ * Next DOC-DEMO-* by numeric max of ALL matching rows (including archived).
+ * Must not use lexical ORDER BY external_id.
+ */
 export async function sbNextDemoDocumentExternalId(): Promise<string> {
   const { data, error } = await getSupabaseAdmin()
     .from("client_documents")
     .select("external_id")
-    .like("external_id", "DOC-DEMO-%")
-    .order("external_id", { ascending: false })
-    .limit(1);
+    .like("external_id", "DOC-DEMO-%");
 
   if (error) throw error;
-  const latest = (data?.[0] as { external_id?: string } | undefined)?.external_id;
-  const match = latest?.match(/^DOC-DEMO-(\d+)$/);
-  const next = match ? Number.parseInt(match[1], 10) + 1 : 1;
-  return `DOC-DEMO-${String(next).padStart(4, "0")}`;
+  const ids = ((data ?? []) as { external_id: string }[]).map(
+    (row) => row.external_id,
+  );
+  return computeNextDemoDocumentExternalId(ids);
 }

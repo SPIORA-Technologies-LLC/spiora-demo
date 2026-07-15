@@ -1598,7 +1598,8 @@
     "updateClientFailed": "Не удалось обновить клиента",
     "archiveClientFailed": "Не удалось архивировать клиента",
     "validationFailed": "Проверьте введённые данные",
-    "crmStorageUnavailable": "CRM-хранилище недоступно"
+    "crmStorageUnavailable": "CRM-хранилище недоступно",
+    "documentCreateConflict": "Не удалось назначить уникальный ID документа. Попробуйте ещё раз."
   },
   "knowledgeBase": {
     "title": "База знаний",

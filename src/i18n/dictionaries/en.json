@@ -1600,7 +1600,8 @@
     "updateClientFailed": "Failed to update client",
     "archiveClientFailed": "Failed to archive client",
     "validationFailed": "Please check the entered data",
-    "crmStorageUnavailable": "CRM storage is unavailable"
+    "crmStorageUnavailable": "CRM storage is unavailable",
+    "documentCreateConflict": "Could not assign a unique document ID. Please try again."
   },
   "knowledgeBase": {
     "title": "Knowledge Base",

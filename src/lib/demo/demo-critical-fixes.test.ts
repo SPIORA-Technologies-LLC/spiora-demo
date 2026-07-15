@@ -169,6 +169,9 @@ describe("PR #11 — Sidebar nav i18n", () => {
     assert.equal(translateMessage("ru", "nav.crmLeads"), "Новые лиды");
     assert.equal(translateMessage("ru", "nav.relocation"), "Эмиграция");
     assert.match(translateMessage("ru", "nav.checkupsErevan"), /Ереван/);
+    assert.equal(translateMessage("ru", "nav.analytics"), "Аналитика");
+    assert.equal(translateMessage("ru", "nav.team"), "Команда");
+    assert.equal(translateMessage("ru", "nav.settings"), "Настройки");
   });
 
   it("RU: страницы Эмиграция и Чекапы переведены", () => {

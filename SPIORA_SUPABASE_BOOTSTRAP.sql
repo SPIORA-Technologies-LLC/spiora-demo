@@ -1,9 +1,12 @@
 -- =============================================================================
 -- SPIORA — Supabase Bootstrap (SQL Editor)
 -- =============================================================================
--- Объединяет миграции 001–021 в порядке применения.
--- Без demo seed. Без секретов, URL и project ref.
+-- Объединяет миграции 001–022 в порядке применения.
+-- Без demo seed (см. SPIORA_DEMO_SEED.sql). Без секретов, URL и project ref.
 -- Безопасен для пустой базы (IF NOT EXISTS / идемпотентные ALTER).
+--
+-- Исходные файлы: supabase/migrations/001–022 (23 файла; 010+011 объединены
+-- в секции 010_011, отдельные 010/011 не дублируются).
 --
 -- НЕ запускать повторно без проверки — см. SPIORA_SUPABASE_SQL_EDITOR_RUNBOOK.md
 -- =============================================================================
@@ -267,36 +270,8 @@ create index if not exists calendar_reminder_deliveries_fire_idx
 create index if not exists calendar_reminder_deliveries_event_idx
   on calendar_reminder_deliveries (event_id);
 
--- -----------------------------------------------------------------------------
--- 010_calendar_send_reminders.sql
--- -----------------------------------------------------------------------------
--- Calendar notifications PR #1 — per-event reminder opt-out
-
-alter table calendar_events
-  add column if not exists send_reminders boolean not null default true;
-
--- -----------------------------------------------------------------------------
--- 011_calendar_reminder_deliveries.sql
--- -----------------------------------------------------------------------------
--- Calendar notifications PR #1 — idempotent delivery log for 24h / 1h reminders
-
-create table if not exists calendar_reminder_deliveries (
-  id text primary key,
-  event_id text not null references calendar_events(id) on delete cascade,
-  user_id text not null,
-  offset_minutes int not null check (offset_minutes in (1440, 60)),
-  fire_at timestamptz not null,
-  notification_id text,
-  event_updated_at timestamptz not null,
-  created_at timestamptz not null default now(),
-  unique (event_id, user_id, offset_minutes)
-);
-
-create index if not exists calendar_reminder_deliveries_fire_idx
-  on calendar_reminder_deliveries (fire_at);
-
-create index if not exists calendar_reminder_deliveries_event_idx
-  on calendar_reminder_deliveries (event_id);
+-- Примечание: 010_calendar_send_reminders.sql и 011_calendar_reminder_deliveries.sql
+-- уже включены выше в секции 010_011 — повтор не выполняется.
 
 -- -----------------------------------------------------------------------------
 -- 012_calendar_video_meetings.sql
@@ -497,27 +472,161 @@ create policy "meeting_recordings_service_role_all"
   using (bucket_id = 'meeting-recordings')
   with check (bucket_id = 'meeting-recordings');
 
+-- -----------------------------------------------------------------------------
+-- 022_clients.sql
+-- -----------------------------------------------------------------------------
+-- CRM clients — PostgreSQL primary store (PR #13)
+-- client_notes.client_id ссылается на clients.external_id по соглашению (без FK).
+
+create table if not exists clients (
+  id uuid primary key default gen_random_uuid(),
+  external_id text not null,
+  first_name text not null default '',
+  last_name text not null default '',
+  full_name text not null,
+  email text not null default '',
+  phone text not null default '',
+  status text not null default 'New',
+  pipeline_stage text not null default '',
+  assigned_user_id text,
+  assigned_manager_name text not null default '',
+  country text not null default '',
+  citizenship text not null default '',
+  direction text not null default '',
+  service_type text not null default '',
+  source text not null default 'demo',
+  notes_summary text not null default '',
+  passport_number text,
+  last_activity_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  archived_at timestamptz,
+  is_demo boolean not null default true,
+  legacy_fields jsonb not null default '{}'::jsonb
+);
+
+create unique index if not exists clients_external_id_uidx
+  on clients (external_id);
+
+create index if not exists clients_full_name_idx
+  on clients (full_name);
+
+create index if not exists clients_email_idx
+  on clients (lower(email));
+
+create index if not exists clients_status_idx
+  on clients (status)
+  where archived_at is null;
+
+create index if not exists clients_pipeline_stage_idx
+  on clients (pipeline_stage)
+  where archived_at is null;
+
+create index if not exists clients_assigned_manager_idx
+  on clients (assigned_manager_name)
+  where archived_at is null;
+
+create index if not exists clients_country_idx
+  on clients (country)
+  where archived_at is null;
+
+create index if not exists clients_direction_idx
+  on clients (direction)
+  where archived_at is null;
+
+create index if not exists clients_service_type_idx
+  on clients (service_type)
+  where archived_at is null;
+
+create index if not exists clients_active_updated_idx
+  on clients (updated_at desc)
+  where archived_at is null;
+
+create index if not exists clients_is_demo_idx
+  on clients (is_demo)
+  where archived_at is null;
+
+comment on table clients is
+  'CRM clients. API exposes external_id as Client.id. client_notes.client_id uses external_id.';
+
+comment on column clients.external_id is
+  'Public client identifier, e.g. DEMO-1001. Unique across active and archived rows.';
+
+comment on column clients.legacy_fields is
+  'Optional Google Sheets-only fields (referentName, bookingAddress, etc.) as JSON.';
+
 -- =============================================================================
--- VERIFICATION (read-only) — выполняется после bootstrap
+-- VERIFICATION (read-only) — выполняется после bootstrap (до seed)
 -- =============================================================================
 
--- 1. Список созданных таблиц (ожидается 15)
+-- 1. Список всех таблиц public (ожидается 16)
 SELECT table_name
 FROM information_schema.tables
 WHERE table_schema = 'public'
   AND table_type = 'BASE TABLE'
 ORDER BY table_name;
 
--- 2. Список индексов public schema
+-- 2. Таблицы, используемые Supabase repositories (ожидается present = true для всех 16)
 SELECT
-  tablename,
-  indexname,
-  indexdef
+  expected.table_name,
+  (t.table_name IS NOT NULL) AS present
+FROM (
+  VALUES
+    ('ai_workspace_chats'),
+    ('app_state'),
+    ('calendar_event_participants'),
+    ('calendar_events'),
+    ('calendar_meeting_audit'),
+    ('calendar_meeting_guest_admissions'),
+    ('calendar_meeting_guest_invites'),
+    ('calendar_meeting_recordings'),
+    ('calendar_reminder_deliveries'),
+    ('client_notes'),
+    ('clients'),
+    ('notifications'),
+    ('tasks'),
+    ('team_chat_last_seen'),
+    ('team_chat_messages'),
+    ('user_presence')
+) AS expected(table_name)
+LEFT JOIN information_schema.tables t
+  ON t.table_schema = 'public'
+  AND t.table_type = 'BASE TABLE'
+  AND t.table_name = expected.table_name
+ORDER BY expected.table_name;
+
+-- 3. clients — структура (после bootstrap строк данных нет)
+SELECT COUNT(*) AS clients_count FROM clients;
+SELECT COUNT(*) AS client_notes_count FROM client_notes;
+
+-- 4. Индексы таблицы clients
+SELECT indexname, indexdef
+FROM pg_indexes
+WHERE schemaname = 'public'
+  AND tablename = 'clients'
+ORDER BY indexname;
+
+-- 5. Ключевые constraints clients
+SELECT conname, pg_get_constraintdef(oid) AS definition
+FROM pg_constraint
+WHERE conrelid = 'public.clients'::regclass
+ORDER BY conname;
+
+-- 6. Совместимость client_notes ↔ clients (тип client_id text, без FK — by design)
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_schema = 'public'
+  AND table_name = 'client_notes'
+  AND column_name IN ('id', 'client_id', 'author', 'text', 'created_at')
+ORDER BY column_name;
+
+-- 7. Индексы public schema (обзор)
+SELECT tablename, indexname
 FROM pg_indexes
 WHERE schemaname = 'public'
 ORDER BY tablename, indexname;
 
--- 3. Storage buckets (ожидается 5, все public = false)
+-- 8. Storage buckets (ожидается 5, все public = false)
 SELECT id, name, public
 FROM storage.buckets
 WHERE id IN (
@@ -529,18 +638,18 @@ WHERE id IN (
 )
 ORDER BY id;
 
--- 4. Bucket meeting-recordings + policy
+-- 9. Bucket meeting-recordings + policy
 SELECT id, name, public
 FROM storage.buckets
 WHERE id = 'meeting-recordings';
 
-SELECT policyname, roles, cmd, qual, with_check
+SELECT policyname, roles, cmd
 FROM pg_policies
 WHERE schemaname = 'storage'
   AND tablename = 'objects'
   AND policyname = 'meeting_recordings_service_role_all';
 
--- 5. Ключевые колонки tasks
+-- 10. Ключевые колонки tasks
 SELECT column_name, data_type, is_nullable, column_default
 FROM information_schema.columns
 WHERE table_schema = 'public'
@@ -554,14 +663,14 @@ WHERE table_schema = 'public'
   )
 ORDER BY column_name;
 
--- 6. CHECK constraint tasks.status (workflow)
+-- 11. CHECK constraint tasks.status (workflow)
 SELECT conname, pg_get_constraintdef(oid) AS definition
 FROM pg_constraint
 WHERE conrelid = 'public.tasks'::regclass
   AND contype = 'c'
   AND conname = 'tasks_status_check';
 
--- 7. Ключевые колонки calendar_events
+-- 12. Ключевые колонки calendar_events
 SELECT column_name, data_type, is_nullable, column_default
 FROM information_schema.columns
 WHERE table_schema = 'public'
@@ -578,14 +687,14 @@ WHERE table_schema = 'public'
   )
 ORDER BY column_name;
 
--- 8. CHECK constraint calendar_events.event_type
+-- 13. CHECK constraint calendar_events.event_type
 SELECT conname, pg_get_constraintdef(oid) AS definition
 FROM pg_constraint
 WHERE conrelid = 'public.calendar_events'::regclass
   AND contype = 'c'
   AND conname = 'calendar_events_event_type_check';
 
--- 9. FK calendar_meeting_recordings → calendar_events
+-- 14. FK calendar_meeting_recordings → calendar_events
 SELECT
   tc.constraint_name,
   tc.table_name,
@@ -603,7 +712,7 @@ WHERE tc.constraint_type = 'FOREIGN KEY'
   AND tc.table_schema = 'public'
   AND tc.table_name = 'calendar_meeting_recordings';
 
--- 10. Ключевые колонки team_chat_messages (reply / pin)
+-- 15. Ключевые колонки team_chat_messages (reply / pin)
 SELECT column_name, data_type, is_nullable
 FROM information_schema.columns
 WHERE table_schema = 'public'

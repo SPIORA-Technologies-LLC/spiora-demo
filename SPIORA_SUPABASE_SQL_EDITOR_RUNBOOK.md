@@ -1,122 +1,142 @@
 # SPIORA — SQL Editor Bootstrap Runbook
 
-**Дата:** 13 июля 2026  
-**Файл bootstrap:** `SPIORA_SUPABASE_BOOTSTRAP.sql`  
-**Причина:** Supabase CLI недоступен (timeout к `api.supabase.com`)
+**Дата:** 15 июля 2026  
+**Bootstrap:** `SPIORA_SUPABASE_BOOTSTRAP.sql` (миграции 001–022)  
+**Demo seed:** `SPIORA_DEMO_SEED.sql` (отдельно, после bootstrap)  
+**Причина:** Supabase CLI недоступен или проект создаётся вручную через Dashboard
 
 ---
 
 ## 1. Что делает bootstrap
 
-Один SQL-скрипт объединяет **22 исходных файла миграций** (номера 001–021, включая `010_011`, `010`, `011`) в правильном порядке:
+Один SQL-скрипт объединяет **миграции 001–022** (23 исходных файла; 010+011 объединены, без дублирования):
 
-- создаёт 15 таблиц в `public`
-- создаёт 5 private Storage buckets
-- добавляет 1 storage policy (`meeting-recordings`)
-- **не** включает demo seed из `001_platform.sql`
+- создаёт **16 таблиц** в `public`
+- создаёт **5 private Storage buckets**
+- добавляет **1 storage policy** (`meeting-recordings`)
+- **не** включает demo seed
 - **не** содержит секретов, URL и project ref
 
-В конце файла — **read-only** verification queries.
+В конце bootstrap — **read-only verification queries** (схема, без данных).
 
 ---
 
-## 2. Как открыть SQL Editor
+## 2. Что делает demo seed
+
+Файл `SPIORA_DEMO_SEED.sql` — **отдельный второй шаг**:
+
+| Модуль | Записей | Примечание |
+|--------|---------|------------|
+| CRM `clients` | 25 | fictional, `@example.com` |
+| `client_notes` | 3 | `client_id` = `external_id` |
+| `app_state` | 2 | analytics supplement + formgrid watch |
+
+**Не включено в seed:** Tasks, Calendar, Team Chat, Notifications, AI chats — инициализируются из TypeScript demo seeds приложением.
+
+Seed **не меняет структуру** базы (только INSERT / ON CONFLICT DO NOTHING).
+
+---
+
+## 3. Порядок выполнения (обязательно)
+
+```
+1. SPIORA_SUPABASE_BOOTSTRAP.sql   → схема
+2. Проверить: Success, нет ERROR
+3. SPIORA_DEMO_SEED.sql            → demo-данные
+4. Verification queries            → counts и связи
+5. Настроить .env.local            → не коммитить
+6. npm run build && npm run dev    → smoke test
+```
+
+**Нельзя** запускать только `022_clients.sql` на пустой базе — нужен полный bootstrap.
+
+---
+
+## 4. Как открыть SQL Editor
 
 1. Войти в [Supabase Dashboard](https://supabase.com/dashboard)
-2. Выбрать **новый пустой** проект Spiora
-3. В левом меню: **SQL Editor**
-4. Нажать **New query**
+2. Выбрать **новый пустой** demo-проект Spiora
+3. **SQL Editor** → **New query**
 
 ---
 
-## 3. Как вставить bootstrap
+## 5. Шаг A — Bootstrap
 
-1. Открыть локальный файл `SPIORA_SUPABASE_BOOTSTRAP.sql`
+1. Открыть `SPIORA_SUPABASE_BOOTSTRAP.sql`
 2. Скопировать **весь** файл (Ctrl+A → Ctrl+C)
-3. Вставить в SQL Editor (Ctrl+V)
+3. Вставить в SQL Editor
 4. **Не** разбивать на части при первом запуске
+5. Нажать **Run**
 
----
-
-## 4. Что проверить перед Run
+### Перед Run проверить
 
 | # | Проверка |
 |---|----------|
-| 1 | Проект **новый и пустой** (нет старых таблиц Spiora) |
-| 2 | В Dashboard → Table Editor **нет** `tasks`, `calendar_events` и т.д. |
-| 3 | Вы в **правильном** проекте (не production) |
-| 4 | Скрипт скопирован **целиком**, включая verification в конце |
-| 5 | `.env.local` **ещё не** указывает на старый production ref |
-
-Если таблицы уже существуют — **не нажимать Run**. См. раздел 8.
+| 1 | Проект **новый и пустой** |
+| 2 | В Table Editor **нет** `tasks`, `clients`, `calendar_events` |
+| 3 | Вы в **demo-проекте**, не production |
+| 4 | `.env.local` **ещё не** указывает на старый production ref |
 
 ---
 
-## 5. Запуск
+## 6. Ожидаемый результат bootstrap
 
-1. Нажать **Run** (или Ctrl+Enter)
-2. Дождаться завершения (обычно 5–30 секунд)
-3. В панели Results пролистать вывод **verification queries** внизу
+### DDL
 
----
+- **Success** без `ERROR:`
+- Verification: **16 таблиц** в `public`
 
-## 6. Ожидаемый результат
+### Таблицы (16)
 
-### DDL (основная часть)
+`ai_workspace_chats`, `app_state`, `calendar_event_participants`, `calendar_events`, `calendar_meeting_audit`, `calendar_meeting_guest_admissions`, `calendar_meeting_guest_invites`, `calendar_meeting_recordings`, `calendar_reminder_deliveries`, `client_notes`, `clients`, `notifications`, `tasks`, `team_chat_last_seen`, `team_chat_messages`, `user_presence`
 
-- Сообщение **Success** без ошибок
-- Нет `ERROR:` в выводе
-
-### Verification (read-only)
+### После bootstrap (до seed)
 
 | Query | Ожидание |
 |-------|----------|
-| Таблицы | **15** строк: `ai_workspace_chats`, `app_state`, `calendar_event_participants`, `calendar_events`, `calendar_meeting_audit`, `calendar_meeting_guest_admissions`, `calendar_meeting_guest_invites`, `calendar_meeting_recordings`, `calendar_reminder_deliveries`, `client_notes`, `notifications`, `tasks`, `team_chat_last_seen`, `team_chat_messages`, `user_presence` |
-| Индексы | Список `*_idx` на всех таблицах |
-| Storage buckets | **5** строк, все `public = false` |
-| `meeting-recordings` | 1 строка, `public = false` |
-| Policy | 1 строка `meeting_recordings_service_role_all` |
-| `tasks` колонки | `assignees`, `review_history`, `attachments`, `progress_reports`, `status` |
-| `tasks_status_check` | 5 статусов workflow |
-| `calendar_events` колонки | `send_reminders`, `video_invite_mode`, `guest_*`, `linked_client_*`, `event_type` |
-| `event_type` check | `general`, `video_meeting` |
-| FK recordings | `calendar_meeting_recordings` → `calendar_events` |
-| `team_chat_messages` | `reply_to_*`, `is_pinned`, `message_type` |
+| `clients_count` | **0** |
+| `client_notes_count` | **0** |
+| Storage buckets | **5**, все `public = false` |
+| `meeting-recordings` policy | **1** строка |
+| Repo tables checklist | все `present = true` |
 
 ---
 
-## 7. Что делать при ошибке
+## 7. Шаг B — Demo seed
+
+1. **New query** в SQL Editor
+2. Скопировать **весь** `SPIORA_DEMO_SEED.sql`
+3. Run
+4. Проверить verification в конце файла
+
+### Ожидание после seed
+
+| Query | Ожидание |
+|-------|----------|
+| `clients_count` | **25** |
+| `client_notes_count` | **3** |
+| `app_state` keys | 2 строки |
+| notes → clients join | все `client_exists = true` |
+
+---
+
+## 8. Что делать при ошибке
 
 ### `relation "calendar_events" does not exist`
 
-Миграции выполнились не по порядку или скрипт обрезан.  
-**Действие:** на пустом проекте — Reset database (Settings → General) и повторить с полным файлом.
+Bootstrap обрезан или выполнен не по порядку.  
+**Действие:** Reset database (Settings → General) на пустом demo-проекте → повторить **полный** bootstrap.
 
-### `constraint ... already exists`
+### `relation "clients" already exists` / `constraint ... already exists`
 
-Скрипт уже запускался частично или повторно.  
-**Действие:** не запускать снова вслепую — см. раздел 8.
+Bootstrap уже запускался.  
+**Действие:** **не** запускать bootstrap повторно — см. раздел 9.
 
-### `permission denied` на `storage.buckets`
+### Bootstrap завершился частично (ERROR на середине)
 
-Редко на free tier при первом запуске.  
-**Действие:** убедиться, что Storage включён (Dashboard → Storage). Повторить Run.
-
-### `must be owner of table storage.objects` (policy)
-
-**Действие:** выполнить bootstrap от имени postgres через SQL Editor (по умолчанию так и есть). Если ошибка сохраняется — создать bucket вручную в Storage UI, затем выполнить только блок `021` из bootstrap.
-
-### Любая другая ERROR
-
-1. Скопировать **полный текст ошибки**
-2. Записать **номер секции** из комментария (`-- 0XX_...`)
-3. **Не** запускать скрипт повторно до анализа
-
----
-
-## 8. Как не запускать скрипт второй раз без проверки
-
-Перед повторным Run выполните:
+1. Записать **номер секции** из комментария (`-- 0XX_...`)
+2. Скопировать полный текст ошибки
+3. Выполнить проверку:
 
 ```sql
 SELECT COUNT(*) AS table_count
@@ -127,95 +147,103 @@ WHERE table_schema = 'public'
 
 | `table_count` | Действие |
 |---------------|----------|
-| `0` | Безопасно запустить bootstrap |
-| `1–14` | Частичное применение — **Reset database** или ручной repair |
-| `15` | Bootstrap уже применён — **не запускать** DDL повторно; только verification queries |
-| `>15` | Проект не пустой — остановиться, проверить вручную |
+| `0` | Безопасно повторить полный bootstrap |
+| `1–15` | **Reset database** → повторить bootstrap |
+| `16` | Bootstrap фактически завершён — только verification; seed отдельно |
+| `>16` | Проект не пустой — остановиться, разобрать вручную |
 
-Для повторной проверки скопируйте **только** секцию `VERIFICATION` из конца `SPIORA_SUPABASE_BOOTSTRAP.sql`.
+4. **Не** запускать повторно «вслепую»
+
+### Seed: `there is no unique or exclusion constraint matching ON CONFLICT`
+
+Таблица `clients` не создана — bootstrap не применён.  
+**Действие:** сначала bootstrap, потом seed.
+
+### `permission denied` на storage
+
+Убедиться, что Storage включён (Dashboard → Storage). Повторить Run bootstrap.
 
 ---
 
-## 9. После успешного bootstrap
+## 9. Как не запускать bootstrap второй раз
+
+```sql
+SELECT COUNT(*) AS table_count
+FROM information_schema.tables
+WHERE table_schema = 'public'
+  AND table_type = 'BASE TABLE';
+```
+
+| `table_count` | Действие |
+|---------------|----------|
+| `0` | Можно запустить bootstrap |
+| `16` | Bootstrap применён — **не** запускать DDL снова |
+| другое | См. раздел 8 |
+
+Для повторной проверки скопируйте **только** секцию `VERIFICATION` из конца bootstrap или seed.
+
+**Seed** безопасно перезапускать (idempotent ON CONFLICT).
+
+---
+
+## 10. После успешного bootstrap + seed
 
 ### ENV (`.env.local`, не коммитить)
 
 ```env
 SPIORA_DEMO_MODE=true
 SPIORA_ENABLE_SUPABASE=true
-NEXT_PUBLIC_SUPABASE_URL=https://<NEW_SPIORA_PROJECT_REF>.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=<из Dashboard → Settings → API>
-SPIORA_ALLOWED_SUPABASE_PROJECT_REFS=<NEW_SPIORA_PROJECT_REF>
+NEXT_PUBLIC_SUPABASE_URL=https://<NEW_DEMO_PROJECT_REF>.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<Dashboard → Settings → API>
+SPIORA_ALLOWED_SUPABASE_PROJECT_REFS=<NEW_DEMO_PROJECT_REF>
+SPIORA_ENABLE_GOOGLE_INTEGRATIONS=false
 ```
 
-### Smoke test приложения
+### Smoke test
 
 ```powershell
 npm run build
 npm run dev
 ```
 
-- Login → Tasks CRUD
+- Login → CRM: 25 clients
+- Tasks CRUD
 - Team chat message
 - Calendar event create
 
 ---
 
-## 10. Синхронизация migration history (когда CLI заработает)
+## 11. Синхронизация migration history (когда CLI заработает)
 
-Когда `supabase link` и `supabase db push` станут доступны:
-
-### Вариант A — baseline (рекомендуется)
-
-Схема уже применена через SQL Editor. Пометить миграции как применённые:
+Схема уже применена через SQL Editor. Пометить миграции 001–022 как applied:
 
 ```powershell
 supabase login
-supabase link --project-ref <NEW_SPIORA_PROJECT_REF>
-
-# Для каждой миграции 001–021 — repair/baseline
-# (точная команда зависит от версии CLI)
-supabase migration repair --status applied 001
-# ... повторить для всех версий
+supabase link --project-ref <NEW_DEMO_PROJECT_REF>
+# supabase migration repair --status applied ... (по версиям CLI)
 ```
 
-Или одной операцией после `supabase db pull` сравнить diff — если пусто, history синхронизирована.
-
-### Вариант B — не трогать history
-
-Продолжать использовать SQL Editor для будущих изменений.  
-Новые миграции добавлять в `supabase/migrations/` и применять вручную.
-
-### Вариант C — сверка
-
-```powershell
-supabase migration list
-supabase db diff --linked
-```
-
-Пустой diff = локальные миграции совпадают с remote.
+Или `supabase db diff --linked` — пустой diff = синхронизировано.
 
 ---
 
-## 11. Ограничения SQL Editor
+## 12. Ограничения SQL Editor
 
-| Команда | В bootstrap | SQL Editor |
-|---------|-------------|------------|
-| `CREATE EXTENSION` | ✅ pgcrypto | ✅ |
-| `CREATE TABLE IF NOT EXISTS` | ✅ | ✅ |
-| `ALTER TABLE` | ✅ | ✅ |
-| `INSERT INTO storage.buckets` | ✅ | ✅ |
-| `CREATE POLICY` on storage | ✅ | ✅ |
-| `\i`, `\copy` (psql) | ❌ не используется | ❌ |
-| `CREATE ROLE` / superuser | ❌ не используется | ❌ |
+| Команда | Bootstrap | Seed |
+|---------|-----------|------|
+| `CREATE TABLE IF NOT EXISTS` | ✅ | ❌ |
+| `INSERT ... ON CONFLICT` | ❌ | ✅ |
+| `INSERT INTO storage.buckets` | ✅ | ❌ |
+| `\i`, `\copy` (psql) | ❌ | ❌ |
 
 ---
 
-## 12. Связанные документы
+## 13. Связанные документы
 
-- `SPIORA_SUPABASE_DEPLOY_PLAN.md` — общий план деплоя
-- `SPIORA_SUPABASE_DEPLOY_CHECK.md` — аудит миграций
-- `SPIORA_SUPABASE_BOOTSTRAP.sql` — исполняемый скрипт
+- `SPIORA_SUPABASE_BOOTSTRAP.sql` — схема 001–022
+- `SPIORA_DEMO_SEED.sql` — demo-данные
+- `SPIORA_CRM_POSTGRES_REPORT.md` — CRM PostgreSQL
+- `SPIORA_SUPABASE_GAP_ANALYSIS.md` — gaps и repos
 
 ---
 

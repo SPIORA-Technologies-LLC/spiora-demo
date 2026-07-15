@@ -58,7 +58,7 @@ export type AddressLoadSummary = {
 
 export type CroatiaAnalytics = {
   range: DateRange;
-  source: "google_sheets" | "demo";
+  source: "postgresql" | "google_sheets" | "demo";
   generatedAt: string;
   overview: {
     submitted: number;

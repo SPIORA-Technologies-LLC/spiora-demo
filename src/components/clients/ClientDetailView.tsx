@@ -47,9 +47,11 @@ export async function ClientDetailView({ detail }: ClientDetailViewProps) {
         <div className={styles.fieldRow}>
           <span className={styles.fieldLabel}>{t("source")}</span>
           <span className={styles.fieldValue}>
-            {detail.source === "google_sheets"
-              ? t("sourceSheets")
-              : t("sourceDemo")}
+            {detail.source === "postgresql"
+              ? t("sourcePostgresql")
+              : detail.source === "google_sheets"
+                ? t("sourceSheets")
+                : t("sourceDemo")}
             {client.rowIndex
               ? ` · ${t("rowIndex", { index: client.rowIndex })}`
               : null}

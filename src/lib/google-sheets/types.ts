@@ -82,7 +82,7 @@ export type ClientsListResult = {
   total: number;
   page: number;
   pageSize: number;
-  source: "google_sheets" | "demo";
+  source: "postgresql" | "google_sheets" | "demo";
 };
 
 export type ClientDetail = {
@@ -90,5 +90,5 @@ export type ClientDetail = {
   surveys: ClientSurvey[];
   documents: ClientDocument[];
   notes: ClientNote[];
-  source: "google_sheets" | "demo";
+  source: "postgresql" | "google_sheets" | "demo";
 };

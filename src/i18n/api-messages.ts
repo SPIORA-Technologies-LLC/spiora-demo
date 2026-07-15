@@ -5,11 +5,17 @@ import { translateMessage } from "./messages";
 
 export type ApiMessageKey =
   | "unauthorized"
+  | "forbidden"
   | "notFound"
   | "textRequired"
   | "noteSaveFailed"
   | "loadClientsFailed"
-  | "loadClientFailed";
+  | "loadClientFailed"
+  | "createClientFailed"
+  | "updateClientFailed"
+  | "archiveClientFailed"
+  | "validationFailed"
+  | "crmStorageUnavailable";
 
 export async function getRequestLocale(): Promise<AppLocale> {
   const cookieStore = await cookies();

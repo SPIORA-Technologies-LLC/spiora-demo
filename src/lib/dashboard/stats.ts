@@ -16,7 +16,7 @@ export type DashboardStats = {
   activeConsultations: number;
   aiRequestsThisMonth: number;
   sources: {
-    clients: "google_sheets" | "demo";
+    clients: "postgresql" | "google_sheets" | "demo";
     formgrid: "google_sheets" | "unavailable";
     ai: "workspace_chats" | "unavailable";
   };

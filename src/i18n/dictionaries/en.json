@@ -324,7 +324,8 @@
     },
     "sources": {
       "googleSheets": "Google Sheets",
-      "demo": "Demo data"
+      "demo": "Demo data",
+      "postgresql": "CRM (PostgreSQL)"
     },
     "table": {
       "name": "Name",
@@ -357,7 +358,7 @@
     },
     "detail": {
       "sectionTitle": "Clients · {name}",
-      "subtitle": "All client data from Google Sheets",
+      "subtitle": "CRM client profile",
       "backToList": "Back to clients",
       "fullName": "Full name",
       "passport": "Passport",
@@ -365,6 +366,7 @@
       "source": "Source",
       "sourceDemo": "Demo",
       "sourceSheets": "Google Sheets",
+      "sourcePostgresql": "CRM (PostgreSQL)",
       "rowIndex": "row {index}",
       "sheetData": "Spreadsheet data",
       "surveys": "Applications",
@@ -1556,11 +1558,17 @@
   },
   "api": {
     "unauthorized": "Access denied",
+    "forbidden": "Insufficient permissions",
     "notFound": "Not found",
     "textRequired": "Note text is required",
     "noteSaveFailed": "Failed to save note",
     "loadClientsFailed": "Failed to load clients",
-    "loadClientFailed": "Failed to load client"
+    "loadClientFailed": "Failed to load client",
+    "createClientFailed": "Failed to create client",
+    "updateClientFailed": "Failed to update client",
+    "archiveClientFailed": "Failed to archive client",
+    "validationFailed": "Please check the entered data",
+    "crmStorageUnavailable": "CRM storage is unavailable"
   },
   "knowledgeBase": {
     "title": "Knowledge Base",

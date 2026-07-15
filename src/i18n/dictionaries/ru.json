@@ -324,7 +324,8 @@
     },
     "sources": {
       "googleSheets": "Google Sheets",
-      "demo": "Демо-данные"
+      "demo": "Демо-данные",
+      "postgresql": "CRM (PostgreSQL)"
     },
     "table": {
       "name": "Имя",
@@ -357,7 +358,7 @@
     },
     "detail": {
       "sectionTitle": "Клиенты · {name}",
-      "subtitle": "Все данные клиента из Google Sheets",
+      "subtitle": "Карточка клиента CRM",
       "backToList": "К списку клиентов",
       "fullName": "ФИО",
       "passport": "Паспорт",
@@ -365,6 +366,7 @@
       "source": "Источник",
       "sourceDemo": "Демо",
       "sourceSheets": "Google Sheets",
+      "sourcePostgresql": "CRM (PostgreSQL)",
       "rowIndex": "строка {index}",
       "sheetData": "Данные из таблицы",
       "surveys": "Анкеты",
@@ -1554,11 +1556,17 @@
   },
   "api": {
     "unauthorized": "Доступ запрещён",
+    "forbidden": "Недостаточно прав",
     "notFound": "Не найдено",
     "textRequired": "Текст заметки обязателен",
     "noteSaveFailed": "Не удалось сохранить заметку",
     "loadClientsFailed": "Не удалось загрузить клиентов",
-    "loadClientFailed": "Не удалось загрузить клиента"
+    "loadClientFailed": "Не удалось загрузить клиента",
+    "createClientFailed": "Не удалось создать клиента",
+    "updateClientFailed": "Не удалось обновить клиента",
+    "archiveClientFailed": "Не удалось архивировать клиента",
+    "validationFailed": "Проверьте введённые данные",
+    "crmStorageUnavailable": "CRM-хранилище недоступно"
   },
   "knowledgeBase": {
     "title": "База знаний",

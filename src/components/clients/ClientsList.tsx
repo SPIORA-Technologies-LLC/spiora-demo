@@ -186,9 +186,11 @@ export function ClientsList() {
             ? t("errors.loadFailed")
             : t("meta.count", { count: total })}
         <span className={styles.source}>
-          {source === "google_sheets"
-            ? t("sources.googleSheets")
-            : t("sources.demo")}
+          {source === "postgresql"
+            ? t("sources.postgresql")
+            : source === "google_sheets"
+              ? t("sources.googleSheets")
+              : t("sources.demo")}
         </span>
       </p>
 

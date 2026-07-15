@@ -100,11 +100,11 @@ describe("branding config", () => {
     assert.equal(branding.liveKitRoomPrefix, "spiora-cal");
   });
 
-  it("points assets to logo3.png", () => {
+  it("points assets to logo3.png and icon1-based favicon", () => {
     assert.equal(branding.logoPath, "/logo3.png");
     assert.equal(branding.logoCompactPath, "/logo3-compact.png");
-    assert.equal(branding.iconPath, "/logo3.png");
-    assert.equal(branding.faviconPath, "/logo3.png");
+    assert.equal(branding.iconPath, "/icons/icon-512x512.png");
+    assert.equal(branding.faviconPath, "/icons/favicon-32x32.png");
   });
 });
 

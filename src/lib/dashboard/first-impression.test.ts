@@ -14,10 +14,10 @@ import {
 import { translateMessage } from "@/i18n/messages.ts";
 
 describe("PR #12 — First Impression branding", () => {
-  it("использует logo3.png везде", () => {
+  it("использует logo3.png и icon1 favicon", () => {
     assert.equal(branding.logoPath, "/logo3.png");
-    assert.equal(branding.iconPath, "/logo3.png");
-    assert.equal(branding.faviconPath, "/logo3.png");
+    assert.equal(branding.iconPath, "/icons/icon-512x512.png");
+    assert.equal(branding.faviconPath, "/icons/favicon-32x32.png");
   });
 
   it("brand slogan — logo / splash", () => {

@@ -397,7 +397,36 @@
       "placeholder": "Новая заметка…",
       "saving": "Сохранение…",
       "add": "Добавить заметку",
-      "empty": "Заметок пока нет"
+      "empty": "Заметок пока нет",
+      "edit": "Редактировать",
+      "save": "Сохранить",
+      "cancel": "Отмена",
+      "archive": "Архивировать"
+    },
+    "documents": {
+      "empty": "Документов пока нет",
+      "uploadHint": "Загрузка файлов будет доступна после настройки Storage."
+    },
+    "documentTypes": {
+      "passport_copy": "Копия паспорта",
+      "application_form": "Анкета заявления",
+      "employment_contract": "Трудовой договор",
+      "proof_of_address": "Подтверждение адреса",
+      "residence_permit": "Вид на жительство",
+      "client_questionnaire": "Анкета клиента",
+      "other": "Другое"
+    },
+    "documentStatuses": {
+      "uploaded": "Загружен",
+      "under_review": "На проверке",
+      "approved": "Одобрен",
+      "missing": "Отсутствует",
+      "expired": "Просрочен"
+    },
+    "documentStorage": {
+      "demo": "Демо",
+      "supabase": "Storage",
+      "pending": "Ожидание"
     },
     "ai": {
       "askButton": "Спросить AI по клиенту",

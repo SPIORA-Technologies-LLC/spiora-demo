@@ -397,7 +397,36 @@
       "placeholder": "New note…",
       "saving": "Saving…",
       "add": "Add note",
-      "empty": "No notes yet"
+      "empty": "No notes yet",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "archive": "Archive"
+    },
+    "documents": {
+      "empty": "No documents yet",
+      "uploadHint": "File upload will be enabled after Storage setup."
+    },
+    "documentTypes": {
+      "passport_copy": "Passport Copy",
+      "application_form": "Application Form",
+      "employment_contract": "Employment Contract",
+      "proof_of_address": "Proof of Address",
+      "residence_permit": "Residence Permit",
+      "client_questionnaire": "Client Questionnaire",
+      "other": "Other"
+    },
+    "documentStatuses": {
+      "uploaded": "Uploaded",
+      "under_review": "Under Review",
+      "approved": "Approved",
+      "missing": "Missing",
+      "expired": "Expired"
+    },
+    "documentStorage": {
+      "demo": "Demo",
+      "supabase": "Storage",
+      "pending": "Pending"
     },
     "ai": {
       "askButton": "Ask AI about client",

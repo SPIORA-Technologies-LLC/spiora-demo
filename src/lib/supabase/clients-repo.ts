@@ -98,6 +98,20 @@ export async function sbListClients(
   };
 }
 
+export async function sbGetClientUuidByExternalId(
+  externalId: string,
+): Promise<string | null> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("clients")
+    .select("id")
+    .eq("external_id", externalId)
+    .is("archived_at", null)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? String((data as { id: string }).id) : null;
+}
+
 export async function sbGetClientByExternalId(
   externalId: string,
 ): Promise<Client | null> {

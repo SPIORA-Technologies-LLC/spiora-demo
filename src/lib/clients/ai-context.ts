@@ -1,5 +1,15 @@
-import { formatClientForAi } from "@/lib/ai/format-client";
 import type { ClientDetail } from "@/lib/google-sheets/types";
+import { formatClientForAi } from "@/lib/ai/format-client";
+
+const MAX_NOTES_IN_CONTEXT = 8;
+const MAX_DOCUMENTS_IN_CONTEXT = 10;
+const MAX_NOTE_CHARS = 500;
+
+function trimText(value: string, max: number): string {
+  const trimmed = value.trim();
+  if (trimmed.length <= max) return trimmed;
+  return `${trimmed.slice(0, max)}…`;
+}
 
 export function buildClientAiContext(detail: ClientDetail): string {
   const { client, surveys, documents, notes } = detail;
@@ -7,6 +17,7 @@ export function buildClientAiContext(detail: ClientDetail): string {
   const surveysText =
     surveys.length > 0
       ? surveys
+          .slice(0, 5)
           .map(
             (s) =>
               `- ${s.title} (${s.filledAt}), статус: ${s.processingStatus}`,
@@ -17,13 +28,23 @@ export function buildClientAiContext(detail: ClientDetail): string {
   const docsText =
     documents.length > 0
       ? documents
-          .map((d) => `- ${d.name} [${d.category}], ${d.uploadedAt}`)
+          .slice(0, MAX_DOCUMENTS_IN_CONTEXT)
+          .map(
+            (d) =>
+              `- ${d.name} [${d.documentType ?? d.category}] · статус: ${d.status ?? "unknown"} · ${d.uploadedAt}`,
+          )
           .join("\n")
       : "Нет документов";
 
   const notesText =
     notes.length > 0
-      ? notes.map((n) => `${n.createdAt} (${n.author}): ${n.text}`).join("\n")
+      ? notes
+          .slice(0, MAX_NOTES_IN_CONTEXT)
+          .map(
+            (n) =>
+              `${n.createdAt} (${n.author}): ${trimText(n.text, MAX_NOTE_CHARS)}`,
+          )
+          .join("\n")
       : "Нет заметок";
 
   return `
@@ -35,7 +56,7 @@ Email: ${client.email}
 Анкеты:
 ${surveysText}
 
-Документы:
+Документы (метаданные):
 ${docsText}
 
 Заметки менеджеров:

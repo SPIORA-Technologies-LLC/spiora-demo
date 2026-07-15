@@ -1,20 +1,19 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import { getClientDetail } from "@/lib/google-sheets/service";
 import {
-  ClientNotesAccessError,
-  ClientNotesStorageError,
-  createClientNote,
-  listClientNotes,
-} from "@/lib/clients/client-notes-store";
+  ClientDocumentsAccessError,
+  ClientDocumentsStorageError,
+  createClientDocumentMetadata,
+  listClientDocuments,
+} from "@/lib/clients/client-documents-store";
 import { ClientDataValidationError } from "@/lib/clients/client-data-validation";
-import { mapNoteRecordToClientNote } from "@/lib/clients/client-data-map";
+import { mapDocumentPublicToClientDocument } from "@/lib/clients/client-data-map";
 import { getRequestLocale, translateApiMessage } from "@/i18n/api-messages";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
-function handleNotesError(error: unknown, locale: Awaited<ReturnType<typeof getRequestLocale>>) {
-  if (error instanceof ClientNotesAccessError) {
+function handleError(error: unknown, locale: Awaited<ReturnType<typeof getRequestLocale>>) {
+  if (error instanceof ClientDocumentsAccessError) {
     return NextResponse.json(
       { error: translateApiMessage(locale, "forbidden") },
       { status: 403 },
@@ -26,7 +25,7 @@ function handleNotesError(error: unknown, locale: Awaited<ReturnType<typeof getR
       { status: 400 },
     );
   }
-  if (error instanceof ClientNotesStorageError) {
+  if (error instanceof ClientDocumentsStorageError) {
     const status = error.message.includes("not found") ? 404 : 503;
     return NextResponse.json(
       {
@@ -39,7 +38,7 @@ function handleNotesError(error: unknown, locale: Awaited<ReturnType<typeof getR
     );
   }
   return NextResponse.json(
-    { error: translateApiMessage(locale, "noteSaveFailed") },
+    { error: translateApiMessage(locale, "loadClientFailed") },
     { status: 500 },
   );
 }
@@ -57,13 +56,13 @@ export async function GET(_request: Request, context: RouteContext) {
   const { id } = await context.params;
 
   try {
-    const result = await listClientNotes(id, session);
+    const result = await listClientDocuments(id, session);
     return NextResponse.json({
-      notes: result.items.map(mapNoteRecordToClientNote),
+      documents: result.items.map(mapDocumentPublicToClientDocument),
       source: result.source,
     });
   } catch (error) {
-    return handleNotesError(error, locale);
+    return handleError(error, locale);
   }
 }
 
@@ -78,24 +77,31 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const body = (await request.json()) as { text?: string };
-
-  const detail = await getClientDetail(id);
-  if (!detail) {
-    return NextResponse.json(
-      { error: translateApiMessage(locale, "notFound") },
-      { status: 404 },
-    );
-  }
+  const body = (await request.json()) as Record<string, unknown>;
 
   try {
-    await createClientNote(id, session, body.text ?? "");
-    const result = await listClientNotes(id, session);
+    const document = await createClientDocumentMetadata(id, session, {
+      fileName: typeof body.fileName === "string" ? body.fileName : "",
+      originalFileName:
+        typeof body.originalFileName === "string"
+          ? body.originalFileName
+          : undefined,
+      mimeType: typeof body.mimeType === "string" ? body.mimeType : undefined,
+      sizeBytes: typeof body.sizeBytes === "number" ? body.sizeBytes : undefined,
+      documentType:
+        typeof body.documentType === "string" ? body.documentType : undefined,
+      status: typeof body.status === "string" ? body.status : undefined,
+      storageProvider:
+        typeof body.storageProvider === "string"
+          ? body.storageProvider
+          : "demo",
+      storagePath:
+        typeof body.storagePath === "string" ? body.storagePath : undefined,
+    });
     return NextResponse.json({
-      notes: result.items.map(mapNoteRecordToClientNote),
-      source: result.source,
+      document: mapDocumentPublicToClientDocument(document),
     });
   } catch (error) {
-    return handleNotesError(error, locale);
+    return handleError(error, locale);
   }
 }

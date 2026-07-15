@@ -6,6 +6,7 @@ import { translateClientStatus } from "@/i18n/statuses";
 import type { AppLocale } from "@/i18n/config";
 import { Card } from "@/components/ui/Card";
 import { ClientAiActions } from "./ClientAiPanel";
+import { ClientDocuments } from "./ClientDocuments";
 import { ClientNotes } from "./ClientNotes";
 import styles from "./ClientDetailView.module.css";
 
@@ -90,21 +91,10 @@ export async function ClientDetailView({ detail }: ClientDetailViewProps) {
           </Card>
         ) : null}
 
-        {documents.length > 0 ? (
-          <Card className={styles.panel}>
-            <h2 className={styles.panelTitle}>{t("documents")}</h2>
-            <ul className={styles.itemList}>
-              {documents.map((d) => (
-                <li key={d.id} className={styles.item}>
-                  <span className={styles.itemTitle}>{d.name}</span>
-                  <span className={styles.itemMeta}>
-                    {d.category} · {d.uploadedAt}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        ) : null}
+        <Card className={styles.panel}>
+          <h2 className={styles.panelTitle}>{t("documents")}</h2>
+          <ClientDocuments documents={documents} source={detail.source} />
+        </Card>
       </div>
 
       <ClientAiActions clientId={client.id} clientName={client.name} />

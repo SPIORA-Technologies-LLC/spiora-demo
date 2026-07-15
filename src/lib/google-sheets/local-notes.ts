@@ -4,8 +4,6 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type { ClientNote } from "./types";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
-import * as sbNotes from "@/lib/supabase/client-notes-repo";
 
 const STORE_PATH = path.join(process.cwd(), ".data", "client-notes.json");
 
@@ -29,18 +27,10 @@ async function writeStore(store: NotesStore): Promise<void> {
   await writeFile(STORE_PATH, JSON.stringify(store, null, 2), "utf8");
 }
 
+/** Legacy .data store — used only when Google Sheets public clients mode is active. */
 export async function listLocalNotesByClientId(
   clientId: string,
 ): Promise<ClientNote[]> {
-  if (isSupabaseConfigured()) {
-    try {
-      return await sbNotes.sbListClientNotes(clientId);
-    } catch (error) {
-      console.error("[client-notes] supabase list", error);
-      return [];
-    }
-  }
-
   const store = await readStore();
   return store.notes
     .filter((note) => note.clientId === clientId)
@@ -60,16 +50,6 @@ export async function appendLocalNote(
     text,
   };
 
-  if (isSupabaseConfigured()) {
-    try {
-      await sbNotes.sbInsertClientNote(note);
-      return true;
-    } catch (error) {
-      console.error("[client-notes] supabase append", error);
-      return false;
-    }
-  }
-
   const store = await readStore();
   store.notes.push(note);
   await writeStore(store);
@@ -81,15 +61,6 @@ export async function updateLocalNote(
   clientId: string,
   text: string,
 ): Promise<boolean> {
-  if (isSupabaseConfigured()) {
-    try {
-      return await sbNotes.sbUpdateClientNote(noteId, clientId, text);
-    } catch (error) {
-      console.error("[client-notes] supabase update", error);
-      return false;
-    }
-  }
-
   const store = await readStore();
   const note = store.notes.find(
     (item) => item.id === noteId && item.clientId === clientId,

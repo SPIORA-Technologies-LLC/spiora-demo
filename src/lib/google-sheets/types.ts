@@ -57,7 +57,16 @@ export type ClientDocument = {
   clientId: string;
   name: string;
   uploadedAt: string;
+  /** @deprecated use documentType with i18n */
   category: string;
+  externalId?: string;
+  documentType?: string;
+  status?: string;
+  mimeType?: string;
+  sizeBytes?: number;
+  uploadedByName?: string;
+  storageState?: "demo" | "supabase" | "pending";
+  updatedAt?: string;
 };
 
 export type ClientNote = {
@@ -66,6 +75,7 @@ export type ClientNote = {
   createdAt: string;
   author: string;
   text: string;
+  updatedAt?: string;
   rowIndex?: number;
 };
 

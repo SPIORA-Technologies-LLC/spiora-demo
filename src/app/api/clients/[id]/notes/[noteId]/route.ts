@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
-import { getClientDetail } from "@/lib/google-sheets/service";
 import {
+  archiveClientNote,
   ClientNotesAccessError,
   ClientNotesStorageError,
-  createClientNote,
-  listClientNotes,
+  updateClientNote,
 } from "@/lib/clients/client-notes-store";
 import { ClientDataValidationError } from "@/lib/clients/client-data-validation";
 import { mapNoteRecordToClientNote } from "@/lib/clients/client-data-map";
 import { getRequestLocale, translateApiMessage } from "@/i18n/api-messages";
 
-type RouteContext = { params: Promise<{ id: string }> };
+type RouteContext = { params: Promise<{ id: string; noteId: string }> };
 
-function handleNotesError(error: unknown, locale: Awaited<ReturnType<typeof getRequestLocale>>) {
+function handleError(error: unknown, locale: Awaited<ReturnType<typeof getRequestLocale>>) {
   if (error instanceof ClientNotesAccessError) {
     return NextResponse.json(
       { error: translateApiMessage(locale, "forbidden") },
@@ -44,7 +43,7 @@ function handleNotesError(error: unknown, locale: Awaited<ReturnType<typeof getR
   );
 }
 
-export async function GET(_request: Request, context: RouteContext) {
+export async function PATCH(request: Request, context: RouteContext) {
   const session = await getSession();
   const locale = await getRequestLocale();
   if (!session) {
@@ -54,20 +53,18 @@ export async function GET(_request: Request, context: RouteContext) {
     );
   }
 
-  const { id } = await context.params;
+  const { id, noteId } = await context.params;
+  const body = (await request.json()) as { text?: string };
 
   try {
-    const result = await listClientNotes(id, session);
-    return NextResponse.json({
-      notes: result.items.map(mapNoteRecordToClientNote),
-      source: result.source,
-    });
+    const note = await updateClientNote(id, noteId, session, body.text ?? "");
+    return NextResponse.json({ note: mapNoteRecordToClientNote(note) });
   } catch (error) {
-    return handleNotesError(error, locale);
+    return handleError(error, locale);
   }
 }
 
-export async function POST(request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: RouteContext) {
   const session = await getSession();
   const locale = await getRequestLocale();
   if (!session) {
@@ -77,25 +74,12 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
-  const { id } = await context.params;
-  const body = (await request.json()) as { text?: string };
-
-  const detail = await getClientDetail(id);
-  if (!detail) {
-    return NextResponse.json(
-      { error: translateApiMessage(locale, "notFound") },
-      { status: 404 },
-    );
-  }
+  const { id, noteId } = await context.params;
 
   try {
-    await createClientNote(id, session, body.text ?? "");
-    const result = await listClientNotes(id, session);
-    return NextResponse.json({
-      notes: result.items.map(mapNoteRecordToClientNote),
-      source: result.source,
-    });
+    await archiveClientNote(id, noteId, session);
+    return NextResponse.json({ ok: true, archivedId: noteId });
   } catch (error) {
-    return handleNotesError(error, locale);
+    return handleError(error, locale);
   }
 }

@@ -38,11 +38,18 @@ import {
 import type {
   Client,
   ClientDetail,
+  ClientDocument,
   ClientFilters,
+  ClientNote,
   ClientsListResult,
 } from "@/lib/google-sheets/types";
 import * as sbClients from "@/lib/supabase/clients-repo";
-import * as sbNotes from "@/lib/supabase/client-notes-repo";
+import { listClientDocuments } from "@/lib/clients/client-documents-store";
+import { listClientNotes } from "@/lib/clients/client-notes-store";
+import {
+  mapDocumentPublicToClientDocument,
+  mapNoteRecordToClientNote,
+} from "@/lib/clients/client-data-map";
 
 const DEFAULT_PAGE_SIZE = 25;
 
@@ -163,12 +170,30 @@ export async function listClients(
   );
 }
 
-async function loadPostgresClientNotes(clientId: string) {
+async function loadPostgresClientDetailData(
+  clientExternalId: string,
+  user?: SessionUser,
+): Promise<{ notes: ClientNote[]; documents: ClientDocument[] }> {
+  const systemUser: SessionUser = user ?? {
+    id: "system",
+    email: "system@spiora.demo",
+    name: "System",
+    role: "owner",
+  };
+
   try {
-    return await sbNotes.sbListClientNotes(clientId);
+    const [notesResult, documentsResult] = await Promise.all([
+      listClientNotes(clientExternalId, systemUser),
+      listClientDocuments(clientExternalId, systemUser),
+    ]);
+
+    return {
+      notes: notesResult.items.map(mapNoteRecordToClientNote),
+      documents: documentsResult.items.map(mapDocumentPublicToClientDocument),
+    };
   } catch (error) {
-    console.error("[crm-store] client notes load failed", error);
-    return [];
+    console.error("[crm-store] client detail data load failed", error);
+    return { notes: [], documents: [] };
   }
 }
 
@@ -178,11 +203,11 @@ export async function getClientDetail(id: string): Promise<ClientDetail | null> 
     async () => {
       const client = await sbClients.sbGetClientByExternalId(id);
       if (!client) return null;
-      const notes = await loadPostgresClientNotes(id);
+      const { notes, documents } = await loadPostgresClientDetailData(id);
       return {
         client,
         surveys: [],
-        documents: [],
+        documents,
         notes,
         source: toApiSource("postgresql"),
       };
@@ -342,11 +367,18 @@ export async function addClientNote(
   clientId: string,
   author: string,
   text: string,
+  user?: SessionUser,
 ): Promise<boolean> {
   if (isCrmPostgresPrimary()) {
-    const detail = await getClientDetail(clientId);
-    if (!detail) return false;
-    return appendLocalNote(clientId, author, text);
+    if (!user) return false;
+    try {
+      const { createClientNote } = await import("@/lib/clients/client-notes-store");
+      await createClientNote(clientId, user, text);
+      return true;
+    } catch (error) {
+      console.error("[crm-store] addClientNote postgres failed", error);
+      return false;
+    }
   }
 
   if (sheetsConfigured()) {
@@ -365,9 +397,20 @@ export async function updateClientNote(
   clientId: string,
   text: string,
   rowIndex?: number,
+  user?: SessionUser,
 ): Promise<boolean> {
   if (isCrmPostgresPrimary()) {
-    return updateLocalNote(noteId, clientId, text);
+    if (!user) return false;
+    try {
+      const { updateClientNote: updateNoteInPostgres } = await import(
+        "@/lib/clients/client-notes-store"
+      );
+      await updateNoteInPostgres(clientId, noteId, user, text);
+      return true;
+    } catch (error) {
+      console.error("[crm-store] updateClientNote postgres failed", error);
+      return false;
+    }
   }
 
   if (sheetsConfigured()) {

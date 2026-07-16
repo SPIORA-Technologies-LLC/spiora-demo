@@ -34,16 +34,28 @@ describe("system health", () => {
     assert.equal(report.storage, "disabled");
     assert.equal(report.google, "disabled");
     assert.equal(report.ai, "disabled");
-    assert.equal(report.auth, "ok");
+    assert.equal(report.auth, "warning");
+    assert.equal(report.session, "warning");
+    assert.equal(report.rbac, "warning");
     assert.match(report.version, /^\d+\.\d+\.\d+$/);
   });
 
-  it("без AUTH_SECRET в production — auth error", async () => {
+  it("без AUTH_SECRET в production — auth disabled", async () => {
     process.env.NODE_ENV = "production";
     delete process.env.AUTH_SECRET;
 
     const report = await getSystemHealth();
-    assert.equal(report.auth, "error");
+    assert.equal(report.auth, "disabled");
+    assert.equal(report.session, "disabled");
+  });
+
+  it("с AUTH_SECRET auth становится ok", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.AUTH_SECRET = "strong-test-secret";
+    const report = await getSystemHealth();
+    assert.equal(report.auth, "ok");
+    assert.equal(report.session, "warning");
+    assert.equal(report.rbac, "warning");
   });
 
   it("не содержит URL, project ref и ключей", async () => {

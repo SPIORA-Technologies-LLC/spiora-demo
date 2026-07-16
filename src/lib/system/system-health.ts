@@ -11,6 +11,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export type HealthStatus =
   | "ok"
+  | "warning"
   | "degraded"
   | "error"
   | "disabled"
@@ -20,6 +21,8 @@ export type SystemHealthReport = {
   postgresql: HealthStatus;
   storage: HealthStatus;
   auth: HealthStatus;
+  session: HealthStatus;
+  rbac: HealthStatus;
   google: HealthStatus;
   ai: HealthStatus;
   version: string;
@@ -40,6 +43,10 @@ function isAuthConfigured(): boolean {
   const secret = process.env.AUTH_SECRET?.trim();
   if (secret) return true;
   return process.env.NODE_ENV !== "production";
+}
+
+function usesDevFallbackAuthSecret(): boolean {
+  return !process.env.AUTH_SECRET?.trim() && process.env.NODE_ENV !== "production";
 }
 
 async function probePostgresql(): Promise<HealthStatus> {
@@ -73,7 +80,19 @@ async function probeStorage(): Promise<HealthStatus> {
 }
 
 function probeAuth(): HealthStatus {
-  return isAuthConfigured() ? "ok" : "error";
+  if (!isAuthConfigured()) return "disabled";
+  return usesDevFallbackAuthSecret() ? "warning" : "ok";
+}
+
+function probeSession(): HealthStatus {
+  if (!isAuthConfigured()) return "disabled";
+  // Demo session is a single long-lived JWT cookie with no refresh/revocation.
+  return "warning";
+}
+
+function probeRbac(): HealthStatus {
+  // Runtime RBAC exists, but only owner/manager roles are implemented today.
+  return "warning";
 }
 
 function probeGoogle(): HealthStatus {
@@ -114,6 +133,8 @@ export async function getSystemHealth(): Promise<SystemHealthReport> {
     postgresql,
     storage,
     auth: probeAuth(),
+    session: probeSession(),
+    rbac: probeRbac(),
     google: probeGoogle(),
     ai: probeAi(),
     version: readAppVersion(),

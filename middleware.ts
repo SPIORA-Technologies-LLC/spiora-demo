@@ -2,7 +2,10 @@ import createIntlMiddleware from "next-intl/middleware";
 import { NextResponse, type NextRequest } from "next/server";
 import { routing } from "@/i18n/config";
 import { canAccessPath } from "@/lib/auth/permissions";
+import { resolveSessionFromAuthUserId } from "@/lib/auth/middleware-session";
+import { getAuthProvider } from "@/lib/auth/provider";
 import { getSessionFromToken } from "@/lib/auth/session";
+import { updateSupabaseAuthSession } from "@/lib/supabase/middleware-auth";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -45,37 +48,77 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = request.cookies.get("spiora_session")?.value;
-  const session = await getSessionFromToken(token);
+  const provider = getAuthProvider();
+  let session = null as Awaited<ReturnType<typeof getSessionFromToken>>;
+  let supabaseResponse: NextResponse | null = null;
+
+  if (provider === "supabase") {
+    const refreshed = await updateSupabaseAuthSession(request);
+    supabaseResponse = refreshed.response;
+    session = await resolveSessionFromAuthUserId(refreshed.user?.id ?? null);
+  } else {
+    const token = request.cookies.get("spiora_session")?.value;
+    session = await getSessionFromToken(token);
+  }
 
   if (pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = session ? "/dashboard" : "/login";
-    return NextResponse.redirect(url);
+    const redirect = NextResponse.redirect(url);
+    if (supabaseResponse) {
+      for (const cookie of supabaseResponse.cookies.getAll()) {
+        redirect.cookies.set(cookie);
+      }
+    }
+    return redirect;
   }
 
   if (isPublicPath(pathname)) {
     if (session && pathname === "/login") {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+      const redirect = NextResponse.redirect(url);
+      if (supabaseResponse) {
+        for (const cookie of supabaseResponse.cookies.getAll()) {
+          redirect.cookies.set(cookie);
+        }
+      }
+      return redirect;
     }
   } else if (isProtectedPath(pathname)) {
     if (!session) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("next", pathname);
-      return NextResponse.redirect(url);
+      const redirect = NextResponse.redirect(url);
+      if (supabaseResponse) {
+        for (const cookie of supabaseResponse.cookies.getAll()) {
+          redirect.cookies.set(cookie);
+        }
+      }
+      return redirect;
     }
 
     if (!canAccessPath(session.role, pathname)) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
+      const redirect = NextResponse.redirect(url);
+      if (supabaseResponse) {
+        for (const cookie of supabaseResponse.cookies.getAll()) {
+          redirect.cookies.set(cookie);
+        }
+      }
+      return redirect;
     }
   }
 
-  return intlMiddleware(request);
+  const intlResponse = intlMiddleware(request);
+  if (supabaseResponse) {
+    for (const cookie of supabaseResponse.cookies.getAll()) {
+      intlResponse.cookies.set(cookie);
+    }
+  }
+  return intlResponse;
 }
 
 export const config = {

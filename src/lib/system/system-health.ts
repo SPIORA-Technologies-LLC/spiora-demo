@@ -7,7 +7,15 @@ import {
   isExternalAiIntegrationEnabled,
   isSupabaseIntegrationEnabled,
 } from "@/lib/demo/integration-policy";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import {
+  isSupabaseAuthConfigured,
+  isSupabaseConfigured,
+} from "@/lib/supabase/config";
+import {
+  getAuthProvider,
+  resolveAuthProvider,
+  type AuthProvider,
+} from "@/lib/auth/provider";
 
 export type HealthStatus =
   | "ok"
@@ -20,7 +28,9 @@ export type HealthStatus =
 export type SystemHealthReport = {
   postgresql: HealthStatus;
   storage: HealthStatus;
+  authProvider: AuthProvider;
   auth: HealthStatus;
+  profiles: HealthStatus;
   session: HealthStatus;
   rbac: HealthStatus;
   google: HealthStatus;
@@ -39,7 +49,7 @@ function readAppVersion(): string {
   }
 }
 
-function isAuthConfigured(): boolean {
+function isLegacyAuthSecretConfigured(): boolean {
   const secret = process.env.AUTH_SECRET?.trim();
   if (secret) return true;
   return process.env.NODE_ENV !== "production";
@@ -79,19 +89,50 @@ async function probeStorage(): Promise<HealthStatus> {
   }
 }
 
-function probeAuth(): HealthStatus {
-  if (!isAuthConfigured()) return "disabled";
+function probeAuth(provider: AuthProvider): HealthStatus {
+  if (provider === "supabase") {
+    if (!isSupabaseAuthConfigured()) return "disabled";
+    if (!isSupabaseConfigured()) return "warning";
+    return "ok";
+  }
+
+  if (!isLegacyAuthSecretConfigured()) return "disabled";
   return usesDevFallbackAuthSecret() ? "warning" : "ok";
 }
 
-function probeSession(): HealthStatus {
-  if (!isAuthConfigured()) return "disabled";
-  // Demo session is a single long-lived JWT cookie with no refresh/revocation.
+async function probeProfiles(provider: AuthProvider): Promise<HealthStatus> {
+  if (provider !== "supabase") return "disabled";
+  if (!isSupabaseConfigured()) return "unavailable";
+
+  try {
+    const { getSupabaseAdmin } = await import("@/lib/supabase/server");
+    const { error } = await getSupabaseAdmin()
+      .from("user_profiles")
+      .select("id", { count: "exact", head: true })
+      .limit(1);
+
+    if (error) {
+      // Table may not exist yet before migration 024 is applied.
+      return "unavailable";
+    }
+    return "ok";
+  } catch {
+    return "error";
+  }
+}
+
+function probeSession(provider: AuthProvider): HealthStatus {
+  if (provider === "supabase") {
+    if (!isSupabaseAuthConfigured()) return "disabled";
+    return "ok";
+  }
+
+  if (!isLegacyAuthSecretConfigured()) return "disabled";
+  // Legacy JWT: no refresh/revocation.
   return "warning";
 }
 
 function probeRbac(): HealthStatus {
-  // Runtime RBAC exists, but only owner/manager roles are implemented today.
   return "warning";
 }
 
@@ -124,16 +165,23 @@ function probeAi(): HealthStatus {
 }
 
 export async function getSystemHealth(): Promise<SystemHealthReport> {
-  const [postgresql, storage] = await Promise.all([
+  const provider = getAuthProvider();
+  const resolution = resolveAuthProvider();
+  void resolution;
+
+  const [postgresql, storage, profiles] = await Promise.all([
     probePostgresql(),
     probeStorage(),
+    probeProfiles(provider),
   ]);
 
   return {
     postgresql,
     storage,
-    auth: probeAuth(),
-    session: probeSession(),
+    authProvider: provider,
+    auth: probeAuth(provider),
+    profiles,
+    session: probeSession(provider),
     rbac: probeRbac(),
     google: probeGoogle(),
     ai: probeAi(),

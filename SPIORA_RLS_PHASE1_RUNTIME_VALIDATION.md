@@ -1,96 +1,107 @@
 # SPIORA — RLS Phase 1 Runtime Validation
 
-**PR #18.** Статус на момент подготовки: migration **не применена**.
-
-Заполнять после ручного apply на demo.
+**PR #18.1.** Migration **применена** на demo Supabase (2026-07-17).  
+**Среда проверки:** localhost (`npm run dev`), не Vercel.
 
 ## Preflight (до apply)
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| Auth users | 4 | _pending_ | ☐ |
-| Active profiles | 4 | _pending_ | ☐ |
-| Active owners | 1 | _pending_ | ☐ |
-| Clients | 25 | _pending_ | ☐ |
-| Orphan notes | 0 | _pending_ | ☐ |
-| Orphan documents | 0 | _pending_ | ☐ |
-| notes без client_uuid | 0 | _pending_ | ☐ |
-| Profiles без auth_user_id | 0 | _pending_ | ☐ |
-| Role/status constraints | present | _pending_ | ☐ |
+| Auth users | 4 | 4 | ✅ |
+| Active profiles | 4 | 4 | ✅ |
+| Active owners | 1 | 1 | ✅ |
+| Active managers | 3 | 3 | ✅ |
+| Clients | 25 | 25 | ✅ |
+| Orphan notes | 0 | 0 | ✅ |
+| Orphan documents | 0 | 0 | ✅ |
+| notes без client_uuid | 0 | 0 | ✅ |
+| Profiles без auth_user_id | 0 | 0 | ✅ |
+| Auth users without profile | 0 | 0 | ✅ |
+| Role/status constraints | present | 2 rows | ✅ |
 
-**Preflight verdict:** ☐ SAFE TO APPLY / ☐ NOT SAFE TO APPLY
+**Preflight verdict:** ✅ **SAFE TO APPLY**
 
 ## Post-apply SQL
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| `spiora_rls_phase1_status()` | enabled | _pending_ | ☐ |
-| RLS on 4 tables | true | _pending_ | ☐ |
-| Policy count Phase 1 | ≥ 16 | _pending_ | ☐ |
+| `spiora_rls_phase1_status()` | enabled | enabled | ✅ |
+| RLS on 4 tables | true | true (все 4) | ✅ |
+| Policy count Phase 1 | ≥ 16 | не считали отдельно | ☐ |
 
 ## Anonymous
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| SELECT clients без session | denied/empty | _pending_ | ☐ |
-| SELECT user_profiles | denied/empty | _pending_ | ☐ |
+| SELECT clients без session | denied/empty | _не проверено_ | ☐ |
+| SELECT user_profiles | denied/empty | _не проверено_ | ☐ |
 
 ## Olivia owner
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| Profiles / self | OK | _pending_ | ☐ |
-| Clients CRUD + archive | OK | _pending_ | ☐ |
-| Notes CRUD | OK | _pending_ | ☐ |
-| Documents create/update/archive | OK | _pending_ | ☐ |
+| Login / session | OK | OK (localhost) | ✅ |
+| Profiles / self | OK | _не проверено отдельно_ | ☐ |
+| Clients CRUD + archive | OK | _не проверено отдельно_ | ☐ |
+| Notes CRUD | OK | _не проверено отдельно_ | ☐ |
+| Documents create/update/archive | OK | _не проверено отдельно_ | ☐ |
 
 ## Daniel manager
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| Clients read/create/update | OK | _pending_ | ☐ |
-| Client archive | denied | _pending_ | ☐ |
-| Notes CRUD | OK | _pending_ | ☐ |
-| Documents read/create/update | OK | _pending_ | ☐ |
-| Document archive | denied | _pending_ | ☐ |
-| Role/status profile change | denied | _pending_ | ☐ |
+| Clients read/create/update | OK | _не проверено_ | ☐ |
+| Client archive | denied | _не проверено_ | ☐ |
+| Notes CRUD | OK | _не проверено_ | ☐ |
+| Documents read/create/update | OK | _не проверено_ | ☐ |
+| Document archive | denied | _не проверено_ | ☐ |
+| Role/status profile change | denied | _не проверено_ | ☐ |
 
 ## Suspended / abuse
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| Suspended data access | denied | _pending_ | ☐ |
-| Cross-client note ID | denied | _pending_ | ☐ |
-| Role self-escalate | denied | _pending_ | ☐ |
-| Hard delete | denied | _pending_ | ☐ |
-| Подмена client_uuid | denied | _pending_ | ☐ |
+| Suspended data access | denied | _не проверено_ | ☐ |
+| Cross-client note ID | denied | _не проверено_ | ☐ |
+| Role self-escalate | denied | _не проверено_ | ☐ |
+| Hard delete | denied | _не проверено_ | ☐ |
+| Подмена client_uuid | denied | _не проверено_ | ☐ |
 
-## App regression (service_role)
+## App regression (service_role path)
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| Supabase login | OK | _pending_ | ☐ |
-| CRM | OK | _pending_ | ☐ |
-| Notes / documents | OK | _pending_ | ☐ |
-| Dashboard KPI | OK | _pending_ | ☐ |
-| Owner/manager RBAC | OK | _pending_ | ☐ |
-| Google off | OK | _pending_ | ☐ |
-| Health `rls` / `rlsPhase` | enabled / phase1 | _pending_ | ☐ |
+| Supabase login (Olivia) | OK | OK (localhost) | ✅ |
+| App opens after login | OK | OK | ✅ |
+| CRM | OK | _не проверено отдельно_ | ☐ |
+| Notes / documents | OK | _не проверено отдельно_ | ☐ |
+| Dashboard KPI | OK | _не проверено отдельно_ | ☐ |
+| Owner/manager RBAC | OK | _не проверено отдельно_ | ☐ |
+| Google off | OK | env off | ✅ |
+| Health `rls` / `rlsPhase` | enabled / phase1 | _не проверено в API_ | ☐ |
+
+## Заметки
+
+- Backup на Free plan недоступен; rollback: `SPIORA_SUPABASE_PATCH_025_RLS_ROLLBACK.sql`.
+- Vercel **не использовался** для login (старая версия кода / другой auth path).
+- `npm run dev` на Windows: использовать `npm.cmd run dev` при блокировке PowerShell ExecutionPolicy.
 
 ## Итоговые вердикты (после validation)
 
 | Вердикт | Статус |
 | --- | --- |
-| SAFE TO COMMIT | ✅ да (npm test 607 pass; npm run build OK; migration не применена) |
-| SAFE TO APPLY RLS | ❌ **NOT SAFE TO APPLY** до явного подтверждения + зелёного preflight |
-| SAFE TO ENABLE AUTH ON VERCEL | ❌ **NOT SAFE** до успешного apply и этой validation |
+| SAFE TO COMMIT | ✅ да |
+| SAFE TO PUSH | ✅ да |
+| SAFE TO APPLY RLS | ✅ **применено**, preflight + SQL verification OK |
+| SAFE TO ENABLE AUTH ON VERCEL | ❌ **NOT SAFE** — нужны полный browser/API validation + deploy с env |
 
-## Подготовка PR (до apply) — checklist артефактов
+## Подготовка PR — checklist артефактов
 
 | Артефакт | Готов |
 | --- | --- |
-| migration 025 | ✅ |
+| migration 025 | ✅ applied |
 | patch + rollback | ✅ |
 | policy shape tests | ✅ |
 | health rls fields | ✅ |
 | docs (report/matrix/runbook/threat) | ✅ |
+| runtime validation (partial) | ✅ этот файл |

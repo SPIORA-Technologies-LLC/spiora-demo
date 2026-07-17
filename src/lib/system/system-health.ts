@@ -25,6 +25,8 @@ export type HealthStatus =
   | "disabled"
   | "unavailable";
 
+export type RlsHealthStatus = "enabled" | "disabled" | "warning";
+
 export type SystemHealthReport = {
   postgresql: HealthStatus;
   storage: HealthStatus;
@@ -33,6 +35,9 @@ export type SystemHealthReport = {
   profiles: HealthStatus;
   session: HealthStatus;
   rbac: HealthStatus;
+  /** Phase 1 RLS surface status. Never includes policy names or SQL. */
+  rls: RlsHealthStatus;
+  rlsPhase: "phase1";
   google: HealthStatus;
   ai: HealthStatus;
   version: string;
@@ -136,6 +141,30 @@ function probeRbac(): HealthStatus {
   return "warning";
 }
 
+async function probeRls(): Promise<RlsHealthStatus> {
+  if (!isSupabaseIntegrationEnabled()) return "disabled";
+  if (!isSupabaseConfigured()) return "disabled";
+
+  try {
+    const { getSupabaseAdmin } = await import("@/lib/supabase/server");
+    const { data, error } = await getSupabaseAdmin().rpc(
+      "spiora_rls_phase1_status",
+    );
+
+    if (error) {
+      // Function missing until migration 025 is applied.
+      return "disabled";
+    }
+
+    if (data === "enabled" || data === "disabled" || data === "warning") {
+      return data;
+    }
+    return "warning";
+  } catch {
+    return "warning";
+  }
+}
+
 function probeGoogle(): HealthStatus {
   if (!isSupabaseIntegrationEnabled() && !areGoogleIntegrationsEnabled()) {
     return "disabled";
@@ -169,10 +198,11 @@ export async function getSystemHealth(): Promise<SystemHealthReport> {
   const resolution = resolveAuthProvider();
   void resolution;
 
-  const [postgresql, storage, profiles] = await Promise.all([
+  const [postgresql, storage, profiles, rls] = await Promise.all([
     probePostgresql(),
     probeStorage(),
     probeProfiles(provider),
+    probeRls(),
   ]);
 
   return {
@@ -183,6 +213,8 @@ export async function getSystemHealth(): Promise<SystemHealthReport> {
     profiles,
     session: probeSession(provider),
     rbac: probeRbac(),
+    rls,
+    rlsPhase: "phase1",
     google: probeGoogle(),
     ai: probeAi(),
     version: readAppVersion(),

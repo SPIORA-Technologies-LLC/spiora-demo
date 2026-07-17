@@ -43,6 +43,8 @@ describe("system health", () => {
     assert.equal(report.profiles, "disabled");
     assert.equal(report.session, "warning");
     assert.equal(report.rbac, "warning");
+    assert.equal(report.rls, "disabled");
+    assert.equal(report.rlsPhase, "phase1");
     assert.match(report.version, /^\d+\.\d+\.\d+$/);
   });
 
@@ -76,5 +78,13 @@ describe("system health", () => {
     assert.doesNotMatch(serialized, /service_role/i);
     assert.doesNotMatch(serialized, /eyJ[A-Za-z0-9_-]{10,}/);
     assert.doesNotMatch(serialized, /@spiora\.demo/i);
+    assert.doesNotMatch(serialized, /rls_p1_/i);
+    assert.doesNotMatch(serialized, /create policy/i);
+  });
+
+  it("всегда сообщает rlsPhase phase1 без внутренних ID", async () => {
+    const report = await getSystemHealth();
+    assert.equal(report.rlsPhase, "phase1");
+    assert.ok(["enabled", "disabled", "warning"].includes(report.rls));
   });
 });

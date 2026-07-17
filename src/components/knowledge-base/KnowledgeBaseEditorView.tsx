@@ -198,7 +198,18 @@ export function KnowledgeBaseEditorView({
         setError(t("editor.errors.slugTaken"));
         return;
       }
-      if (!res.ok) throw new Error("save failed");
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as {
+          code?: string;
+          error?: string;
+        } | null;
+        setError(
+          data?.code
+            ? `${t("errors.saveFailed")} (${data.code})`
+            : t("errors.saveFailed"),
+        );
+        return;
+      }
 
       if (mode === "create") {
         const data = (await res.json()) as { article: { slug: string } };

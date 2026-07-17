@@ -8,6 +8,11 @@ describe("Knowledge Base slug helpers", () => {
     assert.equal(slugifyKbTitle("  New CRM Process  "), "new-crm-process");
   });
 
+  it("slugifyKbTitle strips non-ASCII so slug matches API normalize", () => {
+    assert.equal(slugifyKbTitle("Новая политика компании"), "article");
+    assert.equal(slugifyKbTitle("Policy 2026 — CRM"), "policy-2026-crm");
+  });
+
   it("suggestDuplicateSlug increments copy suffix", () => {
     assert.equal(suggestDuplicateSlug("my-article"), "my-article-copy");
     assert.equal(suggestDuplicateSlug("my-article", 2), "my-article-copy-2");
@@ -22,5 +27,13 @@ describe("Knowledge Base AI draft generator", () => {
     assert.ok(draft.translations.ru.content.includes("##"));
     assert.equal(draft.translations.en.title.length > 0, true);
     assert.equal(draft.translations.ru.title.length > 0, true);
+  });
+
+  it("Russian prompt does not copy Cyrillic into EN title", () => {
+    const draft = generateKbAiDraft("Рабочая этика");
+    assert.doesNotMatch(draft.translations.en.title, /[А-Яа-яЁё]/);
+    assert.match(draft.translations.ru.title, /Рабочая этика/);
+    assert.match(draft.translations.en.title, /Rabochaya|Etika|Draft/i);
+    assert.doesNotMatch(draft.translations.en.content.split("\n")[2] ?? "", /[А-Яа-яЁё]/);
   });
 });

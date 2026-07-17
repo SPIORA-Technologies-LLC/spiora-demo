@@ -14,6 +14,7 @@ import type {
   KbArticleListItem,
   KbListingResponse,
 } from "@/lib/knowledge-base/types";
+import { buildKbListQuery } from "@/lib/knowledge-base/kb-locale";
 import { Card } from "@/components/ui/Card";
 import { KbArticleMarkdown } from "./KbArticleMarkdown";
 
@@ -76,15 +77,18 @@ export function KnowledgeBaseView() {
     setLoading(true);
     setSearchError(false);
     try {
-      const params = new URLSearchParams();
-      if (query) params.set("q", query);
-      if (category) params.set("category", category);
-      if (tag) params.set("tag", tag);
-      if (articleSlug) params.set("article", articleSlug);
-      if (currentFolderId) params.set("folderId", currentFolderId);
-      if (statusFilter) params.set("status", statusFilter);
-      const qs = params.toString();
-      const res = await fetch(`/api/knowledge-base${qs ? `?${qs}` : ""}`);
+      const qs = buildKbListQuery({
+        locale,
+        q: query,
+        category,
+        tag,
+        article: articleSlug,
+        folderId: currentFolderId,
+        status: statusFilter,
+      });
+      const res = await fetch(`/api/knowledge-base?${qs}`, {
+        cache: "no-store",
+      });
       if (!res.ok) throw new Error("fetch failed");
       const data = (await res.json()) as ApiResponse;
       setListing(data);
@@ -94,7 +98,7 @@ export function KnowledgeBaseView() {
     } finally {
       setLoading(false);
     }
-  }, [query, category, tag, articleSlug, currentFolderId, statusFilter]);
+  }, [locale, query, category, tag, articleSlug, currentFolderId, statusFilter]);
 
   useEffect(() => {
     void fetchListing();

@@ -39,6 +39,9 @@ function emptyPostgresListing(
     categoryFilter: params.category as KbListingResponse["categoryFilter"],
     tagFilter: params.tag,
     errorMessage: translateKnowledgeBaseMessage(locale, "empty.unconfigured"),
+    requestedLocale: locale,
+    resolvedLocale: locale,
+    fallbackUsed: false,
   };
 }
 

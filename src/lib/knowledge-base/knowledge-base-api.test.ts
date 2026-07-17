@@ -70,10 +70,11 @@ describe("Knowledge Base seed audit (026)", () => {
     assert.doesNotMatch(sql, /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
   });
 
-  it("апострофы SQL-экранированы", () => {
-    assert.match(sql, /client''s direction/);
-    assert.match(sql, /today''s priorities/);
-    assert.doesNotMatch(sql, /[^']client's[^']/);
+  it("длинный текст в dollar-quote (апострофы не ломают SQL)", () => {
+    assert.match(sql, /\$kb_[a-z0-9_]+\$/);
+    assert.match(sql, /client's direction/);
+    assert.match(sql, /today's priorities/);
+    assert.doesNotMatch(sql, /client''s direction/);
   });
 
   it("deep links slug совпадают с demo-articles", () => {
@@ -145,10 +146,45 @@ describe("Knowledge Base API validation", () => {
   it("пустой content отклоняется", () => {
     const parsed = parseKbCreateBody({
       ...validBody,
+      status: "published",
       translations: [{ locale: "en", title: "T", summary: "S", content: "  " }],
     });
     assert.equal(parsed.ok, false);
     if (!parsed.ok) assert.equal(parsed.error, "empty_field");
+  });
+
+  it("draft допускает пустую вторую локаль и пустой summary/content", () => {
+    const parsed = parseKbCreateBody({
+      ...validBody,
+      status: "draft",
+      translations: [
+        { locale: "en", title: "Draft EN", summary: "", content: "" },
+        { locale: "ru", title: "", summary: "", content: "" },
+      ],
+    });
+    assert.equal(parsed.ok, true);
+    if (parsed.ok) {
+      assert.equal(parsed.data.translations.length, 1);
+      assert.equal(parsed.data.translations[0]?.locale, "en");
+      assert.equal(parsed.data.translations[0]?.summary, "");
+    }
+  });
+
+  it("publish требует обе локали полностью", () => {
+    const parsed = parseKbCreateBody({
+      ...validBody,
+      status: "published",
+      translations: [
+        { locale: "en", title: "EN", summary: "S", content: "C" },
+        { locale: "ru", title: "", summary: "", content: "" },
+      ],
+    });
+    assert.equal(parsed.ok, false);
+    if (!parsed.ok) assert.equal(parsed.error, "empty_field");
+  });
+
+  it("кириллический slug отклоняется normalizeKbSlug", () => {
+    assert.equal(normalizeKbSlug("новая-политика"), null);
   });
 
   it("authorKey вне whitelist отклоняется", () => {

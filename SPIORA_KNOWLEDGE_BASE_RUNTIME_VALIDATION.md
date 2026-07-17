@@ -1,49 +1,110 @@
 # SPIORA — Knowledge Base Runtime Validation
 
-**PR #19.** Статус: **pre-apply audit** — migration не применена на demo Supabase.
+**PR #19 / #19.3.** Статус: **awaiting manual cutover** — migration 026 **не** применена агентом.
 
-## Automated (local CI)
+**HEAD (required):**
+- `0fcab21` — production baseline  
+- `243d276` — Supabase Knowledge Base with owner editor (`243d276…` full)
+
+## Automated (local CI) — code already committed
 
 | Check | Status | Notes |
 | --- | --- | --- |
-| `npm test` | ✔ pass (619 tests) | includes `kb-policy-shape`, `knowledge-base-config` |
-| `npm run build` | ✔ pass | Next.js 15.5.18 |
-| Migration shape tests | ✔ local | 7 policies, 2 tables, hard-delete guard |
-| Seed shape tests | ✔ local | 15 slugs × EN/RU |
+| `npm test` | ✔ 644 pass | kb-policy-shape, api, editor, config |
+| `npm run build` | ✔ pass | Next.js 15.5.x |
+| Migration / seed shape tests | ✔ | local file audits |
 
-## Pre-apply database (NOT RUN)
+## Cutover artifacts (PR #19.3)
+
+| File | Role |
+| --- | --- |
+| `SPIORA_KB_CUTOVER_CHECKLIST.md` | Strict manual order |
+| `SPIORA_KB_PREFLIGHT_026.sql` | Read-only preflight |
+| `SPIORA_KB_VALIDATE_026.sql` | Post-apply SQL validation |
+| `SPIORA_SUPABASE_PATCH_026_KNOWLEDGE_BASE.sql` | Apply schema |
+| `SPIORA_KNOWLEDGE_BASE_SEED_026.sql` | Seed 15×EN+RU |
+| `SPIORA_SUPABASE_PATCH_026_KNOWLEDGE_BASE_ROLLBACK.sql` | Emergency rollback |
+
+## Pre-apply database
 
 | Check | Expected | Actual |
 | --- | --- | --- |
-| Tables exist | 2 tables | ⏸ not applied |
-| Published articles | 15 | ⏸ |
-| Translations EN/RU | 15 each | ⏸ |
-| RLS enabled | yes | ⏸ |
+| Backup taken | yes | ⏸ awaiting operator |
+| Preflight PASS | no FAIL rows | ⏸ |
+| Tables before apply | absent or shape_ok | ⏸ |
 
-## Post-apply checklist (manual)
+## Post-apply SQL (operator fills)
 
-- [ ] Owner: list 15 articles, source `postgresql`
-- [ ] Manager: list published, no drafts
-- [ ] Search EN + RU tokens
-- [ ] Category filter `ai-automation`
-- [ ] Tag filter `security`
-- [ ] Deep link each of 15 slugs
-- [ ] AI Workspace KB excerpt (≤8 articles, 600 char excerpt)
-- [ ] Owner POST create draft → PATCH publish → PATCH archive
-- [ ] Manager POST → 403
-- [ ] Anonymous API → 401
-- [ ] Set `SPIORA_KB_EMBEDDED_FALLBACK=false` → still works from Postgres only
+| Check | Expected | Actual |
+| --- | --- | --- |
+| articles_total | 15 | ⏸ |
+| translations_total | 30 | ⏸ |
+| unique_slugs | 15 | ⏸ |
+| missing_locale_pairs | none | ⏸ |
+| empty title/summary/content | 0 | ⏸ |
+| RLS both tables | enabled | ⏸ |
+| kb_policies_count | 7 | ⏸ |
+| hard_delete_triggers | both present | ⏸ |
+| anon_table_privileges | none | ⏸ |
 
-## Fallback validation
+## Local runtime (operator fills)
 
-| Scenario | Expected source |
+| Check | Expected | Actual |
+| --- | --- | --- |
+| `npm.cmd run dev` | starts | ⏸ |
+| `GET /api/knowledge-base` `source` | `postgresql` | ⏸ |
+| `canManage` (Olivia) | `true` | ⏸ |
+| Embedded fallback still on | yes (not disabled) | ⏸ |
+| `GET /api/system/health` | ok / no secret leak | ⏸ |
+
+## Owner Olivia E2E
+
+| Step | Result |
 | --- | --- |
-| Postgres empty + fallback on | `embedded` |
-| Postgres 15 rows + fallback on | `postgresql` |
-| Postgres 15 rows + fallback off | `postgresql` |
-| Postgres error + fallback off | `error` |
+| Open KB + owner controls | ⏸ |
+| Create draft RU+EN | ⏸ |
+| Save + reopen + edit | ⏸ |
+| Preview | ⏸ |
+| Publish + deep link | ⏸ |
+| Search / category / tag | ⏸ |
+| Archive | ⏸ |
 
-## Verdict (pre-apply)
+## Daniel manager E2E
 
-- **SAFE TO COMMIT (code review):** after tests + build green
-- **NOT SAFE TO APPLY:** until manual preflight + backup + owner sign-off
+| Step | Result |
+| --- | --- |
+| Sees published | ⏸ |
+| No draft / archive in default list | ⏸ |
+| No owner controls | ⏸ |
+| `/new` and `/edit/...` redirected | ⏸ |
+| POST create → 403 | ⏸ |
+
+## AI Workspace
+
+| Step | Result |
+| --- | --- |
+| Published article in KB context | ⏸ |
+| Draft / archived excluded | ⏸ |
+| Context from PostgreSQL (not Drive) | ⏸ |
+| Demo AI draft without external API | ⏸ |
+
+## Fallback policy
+
+| Scenario | Expected |
+| --- | --- |
+| First cutover deploy | `SPIORA_KB_EMBEDDED_FALLBACK` **remains enabled** |
+| After stable `source: "postgresql"` in production | separate tiny change → `false` |
+
+## Verdicts (fill after operator results)
+
+| Verdict | Status |
+| --- | --- |
+| **SAFE / NOT SAFE TO PUSH** | ⏸ **NOT EVALUATED** — awaiting preflight + SQL + UI E2E |
+| **SAFE / NOT SAFE TO DEPLOY** | ⏸ **NOT EVALUATED** — awaiting runtime validation |
+| **SAFE / NOT SAFE TO DISABLE FALLBACK** | ⏸ **NOT SAFE** until production/demo runs stably on PostgreSQL with fallback still on |
+
+**Current standing (before operator cutover):**
+
+- **NOT SAFE TO APPLY** until backup + preflight PASS  
+- **NOT SAFE TO PUSH / DEPLOY** until checklist §1–9 PASS and this file updated with Actuals  
+- **NOT SAFE TO DISABLE FALLBACK** until after successful deployed cutover with fallback still enabled

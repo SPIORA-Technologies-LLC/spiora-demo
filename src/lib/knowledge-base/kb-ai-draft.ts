@@ -1,5 +1,10 @@
 import type { AppLocale } from "@/i18n/config";
 import { slugifyKbTitle } from "./kb-slug";
+import {
+  englishFacingTopic,
+  isMostlyCyrillic,
+  russianFacingTopic,
+} from "./kb-text-locale";
 import type { KbCategoryId } from "./types";
 
 export type KbAiDraftResult = {
@@ -28,7 +33,7 @@ function inferTags(prompt: string): string[] {
   if (/crm|client|клиент/i.test(hay)) tags.add("clients");
   if (/document|документ/i.test(hay)) tags.add("documents");
   if (/ai/i.test(hay)) tags.add("ai");
-  if (/compliance|policy|политик/i.test(hay)) tags.add("compliance");
+  if (/compliance|policy|политик|этик/i.test(hay)) tags.add("compliance");
   return [...tags].slice(0, 4);
 }
 
@@ -68,6 +73,10 @@ ${topic}
 - Update this article when the process changes.`;
 }
 
+function clip(title: string): string {
+  return title.length > 80 ? `${title.slice(0, 77)}…` : title;
+}
+
 /** Demo-safe KB draft generator (no external AI required). */
 export function generateKbAiDraft(
   prompt: string,
@@ -75,8 +84,10 @@ export function generateKbAiDraft(
 ): KbAiDraftResult {
   const trimmed = prompt.trim();
   const topic = trimmed || "Internal workflow guide";
-  const enTitle = topic.length > 80 ? `${topic.slice(0, 77)}…` : topic;
-  const ruTitle = topic.length > 80 ? `${topic.slice(0, 77)}…` : topic;
+  const enTopic = englishFacingTopic(topic);
+  const ruTopic = russianFacingTopic(topic);
+  const enTitle = clip(enTopic);
+  const ruTitle = clip(ruTopic);
 
   return {
     slug: slugifyKbTitle(enTitle),
@@ -86,13 +97,15 @@ export function generateKbAiDraft(
     translations: {
       en: {
         title: enTitle,
-        summary: `Draft guide generated from: ${topic.slice(0, 120)}`,
-        content: buildMarkdown(topic, "en"),
+        summary: isMostlyCyrillic(topic)
+          ? `Draft guide generated from Russian topic: ${topic.slice(0, 100)}`
+          : `Draft guide generated from: ${topic.slice(0, 120)}`,
+        content: buildMarkdown(enTopic, "en"),
       },
       ru: {
         title: ruTitle,
         summary: `Черновик инструкции на основе запроса: ${topic.slice(0, 120)}`,
-        content: buildMarkdown(topic, "ru"),
+        content: buildMarkdown(ruTopic, "ru"),
       },
     },
   };

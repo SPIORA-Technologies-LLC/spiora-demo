@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { getRequestLocale } from "@/i18n/api-messages";
+import { resolveKbRequestLocale } from "@/lib/knowledge-base/kb-locale";
 import { translateKnowledgeBaseMessage } from "@/i18n/knowledge-base-messages";
 import { listKnowledgeBaseFolder } from "@/lib/google-drive/kb-drive";
 import { isGoogleDriveKbConfigured } from "@/lib/google-sheets/auth";
@@ -77,8 +78,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const locale = await getRequestLocale();
+  const cookieLocale = await getRequestLocale();
   const url = new URL(request.url);
+  const locale = resolveKbRequestLocale(url.searchParams.get("locale"), cookieLocale);
   const params = parseSearchParams(url, session.role === "owner");
 
   if (

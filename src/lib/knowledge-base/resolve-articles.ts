@@ -16,6 +16,7 @@ import type {
   KbSearchParams,
   KbTagSummary,
 } from "./types";
+import { alignKbTextToLocale } from "./kb-text-locale";
 
 function formatArticleDate(iso: string, locale: AppLocale): string {
   const intlTag = locale === "ru" ? "ru-RU" : "en-US";
@@ -30,11 +31,17 @@ export function resolveArticleListItem(
   record: KbArticleRecord,
   locale: AppLocale,
 ): KbArticleListItem {
+  const raw = {
+    title: translateKnowledgeBaseArticle(locale, record.slug, "title"),
+    summary: translateKnowledgeBaseArticle(locale, record.slug, "summary"),
+    content: "",
+  };
+  const aligned = alignKbTextToLocale(locale, raw);
   return {
     id: record.id,
     slug: record.slug,
-    title: translateKnowledgeBaseArticle(locale, record.slug, "title"),
-    summary: translateKnowledgeBaseArticle(locale, record.slug, "summary"),
+    title: aligned.title,
+    summary: aligned.summary,
     categoryId: record.categoryId,
     categoryLabel: translateKnowledgeBaseCategory(locale, record.categoryId),
     tags: record.tagKeys,
@@ -43,6 +50,9 @@ export function resolveArticleListItem(
     ),
     authorName: translateKnowledgeBaseAuthor(locale, record.authorId),
     updatedAt: formatArticleDate(record.updatedAt, locale),
+    requestedLocale: locale,
+    resolvedLocale: locale,
+    fallbackUsed: aligned.corrected,
   };
 }
 
@@ -50,9 +60,16 @@ export function resolveArticleDetail(
   record: KbArticleRecord,
   locale: AppLocale,
 ): KbArticleDetail {
-  return {
-    ...resolveArticleListItem(record, locale),
+  const list = resolveArticleListItem(record, locale);
+  const contentAligned = alignKbTextToLocale(locale, {
+    title: list.title,
+    summary: list.summary,
     content: translateKnowledgeBaseArticle(locale, record.slug, "content"),
+  });
+  return {
+    ...list,
+    content: contentAligned.content,
+    fallbackUsed: list.fallbackUsed || contentAligned.corrected,
   };
 }
 
@@ -168,6 +185,9 @@ export function searchDemoArticles(
     searchQuery: params.q,
     categoryFilter,
     tagFilter,
+    requestedLocale: locale,
+    resolvedLocale: selectedArticle?.resolvedLocale ?? locale,
+    fallbackUsed: false,
   };
 }
 

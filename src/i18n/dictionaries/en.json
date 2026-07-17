@@ -1851,7 +1851,7 @@
       "monthly-reporting-guide": {
         "title": "Monthly reporting guide",
         "summary": "How to compile monthly activity reports for leadership review.",
-        "content": "## Metrics to include\n\n- New clients and conversions by direction\n- Consultations held vs scheduled\n- Overdue tasks trend\n- Document turnaround time (median days)\n\n## Template\n\nUse the monthly report template in Document Management. Export Analytics overview screenshots for the appendix.\n\n## Deadline\n\nSubmit by the 3rd business day of the following month to olivia@spiora.demo (demo address)."
+        "content": "## Metrics to include\n\n- New clients and conversions by direction\n- Consultations held vs scheduled\n- Overdue tasks trend\n- Document turnaround time (median days)\n\n## Template\n\nUse the monthly report template in Document Management. Export Analytics overview screenshots for the appendix.\n\n## Deadline\n\nSubmit by the 3rd business day of the following month to olivia@spiora.example (demo address)."
       },
       "client-intake-workflow": {
         "title": "Client intake workflow",

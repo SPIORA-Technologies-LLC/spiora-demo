@@ -1,3 +1,5 @@
+import type { AppLocale } from "@/i18n/config";
+
 export type KbCategoryId =
   | "company-policies"
   | "client-workflow"
@@ -32,6 +34,9 @@ export type KbArticleListItem = {
   authorName: string;
   updatedAt: string;
   status?: KbArticleStatus;
+  requestedLocale?: AppLocale;
+  resolvedLocale?: AppLocale;
+  fallbackUsed?: boolean;
 };
 
 export type KbArticleDetail = KbArticleListItem & {
@@ -73,6 +78,9 @@ export type KbListingResponse = {
   tagFilter?: string;
   statusFilter?: KbArticleStatus | "all";
   errorMessage?: string;
+  requestedLocale?: AppLocale;
+  resolvedLocale?: AppLocale;
+  fallbackUsed?: boolean;
 };
 
 export type KbEditorTranslation = {

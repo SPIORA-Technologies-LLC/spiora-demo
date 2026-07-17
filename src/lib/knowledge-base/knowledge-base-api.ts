@@ -77,6 +77,7 @@ export function normalizeKbSlug(raw: string): string | null {
 
 function parseTranslations(
   translations: unknown,
+  options: { draftFriendly?: boolean } = {},
 ): KbTranslationInput[] | KbParseError {
   if (!Array.isArray(translations) || translations.length === 0) {
     return "invalid_payload";
@@ -84,6 +85,7 @@ function parseTranslations(
 
   const parsed: KbTranslationInput[] = [];
   const locales = new Set<string>();
+  const draftFriendly = options.draftFriendly === true;
 
   for (const entry of translations) {
     if (!entry || typeof entry !== "object") return "invalid_payload";
@@ -94,14 +96,31 @@ function parseTranslations(
     const content = typeof tr.content === "string" ? tr.content.trim() : "";
 
     if (locale !== "en" && locale !== "ru") return "invalid_locale";
-    if (!title || !summary || !content) return "empty_field";
     if (locales.has(locale)) return "invalid_payload";
-    locales.add(locale);
 
+    if (draftFriendly) {
+      // Draft: skip empty locales; title required when locale is kept (DB check).
+      if (!title) continue;
+      locales.add(locale);
+      parsed.push({ locale, title, summary, content });
+      continue;
+    }
+
+    if (!title || !summary || !content) return "empty_field";
+    locales.add(locale);
     parsed.push({ locale, title, summary, content });
   }
 
+  if (parsed.length === 0) return "empty_field";
   return parsed;
+}
+
+function requireBothLocales(
+  translations: KbTranslationInput[],
+): KbParseError | null {
+  const locales = new Set(translations.map((t) => t.locale));
+  if (!locales.has("en") || !locales.has("ru")) return "empty_field";
+  return null;
 }
 
 export function parseKbCreateBody(
@@ -137,9 +156,17 @@ export function parseKbCreateBody(
     return { ok: false, error: "invalid_status" };
   }
 
-  const translations = parseTranslations(raw.translations);
+  const status: "draft" | "published" =
+    raw.status === "published" ? "published" : "draft";
+  const translations = parseTranslations(raw.translations, {
+    draftFriendly: status === "draft",
+  });
   if (typeof translations === "string") {
     return { ok: false, error: translations };
+  }
+  if (status === "published") {
+    const missing = requireBothLocales(translations);
+    if (missing) return { ok: false, error: missing };
   }
 
   const tagKeys = Array.isArray(raw.tagKeys)
@@ -159,7 +186,7 @@ export function parseKbCreateBody(
       categoryId: categoryId as KbCategoryId,
       tagKeys,
       authorKey,
-      status: raw.status === "published" ? "published" : "draft",
+      status,
       translations,
     },
   };
@@ -216,9 +243,16 @@ export function parseKbPatchBody(
   }
 
   if (Array.isArray(raw.translations)) {
-    const translations = parseTranslations(raw.translations);
+    const publishing = raw.action === "publish" || raw.status === "published";
+    const translations = parseTranslations(raw.translations, {
+      draftFriendly: !publishing,
+    });
     if (typeof translations === "string") {
       return { ok: false, error: translations };
+    }
+    if (publishing) {
+      const missing = requireBothLocales(translations);
+      if (missing) return { ok: false, error: missing };
     }
     patch.translations = translations;
   }

@@ -27,14 +27,35 @@ const SEEDS = [
   ["quality-review-process", "ai-automation", ["ai", "compliance", "workflow"], "olivia-bennett", "2026-06-05T10:15:00.000Z"],
 ];
 
+/** Simple identifiers / short tokens — single-quoted with escaping. */
 function sqlLiteral(value) {
   if (value == null) return "null";
   return `'${String(value).replace(/'/g, "''")}'`;
 }
 
+/**
+ * Dollar-quote long text so apostrophes, @emails, and markdown never break SQL.
+ * Avoids Postgres parsing leaked `schema.demo` as a relation.
+ */
+function sqlDollarQuote(value, tagBase = "kb") {
+  const text = String(value ?? "");
+  let tag = tagBase;
+  let n = 0;
+  while (text.includes(`$${tag}$`)) {
+    n += 1;
+    tag = `${tagBase}_${n}`;
+  }
+  return `$${tag}$${text}$${tag}$`;
+}
+
 function pgArray(values) {
   if (!values.length) return "array[]::text[]";
   return `array[${values.map((v) => sqlLiteral(v)).join(", ")}]::text[]`;
+}
+
+/** Demo emails must not use `.demo` TLD — outside quotes Postgres reads schema.relation. */
+function sanitizeSeedText(text) {
+  return String(text).replace(/@spiora\.demo\b/gi, "@spiora.example");
 }
 
 const articleRows = [];
@@ -55,8 +76,10 @@ for (const [slug, categoryId, tagKeys, authorKey, updatedAt] of SEEDS) {
     ["en", enArticle],
     ["ru", ruArticle],
   ]) {
+    const tag = `kb_${slug.replace(/-/g, "_")}_${locale}`;
     translationRows.push(
-      `  ((select id from knowledge_base_articles where slug = ${sqlLiteral(slug)}), ${sqlLiteral(locale)}, ${sqlLiteral(article.title)}, ${sqlLiteral(article.summary)}, ${sqlLiteral(article.content)})`,
+      `  ((select id from public.knowledge_base_articles where slug = ${sqlLiteral(slug)}), ${sqlLiteral(locale)}, ${sqlDollarQuote(sanitizeSeedText(article.title), `${tag}_title`)}, ${sqlDollarQuote(sanitizeSeedText(article.summary), `${tag}_summary`)}, ${sqlDollarQuote(sanitizeSeedText(article.content), `${tag}_content`)})`,
+
     );
   }
 }
@@ -65,6 +88,8 @@ const sql = `-- ================================================================
 -- SPIORA_KNOWLEDGE_BASE_SEED_026.sql
 -- PR #19 — 15 demo articles (EN + RU). Idempotent. No secrets.
 -- Apply after migration 026. Do NOT auto-apply.
+-- Content uses dollar-quoting ($kb_…$) so markdown/emails cannot break SQL.
+-- Email TLD .demo is rewritten to .example (avoids schema.relation parse of "demo").
 -- =============================================================================
 
 insert into public.knowledge_base_articles (

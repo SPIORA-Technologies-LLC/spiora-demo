@@ -7,10 +7,12 @@ import {
   articleMatchesQuery,
   buildKbCategorySummaries,
   buildKbTagSummaries,
+  flattenKbTranslationRow,
   mapKbDetail,
   mapKbListItem,
   type KbArticleRow,
   type KbArticleWithTranslation,
+  type KbJoinTranslation,
 } from "@/lib/knowledge-base/map-articles";
 import {
   resolveArchivedAtForUpsert,
@@ -28,27 +30,14 @@ const ARTICLE_SELECT =
   "id, slug, category_id, tag_keys, author_key, status, updated_at, published_at, archived_at";
 
 type TranslationJoinRow = KbArticleRow & {
-  knowledge_base_article_translations: Array<{
-    locale: AppLocale;
-    title: string;
-    summary: string;
-    content: string;
-  }>;
+  knowledge_base_article_translations: KbJoinTranslation[];
 };
 
-function flattenRow(row: TranslationJoinRow, locale: AppLocale): KbArticleWithTranslation | null {
-  const translation =
-    row.knowledge_base_article_translations.find((t) => t.locale === locale) ??
-    row.knowledge_base_article_translations[0];
-  if (!translation) return null;
-  return {
-    ...row,
-    article_id: row.id,
-    locale: translation.locale,
-    title: translation.title,
-    summary: translation.summary,
-    content: translation.content,
-  };
+function flattenRow(
+  row: TranslationJoinRow,
+  locale: AppLocale,
+): KbArticleWithTranslation | null {
+  return flattenKbTranslationRow(row, locale);
 }
 
 async function fetchArticles(
@@ -157,6 +146,11 @@ export async function sbListKnowledgeBase(
     categoryFilter,
     tagFilter,
     statusFilter: params.status,
+    requestedLocale: locale,
+    resolvedLocale: selectedArticle?.resolvedLocale ?? locale,
+    fallbackUsed:
+      selectedArticle?.fallbackUsed === true ||
+      articles.some((a) => a.fallbackUsed === true),
   };
 }
 

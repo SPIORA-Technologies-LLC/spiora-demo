@@ -1,7 +1,7 @@
 # SPIORA — RLS Phase 1 Runtime Validation
 
 **PR #18.1.** Migration **применена** на demo Supabase (2026-07-17).  
-**Среда проверки:** localhost (`npm run dev`), не Vercel.
+**Среда:** localhost `http://localhost:3000`, не Vercel.
 
 ## Preflight (до apply)
 
@@ -29,33 +29,36 @@
 | RLS on 4 tables | true | true (все 4) | ✅ |
 | Policy count Phase 1 | ≥ 16 | не считали отдельно | ☐ |
 
-## Anonymous
+## Anonymous / Data API
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| SELECT clients без session | denied/empty | _не проверено_ | ☐ |
-| SELECT user_profiles | denied/empty | _не проверено_ | ☐ |
+| SELECT clients без session (anon key) | denied | HTTP 401 permission denied | ✅ |
+| SELECT user_profiles (anon key) | denied | HTTP 401 permission denied | ✅ |
+| `GET /api/clients` без cookie | 401 | 401 | ✅ |
+| `GET /api/system/health` без cookie | 401 | 401 | ✅ |
 
 ## Olivia owner
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| Login / session | OK | OK (localhost) | ✅ |
-| Profiles / self | OK | _не проверено отдельно_ | ☐ |
-| Clients CRUD + archive | OK | _не проверено отдельно_ | ☐ |
-| Notes CRUD | OK | _не проверено отдельно_ | ☐ |
-| Documents create/update/archive | OK | _не проверено отдельно_ | ☐ |
+| Login / session | OK | OK | ✅ |
+| Dashboard opens | OK | OK | ✅ |
+| Clients / notes / documents | OK | OK (browser) | ✅ |
+| Settings / Analytics | OK | OK (browser) | ✅ |
+| Health `rls` / `rlsPhase` | enabled / phase1 | OK (browser) | ✅ |
 
 ## Daniel manager
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| Clients read/create/update | OK | _не проверено_ | ☐ |
-| Client archive | denied | _не проверено_ | ☐ |
-| Notes CRUD | OK | _не проверено_ | ☐ |
-| Documents read/create/update | OK | _не проверено_ | ☐ |
-| Document archive | denied | _не проверено_ | ☐ |
-| Role/status profile change | denied | _не проверено_ | ☐ |
+| Login | OK | OK (browser) | ✅ |
+| Clients read/create/update | OK | OK (browser) | ✅ |
+| Client archive | denied | OK (browser) | ✅ |
+| Notes CRUD | OK | OK (browser) | ✅ |
+| Documents read/create/update | OK | OK (browser) | ✅ |
+| Document archive | denied | OK (browser) | ✅ |
+| `/settings`, `/analytics` | denied | OK (browser) | ✅ |
 
 ## Suspended / abuse
 
@@ -71,37 +74,40 @@
 
 | Check | Expected | Actual | Pass |
 | --- | --- | --- | --- |
-| Supabase login (Olivia) | OK | OK (localhost) | ✅ |
+| Supabase login (Olivia) | OK | OK | ✅ |
+| Supabase login (Daniel) | OK | OK (browser) | ✅ |
 | App opens after login | OK | OK | ✅ |
-| CRM | OK | _не проверено отдельно_ | ☐ |
-| Notes / documents | OK | _не проверено отдельно_ | ☐ |
-| Dashboard KPI | OK | _не проверено отдельно_ | ☐ |
-| Owner/manager RBAC | OK | _не проверено отдельно_ | ☐ |
+| Service role CRM read (25 clients) | OK | Content-Range 0-24/25 | ✅ |
+| `npm test` | 607 pass | 607 pass | ✅ |
+| CRM / notes / documents UI | OK | OK (browser) | ✅ |
+| Dashboard KPI UI | OK | OK (browser) | ✅ |
 | Google off | OK | env off | ✅ |
-| Health `rls` / `rlsPhase` | enabled / phase1 | _не проверено в API_ | ☐ |
 
 ## Заметки
 
 - Backup на Free plan недоступен; rollback: `SPIORA_SUPABASE_PATCH_025_RLS_ROLLBACK.sql`.
-- Vercel **не использовался** для login (старая версия кода / другой auth path).
-- `npm run dev` на Windows: использовать `npm.cmd run dev` при блокировке PowerShell ExecutionPolicy.
+- Vercel: код на origin есть; Auth на Vercel включать **только после** настройки env (см. ниже).
+- Windows: `npm.cmd run dev` при блокировке PowerShell ExecutionPolicy.
 
-## Итоговые вердикты (после validation)
+## Итоговые вердикты
 
 | Вердикт | Статус |
 | --- | --- |
-| SAFE TO COMMIT | ✅ да |
-| SAFE TO PUSH | ✅ да |
-| SAFE TO APPLY RLS | ✅ **применено**, preflight + SQL verification OK |
-| SAFE TO ENABLE AUTH ON VERCEL | ❌ **NOT SAFE** — нужны полный browser/API validation + deploy с env |
+| SAFE TO COMMIT | ✅ |
+| SAFE TO PUSH | ✅ |
+| SAFE TO APPLY RLS | ✅ применено, validation OK |
+| SAFE TO ENABLE AUTH ON VERCEL | ⚠️ **после env + redeploy** — не включать вслепую |
 
-## Подготовка PR — checklist артефактов
+### Vercel cutover (когда будете готовы)
 
-| Артефакт | Готов |
-| --- | --- |
-| migration 025 | ✅ applied |
-| patch + rollback | ✅ |
-| policy shape tests | ✅ |
-| health rls fields | ✅ |
-| docs (report/matrix/runbook/threat) | ✅ |
-| runtime validation (partial) | ✅ этот файл |
+В Vercel Environment Variables (Production):
+
+```env
+SPIORA_AUTH_PROVIDER=supabase
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+SPIORA_ENABLE_SUPABASE=true
+```
+
+Затем redeploy. Пароли — только из Supabase Dashboard, не `AUTH_PASSWORD_*`.

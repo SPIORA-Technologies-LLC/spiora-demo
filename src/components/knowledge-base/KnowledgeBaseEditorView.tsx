@@ -503,7 +503,7 @@ export function KnowledgeBaseEditorView({
               />
             </label>
             <label className={styles.editorLabel}>
-              Summary
+              {t("editor.fields.summary")}
               <textarea
                 className={styles.editorTextarea}
                 rows={2}
@@ -518,7 +518,7 @@ export function KnowledgeBaseEditorView({
               />
             </label>
             <label className={styles.editorLabel}>
-              Markdown
+              {t("editor.fields.content")}
               <textarea
                 className={styles.editorTextarea}
                 rows={14}
@@ -532,6 +532,7 @@ export function KnowledgeBaseEditorView({
                 }
               />
             </label>
+            <p className={styles.meta}>{t("editor.fields.contentHint")}</p>
           </Card>
         ))}
       </div>

@@ -1703,7 +1703,10 @@
       },
       "fields": {
         "primaryTitle": "Primary title (EN)",
-        "title": "Title"
+        "title": "Title",
+        "summary": "Summary",
+        "content": "Article text",
+        "contentHint": "Plain text is fine. Headings and lists are optional."
       },
       "status": {
         "draft": "Draft",

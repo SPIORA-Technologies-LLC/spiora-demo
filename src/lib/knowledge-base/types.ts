@@ -18,6 +18,8 @@ export type KbArticleRecord = KbArticleSeed & {
   createdAt: string;
 };
 
+export type KbArticleStatus = "draft" | "published" | "archived";
+
 export type KbArticleListItem = {
   id: string;
   slug: string;
@@ -29,6 +31,7 @@ export type KbArticleListItem = {
   tagLabels: string[];
   authorName: string;
   updatedAt: string;
+  status?: KbArticleStatus;
 };
 
 export type KbArticleDetail = KbArticleListItem & {
@@ -46,11 +49,21 @@ export type KbTagSummary = {
   label: string;
 };
 
+export type KbSource =
+  | "demo"
+  | "embedded"
+  | "postgresql"
+  | "google_drive"
+  | "unconfigured"
+  | "error";
+
 export type KbListingResponse = {
   demo: boolean;
-  source: "demo" | "google_drive" | "unconfigured" | "error";
+  source: KbSource;
   uploadDisabled: boolean;
   readOnly: boolean;
+  /** Owner can create/edit via UI when PostgreSQL KB is enabled. */
+  canManage?: boolean;
   categories: KbCategorySummary[];
   tags: KbTagSummary[];
   articles: KbArticleListItem[];
@@ -58,7 +71,24 @@ export type KbListingResponse = {
   searchQuery?: string;
   categoryFilter?: KbCategoryId;
   tagFilter?: string;
+  statusFilter?: KbArticleStatus | "all";
   errorMessage?: string;
+};
+
+export type KbEditorTranslation = {
+  title: string;
+  summary: string;
+  content: string;
+};
+
+export type KbEditorArticle = {
+  slug: string;
+  categoryId: KbCategoryId;
+  tagKeys: string[];
+  authorKey: string;
+  status: KbArticleStatus;
+  publishedAt: string | null;
+  translations: Record<"en" | "ru", KbEditorTranslation>;
 };
 
 export type KbSearchParams = {
@@ -67,4 +97,5 @@ export type KbSearchParams = {
   tag?: string;
   article?: string;
   folderId?: string;
+  status?: KbArticleStatus | "all";
 };

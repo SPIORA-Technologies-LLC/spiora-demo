@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { AppLocale } from "@/i18n/config";
 import type {
@@ -20,8 +21,12 @@ import styles from "./KnowledgeBaseView.module.css";
 
 type ApiResponse = KbListingResponse & Partial<Omit<DriveKbListing, "source">>;
 
-function isDemoListing(data: ApiResponse): boolean {
-  return data.source === "demo";
+function isArticleListing(data: ApiResponse): boolean {
+  return (
+    data.source === "demo" ||
+    data.source === "embedded" ||
+    data.source === "postgresql"
+  );
 }
 
 function isDriveListing(data: ApiResponse): boolean {
@@ -56,6 +61,7 @@ export function KnowledgeBaseView() {
   const tag = searchParams.get("tag") ?? undefined;
   const articleSlug = searchParams.get("article") ?? undefined;
   const query = searchParams.get("q") ?? undefined;
+  const statusFilter = searchParams.get("status") ?? undefined;
 
   const updateRoute = useCallback(
     (next: Record<string, string | undefined>) => {
@@ -76,6 +82,7 @@ export function KnowledgeBaseView() {
       if (tag) params.set("tag", tag);
       if (articleSlug) params.set("article", articleSlug);
       if (currentFolderId) params.set("folderId", currentFolderId);
+      if (statusFilter) params.set("status", statusFilter);
       const qs = params.toString();
       const res = await fetch(`/api/knowledge-base${qs ? `?${qs}` : ""}`);
       if (!res.ok) throw new Error("fetch failed");
@@ -87,7 +94,7 @@ export function KnowledgeBaseView() {
     } finally {
       setLoading(false);
     }
-  }, [query, category, tag, articleSlug, currentFolderId]);
+  }, [query, category, tag, articleSlug, currentFolderId, statusFilter]);
 
   useEffect(() => {
     void fetchListing();
@@ -98,7 +105,7 @@ export function KnowledgeBaseView() {
   }, [query]);
 
   const selectedArticle = useMemo(() => {
-    if (!listing || !isDemoListing(listing)) return null;
+    if (!listing || !isArticleListing(listing)) return null;
     return listing.selectedArticle ?? null;
   }, [listing]);
 
@@ -160,10 +167,11 @@ export function KnowledgeBaseView() {
     );
   }
 
-  const demoListing = listing && isDemoListing(listing) ? listing : null;
+  const demoListing = listing && isArticleListing(listing) ? listing : null;
   const articles = demoListing?.articles ?? [];
   const categories = demoListing?.categories ?? [];
   const tags = demoListing?.tags ?? [];
+  const canManage = demoListing?.canManage === true;
 
   return (
     <div className={styles.wrap}>
@@ -175,6 +183,14 @@ export function KnowledgeBaseView() {
           {t(`sources.${demoListing?.source ?? "unconfigured"}`)}
         </span>
       </div>
+
+      {canManage ? (
+        <div className={styles.ownerToolbar}>
+          <Link href="/knowledge-base/new" className={styles.primaryBtn}>
+            <i className="fa-solid fa-plus" aria-hidden /> {t("actions.create")}
+          </Link>
+        </div>
+      ) : null}
 
       <form className={styles.searchRow} onSubmit={handleSearchSubmit}>
         <label className={styles.searchLabel} htmlFor="kb-search">
@@ -212,7 +228,7 @@ export function KnowledgeBaseView() {
               type="button"
               className={`${styles.filterBtn} ${!category ? styles.filterActive : ""}`}
               onClick={() =>
-                updateRoute({ q: query, tag, article: undefined })
+                updateRoute({ q: query, tag, status: statusFilter, article: undefined })
               }
             >
               {t("filters.allCategories")}
@@ -227,6 +243,7 @@ export function KnowledgeBaseView() {
                     q: query,
                     category: cat.id,
                     tag: undefined,
+                    status: statusFilter,
                     article: undefined,
                   })
                 }
@@ -243,7 +260,7 @@ export function KnowledgeBaseView() {
               type="button"
               className={`${styles.filterBtn} ${!tag ? styles.filterActive : ""}`}
               onClick={() =>
-                updateRoute({ q: query, category, article: undefined })
+                updateRoute({ q: query, category, status: statusFilter, article: undefined })
               }
             >
               {t("filters.allTags")}
@@ -258,6 +275,7 @@ export function KnowledgeBaseView() {
                     q: query,
                     category,
                     tag: tagItem.id,
+                    status: statusFilter,
                     article: undefined,
                   })
                 }
@@ -266,6 +284,36 @@ export function KnowledgeBaseView() {
               </button>
             ))}
           </div>
+
+          {canManage ? (
+            <div className={styles.filterBlock}>
+              <p className={styles.filterTitle}>{t("editor.status.draft")}</p>
+              {(
+                [
+                  ["published", t("editor.filters.published")],
+                  ["draft", t("editor.filters.draft")],
+                  ["archived", t("editor.filters.archived")],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`${styles.filterBtn} ${statusFilter === value ? styles.filterActive : ""}`}
+                  onClick={() =>
+                    updateRoute({
+                      q: query,
+                      category,
+                      tag,
+                      status: statusFilter === value ? undefined : value,
+                      article: undefined,
+                    })
+                  }
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
           {demoListing?.uploadDisabled ? (
             <p className={styles.uploadDisabled}>{t("upload.disabled")}</p>
@@ -316,8 +364,9 @@ export function KnowledgeBaseView() {
           ) : selectedArticle ? (
             <ArticleDetailView
               article={selectedArticle}
+              canManage={canManage}
               onBack={() =>
-                updateRoute({ q: query, category, tag, article: undefined })
+                updateRoute({ q: query, category, tag, status: statusFilter, article: undefined })
               }
               onCopyLink={handleCopyLink}
               t={t}
@@ -339,14 +388,17 @@ export function KnowledgeBaseView() {
                     <ArticleCard
                       key={article.id}
                       article={article}
+                      canManage={canManage}
                       onOpen={() =>
                         updateRoute({
                           q: query,
                           category,
                           tag,
+                          status: statusFilter,
                           article: article.slug,
                         })
                       }
+                      onRefresh={() => void fetchListing()}
                       t={t}
                     />
                   ))}
@@ -362,18 +414,58 @@ export function KnowledgeBaseView() {
 
 function ArticleCard({
   article,
+  canManage,
   onOpen,
+  onRefresh,
   t,
 }: {
   article: KbArticleListItem;
+  canManage: boolean;
   onOpen: () => void;
+  onRefresh: () => void;
   t: ReturnType<typeof useTranslations<"knowledgeBase">>;
 }) {
+  const router = useRouter();
+
+  const quickPublish = async () => {
+    await fetch(`/api/knowledge-base/${encodeURIComponent(article.slug)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "publish" }),
+    });
+    onRefresh();
+  };
+
+  const quickArchive = async () => {
+    if (!window.confirm(t("confirm.archiveBody"))) return;
+    await fetch(`/api/knowledge-base/${encodeURIComponent(article.slug)}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "archive" }),
+    });
+    onRefresh();
+  };
+
+  const duplicate = async () => {
+    const res = await fetch(
+      `/api/knowledge-base/${encodeURIComponent(article.slug)}/duplicate`,
+      { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
+    );
+    if (!res.ok) return;
+    const data = (await res.json()) as { slug: string };
+    router.push(`/knowledge-base/edit/${encodeURIComponent(data.slug)}`);
+  };
+
   return (
     <Card className={styles.articleCard}>
       <div className={styles.articleCardHead}>
         <span className={styles.articleCategory}>{article.categoryLabel}</span>
         <span className={styles.articleDate}>
+          {article.status && canManage ? (
+            <span className={`${styles.statusChip} ${styles[`statusChip_${article.status}`]}`}>
+              {t(`editor.status.${article.status}` as "editor.status.draft")}
+            </span>
+          ) : null}{" "}
           {t("article.updated", { date: article.updatedAt })}
         </span>
       </div>
@@ -393,6 +485,29 @@ function ArticleCard({
         <button type="button" className={styles.linkBtn} onClick={onOpen}>
           {t("actions.preview")}
         </button>
+        {canManage ? (
+          <>
+            <Link
+              href={`/knowledge-base/edit/${encodeURIComponent(article.slug)}`}
+              className={styles.linkBtn}
+            >
+              {t("actions.edit")}
+            </Link>
+            <button type="button" className={styles.linkBtn} onClick={() => void duplicate()}>
+              {t("actions.duplicate")}
+            </button>
+            {article.status === "draft" ? (
+              <button type="button" className={styles.linkBtn} onClick={() => void quickPublish()}>
+                {t("actions.publish")}
+              </button>
+            ) : null}
+            {article.status === "published" ? (
+              <button type="button" className={styles.linkBtn} onClick={() => void quickArchive()}>
+                {t("actions.archive")}
+              </button>
+            ) : null}
+          </>
+        ) : null}
       </div>
     </Card>
   );
@@ -400,11 +515,13 @@ function ArticleCard({
 
 function ArticleDetailView({
   article,
+  canManage,
   onBack,
   onCopyLink,
   t,
 }: {
   article: KbArticleDetail;
+  canManage: boolean;
   onBack: () => void;
   onCopyLink: (slug: string) => void;
   t: ReturnType<typeof useTranslations<"knowledgeBase">>;
@@ -422,6 +539,14 @@ function ArticleDetailView({
         >
           {t("actions.copyLink")}
         </button>
+        {canManage ? (
+          <Link
+            href={`/knowledge-base/edit/${encodeURIComponent(article.slug)}`}
+            className={styles.linkBtn}
+          >
+            {t("actions.edit")}
+          </Link>
+        ) : null}
       </div>
       <p className={styles.detailMeta}>
         {t("article.updated", { date: article.updatedAt })} · {t("article.author")}:{" "}

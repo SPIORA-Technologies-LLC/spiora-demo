@@ -1631,6 +1631,9 @@
       "copyLink": "Copy link",
       "create": "Create article",
       "edit": "Edit",
+      "duplicate": "Duplicate",
+      "publish": "Publish",
+      "archive": "Archive",
       "delete": "Delete",
       "upload": "Upload file",
       "back": "Back to list",
@@ -1657,6 +1660,7 @@
     },
     "errors": {
       "loadFailed": "Could not load knowledge base data.",
+      "saveFailed": "Could not save the article.",
       "articleNotFound": "Article not found.",
       "accessDenied": "You do not have access to this resource.",
       "generic": "Something went wrong. Please try again."
@@ -1675,8 +1679,47 @@
     "confirm": {
       "deleteTitle": "Delete article?",
       "deleteBody": "This action cannot be undone.",
+      "archiveBody": "Archive this article? It will be hidden from the team list.",
       "confirm": "Confirm",
       "cancel": "Cancel"
+    },
+    "editor": {
+      "newTitle": "New article",
+      "newSubtitle": "Create a draft and publish when ready",
+      "editTitle": "Edit article",
+      "preview": "Preview",
+      "saveDraft": "Save draft",
+      "publish": "Publish",
+      "archive": "Archive",
+      "aiCreate": "Create with AI",
+      "aiHint": "Describe the process or policy. AI generates a bilingual draft you can review and edit.",
+      "aiPlaceholder": "e.g. Write a guide for the new CRM intake process…",
+      "aiGenerate": "Generate draft",
+      "aiGenerating": "Generating…",
+      "sections": {
+        "main": "Main",
+        "en": "English content",
+        "ru": "Russian content"
+      },
+      "fields": {
+        "primaryTitle": "Primary title (EN)",
+        "title": "Title"
+      },
+      "status": {
+        "draft": "Draft",
+        "published": "Published",
+        "archived": "Archived"
+      },
+      "filters": {
+        "published": "Published",
+        "draft": "Drafts",
+        "archived": "Archive"
+      },
+      "errors": {
+        "slugTaken": "This slug is already in use.",
+        "aiFailed": "Could not generate AI draft."
+      },
+      "postgresRequired": "Article management requires PostgreSQL Knowledge Base (migration 026)."
     },
     "upload": {
       "disabled": "File uploads are disabled in the public demo.",
@@ -1691,6 +1734,8 @@
     },
     "sources": {
       "demo": "Demo library",
+      "embedded": "Embedded demo library",
+      "postgresql": "PostgreSQL",
       "google_drive": "Google Drive",
       "unconfigured": "Not configured",
       "error": "Connection error"
@@ -1718,6 +1763,7 @@
       "delete": "Deleting articles is disabled in the public demo."
     },
     "aiContextHeader": "Knowledge Base (demo articles):",
+    "aiContextPostgresHeader": "Knowledge Base (PostgreSQL):",
     "aiContextEmpty": "No matching demo articles found.",
     "categories": {
       "companyPolicies": "Company Policies",

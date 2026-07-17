@@ -156,10 +156,10 @@ describe("Knowledge Base demo mode store", () => {
     assert.doesNotMatch(text, /GOOGLE_DRIVE_KB_FOLDER_ID/);
   });
 
-  it("listDemoKnowledgeBase returns demo source", async () => {
+  it("listDemoKnowledgeBase returns embedded source", async () => {
     await resetDemoKnowledgeBaseStore();
     const listing = await listDemoKnowledgeBase("en", {});
-    assert.equal(listing.source, "demo");
+    assert.equal(listing.source, "embedded");
     assert.equal(listing.demo, true);
     assert.equal(listing.uploadDisabled, true);
     assert.equal(listing.readOnly, true);

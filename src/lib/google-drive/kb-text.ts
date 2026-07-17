@@ -629,17 +629,22 @@ async function getDriveTextForAi(
   return formatDriveContext(folderLabel, chunks, userQuery, files.length);
 }
 
-/** Быстро: только список файлов в KB, без скачивания текста. */
+/** Быстро: KB context for AI — PostgreSQL primary, embedded fallback. */
 export async function getKnowledgeBaseTextForAi(
   userQuery: string,
   options?: DriveTextOptions,
   locale: import("@/i18n/config").AppLocale = "en",
 ): Promise<string> {
-  const { shouldUseDemoKnowledgeBase, getDemoKnowledgeBaseTextForAi } =
-    await import("@/lib/knowledge-base/store");
+  const { getKnowledgeBaseTextForAi: resolveKbText } = await import(
+    "@/lib/knowledge-base/knowledge-base-service"
+  );
+  const {
+    isKnowledgeBasePostgresEnabled,
+    shouldPreferEmbeddedKnowledgeBase,
+  } = await import("@/lib/knowledge-base/config");
 
-  if (shouldUseDemoKnowledgeBase()) {
-    return getDemoKnowledgeBaseTextForAi(locale, userQuery);
+  if (isKnowledgeBasePostgresEnabled() || shouldPreferEmbeddedKnowledgeBase()) {
+    return resolveKbText(locale, userQuery);
   }
 
   if (!isGoogleDriveKbConfigured()) {

@@ -1016,7 +1016,7 @@
       "calendarLinkShare": "Calendar link for tomorrow's CRM Review is in the event card — copy the client invite from there if needed.",
       "meetingPrepAnna": "Before the 11:00 call with Anna Kowalska: check document status in CRM and note which items are still blocking submission.",
       "aiSummaryReady": "AI summary for Anna Kowalska is ready in AI Workspace — risks, open documents, and suggested next steps included.",
-      "kbArticleLink": "Useful KB article on Spain remote work requirements — share with Sofia Martins when sending the document list.",
+      "kbArticleLink": "Useful KB material on Spain remote work requirements — share with Sofia Martins when sending the document list.",
       "clientPipelineReview": "Client pipeline for this week: 4 active cases, 2 in consultation, 1 new application. Focus on document collection for Spain and Croatia.",
       "overdueTasksNote": "Heads-up: 3 tasks are overdue (visa review, Marco Rossi booking, CRM notes). Let's clear at least two before lunch.",
       "videoCallReminder": "Video consultation with Anna Kowalska starts in 1 hour — link is in the calendar event. Please review her file beforehand.",
@@ -1610,13 +1610,13 @@
     "breadcrumbRoot": "Knowledge Base",
     "breadcrumbAria": "Knowledge base navigation",
     "search": {
-      "placeholder": "Search articles, categories, tags…",
+      "placeholder": "Search materials, categories, tags…",
       "label": "Search knowledge base",
       "clear": "Clear search",
       "resultsCount": "{count} results",
-      "noResults": "No articles match your search.",
+      "noResults": "No materials match your search.",
       "unavailable": "Search is temporarily unavailable.",
-      "hint": "Search by title, summary, category, tags, or article content."
+      "hint": "Search by title, summary, category, tags, or material content."
     },
     "filters": {
       "allCategories": "All categories",
@@ -1629,7 +1629,7 @@
       "preview": "Preview",
       "download": "Download",
       "copyLink": "Copy link",
-      "create": "Create article",
+      "create": "Create material",
       "addMaterial": "Add material",
       "edit": "Edit",
       "duplicate": "Duplicate",
@@ -1664,16 +1664,23 @@
       "archive": "Archive table",
       "confirmArchive": "Archive this table? It will be hidden from the team.",
       "tableTitle": "Table name",
+      "tableTitlePrompt": "Give the table a name",
+      "tableTitlePlaceholder": "For example: Payment plan",
       "addRow": "+ Row",
       "addColumn": "+ Column",
       "deleteColumn": "Remove column",
       "columnName": "Column name",
       "columnType": "Column type",
-      "pasteHint": "Paste a range from Excel or Google Sheets into the grid.",
+      "pasteHint": "You can also copy cells from Excel or Google Sheets and paste them here.",
+      "editHint": "Fill in the table, add more rows and columns if needed, then click Save.",
       "undoPaste": "Undo last paste",
       "search": "Search in table",
+      "edit": "Edit",
+      "save": "Save",
+      "doneEditing": "Done",
       "empty": "No columns yet.",
       "none": "No tables in this material.",
+      "newTable": "New table",
       "saving": "Saving…",
       "saved": "Saved",
       "saveFailed": "Could not save the table.",
@@ -1735,23 +1742,23 @@
       "category": "Category",
       "tags": "Tags",
       "readingTime": "{minutes} min read",
-      "previewTitle": "Article preview"
+      "previewTitle": "Material preview"
     },
     "empty": {
-      "noArticles": "No articles in this category yet.",
+      "noArticles": "No materials in this category yet.",
       "unconfigured": "Knowledge Base is not configured.",
       "folderEmpty": "This folder is empty.",
-      "selectArticle": "Select an article to read or use search to find a topic."
+      "selectArticle": "Select a material to read or use search to find a topic."
     },
     "loading": {
-      "list": "Loading articles…",
-      "article": "Loading article…",
+      "list": "Loading materials…",
+      "article": "Loading material…",
       "drive": "Loading knowledge base…"
     },
     "errors": {
       "loadFailed": "Could not load knowledge base data.",
-      "saveFailed": "Could not save the article.",
-      "articleNotFound": "Article not found.",
+      "saveFailed": "Could not save the material.",
+      "articleNotFound": "Material not found.",
       "accessDenied": "You do not have access to this resource.",
       "generic": "Something went wrong. Please try again."
     },
@@ -1764,28 +1771,28 @@
       "linkCopied": "Link copied to clipboard.",
       "linkCopyFailed": "Could not copy link.",
       "saved": "Changes saved.",
-      "deleted": "Article deleted."
+      "deleted": "Material deleted."
     },
     "confirm": {
-      "deleteTitle": "Delete article?",
+      "deleteTitle": "Delete material?",
       "deleteBody": "This action cannot be undone.",
-      "archiveBody": "Archive this article? It will be hidden from the team list.",
+      "archiveBody": "Archive this material? It will be hidden from the team list.",
       "confirm": "Confirm",
       "cancel": "Cancel"
     },
     "editor": {
-      "newTitle": "New article",
+      "newTitle": "New material",
       "newSubtitle": "Create a draft and publish when ready",
-      "editTitle": "Edit article",
+      "editTitle": "Edit material",
       "preview": "Preview",
       "saveDraft": "Save draft",
       "publish": "Publish",
       "archive": "Archive",
-      "aiCreate": "Create with AI",
-      "aiHint": "Describe the process or policy. AI generates a bilingual draft you can review and edit.",
-      "aiPlaceholder": "e.g. Write a guide for the new CRM intake process…",
-      "aiGenerate": "Generate draft",
-      "aiGenerating": "Generating…",
+      "aiCreate": "Create template",
+      "aiHint": "Enter the topic. We will create a bilingual draft template you can review and edit.",
+      "aiPlaceholder": "e.g. New CRM intake process",
+      "aiGenerate": "Create template",
+      "aiGenerating": "Creating…",
       "sections": {
         "main": "Main",
         "en": "English content",
@@ -1795,7 +1802,7 @@
         "primaryTitle": "Primary title (EN)",
         "title": "Title",
         "summary": "Summary",
-        "content": "Article text",
+        "content": "Material text",
         "contentHint": "Plain text is fine. Headings and lists are optional."
       },
       "status": {
@@ -1810,9 +1817,9 @@
       },
       "errors": {
         "slugTaken": "This slug is already in use.",
-        "aiFailed": "Could not generate AI draft."
+        "aiFailed": "Could not create the template."
       },
-      "postgresRequired": "Article management requires PostgreSQL Knowledge Base (migration 026)."
+      "postgresRequired": "Material management requires PostgreSQL Knowledge Base (migration 026)."
     },
     "upload": {
       "disabled": "File uploads are disabled in the public demo.",
@@ -1851,13 +1858,13 @@
     },
     "demoGuard": {
       "upload": "File uploads are disabled in the public demo.",
-      "create": "Creating articles is disabled in the public demo.",
-      "edit": "Editing articles is disabled in the public demo.",
-      "delete": "Deleting articles is disabled in the public demo."
+      "create": "Creating materials is disabled in the public demo.",
+      "edit": "Editing materials is disabled in the public demo.",
+      "delete": "Deleting materials is disabled in the public demo."
     },
-    "aiContextHeader": "Knowledge Base (demo articles):",
+    "aiContextHeader": "Knowledge Base (demo materials):",
     "aiContextPostgresHeader": "Knowledge Base (PostgreSQL):",
-    "aiContextEmpty": "No matching demo articles found.",
+    "aiContextEmpty": "No matching demo materials found.",
     "categories": {
       "companyPolicies": "Company Policies",
       "clientWorkflow": "Client Workflow",
@@ -1899,7 +1906,7 @@
       "internal-communication-guidelines": {
         "title": "Internal communication guidelines",
         "summary": "How the Northstar Mobility team communicates about clients and cases.",
-        "content": "## Channels\n\n- **Team Chat** — day-to-day coordination, quick updates.\n- **CRM notes** — official case history; always log decisions here.\n- **Email** — client-facing only; copy summaries to CRM.\n\n## Client privacy\n\nDo not share passport numbers, full addresses, or financial details in chat. Use client IDs and last names only.\n\n## Response times\n\nManagers should acknowledge @mentions within 4 business hours. Urgent escalations use the escalation procedure article."
+        "content": "## Channels\n\n- **Team Chat** — day-to-day coordination, quick updates.\n- **CRM notes** — official case history; always log decisions here.\n- **Email** — client-facing only; copy summaries to CRM.\n\n## Client privacy\n\nDo not share passport numbers, full addresses, or financial details in chat. Use client IDs and last names only.\n\n## Response times\n\nManagers should acknowledge @mentions within 4 business hours. Urgent escalations use the escalation procedure material."
       },
       "consultation-prep": {
         "title": "How to prepare for a client consultation",
@@ -1959,7 +1966,7 @@
       "quality-review-process": {
         "title": "Quality review process",
         "summary": "Peer review steps before submitting client packages or AI-generated drafts.",
-        "content": "## When to review\n\n- Before submitting a document package to authorities\n- Before sending AI-drafted client emails\n- After updating a Knowledge Base article (production only)\n\n## Reviewer checklist\n\n1. Facts match CRM and uploaded documents.\n2. No internal jargon or demo placeholders in client text.\n3. Dates and names are consistent.\n\n## Demo note\n\nIn public demo, edits are read-only — use this process as reference only."
+        "content": "## When to review\n\n- Before submitting a document package to authorities\n- Before sending AI-drafted client emails\n- After updating a Knowledge Base material (production only)\n\n## Reviewer checklist\n\n1. Facts match CRM and uploaded documents.\n2. No internal jargon or demo placeholders in client text.\n3. Dates and names are consistent.\n\n## Demo note\n\nIn public demo, edits are read-only — use this process as reference only."
       }
     }
   },
@@ -2201,7 +2208,7 @@
         "description": "Refresh the internal Croatia checklist with latest temporary stay requirements and link the Anna Kowalska document set as a reference example."
       },
       "team-chat-kb-announcement": {
-        "title": "Announce new KB article in Team Chat",
+        "title": "Announce new KB material in Team Chat",
         "description": "Post a short Team Chat message about the updated client onboarding checklist and pin the Knowledge Base link for new case managers."
       },
       "marco-rossi-intake-review": {

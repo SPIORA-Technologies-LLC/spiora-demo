@@ -18,7 +18,7 @@ import type {
   KbCategoryId,
   KbEditorArticle,
 } from "@/lib/knowledge-base/types";
-import { slugifyKbTitle } from "@/lib/knowledge-base/kb-slug";
+import { slugifyKbTitle, suggestDuplicateSlug } from "@/lib/knowledge-base/kb-slug";
 import type { KbAiDraftResult } from "@/lib/knowledge-base/kb-ai-draft";
 import {
   ensureKbDraft,
@@ -191,65 +191,76 @@ export function KnowledgeBaseEditorView({
   const createDraftOnServer = useCallback(async (): Promise<string> => {
     const current = formRef.current;
     const titles = titlesForAutoDraft(current.en.title, current.ru.title);
-    const slug =
-      (current.slug.trim() && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(current.slug.trim())
-        ? current.slug.trim()
-        : slugifyKbTitle(titles.en)) || "article";
+    const hasManualSlug =
+      Boolean(current.slug.trim()) &&
+      /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(current.slug.trim());
+    const baseSlug =
+      (hasManualSlug ? current.slug.trim() : slugifyKbTitle(titles.en)) || "article";
+    // Empty create (e.g. focus=table) must not collide with a prior "untitled-material".
+    const uniqueBase =
+      !current.en.title.trim() && !current.ru.title.trim() && !hasManualSlug
+        ? `${baseSlug}-${Date.now().toString(36)}`
+        : baseSlug;
 
-    const payload = {
-      slug,
-      categoryId: current.categoryId,
-      tagKeys: current.tagKeys,
-      authorKey: current.authorKey,
-      status: "draft" as const,
-      translations: [
-        {
-          locale: "en" as const,
-          title: titles.en,
-          summary: current.en.summary,
-          content: current.en.content,
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const slug =
+        attempt === 0 ? uniqueBase : suggestDuplicateSlug(uniqueBase, attempt);
+
+      const payload = {
+        slug,
+        categoryId: current.categoryId,
+        tagKeys: current.tagKeys,
+        authorKey: current.authorKey,
+        status: "draft" as const,
+        translations: [
+          {
+            locale: "en" as const,
+            title: titles.en,
+            summary: current.en.summary,
+            content: current.en.content,
+          },
+          {
+            locale: "ru" as const,
+            title: titles.ru,
+            summary: current.ru.summary,
+            content: current.ru.content,
+          },
+        ],
+      };
+
+      const res = await fetch("/api/knowledge-base", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.status === 409) continue;
+      if (!res.ok) {
+        throw new Error("create_failed");
+      }
+
+      const data = (await res.json()) as { article: { slug: string } };
+      const createdSlug = data.article.slug;
+
+      setForm((prev) => ({
+        ...prev,
+        slug: createdSlug,
+        status: "draft",
+        en: {
+          ...prev.en,
+          title: prev.en.title.trim() ? prev.en.title : titles.en,
         },
-        {
-          locale: "ru" as const,
-          title: titles.ru,
-          summary: current.ru.summary,
-          content: current.ru.content,
+        ru: {
+          ...prev.ru,
+          title: prev.ru.title.trim() ? prev.ru.title : titles.ru,
         },
-      ],
-    };
-
-    const res = await fetch("/api/knowledge-base", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (res.status === 409) {
-      throw new Error("slug_taken");
-    }
-    if (!res.ok) {
-      throw new Error("create_failed");
+      }));
+      setArticlePersisted(true);
+      // Stay on the create view — avoid remount mid-upload. URL updates on explicit save.
+      return createdSlug;
     }
 
-    const data = (await res.json()) as { article: { slug: string } };
-    const createdSlug = data.article.slug;
-
-    setForm((prev) => ({
-      ...prev,
-      slug: createdSlug,
-      status: "draft",
-      en: {
-        ...prev.en,
-        title: prev.en.title.trim() ? prev.en.title : titles.en,
-      },
-      ru: {
-        ...prev.ru,
-        title: prev.ru.title.trim() ? prev.ru.title : titles.ru,
-      },
-    }));
-    setArticlePersisted(true);
-    // Stay on the create view — avoid remount mid-upload. URL updates on explicit save.
-    return createdSlug;
+    throw new Error("slug_taken");
   }, []);
 
   const ensureDraft = useCallback(async (): Promise<string> => {

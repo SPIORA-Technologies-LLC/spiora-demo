@@ -4,12 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { KbTableGrid } from "@/components/knowledge-base/KbTableGrid";
 import {
-  KB_TABLE_COLUMN_TYPES,
   emptyKbTableDocument,
-  type KbTableColumnType,
   type KbTableDocument,
 } from "@/lib/knowledge-base/table-limits";
-import { csvMatrixToDocument, parseCsvText } from "@/lib/knowledge-base/table-csv";
 import { shouldEnsureDraftForUpload } from "@/lib/knowledge-base/kb-auto-draft";
 
 import styles from "./KnowledgeBaseView.module.css";
@@ -25,18 +22,6 @@ export type KbTableClient = {
 };
 
 type SaveState = "idle" | "saving" | "saved" | "error" | "conflict";
-
-type CsvPreviewState = {
-  file: File;
-  csvText: string;
-  title: string;
-  headerRow: boolean;
-  types: KbTableColumnType[];
-  columns: Array<{ name: string; type: KbTableColumnType }>;
-  rowCount: number;
-  sampleRows: KbTableDocument["rows"];
-  document: KbTableDocument;
-};
 
 type Props = {
   slug: string;
@@ -55,34 +40,6 @@ const CSV_ERROR_KEYS = new Set([
   "malformed",
 ]);
 
-function buildPreviewFromText(
-  csvText: string,
-  headerRow: boolean,
-  types?: KbTableColumnType[],
-):
-  | {
-      ok: true;
-      columns: Array<{ name: string; type: KbTableColumnType }>;
-      rowCount: number;
-      sampleRows: KbTableDocument["rows"];
-      document: KbTableDocument;
-      types: KbTableColumnType[];
-    }
-  | { ok: false; error: string } {
-  const parsed = parseCsvText(csvText);
-  if (!parsed.ok) return { ok: false, error: parsed.error };
-  const built = csvMatrixToDocument(parsed.data.matrix, { headerRow, types });
-  if (!built.ok) return { ok: false, error: built.error };
-  return {
-    ok: true,
-    columns: built.data.columns.map((c) => ({ name: c.name, type: c.type })),
-    rowCount: built.data.rows.length,
-    sampleRows: built.data.rows.slice(0, 5),
-    document: built.data,
-    types: built.data.columns.map((c) => c.type),
-  };
-}
-
 export function KbTablesPanel({
   slug,
   canManage,
@@ -98,8 +55,8 @@ export function KbTablesPanel({
   const [search, setSearch] = useState("");
   const [sortColumnId, setSortColumnId] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [csvPreview, setCsvPreview] = useState<CsvPreviewState | null>(null);
   const [csvImporting, setCsvImporting] = useState(false);
+  const [editing, setEditing] = useState(false);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingDoc = useRef<KbTableDocument | null>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
@@ -111,7 +68,12 @@ export function KbTablesPanel({
     if (ensureArticle) {
       try {
         return (await ensureArticle()).trim() || null;
-      } catch {
+      } catch (err) {
+        if (err instanceof Error && err.message === "slug_taken") {
+          setError(t("editor.errors.slugTaken"));
+        } else {
+          setError(t("attachments.prepareFailed"));
+        }
         return null;
       }
     }
@@ -136,7 +98,9 @@ export function KbTablesPanel({
         prev && activeOnly.some((x) => x.id === prev) ? prev : activeOnly[0]?.id ?? null,
       );
     } catch {
-      setError(t("tables.loadFailed"));
+      if (tablesRef.current.length === 0) {
+        setError(t("tables.loadFailed"));
+      }
     } finally {
       setLoading(false);
     }
@@ -155,10 +119,7 @@ export function KbTablesPanel({
     setError(null);
     try {
       const uploadSlug = await resolveSlug();
-      if (!uploadSlug) {
-        setError(t("attachments.prepareFailed"));
-        return;
-      }
+      if (!uploadSlug) return;
       const res = await fetch(
         `/api/knowledge-base/${encodeURIComponent(uploadSlug)}/tables`,
         {
@@ -178,7 +139,10 @@ export function KbTablesPanel({
       const data = (await res.json()) as { table: KbTableClient };
       setTables((prev) => [...prev, data.table]);
       setActiveId(data.table.id);
+      setEditing(true);
+      setError(null);
       setSaveState("saved");
+      if (uploadSlug) void load(uploadSlug);
     } finally {
       createInFlight.current = false;
     }
@@ -187,13 +151,13 @@ export function KbTablesPanel({
   const tablesRef = useRef(tables);
   tablesRef.current = tables;
 
-  const flushSave = async (tableId: string, document: KbTableDocument) => {
+  const flushSave = async (tableId: string, document: KbTableDocument): Promise<boolean> => {
     const table = tablesRef.current.find((x) => x.id === tableId);
-    if (!table) return;
+    if (!table) return false;
     const saveSlug = slug.trim() || (await resolveSlug());
     if (!saveSlug) {
       setSaveState("error");
-      return;
+      return false;
     }
     setSaveState("saving");
     const res = await fetch(
@@ -212,18 +176,19 @@ export function KbTablesPanel({
       setSaveState("conflict");
       setError(t("tables.conflict"));
       pendingDoc.current = document;
-      return;
+      return false;
     }
     if (!res.ok) {
       setSaveState("error");
       setError(t("tables.saveFailed"));
-      return;
+      return false;
     }
     const data = (await res.json()) as { table: KbTableClient };
     setTables((prev) => prev.map((x) => (x.id === data.table.id ? data.table : x)));
     setSaveState("saved");
     setError(null);
     pendingDoc.current = null;
+    return true;
   };
 
   const onDocumentChange = (document: KbTableDocument) => {
@@ -274,68 +239,17 @@ export function KbTablesPanel({
     await load(slug);
   };
 
-  const openCsvPreview = async (file: File) => {
-    if (!shouldEnsureDraftForUpload(1)) return;
-    setError(null);
-    const csvText = await file.text();
-    const built = buildPreviewFromText(csvText, true);
-    if (!built.ok) {
-      setError(mapCsvError(built.error));
-      return;
-    }
-    setCsvPreview({
-      file,
-      csvText,
-      title: file.name.replace(/\.csv$/i, "") || t("tables.defaultTitle"),
-      headerRow: true,
-      types: built.types,
-      columns: built.columns,
-      rowCount: built.rowCount,
-      sampleRows: built.sampleRows,
-      document: built.document,
-    });
-  };
-
-  const refreshCsvPreview = (
-    csvText: string,
-    file: File,
-    headerRow: boolean,
-    title: string,
-    types?: KbTableColumnType[],
-  ) => {
-    const built = buildPreviewFromText(csvText, headerRow, types);
-    if (!built.ok) {
-      setError(mapCsvError(built.error));
-      return;
-    }
-    setCsvPreview({
-      file,
-      csvText,
-      title,
-      headerRow,
-      types: built.types,
-      columns: built.columns,
-      rowCount: built.rowCount,
-      sampleRows: built.sampleRows,
-      document: built.document,
-    });
-  };
-
-  const confirmCsvImport = async () => {
-    if (!csvPreview || csvImporting) return;
+  const importCsv = async (file: File) => {
+    if (!shouldEnsureDraftForUpload(1) || csvImporting) return;
     setCsvImporting(true);
     setError(null);
     try {
       const uploadSlug = await resolveSlug();
-      if (!uploadSlug) {
-        setError(t("attachments.prepareFailed"));
-        return;
-      }
+      if (!uploadSlug) return;
       const body = new FormData();
-      body.append("file", csvPreview.file);
-      body.append("headerRow", csvPreview.headerRow ? "true" : "false");
-      body.append("title", csvPreview.title);
-      body.append("types", JSON.stringify(csvPreview.types));
+      body.append("file", file);
+      body.append("headerRow", "true");
+      body.append("title", file.name.replace(/\.csv$/i, "") || t("tables.defaultTitle"));
       const res = await fetch(
         `/api/knowledge-base/${encodeURIComponent(uploadSlug)}/tables/import-csv`,
         { method: "POST", body },
@@ -349,11 +263,22 @@ export function KbTablesPanel({
       const data = (await res.json()) as { table: KbTableClient };
       setTables((prev) => [...prev, data.table]);
       setActiveId(data.table.id);
-      setCsvPreview(null);
+      setEditing(false);
       setSaveState("saved");
     } finally {
       setCsvImporting(false);
     }
+  };
+
+  const saveAndClose = async () => {
+    if (!active || !canManage) return;
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+    }
+    const doc = pendingDoc.current ?? active.document;
+    const ok = await flushSave(active.id, doc);
+    if (ok) setEditing(false);
   };
 
   const retrySave = () => {
@@ -372,13 +297,11 @@ export function KbTablesPanel({
   const saveLabel =
     saveState === "saving"
       ? t("tables.saving")
-      : saveState === "saved"
-        ? t("tables.saved")
-        : saveState === "error"
-          ? t("tables.saveFailed")
-          : saveState === "conflict"
-            ? t("tables.conflict")
-            : null;
+      : saveState === "error"
+        ? t("tables.saveFailed")
+        : saveState === "conflict"
+          ? t("tables.conflict")
+          : null;
 
   return (
     <div className={styles.attachmentsPanel} id="kb-tables-panel">
@@ -393,9 +316,10 @@ export function KbTablesPanel({
           <button
             type="button"
             className={styles.fileActionBtn}
+            disabled={csvImporting}
             onClick={() => csvInputRef.current?.click()}
           >
-            {t("tables.importCsv")}
+            {csvImporting ? t("tables.saving") : t("tables.importCsv")}
           </button>
           <input
             ref={csvInputRef}
@@ -404,104 +328,10 @@ export function KbTablesPanel({
             hidden
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) void openCsvPreview(file);
+              if (file) void importCsv(file);
               e.target.value = "";
             }}
           />
-        </div>
-      ) : null}
-
-      {csvPreview ? (
-        <div className={styles.csvPreviewPanel}>
-          <h4 className={styles.editorSectionTitle}>{t("tables.csvPreviewTitle")}</h4>
-          <p className={styles.meta}>
-            {t("tables.csvPreviewColumns", { count: csvPreview.columns.length })} ·{" "}
-            {t("tables.csvPreviewRows", { count: csvPreview.rowCount })}
-          </p>
-          <label className={styles.editorLabel}>
-            <span>
-              <input
-                type="checkbox"
-                checked={csvPreview.headerRow}
-                onChange={(e) => {
-                  refreshCsvPreview(
-                    csvPreview.csvText,
-                    csvPreview.file,
-                    e.target.checked,
-                    csvPreview.title,
-                  );
-                }}
-              />{" "}
-              {t("tables.csvHeaderRow")}
-            </span>
-          </label>
-          <div className={styles.csvTypeList}>
-            {csvPreview.columns.map((col, i) => (
-              <label key={`${col.name}-${i}`} className={styles.editorLabel}>
-                {col.name}
-                <select
-                  className={styles.editorInput}
-                  value={csvPreview.types[i] ?? col.type}
-                  onChange={(e) => {
-                    const nextTypes = [...csvPreview.types];
-                    nextTypes[i] = e.target.value as KbTableColumnType;
-                    refreshCsvPreview(
-                      csvPreview.csvText,
-                      csvPreview.file,
-                      csvPreview.headerRow,
-                      csvPreview.title,
-                      nextTypes,
-                    );
-                  }}
-                >
-                  {KB_TABLE_COLUMN_TYPES.map((type) => (
-                    <option key={type} value={type}>
-                      {t(`tables.types.${type}`)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
-          </div>
-          <p className={styles.meta}>{t("tables.csvSample")}</p>
-          <div className={styles.tableScroll}>
-            <table className={styles.kbDataTable}>
-              <thead>
-                <tr>
-                  {csvPreview.columns.map((col, i) => (
-                    <th key={`${col.name}-h-${i}`}>{col.name}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {csvPreview.sampleRows.map((row) => (
-                  <tr key={row.id}>
-                    {csvPreview.document.columns.map((col) => (
-                      <td key={col.id}>{String(row.cells[col.id] ?? "")}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className={styles.fileActionRow}>
-            <button
-              type="button"
-              className={styles.fileActionBtn}
-              disabled={csvImporting}
-              onClick={() => void confirmCsvImport()}
-            >
-              {t("tables.csvConfirmImport")}
-            </button>
-            <button
-              type="button"
-              className={styles.linkBtn}
-              disabled={csvImporting}
-              onClick={() => setCsvPreview(null)}
-            >
-              {t("tables.csvCancelImport")}
-            </button>
-          </div>
         </div>
       ) : null}
 
@@ -526,7 +356,10 @@ export function KbTablesPanel({
               key={table.id}
               type="button"
               className={table.id === active?.id ? styles.primaryBtn : styles.linkBtn}
-              onClick={() => setActiveId(table.id)}
+              onClick={() => {
+                setActiveId(table.id);
+                setEditing(false);
+              }}
             >
               {table.title}
             </button>
@@ -536,21 +369,49 @@ export function KbTablesPanel({
 
       {active ? (
         <>
-          {canManage ? (
-            <label className={styles.editorLabel}>
-              {t("tables.tableTitle")}
-              <input
-                className={styles.editorInput}
-                defaultValue={active.title}
-                key={active.id}
-                onBlur={(e) => void onTitleBlur(e.target.value)}
-              />
-            </label>
+          {canManage && editing ? (
+            <>
+              <p className={styles.meta}>{t("tables.editHint")}</p>
+              <label className={styles.editorLabel}>
+                {t("tables.tableTitlePrompt")}
+                <input
+                  className={styles.editorInput}
+                  placeholder={t("tables.tableTitlePlaceholder")}
+                  defaultValue={
+                    active.title === t("tables.defaultTitle") ? "" : active.title
+                  }
+                  key={active.id}
+                  onBlur={(e) => {
+                    const next = e.target.value.trim();
+                    void onTitleBlur(next || t("tables.defaultTitle"));
+                  }}
+                />
+              </label>
+              <p className={styles.meta}>{t("tables.pasteHint")}</p>
+            </>
           ) : (
-            <h4 className={styles.editorSectionTitle}>{active.title}</h4>
+            <div className={styles.fileActionRow}>
+              <h4 className={styles.editorSectionTitle}>
+                {active.title === t("tables.defaultTitle")
+                  ? t("tables.newTable")
+                  : active.title}
+              </h4>
+              {canManage ? (
+                <button
+                  type="button"
+                  className={styles.fileActionBtn}
+                  onClick={() => {
+                    setError(null);
+                    setEditing(true);
+                  }}
+                >
+                  {t("tables.edit")}
+                </button>
+              ) : null}
+            </div>
           )}
 
-          {!canManage ? (
+          {!editing ? (
             <label className={styles.editorLabel}>
               {t("tables.search")}
               <input
@@ -559,16 +420,14 @@ export function KbTablesPanel({
                 onChange={(e) => setSearch(e.target.value)}
               />
             </label>
-          ) : (
-            <p className={styles.meta}>{t("tables.pasteHint")}</p>
-          )}
+          ) : null}
 
           <KbTableGrid
             document={active.document}
-            canEdit={canManage}
+            canEdit={Boolean(canManage && editing)}
             onChange={onDocumentChange}
-            searchQuery={canManage ? "" : search}
-            sortColumnId={canManage ? null : sortColumnId}
+            searchQuery={canManage && editing ? "" : search}
+            sortColumnId={canManage && editing ? null : sortColumnId}
             sortDir={sortDir}
             onSortChange={(id) => {
               if (sortColumnId === id) {
@@ -581,13 +440,23 @@ export function KbTablesPanel({
           />
 
           <div className={styles.fileActionRow}>
+            {canManage && editing ? (
+              <button
+                type="button"
+                className={styles.fileActionBtn}
+                disabled={saveState === "saving"}
+                onClick={() => void saveAndClose()}
+              >
+                {saveState === "saving" ? t("tables.saving") : t("tables.save")}
+              </button>
+            ) : null}
             <a
               className={styles.linkBtn}
               href={`/api/knowledge-base/${encodeURIComponent(slug)}/tables/${encodeURIComponent(active.id)}/export.csv`}
             >
               {t("tables.exportCsv")}
             </a>
-            {canManage ? (
+            {canManage && editing ? (
               <button type="button" className={styles.linkBtn} onClick={() => void archiveActive()}>
                 {t("tables.archive")}
               </button>

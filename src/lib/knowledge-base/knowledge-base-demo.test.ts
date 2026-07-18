@@ -151,7 +151,7 @@ describe("Knowledge Base demo mode store", () => {
   it("AI receives only demo KB context", async () => {
     await resetDemoKnowledgeBaseStore();
     const text = await getDemoKnowledgeBaseTextForAi("en", "AI Workspace");
-    assert.match(text, /Knowledge Base \(demo articles\)|demo articles/i);
+    assert.match(text, /Knowledge Base \(demo materials\)|demo materials/i);
     assert.ok(text.includes("working-with-ai-workspace") || text.includes("AI Workspace"));
     assert.doesNotMatch(text, /GOOGLE_DRIVE_KB_FOLDER_ID/);
   });

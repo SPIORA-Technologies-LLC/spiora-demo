@@ -53,7 +53,7 @@ ${topic}
 ## Примечания
 
 - Проверьте актуальность ссылок на CRM и базу знаний.
-- Обновите статью после изменения процесса.`;
+- Обновите материал после изменения процесса.`;
   }
 
   return `## Overview
@@ -70,7 +70,7 @@ ${topic}
 ## Notes
 
 - Verify CRM and Knowledge Base references stay current.
-- Update this article when the process changes.`;
+- Update this material when the process changes.`;
 }
 
 function clip(title: string): string {

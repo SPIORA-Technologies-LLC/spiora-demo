@@ -29,6 +29,8 @@ export type KbAttachmentClient = {
 type Props = {
   slug: string;
   canManage: boolean;
+  /** When false, slug may be a local draft slug — do not list/upload against it until ensureArticle. */
+  articlePersisted?: boolean;
   /**
    * Ensures a persisted article exists and returns its slug.
    * Used on create flow before the first upload (Auto Draft).
@@ -36,7 +38,12 @@ type Props = {
   ensureArticle?: () => Promise<string>;
 };
 
-export function KbAttachmentsPanel({ slug, canManage, ensureArticle }: Props) {
+export function KbAttachmentsPanel({
+  slug,
+  canManage,
+  articlePersisted = true,
+  ensureArticle,
+}: Props) {
   const t = useTranslations("knowledgeBase");
   const locale = useLocale() as AppLocale;
   const pdfInputRef = useRef<HTMLInputElement>(null);
@@ -49,7 +56,7 @@ export function KbAttachmentsPanel({ slug, canManage, ensureArticle }: Props) {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const articleReady = Boolean(slug.trim());
+  const canUseSlug = articlePersisted && Boolean(slug.trim());
 
   const load = useCallback(async (loadSlug: string) => {
     if (!loadSlug) return;
@@ -71,17 +78,21 @@ export function KbAttachmentsPanel({ slug, canManage, ensureArticle }: Props) {
   }, [t]);
 
   useEffect(() => {
-    if (articleReady) void load(slug);
-  }, [articleReady, slug, load]);
+    if (canUseSlug) void load(slug);
+  }, [canUseSlug, slug, load]);
 
   const resolveSlugForUpload = async (): Promise<string | null> => {
-    if (slug.trim()) return slug.trim();
-    if (!ensureArticle) return null;
-    try {
-      return (await ensureArticle()).trim() || null;
-    } catch {
-      return null;
+    // Prefer ensureArticle whenever provided — local slug alone is not enough
+    // (title blur / slugify can set a slug before the row exists in Postgres).
+    if (ensureArticle) {
+      try {
+        return (await ensureArticle()).trim() || null;
+      } catch {
+        return null;
+      }
     }
+    if (canUseSlug) return slug.trim();
+    return null;
   };
 
   const uploadFiles = async (files: FileList | File[]) => {
@@ -111,7 +122,11 @@ export function KbAttachmentsPanel({ slug, canManage, ensureArticle }: Props) {
         );
         if (!res.ok) {
           const data = (await res.json().catch(() => null)) as { error?: string } | null;
-          throw new Error(data?.error ?? t("attachments.uploadFailed"));
+          const raw = data?.error ?? "";
+          if (/not found/i.test(raw)) {
+            throw new Error(t("attachments.prepareFailed"));
+          }
+          throw new Error(raw || t("attachments.uploadFailed"));
         }
       }
       await load(uploadSlug);
@@ -160,7 +175,7 @@ export function KbAttachmentsPanel({ slug, canManage, ensureArticle }: Props) {
 
   const preview = items.find((i) => i.id === previewId) ?? null;
   const showManageControls = canManage;
-  const showFallbackOnly = !articleReady && !ensureArticle && canManage;
+  const showFallbackOnly = !canUseSlug && !ensureArticle && canManage;
 
   return (
     <div className={styles.attachmentsPanel}>

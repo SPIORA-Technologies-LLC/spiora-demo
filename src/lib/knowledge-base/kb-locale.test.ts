@@ -151,7 +151,8 @@ describe("Knowledge Base locale switching", () => {
     const flat = flattenKbTranslationRow(cyrillicInEn, "en");
     assert.ok(flat);
     assert.doesNotMatch(flat.title, /[А-Яа-яЁё]/);
-    assert.match(flat.title, /Rabochaya|Etika/i);
+    assert.equal(flat.title, "Work Ethics");
+    assert.doesNotMatch(flat.title, /Rabochaya|Etika/i);
     assert.equal(flat.fallbackUsed, true);
   });
 

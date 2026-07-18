@@ -29,11 +29,18 @@ describe("Knowledge Base AI draft generator", () => {
     assert.equal(draft.translations.ru.title.length > 0, true);
   });
 
-  it("Russian prompt does not copy Cyrillic into EN title", () => {
+  it("Russian prompt translates into real English EN title (not transliteration)", () => {
     const draft = generateKbAiDraft("Рабочая этика");
     assert.doesNotMatch(draft.translations.en.title, /[А-Яа-яЁё]/);
     assert.match(draft.translations.ru.title, /Рабочая этика/);
-    assert.match(draft.translations.en.title, /Rabochaya|Etika|Draft/i);
+    assert.equal(draft.translations.en.title, "Work Ethics");
+    assert.doesNotMatch(draft.translations.en.title, /Rabochaya|Etika/i);
     assert.doesNotMatch(draft.translations.en.content.split("\n")[2] ?? "", /[А-Яа-яЁё]/);
+  });
+
+  it("Corporate ethics prompt gets English translation", () => {
+    const draft = generateKbAiDraft("Корпоративная Этика");
+    assert.equal(draft.translations.en.title, "Corporate Ethics");
+    assert.doesNotMatch(draft.translations.en.title, /Korporativ/i);
   });
 });

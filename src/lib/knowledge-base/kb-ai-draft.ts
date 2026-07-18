@@ -98,7 +98,7 @@ export function generateKbAiDraft(
       en: {
         title: enTitle,
         summary: isMostlyCyrillic(topic)
-          ? `Draft guide generated from Russian topic: ${topic.slice(0, 100)}`
+          ? `Draft guide on: ${enTitle}`
           : `Draft guide generated from: ${topic.slice(0, 120)}`,
         content: buildMarkdown(enTopic, "en"),
       },

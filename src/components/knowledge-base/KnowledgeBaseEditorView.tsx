@@ -660,6 +660,7 @@ export function KnowledgeBaseEditorView({
         <KbAttachmentsPanel
           slug={form.slug}
           canManage={!isArchived}
+          articlePersisted={articlePersisted}
           ensureArticle={
             articlePersisted
               ? undefined

@@ -11,6 +11,7 @@ import {
 } from "@/i18n/knowledge-base-messages";
 import { KbArticleMarkdown } from "@/components/knowledge-base/KbArticleMarkdown";
 import { KbAttachmentsPanel } from "@/components/knowledge-base/KbAttachmentsPanel";
+import { KbTablesPanel } from "@/components/knowledge-base/KbTablesPanel";
 import { Card } from "@/components/ui/Card";
 import type {
   KbArticleStatus,
@@ -119,7 +120,7 @@ export function KnowledgeBaseEditorView({
   const uiLocale = useLocale() as AppLocale;
   const router = useRouter();
   const filesSectionRef = useRef<HTMLDivElement>(null);
-
+  const tablesSectionRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState<EditorForm>(emptyForm);
   const [slugLocked, setSlugLocked] = useState(false);
   const [slugManual, setSlugManual] = useState(false);
@@ -163,9 +164,13 @@ export function KnowledgeBaseEditorView({
     if (loading) return;
     if (typeof window === "undefined") return;
     const focus = new URLSearchParams(window.location.search).get("focus");
-    if (focus !== "files") return;
+    if (focus !== "files" && focus !== "table") return;
     const timer = window.setTimeout(() => {
-      filesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (focus === "table") {
+        tablesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        filesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     }, 120);
     return () => window.clearTimeout(timer);
   }, [loading]);
@@ -658,6 +663,27 @@ export function KnowledgeBaseEditorView({
 
       <div ref={filesSectionRef}>
         <KbAttachmentsPanel
+          slug={form.slug}
+          canManage={!isArchived}
+          articlePersisted={articlePersisted}
+          ensureArticle={
+            articlePersisted
+              ? undefined
+              : () =>
+                  ensureDraft().catch((err) => {
+                    if (err instanceof Error && err.message === "slug_taken") {
+                      setError(t("editor.errors.slugTaken"));
+                    } else {
+                      setError(t("attachments.prepareFailed"));
+                    }
+                    throw err;
+                  })
+          }
+        />
+      </div>
+
+      <div ref={tablesSectionRef}>
+        <KbTablesPanel
           slug={form.slug}
           canManage={!isArchived}
           articlePersisted={articlePersisted}

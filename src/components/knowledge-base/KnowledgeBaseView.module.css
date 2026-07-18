@@ -658,6 +658,22 @@
   margin-bottom: 0.35rem;
 }
 
+.csvPreviewPanel {
+  margin: 0.75rem 0 1rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--border-burgundy);
+  border-bottom: 1px solid var(--border-burgundy);
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.csvTypeList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.55rem;
+}
+
 .fileActionBtn {
   appearance: none;
   border: 1px solid var(--border-burgundy);
@@ -781,4 +797,54 @@
   display: block;
   font-size: 0.75rem;
   opacity: 0.75;
+}
+
+.tableGridWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tableScroll {
+  overflow: auto;
+  max-width: 100%;
+  border: 1px solid var(--border-burgundy);
+  border-radius: var(--radius-sm);
+}
+
+.kbDataTable {
+  border-collapse: collapse;
+  width: max-content;
+  min-width: 100%;
+  font-size: 0.9rem;
+}
+
+.kbDataTable th,
+.kbDataTable td {
+  border: 1px solid var(--border-burgundy);
+  padding: 0.35rem 0.45rem;
+  vertical-align: middle;
+  background: transparent;
+}
+
+.kbDataTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: rgba(20, 12, 12, 0.96);
+}
+
+.kbTableCorner {
+  width: 2rem;
+}
+
+.kbColHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 9rem;
+}
+
+.kbCellActive {
+  outline: 1px solid var(--brand-red);
 }

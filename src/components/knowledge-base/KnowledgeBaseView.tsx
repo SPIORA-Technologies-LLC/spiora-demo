@@ -18,6 +18,7 @@ import { buildKbListQuery } from "@/lib/knowledge-base/kb-locale";
 import { Card } from "@/components/ui/Card";
 import { KbArticleMarkdown } from "./KbArticleMarkdown";
 import { KbAttachmentsPanel } from "./KbAttachmentsPanel";
+import { KbTablesPanel } from "./KbTablesPanel";
 
 import styles from "./KnowledgeBaseView.module.css";
 
@@ -228,10 +229,15 @@ export function KnowledgeBaseView() {
                   {t("addMaterial.image")}
                   <span className={styles.addMaterialSoon}>{t("addMaterial.imageHint")}</span>
                 </Link>
-                <button type="button" className={styles.addMaterialItem} disabled>
-                  {t("addMaterial.tableSoon")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>
-                </button>
+                <Link
+                  href="/knowledge-base/new?focus=table&intent=table"
+                  className={styles.addMaterialItem}
+                  role="menuitem"
+                  onClick={() => setAddMenuOpen(false)}
+                >
+                  {t("addMaterial.table")}
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.tableHint")}</span>
+                </Link>
                 <button type="button" className={styles.addMaterialItem} disabled>
                   {t("addMaterial.videoSoon")}
                   <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>
@@ -620,6 +626,7 @@ function ArticleDetailView({
         slug={article.slug}
         canManage={canManage}
       />
+      <KbTablesPanel slug={article.slug} canManage={canManage} articlePersisted />
     </Card>
   );
 }

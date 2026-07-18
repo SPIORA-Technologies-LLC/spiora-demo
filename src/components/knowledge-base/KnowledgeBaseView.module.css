@@ -628,3 +628,128 @@
   flex-direction: column;
   gap: 0.75rem;
 }
+
+.attachmentsPanel {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.dropzone {
+  border: 1px dashed var(--border-burgundy);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: flex-start;
+}
+
+.dropzoneActive {
+  border-color: var(--brand-red);
+  background: rgba(var(--brand-red-rgb), 0.08);
+}
+
+.attachmentList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.attachmentItem {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid var(--border-burgundy);
+}
+
+.attachmentMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: min(100%, 240px);
+  flex: 1;
+}
+
+.attachmentActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.attachmentPreview {
+  border-top: 1px solid var(--border-burgundy);
+  padding-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.attachmentImage {
+  max-width: 100%;
+  max-height: 420px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.attachmentPdf {
+  width: 100%;
+  min-height: 480px;
+  border: 1px solid var(--border-burgundy);
+  border-radius: var(--radius-sm);
+  background: #111;
+}
+
+.addMaterialWrap {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.addMaterialMenu {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  z-index: 20;
+  min-width: 220px;
+  padding: 0.5rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-burgundy);
+  background: var(--surface-dark, #1a1218);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.addMaterialItem {
+  text-align: left;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  padding: 0.5rem 0.65rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.addMaterialItem:hover:not(:disabled) {
+  background: rgba(var(--brand-red-rgb), 0.2);
+}
+
+.addMaterialItem:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.addMaterialSoon {
+  display: block;
+  font-size: 0.75rem;
+  opacity: 0.75;
+}

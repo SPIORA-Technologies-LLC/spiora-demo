@@ -1630,6 +1630,7 @@
       "download": "Download",
       "copyLink": "Copy link",
       "create": "Create article",
+      "addMaterial": "Add material",
       "edit": "Edit",
       "duplicate": "Duplicate",
       "publish": "Publish",
@@ -1638,6 +1639,34 @@
       "upload": "Upload file",
       "back": "Back to list",
       "backToCategory": "Back"
+    },
+    "addMaterial": {
+      "text": "Text material",
+      "pdf": "PDF",
+      "image": "Image",
+      "tableSoon": "Table",
+      "videoSoon": "Video",
+      "linkSoon": "Link",
+      "comingSoon": "Coming later",
+      "attachAfterCreate": "Create a text draft first, then attach PDF or images in the editor."
+    },
+    "attachments": {
+      "title": "Attachments",
+      "hint": "PDF and images (PNG, JPEG, WebP). Max 25 MB for PDF, 10 MB for images.",
+      "saveDraftFirst": "Save the draft once to unlock attachments for this article.",
+      "addFiles": "Add files",
+      "dropHint": "Or drag and drop files here",
+      "uploading": "Uploading…",
+      "preview": "Preview",
+      "download": "Download",
+      "archive": "Archive",
+      "closePreview": "Close preview",
+      "captionPlaceholder": "Caption (optional)",
+      "confirmArchive": "Archive this attachment? It will be hidden from the team.",
+      "loadFailed": "Could not load attachments.",
+      "uploadFailed": "Could not upload the file.",
+      "archiveFailed": "Could not archive the attachment.",
+      "updateFailed": "Could not update the attachment."
     },
     "article": {
       "updated": "Updated {date}",

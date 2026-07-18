@@ -10,6 +10,7 @@ import {
   translateKnowledgeBaseTag,
 } from "@/i18n/knowledge-base-messages";
 import { KbArticleMarkdown } from "@/components/knowledge-base/KbArticleMarkdown";
+import { KbAttachmentsPanel } from "@/components/knowledge-base/KbAttachmentsPanel";
 import { Card } from "@/components/ui/Card";
 import type {
   KbArticleStatus,
@@ -536,6 +537,12 @@ export function KnowledgeBaseEditorView({
           </Card>
         ))}
       </div>
+
+      <KbAttachmentsPanel
+        slug={form.slug}
+        canManage={!isArchived}
+        enabled={mode === "edit"}
+      />
 
       {aiOpen ? (
         <div className={styles.aiModalBackdrop} role="presentation" onClick={() => setAiOpen(false)}>

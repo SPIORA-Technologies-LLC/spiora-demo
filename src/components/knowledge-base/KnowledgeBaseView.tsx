@@ -17,6 +17,7 @@ import type {
 import { buildKbListQuery } from "@/lib/knowledge-base/kb-locale";
 import { Card } from "@/components/ui/Card";
 import { KbArticleMarkdown } from "./KbArticleMarkdown";
+import { KbAttachmentsPanel } from "./KbAttachmentsPanel";
 
 import styles from "./KnowledgeBaseView.module.css";
 
@@ -57,6 +58,8 @@ export function KnowledgeBaseView() {
     searchParams.get("folderId") ?? undefined,
   );
   const [history, setHistory] = useState<string[]>([]);
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const [attachHint, setAttachHint] = useState(false);
 
   const category = searchParams.get("category") ?? undefined;
   const tag = searchParams.get("tag") ?? undefined;
@@ -190,9 +193,68 @@ export function KnowledgeBaseView() {
 
       {canManage ? (
         <div className={styles.ownerToolbar}>
-          <Link href="/knowledge-base/new" className={styles.primaryBtn}>
-            <i className="fa-solid fa-plus" aria-hidden /> {t("actions.create")}
-          </Link>
+          <div className={styles.addMaterialWrap}>
+            <button
+              type="button"
+              className={styles.primaryBtn}
+              onClick={() => setAddMenuOpen((v) => !v)}
+            >
+              <i className="fa-solid fa-plus" aria-hidden /> {t("actions.addMaterial")}
+            </button>
+            {addMenuOpen ? (
+              <div className={styles.addMaterialMenu} role="menu">
+                <Link
+                  href="/knowledge-base/new"
+                  className={styles.addMaterialItem}
+                  role="menuitem"
+                  onClick={() => setAddMenuOpen(false)}
+                >
+                  {t("addMaterial.text")}
+                </Link>
+                <button
+                  type="button"
+                  className={styles.addMaterialItem}
+                  role="menuitem"
+                  onClick={() => {
+                    setAttachHint(true);
+                    setAddMenuOpen(false);
+                    router.push("/knowledge-base/new");
+                  }}
+                >
+                  {t("addMaterial.pdf")}
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.attachAfterCreate")}</span>
+                </button>
+                <button
+                  type="button"
+                  className={styles.addMaterialItem}
+                  role="menuitem"
+                  onClick={() => {
+                    setAttachHint(true);
+                    setAddMenuOpen(false);
+                    router.push("/knowledge-base/new");
+                  }}
+                >
+                  {t("addMaterial.image")}
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.attachAfterCreate")}</span>
+                </button>
+                <button type="button" className={styles.addMaterialItem} disabled>
+                  {t("addMaterial.tableSoon")}
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>
+                </button>
+                <button type="button" className={styles.addMaterialItem} disabled>
+                  {t("addMaterial.videoSoon")}
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>
+                </button>
+                <button type="button" className={styles.addMaterialItem} disabled>
+                  {t("addMaterial.linkSoon")}
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>
+                </button>
+              </div>
+            ) : null}
+          </div>
+          {attachHint ? (
+            <p className={styles.meta}>{t("addMaterial.attachAfterCreate")}</p>
+          ) : null}
         </div>
       ) : null}
 
@@ -566,6 +628,11 @@ function ArticleDetailView({
         ))}
       </div>
       <KbArticleMarkdown content={article.content} />
+      <KbAttachmentsPanel
+        slug={article.slug}
+        canManage={canManage}
+        enabled
+      />
     </Card>
   );
 }

@@ -75,7 +75,8 @@
 }
 
 .playButton,
-.eventLink {
+.eventLink,
+.deleteButton {
   min-height: 2.2rem;
   padding: 0 0.8rem;
   border-radius: var(--radius-sm);
@@ -90,6 +91,18 @@
   background: rgba(99, 102, 241, 0.18);
   color: #e0e7ff;
   cursor: pointer;
+}
+
+.deleteButton {
+  border: 1px solid rgba(var(--brand-red-rgb), 0.45);
+  background: rgba(var(--brand-red-rgb), 0.12);
+  color: #fecaca;
+  cursor: pointer;
+}
+
+.deleteButton:disabled {
+  opacity: 0.55;
+  cursor: default;
 }
 
 .eventLink {

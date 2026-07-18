@@ -24,6 +24,17 @@ function formatFileSize(bytes: number | null): string {
   return `${mb.toFixed(1)} МБ`;
 }
 
+function formatSavedAt(recording: CalendarMeetingRecordingWithEvent): string {
+  const raw = recording.endedAt || recording.startedAt;
+  return new Date(raw).toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function MeetingRecordingsView() {
   const [recordings, setRecordings] = useState<
     CalendarMeetingRecordingWithEvent[]
@@ -34,6 +45,7 @@ export function MeetingRecordingsView() {
   const [activeRecordingId, setActiveRecordingId] = useState<string | null>(
     null,
   );
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const loadRecordings = useCallback(async () => {
     setLoading(true);
@@ -90,13 +102,47 @@ export function MeetingRecordingsView() {
     }
   }
 
+  async function handleDelete(recordingId: string) {
+    if (!window.confirm("Удалить эту запись встречи? Файл будет удалён безвозвратно.")) {
+      return;
+    }
+
+    setDeletingId(recordingId);
+    setError(null);
+    try {
+      const response = await fetch(
+        `/api/meeting-recordings/${encodeURIComponent(recordingId)}`,
+        { method: "DELETE" },
+      );
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        setError(payload?.error ?? "Не удалось удалить запись");
+        return;
+      }
+
+      if (activeRecordingId === recordingId) {
+        setActiveRecordingId(null);
+        setPlaybackUrl(null);
+      }
+      setRecordings((prev) => prev.filter((item) => item.id !== recordingId));
+    } catch {
+      setError("Не удалось удалить запись");
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Записи встреч</h1>
           <p className={styles.subtitle}>
-            Видеозаписи видеовстреч команды. Гости не могут записывать и не видят
+            Видеозаписи сохраняются автоматически, когда запись была включена и
+            все участники покинули встречу. Гости не могут записывать и не видят
             этот раздел.
           </p>
         </div>
@@ -108,8 +154,8 @@ export function MeetingRecordingsView() {
         <p className={styles.error}>{error}</p>
       ) : recordings.length === 0 ? (
         <p className={styles.empty}>
-          Пока нет сохранённых записей. Во время видеовстречи нажмите «Запись» в
-          панели управления.
+          Пока нет сохранённых записей. Во время видеовстречи нажмите «Запись»,
+          затем завершите звонок — файл появится здесь с датой сохранения.
         </p>
       ) : (
         <div className={styles.layout}>
@@ -119,7 +165,7 @@ export function MeetingRecordingsView() {
                 <div className={styles.itemMain}>
                   <h2 className={styles.itemTitle}>{recording.eventTitle}</h2>
                   <p className={styles.itemMeta}>
-                    {new Date(recording.eventStartAt).toLocaleString("ru-RU")}
+                    Сохранено: {formatSavedAt(recording)}
                     {" · "}
                     {recording.startedByName}
                     {" · "}
@@ -147,6 +193,14 @@ export function MeetingRecordingsView() {
                   >
                     Событие
                   </Link>
+                  <button
+                    type="button"
+                    className={styles.deleteButton}
+                    disabled={deletingId === recording.id}
+                    onClick={() => void handleDelete(recording.id)}
+                  >
+                    {deletingId === recording.id ? "…" : "Удалить"}
+                  </button>
                 </div>
               </li>
             ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -60,6 +60,30 @@ export function KnowledgeBaseView() {
   );
   const [history, setHistory] = useState<string[]>([]);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const addMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!addMenuOpen) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const root = addMenuRef.current;
+      if (!root) return;
+      if (event.target instanceof Node && !root.contains(event.target)) {
+        setAddMenuOpen(false);
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setAddMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [addMenuOpen]);
 
   const category = searchParams.get("category") ?? undefined;
   const tag = searchParams.get("tag") ?? undefined;
@@ -193,7 +217,7 @@ export function KnowledgeBaseView() {
 
       {canManage ? (
         <div className={styles.ownerToolbar}>
-          <div className={styles.addMaterialWrap}>
+          <div className={styles.addMaterialWrap} ref={addMenuRef}>
             <button
               type="button"
               className={styles.primaryBtn}
@@ -288,7 +312,7 @@ export function KnowledgeBaseView() {
                   </span>
                 </Link>
                 <Link
-                  href="/knowledge-base/new?focus=link&intent=link"
+                  href="/knowledge-base/new?focus=files&intent=link"
                   className={styles.addMaterialItem}
                   role="menuitem"
                   onClick={() => setAddMenuOpen(false)}
@@ -436,37 +460,44 @@ export function KnowledgeBaseView() {
         </aside>
 
         <main className={styles.mainPanel}>
-          <nav className={styles.breadcrumb} aria-label={t("breadcrumbAria")}>
-            <button
-              type="button"
-              className={styles.crumbBtn}
-              onClick={() =>
-                updateRoute({ q: query, category, tag, article: undefined })
-              }
-            >
-              {t("breadcrumbRoot")}
-            </button>
-            {category ? (
-              <>
-                <span className={styles.crumbSep}>/</span>
-                <button
-                  type="button"
-                  className={styles.crumbBtn}
-                  onClick={() =>
-                    updateRoute({ q: query, category, tag, article: undefined })
-                  }
-                >
-                  {categories.find((c) => c.id === category)?.label ?? category}
-                </button>
-              </>
-            ) : null}
-            {selectedArticle ? (
-              <>
-                <span className={styles.crumbSep}>/</span>
-                <span>{selectedArticle.title}</span>
-              </>
-            ) : null}
-          </nav>
+          {category || selectedArticle ? (
+            <nav className={styles.breadcrumb} aria-label={t("breadcrumbAria")}>
+              <button
+                type="button"
+                className={styles.crumbBtn}
+                onClick={() =>
+                  updateRoute({
+                    q: query,
+                    category: undefined,
+                    tag,
+                    article: undefined,
+                  })
+                }
+              >
+                {t("breadcrumbRoot")}
+              </button>
+              {category ? (
+                <>
+                  <span className={styles.crumbSep}>/</span>
+                  <button
+                    type="button"
+                    className={styles.crumbBtn}
+                    onClick={() =>
+                      updateRoute({ q: query, category, tag, article: undefined })
+                    }
+                  >
+                    {categories.find((c) => c.id === category)?.label ?? category}
+                  </button>
+                </>
+              ) : null}
+              {selectedArticle ? (
+                <>
+                  <span className={styles.crumbSep}>/</span>
+                  <span>{selectedArticle.title}</span>
+                </>
+              ) : null}
+            </nav>
+          ) : null}
 
           {loading ? (
             <p className={styles.meta}>{t("loading.list")}</p>

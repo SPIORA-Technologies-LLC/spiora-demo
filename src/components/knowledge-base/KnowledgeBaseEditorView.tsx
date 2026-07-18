@@ -125,7 +125,6 @@ export function KnowledgeBaseEditorView({
   const router = useRouter();
   const filesSectionRef = useRef<HTMLDivElement>(null);
   const tablesSectionRef = useRef<HTMLDivElement>(null);
-  const linkSectionRef = useRef<HTMLDivElement>(null);
   const [form, setForm] = useState<EditorForm>(emptyForm);
   const [slugLocked, setSlugLocked] = useState(false);
   const [slugManual, setSlugManual] = useState(false);
@@ -139,6 +138,7 @@ export function KnowledgeBaseEditorView({
   const [aiLoading, setAiLoading] = useState(false);
   /** True once the article row exists in Postgres (edit mode or after Auto Draft). */
   const [articlePersisted, setArticlePersisted] = useState(mode === "edit");
+  const [openLinkForm, setOpenLinkForm] = useState(false);
 
   const formRef = useRef(form);
   formRef.current = form;
@@ -171,30 +171,29 @@ export function KnowledgeBaseEditorView({
     const params = new URLSearchParams(window.location.search);
     const focus = params.get("focus");
     const intent = params.get("intent");
-    if (focus !== "files" && focus !== "table" && focus !== "link") return;
+    if (focus !== "files" && focus !== "table") return;
+    if (intent === "link") {
+      setOpenLinkForm(true);
+      setForm((prev) => {
+        if (prev.en.title.trim()) return prev;
+        return {
+          ...prev,
+          en: {
+            ...prev.en,
+            title: prev.en.title || t("addMaterial.linkDefaultTitleEn"),
+            summary: prev.en.summary || t("addMaterial.linkDefaultSummaryEn"),
+          },
+          ru: {
+            ...prev.ru,
+            title: prev.ru.title || t("addMaterial.linkDefaultTitleRu"),
+            summary: prev.ru.summary || t("addMaterial.linkDefaultSummaryRu"),
+          },
+        };
+      });
+    }
     const timer = window.setTimeout(() => {
       if (focus === "table") {
         tablesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else if (focus === "link") {
-        linkSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-        if (intent === "link") {
-          setForm((prev) => {
-            if (prev.externalUrl.trim() || prev.en.title.trim()) return prev;
-            return {
-              ...prev,
-              en: {
-                ...prev.en,
-                title: prev.en.title || t("addMaterial.linkDefaultTitleEn"),
-                summary: prev.en.summary || t("addMaterial.linkDefaultSummaryEn"),
-              },
-              ru: {
-                ...prev.ru,
-                title: prev.ru.title || t("addMaterial.linkDefaultTitleRu"),
-                summary: prev.ru.summary || t("addMaterial.linkDefaultSummaryRu"),
-              },
-            };
-          });
-        }
       } else {
         filesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
@@ -564,19 +563,6 @@ export function KnowledgeBaseEditorView({
           </div>
           <h2 className={styles.detailTitle}>{form[previewLocale].title}</h2>
           <p className={styles.detailSummary}>{form[previewLocale].summary}</p>
-          {form.externalUrl.trim() ? (
-            <p className={styles.externalLinkRow}>
-              <a
-                className={styles.primaryBtn}
-                href={form.externalUrl.trim()}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t("link.open")}
-              </a>
-              <span className={styles.meta}>{form.externalUrl.trim()}</span>
-            </p>
-          ) : null}
           <KbArticleMarkdown content={form[previewLocale].content} />
         </Card>
       ) : null}
@@ -584,23 +570,6 @@ export function KnowledgeBaseEditorView({
       <div className={styles.editorGrid}>
         <Card className={styles.editorPanel}>
           <h3 className={styles.editorSectionTitle}>{t("editor.sections.main")}</h3>
-          <div ref={linkSectionRef}>
-            <label className={styles.editorLabel}>
-              {t("link.field")}
-              <input
-                className={styles.editorInput}
-                type="url"
-                inputMode="url"
-                placeholder={t("link.placeholder")}
-                value={form.externalUrl}
-                disabled={isArchived}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, externalUrl: e.target.value }))
-                }
-              />
-            </label>
-            <p className={styles.meta}>{t("link.hint")}</p>
-          </div>
           <label className={styles.editorLabel}>
             {t("editor.fields.primaryTitle")}
             <input
@@ -735,6 +704,7 @@ export function KnowledgeBaseEditorView({
           slug={form.slug}
           canManage={!isArchived}
           articlePersisted={articlePersisted}
+          openLinkFormInitially={openLinkForm}
           ensureArticle={
             articlePersisted
               ? undefined

@@ -28,7 +28,18 @@ export function MeetingControlBar({
 }: MeetingControlBarProps) {
   const room = useRoomContext();
 
-  function handleLeave() {
+  async function handleLeave() {
+    // Last participant leaving ends the meeting — stop egress and save recording.
+    if (eventId && participantCount <= 1) {
+      try {
+        await fetch(
+          `/api/calendar/events/${encodeURIComponent(eventId)}/meeting-recording`,
+          { method: "DELETE", keepalive: true },
+        );
+      } catch {
+        // best-effort; do not block leave
+      }
+    }
     room.disconnect();
     onLeave();
   }

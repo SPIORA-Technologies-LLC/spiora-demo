@@ -182,3 +182,13 @@ export async function sbListMeetingRecordings(): Promise<
     linkedClientName: row.calendar_events.linked_client_name,
   }));
 }
+
+export async function sbDeleteMeetingRecording(id: string): Promise<boolean> {
+  const { error, count } = await getSupabaseAdmin()
+    .from("calendar_meeting_recordings")
+    .delete({ count: "exact" })
+    .eq("id", id);
+
+  if (error) throw error;
+  return (count ?? 0) > 0;
+}

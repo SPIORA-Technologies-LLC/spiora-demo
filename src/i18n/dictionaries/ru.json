@@ -317,7 +317,7 @@
   },
   "clients": {
     "title": "Клиенты",
-    "subtitle": "Данные из Google Sheets — без дублирования в локальную БД",
+    "subtitle": "Данные клиентов хранятся в PostgreSQL (CRM)",
     "search": {
       "placeholder": "Поиск: имя, паспорт…"
     },
@@ -1651,7 +1651,7 @@
       "audio": "Аудио",
       "audioHint": "Файл или запись",
       "link": "Ссылка",
-      "linkHint": "Внешний URL",
+      "linkHint": "В файлах материала",
       "linkDefaultTitleEn": "External link",
       "linkDefaultTitleRu": "Внешняя ссылка",
       "linkDefaultSummaryEn": "Useful external resource",
@@ -1725,7 +1725,7 @@
     },
     "attachments": {
       "title": "Файлы",
-      "hint": "PDF, изображения, видео и аудио дополнят материал.",
+      "hint": "PDF, изображения, видео, аудио и ссылки дополнят материал.",
       "saveDraftFirst": "Файлы можно добавить после первого сохранения материала.",
       "saveAfterFirst": "Файлы можно добавить после первого сохранения материала.",
       "addFiles": "Добавить файлы",
@@ -1733,6 +1733,16 @@
       "addImage": "+ Добавить изображение",
       "addVideo": "+ Добавить видео",
       "addAudio": "+ Добавить аудио",
+      "addLink": "+ Добавить ссылку",
+      "linkKind": "LINK",
+      "linkUrl": "URL",
+      "linkUrlPlaceholder": "https://example.com/resource",
+      "linkLabel": "Название (необязательно)",
+      "linkLabelPlaceholder": "Как назвать ссылку",
+      "linkSave": "Сохранить ссылку",
+      "linkInvalid": "Укажите корректный http(s) URL.",
+      "linkSaveFailed": "Не удалось сохранить ссылку.",
+      "confirmArchiveLink": "Архивировать ссылку? Она скрывается из списка команды.",
       "dropHint": "Или перетащите файлы сюда",
       "limitsHint": "Видео: MP4/WebM до 100 МБ. Аудио: WebM/OGG/MP3/M4A до 25 МБ. Запись до 10 минут.",
       "uploading": "Загрузка…",

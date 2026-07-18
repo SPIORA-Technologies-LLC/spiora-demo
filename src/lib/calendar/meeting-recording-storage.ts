@@ -1,6 +1,6 @@
 import "server-only";
 
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
@@ -91,6 +91,22 @@ export async function readMeetingRecordingLocalCopy(
     return await readFile(localPath);
   } catch {
     return null;
+  }
+}
+
+export async function deleteMeetingRecordingFile(
+  storagePath: string,
+): Promise<void> {
+  if (isSupabaseConfigured()) {
+    await getSupabaseAdmin().storage.from(MEETING_RECORDINGS_BUCKET).remove([storagePath]);
+    return;
+  }
+
+  const localPath = path.join(LOCAL_DIR, storagePath.replace(/\//g, "_"));
+  try {
+    await unlink(localPath);
+  } catch {
+    // ignore missing
   }
 }
 

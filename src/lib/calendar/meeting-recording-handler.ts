@@ -22,6 +22,7 @@ import { assertCanManageMeetingRecording, canViewMeetingRecording } from "./meet
 import {
   buildMeetingRecordingStoragePath,
   createMeetingRecordingPlaybackUrl,
+  deleteMeetingRecordingFile,
   getEgressStorageConfig,
   getLiveKitApiHost,
 } from "./meeting-recording-storage";
@@ -44,6 +45,7 @@ export type MeetingRecordingDeps = {
   getActiveByEvent: typeof sbRecordings.sbGetActiveMeetingRecordingByEvent;
   getByEgressId: typeof sbRecordings.sbGetMeetingRecordingByEgressId;
   listRecordings: typeof sbRecordings.sbListMeetingRecordings;
+  deleteRecording: typeof sbRecordings.sbDeleteMeetingRecording;
   isConfigured?: () => boolean;
 };
 
@@ -54,6 +56,7 @@ export const defaultMeetingRecordingDeps: MeetingRecordingDeps = {
   getActiveByEvent: sbRecordings.sbGetActiveMeetingRecordingByEvent,
   getByEgressId: sbRecordings.sbGetMeetingRecordingByEgressId,
   listRecordings: sbRecordings.sbListMeetingRecordings,
+  deleteRecording: sbRecordings.sbDeleteMeetingRecording,
   isConfigured: isSupabaseConfigured,
 };
 
@@ -170,6 +173,90 @@ export async function handleStartMeetingRecording(
   }
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * After stopEgress, poll LiveKit for completion so recordings appear even
+ * when webhooks are disabled (common in local/demo).
+ */
+async function finalizeRecordingAfterStop(
+  recording: CalendarMeetingRecording,
+  liveKitEnv: NonNullable<ReturnType<typeof getLiveKitEnv>>,
+  deps: MeetingRecordingDeps,
+): Promise<CalendarMeetingRecording> {
+  if (!recording.egressId) {
+    const updated = await deps.updateRecording(recording.id, {
+      status: "complete",
+      endedAt: new Date().toISOString(),
+      errorMessage: null,
+    });
+    return updated ?? recording;
+  }
+
+  const egressClient = createEgressClient(liveKitEnv);
+
+  for (let attempt = 0; attempt < 15; attempt++) {
+    if (attempt > 0) await sleep(1500);
+
+    try {
+      const infos = await egressClient.listEgress({
+        egressId: recording.egressId,
+      });
+      const info = infos[0];
+      if (!info) continue;
+
+      if (info.status === EgressStatus.EGRESS_COMPLETE) {
+        await handleLiveKitEgressWebhook(
+          recording.egressId,
+          info.status,
+          info.error,
+          (info.fileResults ?? []).map((file) => ({
+            filename: file.filename,
+            size: file.size,
+            duration: file.duration,
+          })),
+          deps,
+        );
+        return (
+          (await deps.getRecordingById(recording.id)) ??
+          recording
+        );
+      }
+
+      if (
+        info.status === EgressStatus.EGRESS_FAILED ||
+        info.status === EgressStatus.EGRESS_ABORTED ||
+        info.status === EgressStatus.EGRESS_LIMIT_REACHED
+      ) {
+        await handleLiveKitEgressWebhook(
+          recording.egressId,
+          info.status,
+          info.error,
+          [],
+          deps,
+        );
+        return (
+          (await deps.getRecordingById(recording.id)) ??
+          recording
+        );
+      }
+    } catch {
+      // keep polling / fall through to known storage path
+    }
+  }
+
+  // Fallback when webhook/poll unavailable: trust planned S3 path from start.
+  const updated = await deps.updateRecording(recording.id, {
+    status: "complete",
+    storagePath: recording.storagePath,
+    endedAt: new Date().toISOString(),
+    errorMessage: null,
+  });
+  return updated ?? recording;
+}
+
 export async function handleStopMeetingRecording(
   session: SessionUser,
   eventId: string,
@@ -204,18 +291,58 @@ export async function handleStopMeetingRecording(
     const egressClient = createEgressClient(liveKitEnv);
     await egressClient.stopEgress(active.egressId);
   } catch (error) {
-    return {
-      status: 503,
-      error:
-        error instanceof Error ? error.message : "Failed to stop recording",
-    };
+    // Egress may already have ended when the room emptied — still finalize.
+    const message = error instanceof Error ? error.message : "";
+    if (!/not found|already|ended|complete/i.test(message)) {
+      return {
+        status: 503,
+        error: message || "Failed to stop recording",
+      };
+    }
   }
 
-  const updated = await deps.updateRecording(active.id, {
+  await deps.updateRecording(active.id, {
     status: "processing",
   });
 
-  return { recording: updated ?? active };
+  // Finalize in background so leave / Stop stay responsive (webhooks optional).
+  void finalizeRecordingAfterStop(active, liveKitEnv, deps).catch((error) => {
+    console.error("[meeting-recording] finalize after stop failed", error);
+  });
+
+  const processing =
+    (await deps.getRecordingById(active.id)) ??
+    ({ ...active, status: "processing" as const });
+
+  return { recording: processing };
+}
+
+export async function handleDeleteMeetingRecording(
+  session: SessionUser,
+  recordingId: string,
+  storeDeps: CalendarStoreDeps = defaultCalendarStoreDeps,
+  deps: MeetingRecordingDeps = defaultMeetingRecordingDeps,
+): Promise<{ ok: true } | MeetingRecordingHandlerError> {
+  const recording = await deps.getRecordingById(recordingId);
+  if (!recording) {
+    return { status: 404, error: "Recording not found" };
+  }
+
+  const event = await storeDeps.getEvent(recording.eventId);
+  if (!event || !canViewEvent(session, event)) {
+    return { status: 403, error: "Forbidden" };
+  }
+
+  if (recording.storagePath) {
+    try {
+      await deleteMeetingRecordingFile(recording.storagePath);
+    } catch (error) {
+      console.error("[meeting-recording] storage delete failed", error);
+    }
+  }
+
+  await deps.deleteRecording(recording.id);
+  return { ok: true };
 }
 
 export async function handleGetMeetingRecordingStatus(
@@ -242,6 +369,21 @@ export async function handleGetMeetingRecordingStatus(
   }
 
   const active = await deps.getActiveByEvent(eventId);
+
+  // While processing, try to promote to complete (covers demo without webhooks).
+  if (
+    active?.status === "processing" &&
+    active.egressId &&
+    getLiveKitEnv()
+  ) {
+    const liveKitEnv = getLiveKitEnv();
+    if (liveKitEnv) {
+      void finalizeRecordingAfterStop(active, liveKitEnv, deps).catch(() => {
+        // ignore; next poll retries
+      });
+    }
+  }
+
   return { recording: active };
 }
 

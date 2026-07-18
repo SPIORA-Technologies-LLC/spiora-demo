@@ -5,11 +5,19 @@ import { useLocale, useTranslations } from "next-intl";
 import type { AppLocale } from "@/i18n/config";
 import {
   KB_ATTACHMENT_ACCEPT,
+  KB_AUDIO_ACCEPT,
   KB_IMAGE_ACCEPT,
   KB_PDF_ACCEPT,
+  KB_VIDEO_ACCEPT,
+  MAX_KB_AUDIO_RECORD_MS,
   formatKbFileSize,
+  type KbAttachmentKind,
 } from "@/lib/knowledge-base/attachment-formats";
 import { shouldEnsureDraftForUpload } from "@/lib/knowledge-base/kb-auto-draft";
+import {
+  formatKbRecordDuration,
+  useKbAudioRecorder,
+} from "@/components/knowledge-base/useKbAudioRecorder";
 
 import styles from "./KnowledgeBaseView.module.css";
 
@@ -23,7 +31,7 @@ export type KbAttachmentClient = {
   isPrimary: boolean;
   status: "active" | "archived";
   url: string;
-  kind: "pdf" | "image";
+  kind: KbAttachmentKind;
 };
 
 type Props = {
@@ -48,6 +56,8 @@ export function KbAttachmentsPanel({
   const locale = useLocale() as AppLocale;
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
   const anyInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<KbAttachmentClient[]>([]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +65,8 @@ export function KbAttachmentsPanel({
   const [error, setError] = useState<string | null>(null);
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const recorder = useKbAudioRecorder();
+  const autoStopRef = useRef(false);
 
   const canUseSlug = articlePersisted && Boolean(slug.trim());
 
@@ -137,6 +149,81 @@ export function KbAttachmentsPanel({
     }
   };
 
+  const saveRecording = useCallback(async () => {
+    if (!canManage || recorder.state !== "recording") return;
+    setError(null);
+    recorder.clearError();
+
+    const recording = await recorder.stopAndGetBlob();
+    if (!recording) {
+      setError(t("attachments.recorder.empty"));
+      return;
+    }
+
+    recorder.setUploading(true);
+    try {
+      let uploadSlug: string | null = null;
+      if (ensureArticle) {
+        try {
+          uploadSlug = (await ensureArticle()).trim() || null;
+        } catch {
+          uploadSlug = null;
+        }
+      } else if (canUseSlug) {
+        uploadSlug = slug.trim();
+      }
+
+      if (!uploadSlug) {
+        setError(
+          ensureArticle
+            ? t("attachments.prepareFailed")
+            : t("attachments.saveAfterFirst"),
+        );
+        return;
+      }
+
+      const file = new File([recording.blob], recording.fileName, {
+        type: recording.mimeType.split(";")[0]?.trim() || "audio/webm",
+      });
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch(
+        `/api/knowledge-base/${encodeURIComponent(uploadSlug)}/attachments`,
+        { method: "POST", body },
+      );
+      if (!res.ok) {
+        const data = (await res.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(data?.error || t("attachments.uploadFailed"));
+      }
+      await load(uploadSlug);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("attachments.uploadFailed"));
+    } finally {
+      recorder.setUploading(false);
+    }
+  }, [
+    canManage,
+    canUseSlug,
+    ensureArticle,
+    load,
+    recorder.clearError,
+    recorder.setUploading,
+    recorder.state,
+    recorder.stopAndGetBlob,
+    slug,
+    t,
+  ]);
+
+  useEffect(() => {
+    if (recorder.state !== "recording") {
+      autoStopRef.current = false;
+      return;
+    }
+    if (recorder.elapsedMs < MAX_KB_AUDIO_RECORD_MS || autoStopRef.current) return;
+    autoStopRef.current = true;
+    void saveRecording();
+  }, [recorder.elapsedMs, recorder.state, saveRecording]);
+
   const archive = async (id: string) => {
     if (!canManage || !slug) return;
     if (!window.confirm(t("attachments.confirmArchive"))) return;
@@ -176,6 +263,7 @@ export function KbAttachmentsPanel({
   const preview = items.find((i) => i.id === previewId) ?? null;
   const showManageControls = canManage;
   const showFallbackOnly = !canUseSlug && !ensureArticle && canManage;
+  const busy = uploading || recorder.state === "uploading" || recorder.state === "recording";
 
   return (
     <div className={styles.attachmentsPanel}>
@@ -197,6 +285,7 @@ export function KbAttachmentsPanel({
           onDrop={(e) => {
             e.preventDefault();
             setDragOver(false);
+            if (recorder.state === "recording") return;
             void uploadFiles(e.dataTransfer.files);
           }}
         >
@@ -221,6 +310,26 @@ export function KbAttachmentsPanel({
             }}
           />
           <input
+            ref={videoInputRef}
+            type="file"
+            accept={KB_VIDEO_ACCEPT}
+            hidden
+            onChange={(e) => {
+              if (e.target.files) void uploadFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+          <input
+            ref={audioInputRef}
+            type="file"
+            accept={KB_AUDIO_ACCEPT}
+            hidden
+            onChange={(e) => {
+              if (e.target.files) void uploadFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+          <input
             ref={anyInputRef}
             type="file"
             accept={KB_ATTACHMENT_ACCEPT}
@@ -235,7 +344,7 @@ export function KbAttachmentsPanel({
             <button
               type="button"
               className={styles.fileActionBtn}
-              disabled={uploading}
+              disabled={busy}
               onClick={() => pdfInputRef.current?.click()}
             >
               {uploading ? t("attachments.uploading") : t("attachments.addPdf")}
@@ -243,17 +352,76 @@ export function KbAttachmentsPanel({
             <button
               type="button"
               className={styles.fileActionBtn}
-              disabled={uploading}
+              disabled={busy}
               onClick={() => imageInputRef.current?.click()}
             >
               {uploading ? t("attachments.uploading") : t("attachments.addImage")}
             </button>
+            <button
+              type="button"
+              className={styles.fileActionBtn}
+              disabled={busy}
+              onClick={() => videoInputRef.current?.click()}
+            >
+              {uploading ? t("attachments.uploading") : t("attachments.addVideo")}
+            </button>
+            <button
+              type="button"
+              className={styles.fileActionBtn}
+              disabled={busy}
+              onClick={() => audioInputRef.current?.click()}
+            >
+              {uploading ? t("attachments.uploading") : t("attachments.addAudio")}
+            </button>
+          </div>
+
+          <div className={styles.recordRow}>
+            {recorder.state === "recording" ? (
+              <>
+                <span className={styles.meta}>
+                  {t("attachments.recorder.recording", {
+                    duration: formatKbRecordDuration(recorder.elapsedMs),
+                  })}
+                </span>
+                <button
+                  type="button"
+                  className={styles.fileActionBtn}
+                  onClick={() => void saveRecording()}
+                >
+                  {t("attachments.recorder.stopSave")}
+                </button>
+                <button
+                  type="button"
+                  className={styles.linkBtn}
+                  onClick={() => recorder.cancelRecording()}
+                >
+                  {t("attachments.recorder.cancel")}
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                className={styles.fileActionBtn}
+                disabled={busy}
+                onClick={() => {
+                  setError(null);
+                  recorder.clearError();
+                  void recorder.startRecording();
+                }}
+              >
+                {recorder.state === "uploading"
+                  ? t("attachments.uploading")
+                  : t("attachments.recorder.start")}
+              </button>
+            )}
           </div>
           <p className={styles.meta}>{t("attachments.dropHint")}</p>
+          <p className={styles.meta}>{t("attachments.limitsHint")}</p>
         </div>
       ) : null}
 
       {error ? <p className={styles.editorError}>{error}</p> : null}
+      {recorder.error ? <p className={styles.editorError}>{recorder.error}</p> : null}
       {loading ? <p className={styles.meta}>{t("loading.article")}</p> : null}
 
       <ul className={styles.attachmentList}>
@@ -319,6 +487,19 @@ export function KbAttachmentsPanel({
               src={`${preview.url}?disposition=inline`}
               alt={preview.caption || preview.fileName}
               className={styles.attachmentImage}
+            />
+          ) : preview.kind === "video" ? (
+            <video
+              controls
+              playsInline
+              src={`${preview.url}?disposition=inline`}
+              className={styles.attachmentVideo}
+            />
+          ) : preview.kind === "audio" ? (
+            <audio
+              controls
+              src={`${preview.url}?disposition=inline`}
+              className={styles.attachmentAudio}
             />
           ) : (
             <iframe

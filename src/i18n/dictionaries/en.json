@@ -1647,12 +1647,16 @@
       "table": "Table",
       "tableSoon": "Table",
       "tableHint": "Create an editable table in the material",
+      "video": "Video",
+      "videoHint": "Open the editor and add a video in Files",
+      "audio": "Audio",
+      "audioHint": "Open the editor — upload audio or record in Files",
       "videoSoon": "Video",
       "linkSoon": "Link",
       "comingSoon": "Coming later",
       "pdfHint": "Open the editor and add a PDF in Files",
       "imageHint": "Open the editor and add an image in Files",
-      "attachAfterCreate": "Open the editor and add PDF or images in Files"
+      "attachAfterCreate": "Open the editor and add files in Files"
     },
     "tables": {
       "title": "Tables",
@@ -1716,13 +1720,16 @@
     },
     "attachments": {
       "title": "Files",
-      "hint": "PDF and images help complete the material.",
+      "hint": "PDF, images, video, and audio can support the material.",
       "saveDraftFirst": "Files can be added after the material is saved once.",
       "saveAfterFirst": "Files can be added after the material is saved once.",
       "addFiles": "Add files",
       "addPdf": "+ Add PDF",
       "addImage": "+ Add image",
+      "addVideo": "+ Add video",
+      "addAudio": "+ Add audio",
       "dropHint": "Or drag and drop files here",
+      "limitsHint": "Video: MP4/WebM up to 100 MB. Audio: WebM/OGG/MP3/M4A up to 25 MB. Recording up to 10 minutes.",
       "uploading": "Uploading…",
       "preview": "Preview",
       "download": "Download",
@@ -1734,7 +1741,17 @@
       "uploadFailed": "Could not upload the file.",
       "archiveFailed": "Could not archive the file.",
       "updateFailed": "Could not update the file.",
-      "prepareFailed": "Could not prepare the material for file upload. Please try again."
+      "prepareFailed": "Could not prepare the material for file upload. Please try again.",
+      "recorder": {
+        "start": "Record audio",
+        "stopSave": "Stop and save",
+        "cancel": "Cancel",
+        "recording": "Recording… {duration}",
+        "unsupported": "Audio recording is not supported in this browser.",
+        "noCodec": "No supported audio format for recording.",
+        "micDenied": "Microphone access was denied.",
+        "empty": "Recording was empty. Try again."
+      }
     },
     "article": {
       "updated": "Updated {date}",

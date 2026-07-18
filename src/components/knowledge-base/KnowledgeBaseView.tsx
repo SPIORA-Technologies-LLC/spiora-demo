@@ -238,10 +238,24 @@ export function KnowledgeBaseView() {
                   {t("addMaterial.table")}
                   <span className={styles.addMaterialSoon}>{t("addMaterial.tableHint")}</span>
                 </Link>
-                <button type="button" className={styles.addMaterialItem} disabled>
-                  {t("addMaterial.videoSoon")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>
-                </button>
+                <Link
+                  href="/knowledge-base/new?focus=files&intent=video"
+                  className={styles.addMaterialItem}
+                  role="menuitem"
+                  onClick={() => setAddMenuOpen(false)}
+                >
+                  {t("addMaterial.video")}
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.videoHint")}</span>
+                </Link>
+                <Link
+                  href="/knowledge-base/new?focus=files&intent=audio"
+                  className={styles.addMaterialItem}
+                  role="menuitem"
+                  onClick={() => setAddMenuOpen(false)}
+                >
+                  {t("addMaterial.audio")}
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.audioHint")}</span>
+                </Link>
                 <button type="button" className={styles.addMaterialItem} disabled>
                   {t("addMaterial.linkSoon")}
                   <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>

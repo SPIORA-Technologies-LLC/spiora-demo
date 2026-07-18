@@ -117,9 +117,77 @@ describe("KB attachment validation Phase 1", () => {
     if (!result.ok) assert.equal(result.error, "mime_mismatch");
   });
 
+  it("accepts WebM audio (EBML) and MP4 video (ftyp)", () => {
+    const webm = Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0, 0, 0, 0]);
+    const audio = validateKbAttachmentFile({
+      fileName: "note.webm",
+      contentType: "audio/webm",
+      size: webm.length,
+      buffer: webm,
+    });
+    assert.equal(audio.ok, true);
+    if (audio.ok) assert.equal(audio.kind, "audio");
+
+    const mp4 = Buffer.alloc(16);
+    mp4.writeUInt32BE(16, 0);
+    mp4.write("ftyp", 4);
+    mp4.write("isom", 8);
+    const video = validateKbAttachmentFile({
+      fileName: "clip.mp4",
+      contentType: "video/mp4",
+      size: mp4.length,
+      buffer: mp4,
+    });
+    assert.equal(video.ok, true);
+    if (video.ok) {
+      assert.equal(video.kind, "video");
+      assert.equal(video.mimeType, "video/mp4");
+    }
+  });
+
+  it("accepts MP3 and rejects video declared as PDF", () => {
+    const mp3 = Buffer.from([0x49, 0x44, 0x33, 0x03, 0, 0, 0, 0]);
+    const ok = validateKbAttachmentFile({
+      fileName: "voice.mp3",
+      contentType: "audio/mpeg",
+      size: mp3.length,
+      buffer: mp3,
+    });
+    assert.equal(ok.ok, true);
+    if (ok.ok) assert.equal(ok.kind, "audio");
+
+    const webm = Buffer.from([0x1a, 0x45, 0xdf, 0xa3, 0, 0, 0, 0]);
+    const mismatch = validateKbAttachmentFile({
+      fileName: "x.pdf",
+      contentType: "application/pdf",
+      size: webm.length,
+      buffer: webm,
+    });
+    assert.equal(mismatch.ok, false);
+    if (!mismatch.ok) assert.equal(mismatch.error, "mime_mismatch");
+  });
+
+  it("denies oversized video", () => {
+    const mp4 = Buffer.alloc(16);
+    mp4.writeUInt32BE(16, 0);
+    mp4.write("ftyp", 4);
+    mp4.write("isom", 8);
+    const result = validateKbAttachmentFile({
+      fileName: "big.mp4",
+      contentType: "video/mp4",
+      size: 101 * 1024 * 1024,
+      buffer: mp4,
+    });
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.error, "file_too_large");
+  });
+
   it("storage path is UUID + ext only (no traversal)", () => {
     const id = "11111111-1111-4111-8111-111111111111";
     assert.equal(buildKbStoragePath(id, "application/pdf"), `${id}.pdf`);
+    assert.equal(buildKbStoragePath(id, "video/mp4"), `${id}.mp4`);
+    assert.equal(buildKbStoragePath(id, "audio/webm"), `${id}.webm`);
+    assert.equal(buildKbStoragePath(id, "audio/mpeg"), `${id}.mp3`);
     assert.doesNotMatch(buildKbStoragePath(id, "image/png"), /\.\.|\/|\\/);
   });
 
@@ -184,5 +252,34 @@ describe("KB attachment policy shape", () => {
     assert.doesNotMatch(itemRoute, /export async function DELETE/);
     assert.match(itemRoute, /action === "archive"/);
     assert.match(itemRoute, /Cache-Control": "private/);
+  });
+
+  it("migration 029 widens MIME/size/path and private bucket for media", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const sql = readFileSync(
+      join(process.cwd(), "supabase/migrations/029_knowledge_base_media_attachments.sql"),
+      "utf8",
+    );
+    assert.match(sql, /video\/mp4/);
+    assert.match(sql, /audio\/webm/);
+    assert.match(sql, /104857600/);
+    assert.match(sql, /mp4\|webm\|ogg\|mp3\|m4a/);
+    assert.match(sql, /knowledge-base/);
+  });
+
+  it("download route supports Range for media seeking", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const itemRoute = readFileSync(
+      join(
+        process.cwd(),
+        "src/app/api/knowledge-base/[slug]/attachments/[attachmentId]/route.ts",
+      ),
+      "utf8",
+    );
+    assert.match(itemRoute, /Accept-Ranges/);
+    assert.match(itemRoute, /Content-Range/);
+    assert.match(itemRoute, /status: 206/);
   });
 });

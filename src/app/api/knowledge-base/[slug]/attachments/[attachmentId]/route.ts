@@ -14,6 +14,34 @@ type RouteContext = {
   params: Promise<{ slug: string; attachmentId: string }>;
 };
 
+function parseByteRange(
+  header: string | null,
+  size: number,
+): { start: number; end: number } | null {
+  if (!header || size <= 0) return null;
+  const match = /^bytes=(\d*)-(\d*)$/i.exec(header.trim());
+  if (!match) return null;
+  const startRaw = match[1] ?? "";
+  const endRaw = match[2] ?? "";
+  if (!startRaw && !endRaw) return null;
+
+  let start = startRaw ? Number.parseInt(startRaw, 10) : 0;
+  let end = endRaw ? Number.parseInt(endRaw, 10) : size - 1;
+  if (!startRaw && endRaw) {
+    // suffix bytes: last N bytes
+    const suffix = Number.parseInt(endRaw, 10);
+    if (!Number.isFinite(suffix) || suffix <= 0) return null;
+    start = Math.max(0, size - suffix);
+    end = size - 1;
+  }
+  if (!Number.isFinite(start) || !Number.isFinite(end) || start < 0 || end < start) {
+    return null;
+  }
+  if (start >= size) return null;
+  end = Math.min(end, size - 1);
+  return { start, end };
+}
+
 export async function GET(request: Request, context: RouteContext) {
   const session = await getSession();
   if (!session) {
@@ -39,14 +67,34 @@ export async function GET(request: Request, context: RouteContext) {
         canPreviewKbAttachmentInline(file.contentType));
     const disposition = inlinePreferred ? "inline" : "attachment";
     const encodedName = encodeURIComponent(file.dto.fileName);
+    const total = file.data.length;
+    const range = parseByteRange(request.headers.get("range"), total);
+
+    const commonHeaders: Record<string, string> = {
+      "Content-Type": file.contentType,
+      "Content-Disposition": `${disposition}; filename*=UTF-8''${encodedName}`,
+      "Cache-Control": "private, max-age=3600",
+      "X-Content-Type-Options": "nosniff",
+      "Accept-Ranges": "bytes",
+    };
+
+    if (range) {
+      const slice = file.data.subarray(range.start, range.end + 1);
+      return new NextResponse(new Uint8Array(slice), {
+        status: 206,
+        headers: {
+          ...commonHeaders,
+          "Content-Length": String(slice.length),
+          "Content-Range": `bytes ${range.start}-${range.end}/${total}`,
+        },
+      });
+    }
 
     return new NextResponse(new Uint8Array(file.data), {
       status: 200,
       headers: {
-        "Content-Type": file.contentType,
-        "Content-Disposition": `${disposition}; filename*=UTF-8''${encodedName}`,
-        "Cache-Control": "private, max-age=3600",
-        "X-Content-Type-Options": "nosniff",
+        ...commonHeaders,
+        "Content-Length": String(total),
       },
     });
   } catch (error) {

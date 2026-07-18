@@ -7,7 +7,9 @@ import {
   MAX_KB_ATTACHMENTS_PER_ARTICLE,
   buildKbStoragePath,
   getKbAttachmentUrl,
+  kindForMime,
   validateKbAttachmentFile,
+  type KbAttachmentKind,
 } from "@/lib/knowledge-base/attachment-formats";
 import {
   readKbAttachmentFile,
@@ -47,7 +49,7 @@ export type KbAttachmentDto = {
   createdAt: string;
   archivedAt: string | null;
   url: string;
-  kind: "pdf" | "image";
+  kind: KbAttachmentKind;
 };
 
 function mapDto(row: KbAttachmentRow, slug: string): KbAttachmentDto {
@@ -65,7 +67,7 @@ function mapDto(row: KbAttachmentRow, slug: string): KbAttachmentDto {
     createdAt: row.created_at,
     archivedAt: row.archived_at,
     url: getKbAttachmentUrl(slug, row.id),
-    kind: row.mime_type === "application/pdf" ? "pdf" : "image",
+    kind: kindForMime(row.mime_type) ?? "pdf",
   };
 }
 

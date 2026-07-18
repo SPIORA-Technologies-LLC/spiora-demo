@@ -4,6 +4,7 @@ import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   KB_ATTACHMENT_BUCKET,
+  KB_STORAGE_PATH_RE,
   contentTypeFromExt,
   extFromFileName,
 } from "@/lib/knowledge-base/attachment-formats";
@@ -13,11 +14,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 const LOCAL_DIR = path.join(process.cwd(), ".data", "knowledge-base");
 
 function assertSafeStoragePath(storagePath: string): string {
-  if (
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(pdf|png|jpe?g|webp)$/i.test(
-      storagePath,
-    )
-  ) {
+  if (!KB_STORAGE_PATH_RE.test(storagePath)) {
     throw new Error("Invalid storage path");
   }
   if (storagePath.includes("..") || storagePath.includes("/") || storagePath.includes("\\")) {

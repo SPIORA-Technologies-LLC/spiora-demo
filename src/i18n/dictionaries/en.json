@@ -1648,13 +1648,18 @@
       "videoSoon": "Video",
       "linkSoon": "Link",
       "comingSoon": "Coming later",
-      "attachAfterCreate": "Create a text draft first, then attach PDF or images in the editor."
+      "pdfHint": "Open the editor and add a PDF in Files",
+      "imageHint": "Open the editor and add an image in Files",
+      "attachAfterCreate": "Open the editor and add PDF or images in Files"
     },
     "attachments": {
-      "title": "Attachments",
-      "hint": "PDF and images (PNG, JPEG, WebP). Max 25 MB for PDF, 10 MB for images.",
-      "saveDraftFirst": "Save the draft once to unlock attachments for this article.",
+      "title": "Files",
+      "hint": "PDF and images help complete the material.",
+      "saveDraftFirst": "Files can be added after the material is saved once.",
+      "saveAfterFirst": "Files can be added after the material is saved once.",
       "addFiles": "Add files",
+      "addPdf": "+ Add PDF",
+      "addImage": "+ Add image",
       "dropHint": "Or drag and drop files here",
       "uploading": "Uploading…",
       "preview": "Preview",
@@ -1662,11 +1667,12 @@
       "archive": "Archive",
       "closePreview": "Close preview",
       "captionPlaceholder": "Caption (optional)",
-      "confirmArchive": "Archive this attachment? It will be hidden from the team.",
-      "loadFailed": "Could not load attachments.",
+      "confirmArchive": "Archive this file? It will be hidden from the team.",
+      "loadFailed": "Could not load files.",
       "uploadFailed": "Could not upload the file.",
-      "archiveFailed": "Could not archive the attachment.",
-      "updateFailed": "Could not update the attachment."
+      "archiveFailed": "Could not archive the file.",
+      "updateFailed": "Could not update the file.",
+      "prepareFailed": "Could not prepare the material for file upload. Please try again."
     },
     "article": {
       "updated": "Updated {date}",

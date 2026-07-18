@@ -5,8 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import type { AppLocale } from "@/i18n/config";
 import {
   KB_ATTACHMENT_ACCEPT,
+  KB_IMAGE_ACCEPT,
+  KB_PDF_ACCEPT,
   formatKbFileSize,
 } from "@/lib/knowledge-base/attachment-formats";
+import { shouldEnsureDraftForUpload } from "@/lib/knowledge-base/kb-auto-draft";
 
 import styles from "./KnowledgeBaseView.module.css";
 
@@ -26,14 +29,19 @@ export type KbAttachmentClient = {
 type Props = {
   slug: string;
   canManage: boolean;
-  /** When true, article must already exist (edit/create after first save). */
-  enabled: boolean;
+  /**
+   * Ensures a persisted article exists and returns its slug.
+   * Used on create flow before the first upload (Auto Draft).
+   */
+  ensureArticle?: () => Promise<string>;
 };
 
-export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
+export function KbAttachmentsPanel({ slug, canManage, ensureArticle }: Props) {
   const t = useTranslations("knowledgeBase");
   const locale = useLocale() as AppLocale;
-  const inputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const anyInputRef = useRef<HTMLInputElement>(null);
   const [items, setItems] = useState<KbAttachmentClient[]>([]);
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -41,13 +49,15 @@ export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
   const [previewId, setPreviewId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const load = useCallback(async () => {
-    if (!enabled || !slug) return;
+  const articleReady = Boolean(slug.trim());
+
+  const load = useCallback(async (loadSlug: string) => {
+    if (!loadSlug) return;
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(
-        `/api/knowledge-base/${encodeURIComponent(slug)}/attachments`,
+        `/api/knowledge-base/${encodeURIComponent(loadSlug)}/attachments`,
         { cache: "no-store" },
       );
       if (!res.ok) throw new Error("load failed");
@@ -58,24 +68,45 @@ export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
     } finally {
       setLoading(false);
     }
-  }, [enabled, slug, t]);
+  }, [t]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    if (articleReady) void load(slug);
+  }, [articleReady, slug, load]);
+
+  const resolveSlugForUpload = async (): Promise<string | null> => {
+    if (slug.trim()) return slug.trim();
+    if (!ensureArticle) return null;
+    try {
+      return (await ensureArticle()).trim() || null;
+    } catch {
+      return null;
+    }
+  };
 
   const uploadFiles = async (files: FileList | File[]) => {
-    if (!canManage || !enabled) return;
+    if (!canManage) return;
     const list = Array.from(files);
-    if (!list.length) return;
+    if (!shouldEnsureDraftForUpload(list.length)) return;
+
     setUploading(true);
     setError(null);
     try {
+      const uploadSlug = await resolveSlugForUpload();
+      if (!uploadSlug) {
+        setError(
+          ensureArticle
+            ? t("attachments.prepareFailed")
+            : t("attachments.saveAfterFirst"),
+        );
+        return;
+      }
+
       for (const file of list) {
         const body = new FormData();
         body.append("file", file);
         const res = await fetch(
-          `/api/knowledge-base/${encodeURIComponent(slug)}/attachments`,
+          `/api/knowledge-base/${encodeURIComponent(uploadSlug)}/attachments`,
           { method: "POST", body },
         );
         if (!res.ok) {
@@ -83,7 +114,7 @@ export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
           throw new Error(data?.error ?? t("attachments.uploadFailed"));
         }
       }
-      await load();
+      await load(uploadSlug);
     } catch (err) {
       setError(err instanceof Error ? err.message : t("attachments.uploadFailed"));
     } finally {
@@ -92,7 +123,7 @@ export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
   };
 
   const archive = async (id: string) => {
-    if (!canManage) return;
+    if (!canManage || !slug) return;
     if (!window.confirm(t("attachments.confirmArchive"))) return;
     setError(null);
     const res = await fetch(
@@ -107,11 +138,11 @@ export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
       setError(t("attachments.archiveFailed"));
       return;
     }
-    await load();
+    await load(slug);
   };
 
   const saveCaption = async (id: string, caption: string) => {
-    if (!canManage) return;
+    if (!canManage || !slug) return;
     const res = await fetch(
       `/api/knowledge-base/${encodeURIComponent(slug)}/attachments/${encodeURIComponent(id)}`,
       {
@@ -124,26 +155,23 @@ export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
       setError(t("attachments.updateFailed"));
       return;
     }
-    await load();
+    await load(slug);
   };
 
-  if (!enabled) {
-    return (
-      <div className={styles.attachmentsPanel}>
-        <h3 className={styles.editorSectionTitle}>{t("attachments.title")}</h3>
-        <p className={styles.meta}>{t("attachments.saveDraftFirst")}</p>
-      </div>
-    );
-  }
-
   const preview = items.find((i) => i.id === previewId) ?? null;
+  const showManageControls = canManage;
+  const showFallbackOnly = !articleReady && !ensureArticle && canManage;
 
   return (
     <div className={styles.attachmentsPanel}>
       <h3 className={styles.editorSectionTitle}>{t("attachments.title")}</h3>
       <p className={styles.meta}>{t("attachments.hint")}</p>
 
-      {canManage ? (
+      {showFallbackOnly ? (
+        <p className={styles.meta}>{t("attachments.saveAfterFirst")}</p>
+      ) : null}
+
+      {showManageControls && !showFallbackOnly ? (
         <div
           className={`${styles.dropzone} ${dragOver ? styles.dropzoneActive : ""}`}
           onDragOver={(e) => {
@@ -158,7 +186,27 @@ export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
           }}
         >
           <input
-            ref={inputRef}
+            ref={pdfInputRef}
+            type="file"
+            accept={KB_PDF_ACCEPT}
+            hidden
+            onChange={(e) => {
+              if (e.target.files) void uploadFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept={KB_IMAGE_ACCEPT}
+            hidden
+            onChange={(e) => {
+              if (e.target.files) void uploadFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+          <input
+            ref={anyInputRef}
             type="file"
             accept={KB_ATTACHMENT_ACCEPT}
             multiple
@@ -168,14 +216,24 @@ export function KbAttachmentsPanel({ slug, canManage, enabled }: Props) {
               e.target.value = "";
             }}
           />
-          <button
-            type="button"
-            className={styles.linkBtn}
-            disabled={uploading}
-            onClick={() => inputRef.current?.click()}
-          >
-            {uploading ? t("attachments.uploading") : t("attachments.addFiles")}
-          </button>
+          <div className={styles.fileActionRow}>
+            <button
+              type="button"
+              className={styles.fileActionBtn}
+              disabled={uploading}
+              onClick={() => pdfInputRef.current?.click()}
+            >
+              {uploading ? t("attachments.uploading") : t("attachments.addPdf")}
+            </button>
+            <button
+              type="button"
+              className={styles.fileActionBtn}
+              disabled={uploading}
+              onClick={() => imageInputRef.current?.click()}
+            >
+              {uploading ? t("attachments.uploading") : t("attachments.addImage")}
+            </button>
+          </div>
           <p className={styles.meta}>{t("attachments.dropHint")}</p>
         </div>
       ) : null}

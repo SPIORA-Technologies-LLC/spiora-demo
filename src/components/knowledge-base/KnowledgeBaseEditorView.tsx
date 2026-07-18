@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,6 +19,10 @@ import type {
 } from "@/lib/knowledge-base/types";
 import { slugifyKbTitle } from "@/lib/knowledge-base/kb-slug";
 import type { KbAiDraftResult } from "@/lib/knowledge-base/kb-ai-draft";
+import {
+  ensureKbDraft,
+  titlesForAutoDraft,
+} from "@/lib/knowledge-base/kb-auto-draft";
 
 import styles from "./KnowledgeBaseView.module.css";
 
@@ -114,6 +118,7 @@ export function KnowledgeBaseEditorView({
   const t = useTranslations("knowledgeBase");
   const uiLocale = useLocale() as AppLocale;
   const router = useRouter();
+  const filesSectionRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState<EditorForm>(emptyForm);
   const [slugLocked, setSlugLocked] = useState(false);
@@ -126,6 +131,14 @@ export function KnowledgeBaseEditorView({
   const [aiOpen, setAiOpen] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+  /** True once the article row exists in Postgres (edit mode or after Auto Draft). */
+  const [articlePersisted, setArticlePersisted] = useState(mode === "edit");
+
+  const formRef = useRef(form);
+  formRef.current = form;
+  const articlePersistedRef = useRef(articlePersisted);
+  articlePersistedRef.current = articlePersisted;
+  const draftInFlightRef = useRef<Promise<string> | null>(null);
 
   const isPublished = form.status === "published";
   const isArchived = form.status === "archived";
@@ -140,10 +153,22 @@ export function KnowledgeBaseEditorView({
         const data = (await res.json()) as { article: KbEditorArticle };
         setForm(fromEditorArticle(data.article));
         setSlugLocked(data.article.status === "published");
+        setArticlePersisted(true);
       })
       .catch(() => setError(t("errors.loadFailed")))
       .finally(() => setLoading(false));
   }, [mode, initialSlug, t]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (typeof window === "undefined") return;
+    const focus = new URLSearchParams(window.location.search).get("focus");
+    if (focus !== "files") return;
+    const timer = window.setTimeout(() => {
+      filesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 120);
+    return () => window.clearTimeout(timer);
+  }, [loading]);
 
   const updateEnTitle = useCallback(
     (title: string) => {
@@ -158,6 +183,100 @@ export function KnowledgeBaseEditorView({
     [slugManual, mode, slugLocked],
   );
 
+  const createDraftOnServer = useCallback(async (): Promise<string> => {
+    const current = formRef.current;
+    const titles = titlesForAutoDraft(current.en.title, current.ru.title);
+    const slug =
+      (current.slug.trim() && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(current.slug.trim())
+        ? current.slug.trim()
+        : slugifyKbTitle(titles.en)) || "article";
+
+    const payload = {
+      slug,
+      categoryId: current.categoryId,
+      tagKeys: current.tagKeys,
+      authorKey: current.authorKey,
+      status: "draft" as const,
+      translations: [
+        {
+          locale: "en" as const,
+          title: titles.en,
+          summary: current.en.summary,
+          content: current.en.content,
+        },
+        {
+          locale: "ru" as const,
+          title: titles.ru,
+          summary: current.ru.summary,
+          content: current.ru.content,
+        },
+      ],
+    };
+
+    const res = await fetch("/api/knowledge-base", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (res.status === 409) {
+      throw new Error("slug_taken");
+    }
+    if (!res.ok) {
+      throw new Error("create_failed");
+    }
+
+    const data = (await res.json()) as { article: { slug: string } };
+    const createdSlug = data.article.slug;
+
+    setForm((prev) => ({
+      ...prev,
+      slug: createdSlug,
+      status: "draft",
+      en: {
+        ...prev.en,
+        title: prev.en.title.trim() ? prev.en.title : titles.en,
+      },
+      ru: {
+        ...prev.ru,
+        title: prev.ru.title.trim() ? prev.ru.title : titles.ru,
+      },
+    }));
+    setArticlePersisted(true);
+    // Stay on the create view — avoid remount mid-upload. URL updates on explicit save.
+    return createdSlug;
+  }, []);
+
+  const ensureDraft = useCallback(async (): Promise<string> => {
+    try {
+      const result = await ensureKbDraft({
+        articleExists: articlePersistedRef.current || mode === "edit",
+        getSlug: () => formRef.current.slug,
+        createDraft: createDraftOnServer,
+        getInFlight: () => draftInFlightRef.current,
+        setInFlight: (p) => {
+          draftInFlightRef.current = p;
+        },
+      });
+      if (!result.ok) {
+        throw new Error("prepare_failed");
+      }
+      return result.slug;
+    } catch (err) {
+      if (err instanceof Error && err.message === "slug_taken") throw err;
+      if (err instanceof Error && err.message === "prepare_failed") throw err;
+      throw new Error("prepare_failed");
+    }
+  }, [createDraftOnServer, mode]);
+
+  const onPrimaryTitleBlur = () => {
+    if (mode !== "create" || articlePersistedRef.current || isArchived) return;
+    if (!formRef.current.en.title.trim() && !formRef.current.ru.title.trim()) return;
+    void ensureDraft().catch(() => {
+      // Silent on blur — upload/publish surfaces a human error if needed.
+    });
+  };
+
   const toggleTag = (tag: string) => {
     setForm((prev) => ({
       ...prev,
@@ -171,29 +290,28 @@ export function KnowledgeBaseEditorView({
     setSaving(true);
     setError(null);
     try {
+      if (mode === "create" && !articlePersisted) {
+        const createdSlug = await ensureDraft();
+        void router.replace(`/knowledge-base/edit/${encodeURIComponent(createdSlug)}`);
+        return;
+      }
+
       const payload = toPayload(form, "draft");
-      const res =
-        mode === "create"
-          ? await fetch("/api/knowledge-base", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            })
-          : await fetch(`/api/knowledge-base/${encodeURIComponent(form.slug)}`, {
-              method: "PATCH",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                action: "update",
-                categoryId: form.categoryId,
-                tagKeys: form.tagKeys,
-                authorKey: form.authorKey,
-                status: "draft",
-                translations: [
-                  { locale: "en", ...form.en },
-                  { locale: "ru", ...form.ru },
-                ],
-              }),
-            });
+      const res = await fetch(`/api/knowledge-base/${encodeURIComponent(form.slug)}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "update",
+          categoryId: form.categoryId,
+          tagKeys: form.tagKeys,
+          authorKey: form.authorKey,
+          status: "draft",
+          translations: [
+            { locale: "en", ...form.en },
+            { locale: "ru", ...form.ru },
+          ],
+        }),
+      });
 
       if (res.status === 409) {
         setError(t("editor.errors.slugTaken"));
@@ -212,14 +330,13 @@ export function KnowledgeBaseEditorView({
         return;
       }
 
-      if (mode === "create") {
-        const data = (await res.json()) as { article: { slug: string } };
-        router.replace(`/knowledge-base/edit/${encodeURIComponent(data.article.slug)}`);
-        return;
-      }
       router.push("/knowledge-base");
-    } catch {
-      setError(t("errors.saveFailed"));
+    } catch (err) {
+      if (err instanceof Error && err.message === "slug_taken") {
+        setError(t("editor.errors.slugTaken"));
+      } else {
+        setError(t("errors.saveFailed"));
+      }
     } finally {
       setSaving(false);
     }
@@ -229,18 +346,12 @@ export function KnowledgeBaseEditorView({
     setSaving(true);
     setError(null);
     try {
-      if (mode === "create") {
-        const res = await fetch("/api/knowledge-base", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(toPayload(form, "published")),
-        });
-        if (!res.ok) throw new Error("publish failed");
-        router.push("/knowledge-base");
-        return;
-      }
+      const slug =
+        mode === "create" && !articlePersisted
+          ? await ensureDraft()
+          : form.slug;
 
-      const res = await fetch(`/api/knowledge-base/${encodeURIComponent(form.slug)}`, {
+      const res = await fetch(`/api/knowledge-base/${encodeURIComponent(slug)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -256,8 +367,14 @@ export function KnowledgeBaseEditorView({
       });
       if (!res.ok) throw new Error("publish failed");
       router.push("/knowledge-base");
-    } catch {
-      setError(t("errors.saveFailed"));
+    } catch (err) {
+      if (err instanceof Error && err.message === "prepare_failed") {
+        setError(t("attachments.prepareFailed"));
+      } else if (err instanceof Error && err.message === "slug_taken") {
+        setError(t("editor.errors.slugTaken"));
+      } else {
+        setError(t("errors.saveFailed"));
+      }
     } finally {
       setSaving(false);
     }
@@ -416,6 +533,7 @@ export function KnowledgeBaseEditorView({
               className={styles.editorInput}
               value={form.en.title}
               onChange={(e) => updateEnTitle(e.target.value)}
+              onBlur={onPrimaryTitleBlur}
               disabled={isArchived}
             />
           </label>
@@ -538,11 +656,25 @@ export function KnowledgeBaseEditorView({
         ))}
       </div>
 
-      <KbAttachmentsPanel
-        slug={form.slug}
-        canManage={!isArchived}
-        enabled={mode === "edit"}
-      />
+      <div ref={filesSectionRef}>
+        <KbAttachmentsPanel
+          slug={form.slug}
+          canManage={!isArchived}
+          ensureArticle={
+            articlePersisted
+              ? undefined
+              : () =>
+                  ensureDraft().catch((err) => {
+                    if (err instanceof Error && err.message === "slug_taken") {
+                      setError(t("editor.errors.slugTaken"));
+                    } else {
+                      setError(t("attachments.prepareFailed"));
+                    }
+                    throw err;
+                  })
+          }
+        />
+      </div>
 
       {aiOpen ? (
         <div className={styles.aiModalBackdrop} role="presentation" onClick={() => setAiOpen(false)}>

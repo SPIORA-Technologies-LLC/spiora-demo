@@ -216,3 +216,6 @@ export function formatKbFileSize(bytes: number, locale: "en" | "ru" = "en"): str
 }
 
 export const KB_ATTACHMENT_ACCEPT = KB_ATTACHMENT_EXTENSIONS.map((ext) => `.${ext}`).join(",");
+
+export const KB_PDF_ACCEPT = ".pdf,application/pdf";
+export const KB_IMAGE_ACCEPT = ".png,.jpg,.jpeg,.webp,image/png,image/jpeg,image/webp";

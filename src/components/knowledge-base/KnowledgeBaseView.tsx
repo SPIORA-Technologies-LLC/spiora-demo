@@ -59,7 +59,6 @@ export function KnowledgeBaseView() {
   );
   const [history, setHistory] = useState<string[]>([]);
   const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const [attachHint, setAttachHint] = useState(false);
 
   const category = searchParams.get("category") ?? undefined;
   const tag = searchParams.get("tag") ?? undefined;
@@ -211,32 +210,24 @@ export function KnowledgeBaseView() {
                 >
                   {t("addMaterial.text")}
                 </Link>
-                <button
-                  type="button"
+                <Link
+                  href="/knowledge-base/new?focus=files&intent=pdf"
                   className={styles.addMaterialItem}
                   role="menuitem"
-                  onClick={() => {
-                    setAttachHint(true);
-                    setAddMenuOpen(false);
-                    router.push("/knowledge-base/new");
-                  }}
+                  onClick={() => setAddMenuOpen(false)}
                 >
                   {t("addMaterial.pdf")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.attachAfterCreate")}</span>
-                </button>
-                <button
-                  type="button"
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.pdfHint")}</span>
+                </Link>
+                <Link
+                  href="/knowledge-base/new?focus=files&intent=image"
                   className={styles.addMaterialItem}
                   role="menuitem"
-                  onClick={() => {
-                    setAttachHint(true);
-                    setAddMenuOpen(false);
-                    router.push("/knowledge-base/new");
-                  }}
+                  onClick={() => setAddMenuOpen(false)}
                 >
                   {t("addMaterial.image")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.attachAfterCreate")}</span>
-                </button>
+                  <span className={styles.addMaterialSoon}>{t("addMaterial.imageHint")}</span>
+                </Link>
                 <button type="button" className={styles.addMaterialItem} disabled>
                   {t("addMaterial.tableSoon")}
                   <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>
@@ -252,9 +243,6 @@ export function KnowledgeBaseView() {
               </div>
             ) : null}
           </div>
-          {attachHint ? (
-            <p className={styles.meta}>{t("addMaterial.attachAfterCreate")}</p>
-          ) : null}
         </div>
       ) : null}
 
@@ -631,7 +619,6 @@ function ArticleDetailView({
       <KbAttachmentsPanel
         slug={article.slug}
         canManage={canManage}
-        enabled
       />
     </Card>
   );

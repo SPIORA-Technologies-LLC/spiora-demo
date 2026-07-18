@@ -207,6 +207,43 @@ describe("Knowledge Base API validation", () => {
     assert.equal(parsed.ok, true);
   });
 
+  it("publish с externalUrl допускает пустой content", () => {
+    const parsed = parseKbCreateBody({
+      ...validBody,
+      status: "published",
+      externalUrl: "https://example.com/guide",
+      translations: [
+        { locale: "en", title: "Guide", summary: "External", content: "" },
+        { locale: "ru", title: "Гид", summary: "Внешний", content: "" },
+      ],
+    });
+    assert.equal(parsed.ok, true);
+    if (parsed.ok) {
+      assert.equal(parsed.data.externalUrl, "https://example.com/guide");
+      assert.equal(parsed.data.translations[0]?.content, "https://example.com/guide");
+    }
+  });
+
+  it("javascript: URL отклоняется", () => {
+    const parsed = parseKbCreateBody({
+      ...validBody,
+      externalUrl: "javascript:alert(1)",
+    });
+    assert.equal(parsed.ok, false);
+    if (!parsed.ok) assert.equal(parsed.error, "invalid_url");
+  });
+
+  it("migration 030 adds external_url", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const sql = readFileSync(
+      join(process.cwd(), "supabase/migrations/030_knowledge_base_links.sql"),
+      "utf8",
+    );
+    assert.match(sql, /external_url/);
+    assert.match(sql, /https\?:\/\//);
+  });
+
   it("пустой PATCH отклоняется", () => {
     const parsed = parseKbPatchBody({});
     assert.equal(parsed.ok, false);

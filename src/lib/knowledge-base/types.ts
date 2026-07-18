@@ -34,6 +34,8 @@ export type KbArticleListItem = {
   authorName: string;
   updatedAt: string;
   status?: KbArticleStatus;
+  /** External http(s) URL when this material is a link. */
+  externalUrl?: string | null;
   requestedLocale?: AppLocale;
   resolvedLocale?: AppLocale;
   fallbackUsed?: boolean;
@@ -96,6 +98,7 @@ export type KbEditorArticle = {
   authorKey: string;
   status: KbArticleStatus;
   publishedAt: string | null;
+  externalUrl: string | null;
   translations: Record<"en" | "ru", KbEditorTranslation>;
 };
 

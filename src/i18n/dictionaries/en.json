@@ -1641,22 +1641,29 @@
       "backToCategory": "Back"
     },
     "addMaterial": {
-      "text": "Text material",
+      "text": "Text",
+      "textHint": "Article and notes",
       "pdf": "PDF",
       "image": "Image",
       "table": "Table",
       "tableSoon": "Table",
-      "tableHint": "Create an editable table in the material",
+      "tableHint": "Editable grid",
       "video": "Video",
-      "videoHint": "Open the editor and add a video in Files",
+      "videoHint": "MP4 or WebM",
       "audio": "Audio",
-      "audioHint": "Open the editor — upload audio or record in Files",
+      "audioHint": "File or recording",
+      "link": "Link",
+      "linkHint": "External URL",
+      "linkDefaultTitleEn": "External link",
+      "linkDefaultTitleRu": "External link",
+      "linkDefaultSummaryEn": "Useful external resource",
+      "linkDefaultSummaryRu": "Useful external resource",
       "videoSoon": "Video",
       "linkSoon": "Link",
       "comingSoon": "Coming later",
-      "pdfHint": "Open the editor and add a PDF in Files",
-      "imageHint": "Open the editor and add an image in Files",
-      "attachAfterCreate": "Open the editor and add files in Files"
+      "pdfHint": "PDF document",
+      "imageHint": "PNG, JPEG, WebP",
+      "attachAfterCreate": "Add files in the Files block"
     },
     "tables": {
       "title": "Tables",
@@ -1760,6 +1767,13 @@
       "tags": "Tags",
       "readingTime": "{minutes} min read",
       "previewTitle": "Material preview"
+    },
+    "link": {
+      "field": "External URL",
+      "placeholder": "https://example.com/resource",
+      "hint": "Optional for text materials. Required for link materials — only http(s) URLs.",
+      "open": "Open link",
+      "badge": "Link"
     },
     "empty": {
       "noArticles": "No materials in this category yet.",

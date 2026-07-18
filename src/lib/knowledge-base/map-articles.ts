@@ -24,6 +24,7 @@ export type KbArticleRow = {
   updated_at: string;
   published_at: string | null;
   archived_at: string | null;
+  external_url: string | null;
 };
 
 export type KbTranslationRow = {
@@ -101,6 +102,7 @@ export function mapKbListItem(
     authorName: translateKnowledgeBaseAuthor(locale, row.author_key),
     updatedAt: formatArticleDate(row.updated_at, locale),
     status: row.status,
+    externalUrl: row.external_url ?? null,
     requestedLocale: row.requestedLocale,
     resolvedLocale: row.resolvedLocale,
     fallbackUsed: row.fallbackUsed,
@@ -159,6 +161,7 @@ export function articleMatchesQuery(
     item.categoryLabel,
     ...item.tagLabels,
     content,
+    item.externalUrl ?? "",
   ]
     .join(" ")
     .toLowerCase();

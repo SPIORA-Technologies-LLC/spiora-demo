@@ -1,4 +1,5 @@
 import type { KbCategoryId } from "./types";
+import { isSafeHttpUrl } from "./table-limits";
 
 export const KB_VALID_CATEGORIES = new Set<KbCategoryId>([
   "company-policies",
@@ -32,6 +33,8 @@ export const KB_VALID_TAG_KEYS = new Set([
 
 export const KB_VALID_LOCALES = new Set(["en", "ru"] as const);
 
+export const MAX_KB_EXTERNAL_URL_CHARS = 2000;
+
 export type KbArticleStatus = "draft" | "published" | "archived";
 
 export type KbTranslationInput = {
@@ -47,6 +50,7 @@ export type KbCreateInput = {
   tagKeys: string[];
   authorKey: string;
   status: "draft" | "published";
+  externalUrl: string | null;
   translations: KbTranslationInput[];
 };
 
@@ -56,6 +60,7 @@ export type KbPatchInput = {
   tagKeys?: string[];
   authorKey?: string;
   status?: KbArticleStatus;
+  externalUrl?: string | null;
   translations?: KbTranslationInput[];
 };
 
@@ -65,6 +70,7 @@ export type KbParseError =
   | "invalid_status"
   | "invalid_author"
   | "invalid_tag"
+  | "invalid_url"
   | "empty_field"
   | "archived_not_allowed_on_create"
   | "empty_patch";
@@ -75,9 +81,22 @@ export function normalizeKbSlug(raw: string): string | null {
   return slug;
 }
 
+/** Returns normalized URL, null (cleared), or "invalid". */
+export function normalizeKbExternalUrl(
+  raw: unknown,
+): string | null | "invalid" {
+  if (raw === null || raw === "") return null;
+  if (typeof raw !== "string") return "invalid";
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  if (trimmed.length > MAX_KB_EXTERNAL_URL_CHARS) return "invalid";
+  if (!isSafeHttpUrl(trimmed)) return "invalid";
+  return trimmed;
+}
+
 function parseTranslations(
   translations: unknown,
-  options: { draftFriendly?: boolean } = {},
+  options: { draftFriendly?: boolean; contentOptional?: boolean } = {},
 ): KbTranslationInput[] | KbParseError {
   if (!Array.isArray(translations) || translations.length === 0) {
     return "invalid_payload";
@@ -86,6 +105,7 @@ function parseTranslations(
   const parsed: KbTranslationInput[] = [];
   const locales = new Set<string>();
   const draftFriendly = options.draftFriendly === true;
+  const contentOptional = options.contentOptional === true;
 
   for (const entry of translations) {
     if (!entry || typeof entry !== "object") return "invalid_payload";
@@ -93,7 +113,7 @@ function parseTranslations(
     const locale = tr.locale;
     const title = typeof tr.title === "string" ? tr.title.trim() : "";
     const summary = typeof tr.summary === "string" ? tr.summary.trim() : "";
-    const content = typeof tr.content === "string" ? tr.content.trim() : "";
+    let content = typeof tr.content === "string" ? tr.content.trim() : "";
 
     if (locale !== "en" && locale !== "ru") return "invalid_locale";
     if (locales.has(locale)) return "invalid_payload";
@@ -106,7 +126,8 @@ function parseTranslations(
       continue;
     }
 
-    if (!title || !summary || !content) return "empty_field";
+    if (!title || !summary) return "empty_field";
+    if (!content && !contentOptional) return "empty_field";
     locales.add(locale);
     parsed.push({ locale, title, summary, content });
   }
@@ -121,6 +142,18 @@ function requireBothLocales(
   const locales = new Set(translations.map((t) => t.locale));
   if (!locales.has("en") || !locales.has("ru")) return "empty_field";
   return null;
+}
+
+function fillEmptyContentWithUrl(
+  translations: KbTranslationInput[],
+  externalUrl: string | null,
+): KbTranslationInput[] {
+  if (!externalUrl) return translations;
+  return translations.map((tr) =>
+    tr.content.trim()
+      ? tr
+      : { ...tr, content: externalUrl },
+  );
 }
 
 export function parseKbCreateBody(
@@ -156,10 +189,18 @@ export function parseKbCreateBody(
     return { ok: false, error: "invalid_status" };
   }
 
+  let externalUrl: string | null = null;
+  if (raw.externalUrl !== undefined) {
+    const normalized = normalizeKbExternalUrl(raw.externalUrl);
+    if (normalized === "invalid") return { ok: false, error: "invalid_url" };
+    externalUrl = normalized;
+  }
+
   const status: "draft" | "published" =
     raw.status === "published" ? "published" : "draft";
   const translations = parseTranslations(raw.translations, {
     draftFriendly: status === "draft",
+    contentOptional: Boolean(externalUrl),
   });
   if (typeof translations === "string") {
     return { ok: false, error: translations };
@@ -187,7 +228,8 @@ export function parseKbCreateBody(
       tagKeys,
       authorKey,
       status,
-      translations,
+      externalUrl,
+      translations: fillEmptyContentWithUrl(translations, externalUrl),
     },
   };
 }
@@ -242,10 +284,23 @@ export function parseKbPatchBody(
     patch.status = raw.status;
   }
 
+  if (raw.externalUrl !== undefined) {
+    const normalized = normalizeKbExternalUrl(raw.externalUrl);
+    if (normalized === "invalid") return { ok: false, error: "invalid_url" };
+    patch.externalUrl = normalized;
+  }
+
   if (Array.isArray(raw.translations)) {
     const publishing = raw.action === "publish" || raw.status === "published";
+    const contentOptional =
+      patch.externalUrl !== undefined
+        ? Boolean(patch.externalUrl)
+        : false;
+    // When publishing without sending externalUrl in this patch, content still required
+    // unless caller also sends a non-null externalUrl. Editor always sends both.
     const translations = parseTranslations(raw.translations, {
       draftFriendly: !publishing,
+      contentOptional: publishing ? contentOptional : Boolean(patch.externalUrl),
     });
     if (typeof translations === "string") {
       return { ok: false, error: translations };
@@ -254,7 +309,10 @@ export function parseKbPatchBody(
       const missing = requireBothLocales(translations);
       if (missing) return { ok: false, error: missing };
     }
-    patch.translations = translations;
+    patch.translations = fillEmptyContentWithUrl(
+      translations,
+      patch.externalUrl ?? null,
+    );
   }
 
   const hasMutation =
@@ -263,6 +321,7 @@ export function parseKbPatchBody(
     patch.tagKeys !== undefined ||
     patch.authorKey !== undefined ||
     patch.status !== undefined ||
+    patch.externalUrl !== undefined ||
     patch.translations !== undefined;
 
   if (!hasMutation) {

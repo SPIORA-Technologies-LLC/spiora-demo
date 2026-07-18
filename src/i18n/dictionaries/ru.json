@@ -1639,22 +1639,29 @@
       "backToCategory": "Назад"
     },
     "addMaterial": {
-      "text": "Текстовый материал",
+      "text": "Текст",
+      "textHint": "Статья и заметки",
       "pdf": "PDF",
       "image": "Изображение",
       "table": "Таблица",
       "tableSoon": "Таблица",
-      "tableHint": "Создайте редактируемую таблицу в материале",
+      "tableHint": "Редактируемая сетка",
       "video": "Видео",
-      "videoHint": "Откроется редактор — добавьте видео в блоке «Файлы»",
+      "videoHint": "MP4 или WebM",
       "audio": "Аудио",
-      "audioHint": "Откроется редактор — загрузите аудио или запишите звук в «Файлы»",
+      "audioHint": "Файл или запись",
+      "link": "Ссылка",
+      "linkHint": "Внешний URL",
+      "linkDefaultTitleEn": "External link",
+      "linkDefaultTitleRu": "Внешняя ссылка",
+      "linkDefaultSummaryEn": "Useful external resource",
+      "linkDefaultSummaryRu": "Полезный внешний ресурс",
       "videoSoon": "Видео",
       "linkSoon": "Ссылка",
       "comingSoon": "Позже",
-      "pdfHint": "Откроется редактор — добавьте PDF в блоке «Файлы»",
-      "imageHint": "Откроется редактор — добавьте изображение в блоке «Файлы»",
-      "attachAfterCreate": "Откроется редактор — добавьте файлы в блоке «Файлы»"
+      "pdfHint": "Документ PDF",
+      "imageHint": "PNG, JPEG, WebP",
+      "attachAfterCreate": "Добавьте файлы в блоке «Файлы»"
     },
     "tables": {
       "title": "Таблицы",
@@ -1758,6 +1765,13 @@
       "tags": "Теги",
       "readingTime": "{minutes} мин чтения",
       "previewTitle": "Предпросмотр материала"
+    },
+    "link": {
+      "field": "Внешний URL",
+      "placeholder": "https://example.com/resource",
+      "hint": "Необязательно для текстовых материалов. Для ссылок — обязателен; только http(s).",
+      "open": "Открыть ссылку",
+      "badge": "Ссылка"
     },
     "empty": {
       "noArticles": "В этой категории пока нет материалов.",

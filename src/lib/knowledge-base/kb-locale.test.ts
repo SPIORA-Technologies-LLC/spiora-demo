@@ -34,6 +34,7 @@ const bilingualJoin = {
   updated_at: "2026-04-10T09:00:00.000Z",
   published_at: "2026-04-10T09:00:00.000Z",
   archived_at: null,
+  external_url: null,
   knowledge_base_article_translations: [
     {
       locale: "ru" as const,

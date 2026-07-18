@@ -209,7 +209,13 @@ export function KnowledgeBaseView() {
                   role="menuitem"
                   onClick={() => setAddMenuOpen(false)}
                 >
-                  {t("addMaterial.text")}
+                  <span className={styles.addMaterialIcon} aria-hidden>
+                    <i className="fa-solid fa-align-left" />
+                  </span>
+                  <span className={styles.addMaterialCopy}>
+                    <span className={styles.addMaterialLabel}>{t("addMaterial.text")}</span>
+                    <span className={styles.addMaterialHint}>{t("addMaterial.textHint")}</span>
+                  </span>
                 </Link>
                 <Link
                   href="/knowledge-base/new?focus=files&intent=pdf"
@@ -217,8 +223,13 @@ export function KnowledgeBaseView() {
                   role="menuitem"
                   onClick={() => setAddMenuOpen(false)}
                 >
-                  {t("addMaterial.pdf")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.pdfHint")}</span>
+                  <span className={styles.addMaterialIcon} aria-hidden>
+                    <i className="fa-solid fa-file-pdf" />
+                  </span>
+                  <span className={styles.addMaterialCopy}>
+                    <span className={styles.addMaterialLabel}>{t("addMaterial.pdf")}</span>
+                    <span className={styles.addMaterialHint}>{t("addMaterial.pdfHint")}</span>
+                  </span>
                 </Link>
                 <Link
                   href="/knowledge-base/new?focus=files&intent=image"
@@ -226,8 +237,13 @@ export function KnowledgeBaseView() {
                   role="menuitem"
                   onClick={() => setAddMenuOpen(false)}
                 >
-                  {t("addMaterial.image")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.imageHint")}</span>
+                  <span className={styles.addMaterialIcon} aria-hidden>
+                    <i className="fa-solid fa-image" />
+                  </span>
+                  <span className={styles.addMaterialCopy}>
+                    <span className={styles.addMaterialLabel}>{t("addMaterial.image")}</span>
+                    <span className={styles.addMaterialHint}>{t("addMaterial.imageHint")}</span>
+                  </span>
                 </Link>
                 <Link
                   href="/knowledge-base/new?focus=table&intent=table"
@@ -235,8 +251,13 @@ export function KnowledgeBaseView() {
                   role="menuitem"
                   onClick={() => setAddMenuOpen(false)}
                 >
-                  {t("addMaterial.table")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.tableHint")}</span>
+                  <span className={styles.addMaterialIcon} aria-hidden>
+                    <i className="fa-solid fa-table" />
+                  </span>
+                  <span className={styles.addMaterialCopy}>
+                    <span className={styles.addMaterialLabel}>{t("addMaterial.table")}</span>
+                    <span className={styles.addMaterialHint}>{t("addMaterial.tableHint")}</span>
+                  </span>
                 </Link>
                 <Link
                   href="/knowledge-base/new?focus=files&intent=video"
@@ -244,8 +265,13 @@ export function KnowledgeBaseView() {
                   role="menuitem"
                   onClick={() => setAddMenuOpen(false)}
                 >
-                  {t("addMaterial.video")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.videoHint")}</span>
+                  <span className={styles.addMaterialIcon} aria-hidden>
+                    <i className="fa-solid fa-film" />
+                  </span>
+                  <span className={styles.addMaterialCopy}>
+                    <span className={styles.addMaterialLabel}>{t("addMaterial.video")}</span>
+                    <span className={styles.addMaterialHint}>{t("addMaterial.videoHint")}</span>
+                  </span>
                 </Link>
                 <Link
                   href="/knowledge-base/new?focus=files&intent=audio"
@@ -253,13 +279,28 @@ export function KnowledgeBaseView() {
                   role="menuitem"
                   onClick={() => setAddMenuOpen(false)}
                 >
-                  {t("addMaterial.audio")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.audioHint")}</span>
+                  <span className={styles.addMaterialIcon} aria-hidden>
+                    <i className="fa-solid fa-microphone" />
+                  </span>
+                  <span className={styles.addMaterialCopy}>
+                    <span className={styles.addMaterialLabel}>{t("addMaterial.audio")}</span>
+                    <span className={styles.addMaterialHint}>{t("addMaterial.audioHint")}</span>
+                  </span>
                 </Link>
-                <button type="button" className={styles.addMaterialItem} disabled>
-                  {t("addMaterial.linkSoon")}
-                  <span className={styles.addMaterialSoon}>{t("addMaterial.comingSoon")}</span>
-                </button>
+                <Link
+                  href="/knowledge-base/new?focus=link&intent=link"
+                  className={styles.addMaterialItem}
+                  role="menuitem"
+                  onClick={() => setAddMenuOpen(false)}
+                >
+                  <span className={styles.addMaterialIcon} aria-hidden>
+                    <i className="fa-solid fa-link" />
+                  </span>
+                  <span className={styles.addMaterialCopy}>
+                    <span className={styles.addMaterialLabel}>{t("addMaterial.link")}</span>
+                    <span className={styles.addMaterialHint}>{t("addMaterial.linkHint")}</span>
+                  </span>
+                </Link>
               </div>
             ) : null}
           </div>
@@ -535,6 +576,9 @@ function ArticleCard({
       <div className={styles.articleCardHead}>
         <span className={styles.articleCategory}>{article.categoryLabel}</span>
         <span className={styles.articleDate}>
+          {article.externalUrl ? (
+            <span className={styles.linkBadge}>{t("link.badge")}</span>
+          ) : null}{" "}
           {article.status && canManage ? (
             <span className={`${styles.statusChip} ${styles[`statusChip_${article.status}`]}`}>
               {t(`editor.status.${article.status}` as "editor.status.draft")}
@@ -628,6 +672,19 @@ function ArticleDetailView({
       </p>
       <h2 className={styles.detailTitle}>{article.title}</h2>
       <p className={styles.detailSummary}>{article.summary}</p>
+      {article.externalUrl ? (
+        <p className={styles.externalLinkRow}>
+          <a
+            className={styles.primaryBtn}
+            href={article.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {t("link.open")}
+          </a>
+          <span className={styles.meta}>{article.externalUrl}</span>
+        </p>
+      ) : null}
       <div className={styles.tagRow}>
         {article.tagLabels.map((label) => (
           <span key={label} className={styles.tagChip}>

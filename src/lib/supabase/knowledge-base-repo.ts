@@ -27,7 +27,7 @@ import type {
 } from "@/lib/knowledge-base/types";
 
 const ARTICLE_SELECT =
-  "id, slug, category_id, tag_keys, author_key, status, updated_at, published_at, archived_at";
+  "id, slug, category_id, tag_keys, author_key, status, updated_at, published_at, archived_at, external_url";
 
 type TranslationJoinRow = KbArticleRow & {
   knowledge_base_article_translations: KbJoinTranslation[];
@@ -131,6 +131,7 @@ export async function sbListKnowledgeBase(
     updated_at: r.updated_at,
     published_at: r.published_at,
     archived_at: r.archived_at,
+    external_url: r.external_url ?? null,
   }));
 
   return {
@@ -198,6 +199,7 @@ export async function sbGetKnowledgeBaseEditorArticle(
     authorKey: record.author_key,
     status: record.status,
     publishedAt: record.published_at,
+    externalUrl: record.external_url ?? null,
     translations,
   };
 }
@@ -222,6 +224,7 @@ export async function sbDuplicateKnowledgeBaseArticle(
     tagKeys: editor.tagKeys,
     authorKey: editor.authorKey,
     status: "draft",
+    externalUrl: editor.externalUrl,
     translations,
   });
 }
@@ -272,6 +275,7 @@ export type KbUpsertInput = {
   tagKeys: string[];
   authorKey: string;
   status: "draft" | "published" | "archived";
+  externalUrl?: string | null;
   translations: Array<{
     locale: AppLocale;
     title: string;
@@ -292,22 +296,24 @@ export async function sbUpsertKnowledgeBaseArticle(
   );
   const archivedAt = resolveArchivedAtForUpsert(input.status, now);
 
+  const articlePayload: Record<string, unknown> = {
+    slug: input.slug,
+    category_id: input.categoryId,
+    tag_keys: input.tagKeys,
+    author_key: input.authorKey,
+    status: input.status,
+    updated_at: now,
+    published_at: publishedAt,
+    archived_at: archivedAt,
+    is_demo: true,
+  };
+  if (input.externalUrl !== undefined) {
+    articlePayload.external_url = input.externalUrl;
+  }
+
   const { data: article, error: articleError } = await getSupabaseAdmin()
     .from("knowledge_base_articles")
-    .upsert(
-      {
-        slug: input.slug,
-        category_id: input.categoryId,
-        tag_keys: input.tagKeys,
-        author_key: input.authorKey,
-        status: input.status,
-        updated_at: now,
-        published_at: publishedAt,
-        archived_at: archivedAt,
-        is_demo: true,
-      },
-      { onConflict: "slug" },
-    )
+    .upsert(articlePayload, { onConflict: "slug" })
     .select(ARTICLE_SELECT)
     .single();
 

@@ -178,6 +178,7 @@ export async function POST(request: Request) {
     tagKeys: parsed.data.tagKeys,
     authorKey: parsed.data.authorKey,
     status: parsed.data.status,
+    externalUrl: parsed.data.externalUrl,
     translations: parsed.data.translations,
   };
 

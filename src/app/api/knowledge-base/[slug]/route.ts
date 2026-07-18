@@ -147,6 +147,10 @@ export async function PATCH(
       tagKeys: patch.tagKeys ?? record.tag_keys,
       authorKey: patch.authorKey ?? record.author_key,
       status,
+      externalUrl:
+        patch.externalUrl !== undefined
+          ? patch.externalUrl
+          : (record.external_url ?? null),
       translations:
         patch.translations ??
         (existing

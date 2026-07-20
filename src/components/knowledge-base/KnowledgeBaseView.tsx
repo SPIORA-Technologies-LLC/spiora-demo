@@ -227,104 +227,93 @@ export function KnowledgeBaseView() {
             </button>
             {addMenuOpen ? (
               <div className={styles.addMaterialMenu} role="menu">
-                <Link
-                  href="/knowledge-base/new"
-                  className={styles.addMaterialItem}
-                  role="menuitem"
-                  onClick={() => setAddMenuOpen(false)}
-                >
-                  <span className={styles.addMaterialIcon} aria-hidden>
-                    <i className="fa-solid fa-align-left" />
-                  </span>
-                  <span className={styles.addMaterialCopy}>
-                    <span className={styles.addMaterialLabel}>{t("addMaterial.text")}</span>
-                    <span className={styles.addMaterialHint}>{t("addMaterial.textHint")}</span>
-                  </span>
-                </Link>
-                <Link
-                  href="/knowledge-base/new?focus=files&intent=pdf"
-                  className={styles.addMaterialItem}
-                  role="menuitem"
-                  onClick={() => setAddMenuOpen(false)}
-                >
-                  <span className={styles.addMaterialIcon} aria-hidden>
-                    <i className="fa-solid fa-file-pdf" />
-                  </span>
-                  <span className={styles.addMaterialCopy}>
-                    <span className={styles.addMaterialLabel}>{t("addMaterial.pdf")}</span>
-                    <span className={styles.addMaterialHint}>{t("addMaterial.pdfHint")}</span>
-                  </span>
-                </Link>
-                <Link
-                  href="/knowledge-base/new?focus=files&intent=image"
-                  className={styles.addMaterialItem}
-                  role="menuitem"
-                  onClick={() => setAddMenuOpen(false)}
-                >
-                  <span className={styles.addMaterialIcon} aria-hidden>
-                    <i className="fa-solid fa-image" />
-                  </span>
-                  <span className={styles.addMaterialCopy}>
-                    <span className={styles.addMaterialLabel}>{t("addMaterial.image")}</span>
-                    <span className={styles.addMaterialHint}>{t("addMaterial.imageHint")}</span>
-                  </span>
-                </Link>
-                <Link
-                  href="/knowledge-base/new?focus=table&intent=table"
-                  className={styles.addMaterialItem}
-                  role="menuitem"
-                  onClick={() => setAddMenuOpen(false)}
-                >
-                  <span className={styles.addMaterialIcon} aria-hidden>
-                    <i className="fa-solid fa-table" />
-                  </span>
-                  <span className={styles.addMaterialCopy}>
-                    <span className={styles.addMaterialLabel}>{t("addMaterial.table")}</span>
-                    <span className={styles.addMaterialHint}>{t("addMaterial.tableHint")}</span>
-                  </span>
-                </Link>
-                <Link
-                  href="/knowledge-base/new?focus=files&intent=video"
-                  className={styles.addMaterialItem}
-                  role="menuitem"
-                  onClick={() => setAddMenuOpen(false)}
-                >
-                  <span className={styles.addMaterialIcon} aria-hidden>
-                    <i className="fa-solid fa-film" />
-                  </span>
-                  <span className={styles.addMaterialCopy}>
-                    <span className={styles.addMaterialLabel}>{t("addMaterial.video")}</span>
-                    <span className={styles.addMaterialHint}>{t("addMaterial.videoHint")}</span>
-                  </span>
-                </Link>
-                <Link
-                  href="/knowledge-base/new?focus=files&intent=audio"
-                  className={styles.addMaterialItem}
-                  role="menuitem"
-                  onClick={() => setAddMenuOpen(false)}
-                >
-                  <span className={styles.addMaterialIcon} aria-hidden>
-                    <i className="fa-solid fa-microphone" />
-                  </span>
-                  <span className={styles.addMaterialCopy}>
-                    <span className={styles.addMaterialLabel}>{t("addMaterial.audio")}</span>
-                    <span className={styles.addMaterialHint}>{t("addMaterial.audioHint")}</span>
-                  </span>
-                </Link>
-                <Link
-                  href="/knowledge-base/new?focus=files&intent=link"
-                  className={styles.addMaterialItem}
-                  role="menuitem"
-                  onClick={() => setAddMenuOpen(false)}
-                >
-                  <span className={styles.addMaterialIcon} aria-hidden>
-                    <i className="fa-solid fa-link" />
-                  </span>
-                  <span className={styles.addMaterialCopy}>
-                    <span className={styles.addMaterialLabel}>{t("addMaterial.link")}</span>
-                    <span className={styles.addMaterialHint}>{t("addMaterial.linkHint")}</span>
-                  </span>
-                </Link>
+                <div className={styles.addMaterialMenuIntro}>{t("actions.addMaterial")}</div>
+                <div className={styles.addMaterialGrid}>
+                  <Link
+                    href="/knowledge-base/new"
+                    className={styles.addMaterialItem}
+                    role="menuitem"
+                    onClick={() => setAddMenuOpen(false)}
+                  >
+                    <span className={styles.addMaterialIcon} aria-hidden>
+                      <i className="fa-solid fa-align-left" />
+                    </span>
+                    <span className={styles.addMaterialCopy}>
+                      <span className={styles.addMaterialLabel}>{t("addMaterial.text")}</span>
+                      <span className={styles.addMaterialHint}>{t("addMaterial.textHint")}</span>
+                    </span>
+                  </Link>
+                  <Link
+                    href="/knowledge-base/new?focus=table&intent=table"
+                    className={styles.addMaterialItem}
+                    role="menuitem"
+                    onClick={() => setAddMenuOpen(false)}
+                  >
+                    <span className={styles.addMaterialIcon} aria-hidden>
+                      <i className="fa-solid fa-table" />
+                    </span>
+                    <span className={styles.addMaterialCopy}>
+                      <span className={styles.addMaterialLabel}>{t("addMaterial.table")}</span>
+                      <span className={styles.addMaterialHint}>{t("addMaterial.tableHint")}</span>
+                    </span>
+                  </Link>
+                  <Link
+                    href="/knowledge-base/new?focus=files&intent=image"
+                    className={styles.addMaterialItem}
+                    role="menuitem"
+                    onClick={() => setAddMenuOpen(false)}
+                  >
+                    <span className={styles.addMaterialIcon} aria-hidden>
+                      <i className="fa-solid fa-image" />
+                    </span>
+                    <span className={styles.addMaterialCopy}>
+                      <span className={styles.addMaterialLabel}>{t("addMaterial.image")}</span>
+                      <span className={styles.addMaterialHint}>{t("addMaterial.imageHint")}</span>
+                    </span>
+                  </Link>
+                  <Link
+                    href="/knowledge-base/new?focus=files&intent=pdf"
+                    className={styles.addMaterialItem}
+                    role="menuitem"
+                    onClick={() => setAddMenuOpen(false)}
+                  >
+                    <span className={styles.addMaterialIcon} aria-hidden>
+                      <i className="fa-solid fa-file-pdf" />
+                    </span>
+                    <span className={styles.addMaterialCopy}>
+                      <span className={styles.addMaterialLabel}>{t("addMaterial.pdf")}</span>
+                      <span className={styles.addMaterialHint}>{t("addMaterial.pdfHint")}</span>
+                    </span>
+                  </Link>
+                  <Link
+                    href="/knowledge-base/new?focus=files&intent=link"
+                    className={styles.addMaterialItem}
+                    role="menuitem"
+                    onClick={() => setAddMenuOpen(false)}
+                  >
+                    <span className={styles.addMaterialIcon} aria-hidden>
+                      <i className="fa-solid fa-link" />
+                    </span>
+                    <span className={styles.addMaterialCopy}>
+                      <span className={styles.addMaterialLabel}>{t("addMaterial.link")}</span>
+                      <span className={styles.addMaterialHint}>{t("addMaterial.linkHint")}</span>
+                    </span>
+                  </Link>
+                  <Link
+                    href="/knowledge-base/new?focus=files&intent=media"
+                    className={styles.addMaterialItem}
+                    role="menuitem"
+                    onClick={() => setAddMenuOpen(false)}
+                  >
+                    <span className={styles.addMaterialIcon} aria-hidden>
+                      <i className="fa-solid fa-film" />
+                    </span>
+                    <span className={styles.addMaterialCopy}>
+                      <span className={styles.addMaterialLabel}>{t("addMaterial.media")}</span>
+                      <span className={styles.addMaterialHint}>{t("addMaterial.mediaHint")}</span>
+                    </span>
+                  </Link>
+                </div>
               </div>
             ) : null}
           </div>

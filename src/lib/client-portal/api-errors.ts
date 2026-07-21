@@ -1,0 +1,85 @@
+import { NextResponse } from "next/server";
+
+export type ClientApiErrorCode =
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "INVALID_EMAIL"
+  | "INVALID_LOCALE"
+  | "INVALID_EXPIRY"
+  | "INVALID_ASSIGNEE"
+  | "ASSIGNEE_REQUIRED"
+  | "INVALID_BODY"
+  | "ORIGIN_MISMATCH"
+  | "INVITATION_INVALID"
+  | "INVITATION_EXPIRED"
+  | "INVITATION_REVOKED"
+  | "INVITATION_ACCEPTED"
+  | "EMAIL_MISMATCH"
+  | "EMAIL_CONFIRMATION_REQUIRED"
+  | "PORTAL_USER_EXISTS"
+  | "ACCEPT_FAILED"
+  | "ALREADY_ACCEPTED"
+  | "AUTH_REQUIRED"
+  | "AUTH_UNAVAILABLE"
+  | "RATE_LIMITED"
+  | "INTERNAL";
+
+const MESSAGES: Record<ClientApiErrorCode, string> = {
+  UNAUTHORIZED: "Authentication required",
+  FORBIDDEN: "Forbidden",
+  NOT_FOUND: "Not found",
+  INVALID_EMAIL: "Invalid email",
+  INVALID_LOCALE: "Invalid locale",
+  INVALID_EXPIRY: "Expiry must be between 1 and 30 days",
+  INVALID_ASSIGNEE: "Invalid assignee",
+  ASSIGNEE_REQUIRED: "Assignee is required",
+  INVALID_BODY: "Invalid request body",
+  ORIGIN_MISMATCH: "Origin check failed",
+  INVITATION_INVALID: "Invitation is not available",
+  INVITATION_EXPIRED: "Invitation has expired",
+  INVITATION_REVOKED: "Invitation was revoked",
+  INVITATION_ACCEPTED: "Invitation was already accepted",
+  EMAIL_MISMATCH: "Signed-in email does not match the invitation",
+  EMAIL_CONFIRMATION_REQUIRED: "Confirm your email, then return to this link",
+  PORTAL_USER_EXISTS: "This account is already linked to another invitation",
+  ACCEPT_FAILED: "Could not accept invitation",
+  ALREADY_ACCEPTED: "Invitation already accepted",
+  AUTH_REQUIRED: "Sign in required",
+  AUTH_UNAVAILABLE: "Authentication is unavailable",
+  RATE_LIMITED: "Too many requests",
+  INTERNAL: "Something went wrong",
+};
+
+export function clientApiError(
+  code: ClientApiErrorCode,
+  status: number,
+  message?: string,
+) {
+  return NextResponse.json(
+    {
+      error: {
+        code,
+        message: message ?? MESSAGES[code],
+      },
+    },
+    {
+      status,
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    },
+  );
+}
+
+export function clientApiOk<T extends Record<string, unknown>>(
+  body: T,
+  init?: { status?: number },
+) {
+  return NextResponse.json(body, {
+    status: init?.status ?? 200,
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
+}

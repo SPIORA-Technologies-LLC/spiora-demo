@@ -122,6 +122,20 @@ export async function sbGetUserProfileByAuthUserId(
   return mapUserProfileRow(data as UserProfileRow);
 }
 
+export async function sbGetUserProfileById(
+  profileId: string,
+): Promise<UserProfile | null> {
+  const { data, error } = await (await getAdmin())
+    .from("user_profiles")
+    .select(PROFILE_SELECT)
+    .eq("id", profileId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+  return mapUserProfileRow(data as UserProfileRow);
+}
+
 export async function sbGetUserProfileByEmail(
   email: string,
 ): Promise<UserProfile | null> {

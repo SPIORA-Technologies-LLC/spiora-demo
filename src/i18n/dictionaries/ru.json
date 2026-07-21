@@ -2294,6 +2294,123 @@
       }
     }
   },
+  "clientInvitations": {
+    "title": "Приглашения клиентов",
+    "subtitle": "Создайте одноразовую ссылку в Spiora Client. Отправка email пока не включена — скопируйте ссылку сразу после создания.",
+    "inviteClient": "Пригласить клиента",
+    "loading": "Загрузка приглашений…",
+    "empty": "Приглашений пока нет",
+    "revoke": "Отозвать",
+    "inviteAgain": "Пригласить снова",
+    "confirmRevoke": "Отозвать это приглашение?",
+    "modalTitle": "Пригласить клиента в Spiora Client",
+    "close": "Закрыть",
+    "create": "Создать приглашение",
+    "creating": "Создание…",
+    "createdTitle": "Приглашение создано",
+    "copyLink": "Скопировать ссылку",
+    "copied": "Скопировано",
+    "copyOnceHint": "Ссылка показывается только один раз. После перезагрузки её нельзя восстановить из базы.",
+    "columns": {
+      "email": "Email",
+      "program": "Программа",
+      "assignee": "Ответственный",
+      "created": "Создано",
+      "expires": "Истекает",
+      "status": "Статус",
+      "actions": "Действия"
+    },
+    "fields": {
+      "email": "Email",
+      "assignee": "Ответственный сотрудник",
+      "assigneePlaceholder": "Выберите сотрудника",
+      "locale": "Язык анкеты",
+      "service": "Услуга / программа",
+      "expiresInDays": "Срок действия (дней)"
+    },
+    "services": {
+      "residence_permit": "ВНЖ",
+      "consultation": "Консультация",
+      "other": "Другое"
+    },
+    "states": {
+      "all": "Все",
+      "pending": "Ожидает",
+      "accepted": "Принято",
+      "expired": "Истекло",
+      "revoked": "Отозвано"
+    },
+    "errors": {
+      "loadFailed": "Не удалось загрузить приглашения",
+      "createFailed": "Не удалось создать приглашение",
+      "reusedNoUrl": "Запрос уже обработан. Создайте новое приглашение, чтобы получить новую ссылку.",
+      "assigneeRequired": "Выберите ответственного сотрудника"
+    }
+  },
+  "clientPortal": {
+    "brand": "Spiora Client",
+    "logout": "Выйти",
+    "home": {
+      "title": "Добро пожаловать в Spiora Client",
+      "inviteAccepted": "Приглашение принято",
+      "hint": "Ваш защищённый кабинет. Анкета и документы появятся здесь в следующих релизах."
+    },
+    "nav": {
+      "questionnaire": "Анкета",
+      "documents": "Документы",
+      "status": "Статус"
+    },
+    "placeholders": {
+      "questionnaire": "Скоро",
+      "documents": "Скоро",
+      "status": "Скоро"
+    },
+    "invite": {
+      "loading": "Проверяем приглашение…",
+      "validTitle": "Вас пригласили в Spiora Client",
+      "emailLabel": "Email",
+      "expiresLabel": "Ссылка действует до",
+      "register": "Регистрация",
+      "signIn": "Вход",
+      "emailField": "Email",
+      "passwordField": "Пароль",
+      "emailMustMatch": "Используйте тот же email, на который выписано приглашение.",
+      "accept": "Принять приглашение",
+      "working": "Подождите…",
+      "alreadySignedIn": "Уже вошли? Принять текущей сессией",
+      "confirmEmail": "Подтвердите email, затем вернитесь по этой ссылке, чтобы принять приглашение.",
+      "demoSkipEmailConfirm": "Демо-режим: подтверждение email пропускается для презентаций.",
+      "expiredTitle": "Срок действия приглашения истёк",
+      "expiredBody": "Обратитесь к сотруднику за новой ссылкой.",
+      "revokedTitle": "Приглашение отменено",
+      "revokedBody": "Обратитесь к сотруднику за новой ссылкой.",
+      "acceptedTitle": "Приглашение уже использовано",
+      "acceptedBody": "Войдите в Spiora Client, чтобы продолжить.",
+      "goLogin": "Войти в Spiora Client",
+      "invalidTitle": "Приглашение недоступно",
+      "invalidBody": "Ссылка недействительна. Обратитесь к сотруднику Spiora.",
+      "errors": {
+        "emailMismatch": "Email входа не совпадает с приглашением.",
+        "expired": "Срок приглашения истёк.",
+        "revoked": "Приглашение отозвано.",
+        "accepted": "Приглашение уже принято.",
+        "acceptFailed": "Не удалось принять приглашение.",
+        "authUnavailable": "Клиентская аутентификация не настроена.",
+        "authFailed": "Не удалось войти или зарегистрироваться."
+      }
+    },
+    "login": {
+      "title": "Вход в Spiora Client",
+      "subtitle": "Для клиентов, которые уже приняли приглашение.",
+      "email": "Email",
+      "password": "Пароль",
+      "submit": "Войти",
+      "working": "Вход…",
+      "authUnavailable": "Клиентская аутентификация не настроена.",
+      "authFailed": "Неверный email или пароль.",
+      "notClient": "Этот аккаунт не является пользователем портала Spiora Client."
+    }
+  },
   "errors": {
     "notFound": {
       "title": "Страница не найдена",

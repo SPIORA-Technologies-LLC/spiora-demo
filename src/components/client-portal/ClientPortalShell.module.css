@@ -1,0 +1,119 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse 80% 50% at 10% -10%, rgba(120, 40, 50, 0.35), transparent),
+    linear-gradient(168deg, #050505 0%, #120a0c 48%, #0a0a0a 100%);
+  color: #f6efe9;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.brand {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+}
+
+.email {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logoutBtn {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: inherit;
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+}
+
+.main {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.heroCard {
+  padding: 1.5rem 1.4rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(160deg, rgba(42, 22, 26, 0.9), rgba(18, 12, 14, 0.92));
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.45rem, 3vw, 1.9rem);
+  font-weight: 650;
+}
+
+.status {
+  margin: 0.65rem 0 0;
+  color: rgba(255, 210, 200, 0.92);
+  font-weight: 560;
+}
+
+.hint {
+  margin: 0.55rem 0 0;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.45;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.placeholder {
+  padding: 1.1rem;
+  border-radius: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.placeholder h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.placeholder p {
+  margin: 0.45rem 0 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 800px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

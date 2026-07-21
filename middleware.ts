@@ -9,7 +9,13 @@ import { updateSupabaseAuthSession } from "@/lib/supabase/middleware-auth";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
-const PUBLIC_PATHS = ["/login", "/join", "/api/webhooks"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/join",
+  "/api/webhooks",
+  "/client/invite",
+  "/client/login",
+];
 
 const PROTECTED_PREFIXES = [
   "/dashboard",
@@ -41,6 +47,30 @@ function isProtectedPath(pathname: string) {
   );
 }
 
+function isClientPortalPath(pathname: string) {
+  return pathname === "/client" || pathname.startsWith("/client/");
+}
+
+function isClientPublicPath(pathname: string) {
+  return (
+    pathname.startsWith("/client/invite") ||
+    pathname === "/client/login" ||
+    pathname.startsWith("/client/login/")
+  );
+}
+
+function withSupabaseCookies(
+  response: NextResponse,
+  supabaseResponse: NextResponse | null,
+) {
+  if (supabaseResponse) {
+    for (const cookie of supabaseResponse.cookies.getAll()) {
+      response.cookies.set(cookie);
+    }
+  }
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -51,74 +81,77 @@ export async function middleware(request: NextRequest) {
   const provider = getAuthProvider();
   let session = null as Awaited<ReturnType<typeof getSessionFromToken>>;
   let supabaseResponse: NextResponse | null = null;
+  let authUserId: string | null = null;
 
   if (provider === "supabase") {
     const refreshed = await updateSupabaseAuthSession(request);
     supabaseResponse = refreshed.response;
-    session = await resolveSessionFromAuthUserId(refreshed.user?.id ?? null);
+    authUserId = refreshed.user?.id ?? null;
+    session = await resolveSessionFromAuthUserId(authUserId);
   } else {
     const token = request.cookies.get("spiora_session")?.value;
     session = await getSessionFromToken(token);
   }
 
+  // Spiora Client paths: never treat employee SessionUser as client access.
+  if (isClientPortalPath(pathname)) {
+    if (isClientPublicPath(pathname)) {
+      const headers = new Headers(request.headers);
+      const response = NextResponse.next({ request: { headers } });
+      response.headers.set("Cache-Control", "no-store");
+      response.headers.set("Referrer-Policy", "no-referrer");
+      const intlResponse = intlMiddleware(request);
+      for (const [key, value] of response.headers.entries()) {
+        intlResponse.headers.set(key, value);
+      }
+      return withSupabaseCookies(intlResponse, supabaseResponse);
+    }
+
+    // Employee sessions cannot enter the client portal shell.
+    if (session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
+    }
+
+    // Client session is enforced in /client layout via getClientSession().
+    // Middleware only blocks employees and lets unauthenticated hit layout → /client/login.
+    const intlResponse = intlMiddleware(request);
+    intlResponse.headers.set("Cache-Control", "no-store");
+    return withSupabaseCookies(intlResponse, supabaseResponse);
+  }
+
   if (pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = session ? "/dashboard" : "/login";
-    const redirect = NextResponse.redirect(url);
-    if (supabaseResponse) {
-      for (const cookie of supabaseResponse.cookies.getAll()) {
-        redirect.cookies.set(cookie);
-      }
-    }
-    return redirect;
+    return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
   }
 
   if (isPublicPath(pathname)) {
     if (session && pathname === "/login") {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
-      const redirect = NextResponse.redirect(url);
-      if (supabaseResponse) {
-        for (const cookie of supabaseResponse.cookies.getAll()) {
-          redirect.cookies.set(cookie);
-        }
-      }
-      return redirect;
+      return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
     }
   } else if (isProtectedPath(pathname)) {
+    // Client Auth users without user_profiles resolve to null session → login.
+    // They must never pass employee ACL.
     if (!session) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       url.searchParams.set("next", pathname);
-      const redirect = NextResponse.redirect(url);
-      if (supabaseResponse) {
-        for (const cookie of supabaseResponse.cookies.getAll()) {
-          redirect.cookies.set(cookie);
-        }
-      }
-      return redirect;
+      return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
     }
 
     if (!canAccessPath(session.role, pathname)) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
-      const redirect = NextResponse.redirect(url);
-      if (supabaseResponse) {
-        for (const cookie of supabaseResponse.cookies.getAll()) {
-          redirect.cookies.set(cookie);
-        }
-      }
-      return redirect;
+      return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
     }
   }
 
   const intlResponse = intlMiddleware(request);
-  if (supabaseResponse) {
-    for (const cookie of supabaseResponse.cookies.getAll()) {
-      intlResponse.cookies.set(cookie);
-    }
-  }
-  return intlResponse;
+  return withSupabaseCookies(intlResponse, supabaseResponse);
 }
 
 export const config = {
@@ -127,6 +160,8 @@ export const config = {
     "/login",
     "/join",
     "/join/:path*",
+    "/client",
+    "/client/:path*",
     "/dashboard",
     "/dashboard/:path*",
     "/clients",

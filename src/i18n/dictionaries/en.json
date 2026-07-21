@@ -2296,6 +2296,123 @@
       }
     }
   },
+  "clientInvitations": {
+    "title": "Client invitations",
+    "subtitle": "Create a one-time Spiora Client link. Email delivery is not enabled yet — copy the link after creating.",
+    "inviteClient": "Invite client",
+    "loading": "Loading invitations…",
+    "empty": "No invitations yet",
+    "revoke": "Revoke",
+    "inviteAgain": "Invite again",
+    "confirmRevoke": "Revoke this invitation?",
+    "modalTitle": "Invite client to Spiora Client",
+    "close": "Close",
+    "create": "Create invitation",
+    "creating": "Creating…",
+    "createdTitle": "Invitation created",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "copyOnceHint": "This link is shown only once. After reload it cannot be recovered from the database.",
+    "columns": {
+      "email": "Email",
+      "program": "Program",
+      "assignee": "Assignee",
+      "created": "Created",
+      "expires": "Expires",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "fields": {
+      "email": "Email",
+      "assignee": "Assigned employee",
+      "assigneePlaceholder": "Select employee",
+      "locale": "Questionnaire language",
+      "service": "Program / service",
+      "expiresInDays": "Valid for (days)"
+    },
+    "services": {
+      "residence_permit": "Residence permit",
+      "consultation": "Consultation",
+      "other": "Other"
+    },
+    "states": {
+      "all": "All",
+      "pending": "Pending",
+      "accepted": "Accepted",
+      "expired": "Expired",
+      "revoked": "Revoked"
+    },
+    "errors": {
+      "loadFailed": "Failed to load invitations",
+      "createFailed": "Could not create invitation",
+      "reusedNoUrl": "Request already processed. Create a new invitation to get a new link.",
+      "assigneeRequired": "Select an assigned employee"
+    }
+  },
+  "clientPortal": {
+    "brand": "Spiora Client",
+    "logout": "Log out",
+    "home": {
+      "title": "Welcome to Spiora Client",
+      "inviteAccepted": "Invitation accepted",
+      "hint": "Your secure client area. Questionnaire and documents will appear here in the next releases."
+    },
+    "nav": {
+      "questionnaire": "Questionnaire",
+      "documents": "Documents",
+      "status": "Status"
+    },
+    "placeholders": {
+      "questionnaire": "Coming soon",
+      "documents": "Coming soon",
+      "status": "Coming soon"
+    },
+    "invite": {
+      "loading": "Checking invitation…",
+      "validTitle": "You are invited to Spiora Client",
+      "emailLabel": "Email",
+      "expiresLabel": "Link valid until",
+      "register": "Register",
+      "signIn": "Sign in",
+      "emailField": "Email",
+      "passwordField": "Password",
+      "emailMustMatch": "Use the same email address the invitation was sent to.",
+      "accept": "Accept invitation",
+      "working": "Please wait…",
+      "alreadySignedIn": "Already signed in? Accept with current session",
+      "confirmEmail": "Confirm your email, then return to this link to accept.",
+      "demoSkipEmailConfirm": "Demo mode: email confirmation is skipped for presentations.",
+      "expiredTitle": "This invitation has expired",
+      "expiredBody": "Ask your Spiora contact for a new link.",
+      "revokedTitle": "This invitation was cancelled",
+      "revokedBody": "Ask your Spiora contact for a new link.",
+      "acceptedTitle": "This invitation was already used",
+      "acceptedBody": "Sign in to Spiora Client to continue.",
+      "goLogin": "Go to Spiora Client login",
+      "invalidTitle": "Invitation unavailable",
+      "invalidBody": "This link is not valid. Ask your Spiora contact for help.",
+      "errors": {
+        "emailMismatch": "Signed-in email does not match the invitation.",
+        "expired": "Invitation has expired.",
+        "revoked": "Invitation was revoked.",
+        "accepted": "Invitation was already accepted.",
+        "acceptFailed": "Could not accept the invitation.",
+        "authUnavailable": "Client authentication is not configured.",
+        "authFailed": "Could not sign in or register."
+      }
+    },
+    "login": {
+      "title": "Spiora Client login",
+      "subtitle": "For clients who already accepted an invitation.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "working": "Signing in…",
+      "authUnavailable": "Client authentication is not configured.",
+      "authFailed": "Invalid email or password.",
+      "notClient": "This account is not a Spiora Client portal user."
+    }
+  },
   "errors": {
     "notFound": {
       "title": "Page not found",

@@ -7,6 +7,7 @@ import { Logo } from "@/components/ui/Logo";
 import { getProductDescription } from "@/config/branding";
 import type { BrandingLocale } from "@/config/branding";
 import { getSession } from "@/lib/auth/session";
+import { getClientSession } from "@/lib/client-portal/session";
 import styles from "./login.module.css";
 
 type LoginPageProps = {
@@ -39,6 +40,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await getSession();
   if (session) {
     redirect("/dashboard");
+  }
+
+  const clientSession = await getClientSession();
+  if (clientSession) {
+    redirect("/client");
   }
 
   const locale = (await getLocale()) as BrandingLocale;

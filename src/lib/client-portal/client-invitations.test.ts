@@ -130,20 +130,22 @@ describe("client portal demo auth", () => {
   });
 
   it("demo skip email confirm only when SPIORA_DEMO_MODE and supabase configured", async () => {
-    const { isClientPortalDemoAuthEnabled } = await import("./demo-auth.ts");
+    const { isClientPortalDemoAuthEnabledFromEnv } = await import(
+      "./demo-auth-policy.ts"
+    );
     delete process.env.SPIORA_DEMO_MODE;
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
     delete process.env.SUPABASE_SERVICE_ROLE_KEY;
-    assert.equal(isClientPortalDemoAuthEnabled(), false);
+    assert.equal(isClientPortalDemoAuthEnabledFromEnv(process.env), false);
 
     process.env.SPIORA_DEMO_MODE = "true";
     process.env.SPIORA_ENABLE_SUPABASE = "true";
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
     process.env.SUPABASE_SERVICE_ROLE_KEY = "service-key";
-    assert.equal(isClientPortalDemoAuthEnabled(), true);
+    assert.equal(isClientPortalDemoAuthEnabledFromEnv(process.env), true);
 
     process.env.SPIORA_DEMO_MODE = "false";
-    assert.equal(isClientPortalDemoAuthEnabled(), false);
+    assert.equal(isClientPortalDemoAuthEnabledFromEnv(process.env), false);
   });
 
   it("demo-register route gates on server before registration", () => {
@@ -230,12 +232,34 @@ describe("invitation assignee employee context", () => {
   });
 
   it("create invitation validates assignee with employee context", () => {
-    const invitations = readFileSync(
-      path.join(root, "src/lib/client-portal/invitations.ts"),
+    const service = readFileSync(
+      path.join(root, "src/lib/client-portal/invitation-service.ts"),
       "utf8",
     );
-    assert.match(invitations, /employeeRole: input\.employeeRole/);
-    assert.match(invitations, /isValidClientInvitationAssignee\(assignedTo,/);
+    assert.match(service, /employeeRole: input\.employeeRole/);
+    assert.match(service, /assignees\.validate\(assignedTo/);
+  });
+});
+
+describe("demo auth policy (framework-agnostic)", () => {
+  const envBackup = { ...process.env };
+
+  afterEach(() => {
+    process.env = { ...envBackup };
+  });
+
+  it("maps demo register access to forbidden when demo mode off", async () => {
+    const { evaluateDemoRegisterAccess } = await import("./demo-auth-policy.ts");
+    process.env.SPIORA_DEMO_MODE = "false";
+    assert.equal(evaluateDemoRegisterAccess(process.env), "forbidden");
+  });
+
+  it("demo register success body stays minimal", async () => {
+    const { isDemoRegisterSuccessBody } = await import(
+      "./demo-register-policy.ts"
+    );
+    assert.equal(isDemoRegisterSuccessBody({ ok: true }), true);
+    assert.equal(isDemoRegisterSuccessBody({ ok: true, password: "x" }), false);
   });
 });
 

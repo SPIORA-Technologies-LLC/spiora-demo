@@ -1,7 +1,6 @@
 import "server-only";
 
-import { isDemoMode } from "@/lib/demo/demo-mode";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { isClientPortalDemoAuthEnabledFromEnv } from "@/lib/client-portal/demo-auth-policy";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 import { normalizeInviteEmail } from "./invite-token";
 
@@ -13,7 +12,7 @@ const MIN_PASSWORD_LEN = 8;
  * Never enabled in production without demo flag.
  */
 export function isClientPortalDemoAuthEnabled(): boolean {
-  return isDemoMode() && isSupabaseConfigured();
+  return isClientPortalDemoAuthEnabledFromEnv();
 }
 
 export async function demoRegisterConfirmedClientUser(input: {

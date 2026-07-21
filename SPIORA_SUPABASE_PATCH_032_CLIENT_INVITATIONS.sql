@@ -224,3 +224,26 @@ create policy rls_client_portal_users_select_employee
 -- Anonymous: no policies → denied
 -- Token lookup must never use the anon/authenticated PostgREST client;
 -- only server-side service role after hashing the presented token.
+
+-- -----------------------------------------------------------------------------
+-- 6. Verification (read-only; safe to re-run)
+-- -----------------------------------------------------------------------------
+
+select table_name
+from information_schema.tables
+where table_schema = 'public'
+  and table_name in ('client_invitations', 'client_portal_users')
+order by table_name;
+
+select column_name, data_type, is_nullable
+from information_schema.columns
+where table_schema = 'public'
+  and table_name = 'client_invitations'
+  and column_name in (
+    'assigned_to',
+    'service_type',
+    'preferred_locale',
+    'token_hash',
+    'created_by'
+  )
+order by column_name;

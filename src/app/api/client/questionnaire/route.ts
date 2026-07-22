@@ -87,6 +87,7 @@ export async function PATCH(request: Request) {
         | "QUESTIONNAIRE_READ_ONLY"
         | "QUESTIONNAIRE_REVISION_CONFLICT"
         | "QUESTIONNAIRE_VALUE_INVALID"
+        | "QUESTIONNAIRE_FIELD_UNKNOWN"
         | "QUESTIONNAIRE_PAYLOAD_TOO_LARGE",
       status,
     );

@@ -48,6 +48,24 @@
   margin-bottom: 0.9rem;
 }
 
+.displayHeading,
+.displayInfo {
+  margin-bottom: 0.9rem;
+}
+
+.displayHeading h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.displayInfo p,
+.displayDescription {
+  margin: 0.35rem 0 0;
+  opacity: 0.85;
+  line-height: 1.45;
+}
+
 .field input,
 .field textarea,
 .field select {

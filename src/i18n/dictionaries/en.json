@@ -2383,6 +2383,7 @@
         "saving": "Saving…",
         "saved": "Saved",
         "error": "Save error",
+        "errorWithCode": "Save error ({code})",
         "conflict": "Version conflict"
       },
       "status": {

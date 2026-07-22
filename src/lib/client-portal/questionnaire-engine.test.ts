@@ -370,4 +370,31 @@ describe("questionnaire draft lifecycle", () => {
     assert.equal(result.ok, false);
     if (!result.ok) assert.equal(result.code, "QUESTIONNAIRE_SCHEMA_INVALID");
   });
+
+  it("rejects display-only welcome fields before draft creation (prod autosave failure)", async () => {
+    const store = makeStore();
+    const result = await saveQuestionnaireDraft(ctx, store as any, {
+      baseRevision: null,
+      operations: [{ op: "set", questionId: "welcome_heading", value: "typed into heading" }],
+      locale: "ru",
+    });
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.code, "QUESTIONNAIRE_FIELD_UNKNOWN");
+    assert.equal(await store.getByInvitationId(), null);
+  });
+
+  it("creates draft on first meaningful answerable field with null baseRevision", async () => {
+    const store = makeStore();
+    const result = await saveQuestionnaireDraft(ctx, store as any, {
+      baseRevision: null,
+      operations: [{ op: "set", questionId: "first_name", value: "Ivan" }],
+      locale: "ru",
+    });
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(result.created, true);
+      assert.equal(result.revision, 1);
+      assert.equal(result.answers.first_name, "Ivan");
+    }
+  });
 });

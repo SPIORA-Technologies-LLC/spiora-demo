@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import styles from "./ClientQuestionnairePage.module.css";
 import { buildReviewSections } from "@/lib/client-portal/questionnaire-review";
 import { isQuestionVisible } from "@/lib/client-portal/questionnaire-visibility";
+import { DISPLAY_ONLY_TYPES } from "@/lib/client-portal/questionnaire-types";
 
 type CurrentResponse = {
   questionnaire: {
@@ -57,6 +58,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<"idle" | "saving" | "saved" | "error" | "conflict">("idle");
+  const [saveErrorCode, setSaveErrorCode] = useState<string | null>(null);
   const [localAnswers, setLocalAnswers] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Array<{ sectionId: string; questionId: string; message: string }>>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -101,13 +103,25 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
 
   async function flushSave(operations: Array<{ op: "set" | "clear"; questionId: string; value?: unknown }>, nextLocal?: Record<string, unknown>) {
     if (!data) return;
+    const answerableOps = operations.filter((operation) => {
+      const question = data.template.schema.sections
+        .flatMap((section) => section.questions)
+        .find((item) => item.id === operation.questionId);
+      return question && !DISPLAY_ONLY_TYPES.has(question.type as never);
+    });
+    if (answerableOps.length === 0) {
+      setSaving("idle");
+      setSaveErrorCode(null);
+      return;
+    }
     setSaving("saving");
+    setSaveErrorCode(null);
     const res = await fetch("/api/client/questionnaire", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         baseRevision: data.questionnaire.revision,
-        operations,
+        operations: answerableOps,
       }),
     });
     if (res.status === 409) {
@@ -115,6 +129,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       return;
     }
     if (!res.ok) {
+      const json = (await res.json().catch(() => null)) as {
+        error?: { code?: string };
+      } | null;
+      setSaveErrorCode(json?.error?.code ?? `HTTP_${res.status}`);
       setSaving("error");
       return;
     }
@@ -168,6 +186,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   }
 
   function onAnswer(questionId: string, questionType: string, value: unknown) {
+    if (DISPLAY_ONLY_TYPES.has(questionType as never)) return;
     const operation = opForValue(questionType, questionId, value);
     const next =
       operation.op === "clear"
@@ -240,7 +259,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
         <header className={styles.header}>
           <h1>{data.template.schema.title[locale]}</h1>
           <p>{t(`status.${data.questionnaire.status}` as never)}</p>
-          <p className={styles.saveState}>{t(`save.${saving}` as never)}</p>
+          <p className={styles.saveState}>
+            {saving === "error" && saveErrorCode
+              ? t("save.errorWithCode", { code: saveErrorCode })
+              : t(`save.${saving}` as never)}
+          </p>
         </header>
 
         {errors.length > 0 ? (
@@ -284,7 +307,22 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
             <h2>{currentSection.title[locale]}</h2>
             {currentSection.questions
               .filter((q) => !q.visibleWhen || isQuestionVisible(q as never, localAnswers))
-              .map((q) => (
+              .map((q) =>
+              DISPLAY_ONLY_TYPES.has(q.type as never) ? (
+                <div
+                  key={q.id}
+                  className={q.type === "heading" ? styles.displayHeading : styles.displayInfo}
+                >
+                  {q.type === "heading" ? (
+                    <h3>{q.label[locale]}</h3>
+                  ) : (
+                    <p>{q.label[locale]}</p>
+                  )}
+                  {q.description ? (
+                    <p className={styles.displayDescription}>{q.description[locale]}</p>
+                  ) : null}
+                </div>
+              ) : (
               <label key={q.id} className={styles.field}>
                 <span>{q.label[locale]}{q.required ? " *" : ""}</span>
                 {q.type === "textarea" ? (
@@ -347,7 +385,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                   </span>
                 ) : null}
               </label>
-            ))}
+              ))}
             <div className={styles.actions}>
               <a href="/client">{t("backHome")}</a>
               <button type="button" onClick={() => void moveToReview()}>{t("review")}</button>

@@ -9,7 +9,12 @@ import {
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { getSupabaseAdmin } from "@/lib/supabase/server";
 
-const BUCKET = "questionnaire-attachments";
+/**
+ * Reuse the existing demo/prod bucket from migration 006 so uploads work on
+ * Vercel without a new storage migration. Objects are namespaced by prefix.
+ */
+const BUCKET = "task-attachments";
+const OBJECT_PREFIX = "questionnaire";
 const LOCAL_DIR = path.join(process.cwd(), ".data", "questionnaire-attachments");
 
 function safeInvitationSegment(invitationId: string): string {
@@ -17,7 +22,11 @@ function safeInvitationSegment(invitationId: string): string {
 }
 
 function storageObjectName(invitationId: string, attachmentId: string, ext: string): string {
-  return `${safeInvitationSegment(invitationId)}/${attachmentId}.${ext}`;
+  return `${OBJECT_PREFIX}/${safeInvitationSegment(invitationId)}/${attachmentId}.${ext}`;
+}
+
+function isVercelRuntime(): boolean {
+  return process.env.VERCEL === "1";
 }
 
 export async function saveQuestionnaireAttachmentFile(
@@ -31,14 +40,19 @@ export async function saveQuestionnaireAttachmentFile(
   const objectName = storageObjectName(invitationId, attachmentId, ext);
 
   if (isSupabaseConfigured()) {
-    const { error } = await getSupabaseAdmin()
-      .storage.from(BUCKET)
-      .upload(objectName, data, {
-        contentType,
-        upsert: true,
-      });
+    const admin = getSupabaseAdmin();
+    const { error } = await admin.storage.from(BUCKET).upload(objectName, data, {
+      contentType,
+      upsert: true,
+    });
     if (!error) return;
-    // Fall back to local disk when the bucket is missing in demo/staging.
+
+    // Local fallback is only useful off Vercel (writable disk).
+    if (isVercelRuntime()) {
+      throw new Error(`Questionnaire attachment upload failed: ${error.message}`);
+    }
+  } else if (isVercelRuntime()) {
+    throw new Error("Questionnaire attachment storage is not configured");
   }
 
   const fullPath = path.join(LOCAL_DIR, objectName);
@@ -64,7 +78,6 @@ export async function readQuestionnaireAttachmentFile(
         contentType: contentTypeFromExt(ext),
       };
     }
-    // Fall through to local for demo hybrids.
   }
 
   try {

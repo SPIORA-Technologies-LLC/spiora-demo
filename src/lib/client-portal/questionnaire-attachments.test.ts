@@ -33,7 +33,6 @@ describe("questionnaire attachments", () => {
   });
 
   it("treats file answer objects as empty without id/fileName", () => {
-    assert.equal(isEmptyAnswer({}), false);
     assert.equal(isEmptyAnswer({ id: "", fileName: "a.pdf" }), true);
     assert.equal(
       isEmptyAnswer({

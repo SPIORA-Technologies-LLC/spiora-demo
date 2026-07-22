@@ -2397,6 +2397,8 @@
       "fileTooLarge": "File is too large (15 MB max)",
       "fileUnsupported": "This file type is not supported",
       "fileUploadError": "Could not upload the file",
+      "fileReadOnly": "Questionnaire is in review — files cannot be changed",
+      "fileAuthRequired": "Sign in again to upload a file",
       "save": {
         "idle": "Not saved yet",
         "saving": "Saving…",

@@ -2,13 +2,47 @@ import { randomUUID } from "node:crypto";
 import { getClientSession } from "@/lib/client-portal/session";
 import { getClientQuestionnaire } from "@/lib/client-portal/questionnaire";
 import { clientApiError, clientApiOk } from "@/lib/client-portal/api-errors";
-import { isAllowedQuestionnaireAttachment, isQuestionnaireFileAnswer } from "@/lib/client-portal/questionnaire-attachment-formats";
+import {
+  isAllowedQuestionnaireAttachment,
+  isQuestionnaireFileAnswer,
+} from "@/lib/client-portal/questionnaire-attachment-formats";
 import {
   deleteQuestionnaireAttachmentFile,
   saveQuestionnaireAttachmentFile,
 } from "@/lib/client-portal/questionnaire-attachment-storage";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+type UploadFile = {
+  name: string;
+  type: string;
+  arrayBuffer: () => Promise<ArrayBuffer>;
+};
+
+/** Avoid `instanceof File` — it often fails in Vercel/Node FormData. */
+function asUploadFile(entry: FormDataEntryValue | null): UploadFile | null {
+  if (!entry || typeof entry === "string") return null;
+  const candidate = entry as {
+    name?: unknown;
+    type?: unknown;
+    arrayBuffer?: () => Promise<ArrayBuffer>;
+  };
+  if (typeof candidate.arrayBuffer !== "function") return null;
+  const name =
+    typeof candidate.name === "string" && candidate.name.trim()
+      ? candidate.name.trim()
+      : "file";
+  const type =
+    typeof candidate.type === "string" && candidate.type
+      ? candidate.type
+      : "application/octet-stream";
+  return {
+    name,
+    type,
+    arrayBuffer: () => candidate.arrayBuffer!(),
+  };
+}
 
 export async function POST(request: Request) {
   const session = await getClientSession();
@@ -40,8 +74,8 @@ export async function POST(request: Request) {
   }
 
   const questionId = String(formData.get("questionId") ?? "");
-  const fileEntry = formData.get("file");
-  if (!questionId || !(fileEntry instanceof File)) {
+  const fileEntry = asUploadFile(formData.get("file"));
+  if (!questionId || !fileEntry) {
     return clientApiError("INVALID_BODY", 400);
   }
 

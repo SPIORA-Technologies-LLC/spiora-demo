@@ -409,7 +409,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
             ? t("fileTooLarge")
             : code === "UNSUPPORTED_FILE_TYPE"
               ? t("fileUnsupported")
-              : t("fileUploadError");
+              : code === "QUESTIONNAIRE_READ_ONLY"
+                ? t("fileReadOnly")
+                : code === "UNAUTHORIZED"
+                  ? t("fileAuthRequired")
+                  : t("fileUploadError");
         setUploadErrorById((prev) => ({ ...prev, [questionId]: message }));
         return;
       }

@@ -2381,6 +2381,8 @@
       "reviewQuestionnaire": "Review questionnaire",
       "submitQuestionnaire": "Submit questionnaire",
       "review": "Review questionnaire",
+      "reviewTitle": "Questionnaire review",
+      "reviewIntro": "Below are all of your answers. Review them, then submit or return to editing.",
       "reopen": "Return to editing",
       "errorSummaryTitle": "Please fix the following fields",
       "navCurrent": "Current section",

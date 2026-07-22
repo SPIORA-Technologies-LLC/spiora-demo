@@ -292,6 +292,75 @@
   margin-bottom: 0.85rem;
 }
 
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.reviewHeader {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  padding: 1rem 1.1rem;
+}
+
+.reviewTitle {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+}
+
+.reviewIntro {
+  margin: 0;
+  color: rgba(246, 239, 233, 0.72);
+  line-height: 1.45;
+}
+
+.reviewSection {
+  padding-top: 1.05rem;
+}
+
+.reviewSectionTitle {
+  margin: 0 0 0.85rem;
+  font-size: 1.1rem;
+  color: #f0b6a0;
+}
+
+.reviewList {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.reviewList .answerRow {
+  margin: 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  gap: 0.25rem;
+}
+
+.reviewList .answerRow:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.reviewList dt {
+  margin: 0;
+  font-size: 0.84rem;
+  color: rgba(246, 239, 233, 0.62);
+  font-weight: 500;
+}
+
+.reviewList dd {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  color: #f6efe9;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 @media (max-width: 900px) {
   .page {
     grid-template-columns: 1fr;

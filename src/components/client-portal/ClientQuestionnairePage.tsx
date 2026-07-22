@@ -192,19 +192,19 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     }
   }, [currentSectionId, reviewMode, loading, currentSection]);
 
-  async function flushSave() {
+  async function flushSave(): Promise<"ok" | "empty" | "busy" | "error" | "conflict"> {
     const current = dataRef.current;
-    if (!current) return;
+    if (!current) return "empty";
 
     if (saveInFlightRef.current) {
       saveAgainRef.current = true;
-      return;
+      return "busy";
     }
 
     const dirtyIds = [...dirtyQuestionIdsRef.current];
     if (dirtyIds.length === 0) {
       setSaveErrorCode(null);
-      return;
+      return "empty";
     }
 
     const snapshot = localAnswersRef.current;
@@ -225,7 +225,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     if (operations.length === 0) {
       dirtyQuestionIdsRef.current.clear();
       setSaveErrorCode(null);
-      return;
+      return "empty";
     }
 
     // Clear dirty set for the fields we're sending; re-dirty if user edits during flight.
@@ -250,7 +250,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
           dirtyQuestionIdsRef.current.add(op.questionId);
         }
         setSaving("conflict");
-        return;
+        return "conflict";
       }
       if (!res.ok) {
         const errJson = (await res.json().catch(() => null)) as {
@@ -262,7 +262,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
         }
         setSaveErrorCode(errJson?.error?.code ?? `HTTP_${res.status}`);
         setSaving("error");
-        return;
+        return "error";
       }
       const json = (await res.json()) as {
         revision: number;
@@ -287,6 +287,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       dataRef.current = nextData;
       setData(nextData);
       setSaving("saved");
+      return "ok";
     } finally {
       saveInFlightRef.current = false;
       if (saveAgainRef.current || dirtyQuestionIdsRef.current.size > 0) {
@@ -294,6 +295,26 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
         scheduleSave();
       }
     }
+  }
+
+  async function flushPendingSave(): Promise<boolean> {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+    for (let attempt = 0; attempt < 12; attempt += 1) {
+      if (saveInFlightRef.current) {
+        await new Promise((resolve) => setTimeout(resolve, 60));
+        continue;
+      }
+      if (dirtyQuestionIdsRef.current.size === 0) return true;
+      const result = await flushSave();
+      if (result === "error" || result === "conflict") return false;
+      if (result === "busy") {
+        await new Promise((resolve) => setTimeout(resolve, 60));
+      }
+    }
+    return dirtyQuestionIdsRef.current.size === 0;
   }
 
   function scheduleSave() {
@@ -365,19 +386,24 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     window.location.href = "/client";
   }
 
-  function onPrimaryAction() {
+  async function onPrimaryAction() {
     if (!adjacent.isLast && adjacent.nextId) {
       if (!validateCurrentSection()) return;
       goToSection(adjacent.nextId);
       return;
     }
-    void moveToReview();
+    if (!validateCurrentSection()) return;
+    const saved = await flushPendingSave();
+    if (!saved) return;
+    window.location.href = "/client/questionnaire/review";
   }
 
   async function moveToReview() {
+    const saved = await flushPendingSave();
+    if (!saved) return;
     const res = await fetch("/api/client/questionnaire/review", { method: "POST" });
     if (res.ok) {
-      window.location.href = "/client/questionnaire/review";
+      await load();
       return;
     }
     const json = (await res.json()) as {
@@ -392,12 +418,36 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     }
   }
 
-  async function reopen() {
-    const res = await fetch("/api/client/questionnaire/reopen", { method: "POST" });
-    if (res.ok) {
-      await load();
+  async function returnToEditing() {
+    const status = dataRef.current?.questionnaire.status;
+    if (status === "in_review") {
+      const res = await fetch("/api/client/questionnaire/reopen", { method: "POST" });
+      if (!res.ok) return;
     }
+    const fallbackId = orderedSections[orderedSections.length - 1]?.id;
+    const targetId =
+      orderedSections.find((section) => {
+        const progress = liveProgress?.sectionProgress[section.id];
+        return progress && progress.completed < progress.total;
+      })?.id ?? fallbackId;
+    if (targetId) {
+      window.location.href = `/client/questionnaire/${targetId}`;
+      return;
+    }
+    window.location.href = "/client/questionnaire";
   }
+
+  const reviewSections = useMemo(() => {
+    if (!data || !reviewMode) return [];
+    return buildReviewSections(
+      data.template.schema as never,
+      localAnswers,
+      locale as "en" | "ru",
+    );
+  }, [data, reviewMode, localAnswers, locale]);
+
+  const canSubmitFromReview =
+    data?.questionnaire.status === "draft" || data?.questionnaire.status === "not_started";
 
   if (loading) {
     return <div className={styles.page}><p>{t("loading")}</p></div>;
@@ -498,21 +548,32 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
 
         {reviewMode ? (
           <section className={styles.review}>
-            {buildReviewSections(data.template.schema as never, localAnswers, locale as "en" | "ru").map((section) => (
-              <article key={section.id} className={styles.card}>
-                <h2>{section.title}</h2>
-                {section.items.map((item) => (
-                  <div key={item.questionId} className={styles.answerRow}>
-                    <strong>{item.label}</strong>
-                    <span>{item.value}</span>
-                  </div>
-                ))}
+            <header className={styles.reviewHeader}>
+              <h2 className={styles.reviewTitle}>{t("reviewTitle")}</h2>
+              <p className={styles.reviewIntro}>{t("reviewIntro")}</p>
+            </header>
+            {reviewSections.map((section) => (
+              <article key={section.id} className={`${styles.card} ${styles.reviewSection}`}>
+                <h3 className={styles.reviewSectionTitle}>{section.title}</h3>
+                <dl className={styles.reviewList}>
+                  {section.items.map((item) => (
+                    <div key={item.questionId} className={styles.answerRow}>
+                      <dt>{item.label}</dt>
+                      <dd>{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
               </article>
             ))}
             <div className={styles.actions}>
-              <button type="button" className={styles.secondaryBtn} onClick={() => void reopen()}>
+              <button type="button" className={styles.secondaryBtn} onClick={() => void returnToEditing()}>
                 {t("reopen")}
               </button>
+              {canSubmitFromReview ? (
+                <button type="button" className={styles.primaryBtn} onClick={() => void moveToReview()}>
+                  {t("submitQuestionnaire")}
+                </button>
+              ) : null}
             </div>
           </section>
         ) : currentSection ? (
@@ -669,7 +730,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
               <button type="button" className={styles.secondaryBtn} onClick={onBack}>
                 {t("back")}
               </button>
-              <button type="button" className={styles.primaryBtn} onClick={onPrimaryAction}>
+              <button type="button" className={styles.primaryBtn} onClick={() => void onPrimaryAction()}>
                 {adjacent.isLast ? t("reviewQuestionnaire") : t("next")}
               </button>
             </div>

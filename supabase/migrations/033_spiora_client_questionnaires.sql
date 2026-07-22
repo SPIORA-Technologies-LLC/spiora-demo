@@ -280,7 +280,7 @@ declare
   "title": { "en": "Client questionnaire", "ru": "Анкета клиента" },
   "description": { "en": "Complete the information below. You can save and continue later.", "ru": "Заполните информацию ниже. Вы можете сохранить и продолжить позже." },
   "sections": [
-    { "id": "welcome", "order": 5, "title": { "en": "Welcome", "ru": "Добро пожаловать" }, "questions": [
+    { "id": "welcome", "order": 5, "title": { "en": "Welcome", "ru": "Добро пожаловать" }, "description": { "en": "Welcome to Spiora Client. Please complete all sections.", "ru": "Добро пожаловать в Spiora Client. Пожалуйста, заполните все разделы." }, "questions": [
       { "id": "welcome_heading", "type": "heading", "order": 10, "label": { "en": "Welcome to Spiora Client", "ru": "Добро пожаловать в Spiora Client" } },
       { "id": "welcome_info", "type": "information", "order": 20, "label": { "en": "Your answers are saved automatically. You can return anytime.", "ru": "Ответы сохраняются автоматически. Вы можете вернуться в любое время." } }
     ]},

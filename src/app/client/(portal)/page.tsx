@@ -16,12 +16,13 @@ export default async function ClientHomePage() {
   });
   const questionnaireStatus = questionnaire.ok
     ? t(`questionnaire.status.${questionnaire.data.questionnaire.status}` as never)
-    : t("questionnaire.status.not_started");
+    : t("questionnaire.status.unavailable");
   const questionnaireProgress = questionnaire.ok
     ? t("questionnaire.progressSummary", {
         percent: questionnaire.data.progress.percent,
       })
     : t("questionnaire.progressSummary", { percent: 0 });
+  const questionnaireUnavailable = !questionnaire.ok;
 
   return (
     <ClientPortalHome
@@ -31,6 +32,7 @@ export default async function ClientHomePage() {
       statusLabel={t("home.inviteAccepted")}
       questionnaireStatus={questionnaireStatus}
       questionnaireProgress={questionnaireProgress}
+      questionnaireUnavailable={questionnaireUnavailable}
       placeholders={{
         questionnaire: t("placeholders.questionnaire"),
         documents: t("placeholders.documents"),

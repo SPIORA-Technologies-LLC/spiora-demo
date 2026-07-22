@@ -12,6 +12,7 @@ type Props = {
   statusLabel: string;
   questionnaireStatus: string;
   questionnaireProgress: string;
+  questionnaireUnavailable?: boolean;
   placeholders: {
     questionnaire: string;
     documents: string;
@@ -27,6 +28,7 @@ export function ClientPortalHome({
   statusLabel,
   questionnaireStatus,
   questionnaireProgress,
+  questionnaireUnavailable = false,
   placeholders,
   logoutLabel,
 }: Props) {
@@ -68,7 +70,9 @@ export function ClientPortalHome({
             <h2>{t("nav.questionnaire")}</h2>
             <p>{questionnaireStatus}</p>
             <p>{questionnaireProgress}</p>
-            <a href="/client/questionnaire">{t("home.continueQuestionnaire")}</a>
+            {questionnaireUnavailable ? null : (
+              <a href="/client/questionnaire">{t("home.continueQuestionnaire")}</a>
+            )}
           </article>
           <article className={styles.placeholder}>
             <h2>{t("nav.documents")}</h2>

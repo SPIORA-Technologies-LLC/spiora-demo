@@ -2391,8 +2391,10 @@
         "in_review": "Ready for review",
         "submitted": "Submitted",
         "locked": "Locked",
-        "archived": "Archived"
-      }
+        "archived": "Archived",
+        "unavailable": "Temporarily unavailable"
+      },
+      "loadError": "Could not load questionnaire ({code}). Please try again later."
     },
     "invite": {
       "loading": "Checking invitation…",

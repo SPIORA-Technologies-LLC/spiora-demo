@@ -54,6 +54,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const t = useTranslations("clientPortal.questionnaire");
   const locale = useLocale() as "en" | "ru";
   const [data, setData] = useState<CurrentResponse | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<"idle" | "saving" | "saved" | "error" | "conflict">("idle");
   const [localAnswers, setLocalAnswers] = useState<Record<string, unknown>>({});
@@ -62,8 +63,23 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
 
   async function load() {
     setLoading(true);
+    setLoadError(null);
     const res = await fetch("/api/client/questionnaire", { cache: "no-store" });
-    const json = (await res.json()) as CurrentResponse;
+    const json = (await res.json()) as CurrentResponse & {
+      error?: { code?: string; message?: string };
+    };
+    if (!res.ok) {
+      setData(null);
+      setLoadError(json.error?.code ?? `HTTP_${res.status}`);
+      setLoading(false);
+      return;
+    }
+    if (!json.template?.schema?.sections) {
+      setData(null);
+      setLoadError("QUESTIONNAIRE_SCHEMA_INVALID");
+      setLoading(false);
+      return;
+    }
     setData(json);
     setLocalAnswers(json.questionnaire.answers ?? {});
     setLoading(false);
@@ -191,8 +207,19 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     }
   }
 
-  if (loading || !data) {
+  if (loading) {
     return <div className={styles.page}><p>{t("loading")}</p></div>;
+  }
+
+  if (loadError || !data) {
+    return (
+      <div className={styles.page}>
+        <p>{t("loadError", { code: loadError ?? "UNKNOWN" })}</p>
+        <p>
+          <a href="/client">{t("backHome")}</a>
+        </p>
+      </div>
+    );
   }
 
   return (

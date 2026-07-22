@@ -13,7 +13,14 @@ import {
   validateAnswersAgainstSchema,
 } from "./questionnaire-validation";
 import { calculateQuestionnaireProgress } from "./questionnaire-progress";
-import { hashQuestionnaireSchema } from "./questionnaire-schema";
+import {
+  GENERAL_CLIENT_ONBOARDING_SCHEMA,
+  GENERAL_CLIENT_ONBOARDING_TEMPLATE_KEY,
+} from "./questionnaire-demo-template";
+import {
+  GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+  hashQuestionnaireSchema,
+} from "./questionnaire-schema";
 
 export type QuestionnaireStore = {
   getPublishedVersionByTemplateKey(
@@ -87,8 +94,36 @@ function mapStatus(record: QuestionnaireRecord | null): QuestionnairePublicState
   return "draft";
 }
 
-function verifySchemaHash(version: TemplateVersionRecord): boolean {
-  return hashQuestionnaireSchema(version.schema) === version.schemaHash;
+/**
+ * When a published row's schema_hash matches the known demo constant, prefer the
+ * in-code canonical schema. SQL seed / jsonb drift can leave schema JSON out of
+ * sync with a repaired schema_hash (hash(schema) !== schema_hash).
+ */
+export function reconcilePublishedTemplateVersion(
+  version: TemplateVersionRecord,
+): TemplateVersionRecord {
+  const templateKey = version.schema?.templateKey;
+  if (
+    templateKey === GENERAL_CLIENT_ONBOARDING_TEMPLATE_KEY &&
+    version.schemaHash === GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH
+  ) {
+    return { ...version, schema: GENERAL_CLIENT_ONBOARDING_SCHEMA };
+  }
+  return version;
+}
+
+export function resolvePublishedTemplateVersion(
+  version: TemplateVersionRecord,
+): TemplateVersionRecord | null {
+  const reconciled = reconcilePublishedTemplateVersion(version);
+  try {
+    if (hashQuestionnaireSchema(reconciled.schema) !== reconciled.schemaHash) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+  return reconciled;
 }
 
 export async function getCurrentQuestionnaire(
@@ -107,11 +142,12 @@ export async function getCurrentQuestionnaire(
   if (!version || version.status !== "published") {
     return { ok: false, code: "QUESTIONNAIRE_NOT_AVAILABLE" };
   }
-  if (!verifySchemaHash(version)) {
+  const resolved = resolvePublishedTemplateVersion(version);
+  if (!resolved) {
     return { ok: false, code: "QUESTIONNAIRE_SCHEMA_INVALID" };
   }
   const answers = record?.answers ?? {};
-  const progress = calculateQuestionnaireProgress(version.schema, answers);
+  const progress = calculateQuestionnaireProgress(resolved.schema, answers);
 
   return {
     ok: true,
@@ -126,10 +162,10 @@ export async function getCurrentQuestionnaire(
         reviewedAt: record?.reviewedAt ?? null,
       },
       template: {
-        id: version.id,
-        version: version.version,
-        schema: version.schema,
-        schemaHash: version.schemaHash,
+        id: resolved.id,
+        version: resolved.version,
+        schema: resolved.schema,
+        schemaHash: resolved.schemaHash,
       },
       progress,
     },
@@ -164,7 +200,8 @@ export async function saveQuestionnaireDraft(
   if (!version || version.status !== "published") {
     return { ok: false, code: "QUESTIONNAIRE_NOT_AVAILABLE" };
   }
-  if (!verifySchemaHash(version)) {
+  const resolved = resolvePublishedTemplateVersion(version);
+  if (!resolved) {
     return { ok: false, code: "QUESTIONNAIRE_SCHEMA_INVALID" };
   }
 
@@ -173,11 +210,11 @@ export async function saveQuestionnaireDraft(
   }
 
   const existing = record?.answers ?? {};
-  const sanitized = applyAnswerOperations(version.schema, input.operations, existing);
+  const sanitized = applyAnswerOperations(resolved.schema, input.operations, existing);
   if (!sanitized.ok) return { ok: false, code: sanitized.code };
 
   const merged = sanitized.merged;
-  const typeErrors = validateAnswersAgainstSchema(version.schema, merged, input.locale);
+  const typeErrors = validateAnswersAgainstSchema(resolved.schema, merged, input.locale);
   if (typeErrors.some((e) => e.code === "QUESTIONNAIRE_FIELD_UNKNOWN" || e.code === "QUESTIONNAIRE_VALUE_INVALID")) {
     return { ok: false, code: "QUESTIONNAIRE_VALUE_INVALID", errors: typeErrors };
   }
@@ -192,7 +229,7 @@ export async function saveQuestionnaireDraft(
     const created = await store.createDraft({
       clientPortalUserId: ctx.portalUserId,
       invitationId: ctx.invitationId,
-      templateVersionId: version.id,
+      templateVersionId: resolved.id,
       answers: merged,
       startedAt: now,
     });
@@ -252,8 +289,20 @@ export async function validateQuestionnaireDraft(
       }],
     };
   }
+  const resolved = resolvePublishedTemplateVersion(version);
+  if (!resolved) {
+    return {
+      valid: false,
+      errors: [{
+        sectionId: "unknown",
+        questionId: "_schema",
+        code: "QUESTIONNAIRE_SCHEMA_INVALID",
+        message: "Questionnaire schema is invalid",
+      }],
+    };
+  }
   const answers = record?.answers ?? {};
-  const errors = validateAnswersAgainstSchema(version.schema, answers, locale);
+  const errors = validateAnswersAgainstSchema(resolved.schema, answers, locale);
   return { valid: errors.length === 0, errors };
 }
 
@@ -276,8 +325,10 @@ export async function moveQuestionnaireToReview(
 
   const version = await store.getPublishedVersionById(record.templateVersionId);
   if (!version) return { ok: false, code: "QUESTIONNAIRE_NOT_AVAILABLE" };
+  const resolved = resolvePublishedTemplateVersion(version);
+  if (!resolved) return { ok: false, code: "QUESTIONNAIRE_SCHEMA_INVALID" };
 
-  const errors = validateAnswersAgainstSchema(version.schema, record.answers, locale);
+  const errors = validateAnswersAgainstSchema(resolved.schema, record.answers, locale);
   if (errors.length > 0) {
     return { ok: false, code: "QUESTIONNAIRE_VALIDATION_FAILED", errors };
   }

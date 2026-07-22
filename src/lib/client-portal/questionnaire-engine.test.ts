@@ -5,7 +5,8 @@ import { validateSchemaStructure, hashQuestionnaireSchema } from "./questionnair
 import { calculateQuestionnaireProgress } from "./questionnaire-progress.ts";
 import { buildReviewSections, formatAnswerForReview } from "./questionnaire-review.ts";
 import { applyAnswerOperations, validateAnswersAgainstSchema, hasMeaningfulAnswers } from "./questionnaire-validation.ts";
-import { saveQuestionnaireDraft, moveQuestionnaireToReview, reopenQuestionnaireDraft } from "./questionnaire-service.ts";
+import { saveQuestionnaireDraft, moveQuestionnaireToReview, reopenQuestionnaireDraft, getCurrentQuestionnaire } from "./questionnaire-service.ts";
+import { GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH } from "./questionnaire-schema-hash.ts";
 
 describe("questionnaire schema", () => {
   it("accepts valid demo schema", () => {
@@ -267,5 +268,106 @@ describe("questionnaire draft lifecycle", () => {
       },
     );
     assert.equal(second.ok, true);
+  });
+
+  it("reconciles drifted DB schema when stored hash matches published constant", async () => {
+    const drifted = structuredClone(GENERAL_CLIENT_ONBOARDING_SCHEMA);
+    delete drifted.sections[0].description;
+    assert.notEqual(
+      hashQuestionnaireSchema(drifted),
+      GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+    );
+
+    const version = {
+      id: "v-drift",
+      templateId: "t1",
+      version: 1,
+      schema: drifted,
+      schemaHash: GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+      status: "published" as const,
+      publishedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    const store = {
+      async getPublishedVersionByTemplateKey(templateKey: string) {
+        return templateKey === "general_client_onboarding" ? version : null;
+      },
+      async getPublishedVersionById() {
+        return version;
+      },
+      async getByInvitationId() {
+        return null;
+      },
+      async getById() {
+        return null;
+      },
+      async createDraft() {
+        throw new Error("not used");
+      },
+      async updateDraft() {
+        throw new Error("not used");
+      },
+      async setStatus() {
+        throw new Error("not used");
+      },
+    };
+
+    const result = await getCurrentQuestionnaire(ctx, store as any);
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(
+        result.data.template.schemaHash,
+        GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+      );
+      assert.deepEqual(
+        result.data.template.schema.sections[0].description,
+        GENERAL_CLIENT_ONBOARDING_SCHEMA.sections[0].description,
+      );
+      assert.equal(result.data.questionnaire.status, "not_started");
+    }
+  });
+
+  it("rejects drifted schema when stored hash does not match published constant", async () => {
+    const drifted = structuredClone(GENERAL_CLIENT_ONBOARDING_SCHEMA);
+    delete drifted.sections[0].description;
+    const version = {
+      id: "v-bad",
+      templateId: "t1",
+      version: 1,
+      schema: drifted,
+      schemaHash: hashQuestionnaireSchema(drifted),
+      status: "published" as const,
+      publishedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    // Corrupt the stored hash so integrity check must fail without known-constant reconcile.
+    version.schemaHash = "0".repeat(64);
+    const store = {
+      async getPublishedVersionByTemplateKey() {
+        return version;
+      },
+      async getPublishedVersionById() {
+        return version;
+      },
+      async getByInvitationId() {
+        return null;
+      },
+      async getById() {
+        return null;
+      },
+      async createDraft() {
+        throw new Error("not used");
+      },
+      async updateDraft() {
+        throw new Error("not used");
+      },
+      async setStatus() {
+        throw new Error("not used");
+      },
+    };
+
+    const result = await getCurrentQuestionnaire(ctx, store as any);
+    assert.equal(result.ok, false);
+    if (!result.ok) assert.equal(result.code, "QUESTIONNAIRE_SCHEMA_INVALID");
   });
 });

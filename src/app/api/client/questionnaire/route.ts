@@ -19,11 +19,18 @@ export async function GET() {
   });
 
   if (!result.ok) {
+    const status =
+      result.code === "QUESTIONNAIRE_NOT_AVAILABLE"
+        ? 404
+        : result.code === "QUESTIONNAIRE_SCHEMA_INVALID"
+          ? 503
+          : 500;
     return clientApiError(
       result.code as
         | "QUESTIONNAIRE_NOT_AVAILABLE"
-        | "QUESTIONNAIRE_SCHEMA_INVALID",
-      result.code === "QUESTIONNAIRE_NOT_AVAILABLE" ? 404 : 500,
+        | "QUESTIONNAIRE_SCHEMA_INVALID"
+        | "INTERNAL",
+      status,
     );
   }
 
@@ -70,7 +77,9 @@ export async function PATCH(request: Request) {
         ? 409
         : result.code === "QUESTIONNAIRE_NOT_AVAILABLE"
           ? 404
-          : 400;
+          : result.code === "QUESTIONNAIRE_SCHEMA_INVALID"
+            ? 503
+            : 400;
     return clientApiError(
       result.code as
         | "QUESTIONNAIRE_NOT_AVAILABLE"

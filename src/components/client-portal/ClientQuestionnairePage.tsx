@@ -14,6 +14,10 @@ import {
   getSectionNavState,
   validateSectionRequiredFields,
 } from "@/lib/client-portal/questionnaire-nav";
+import {
+  applyLocalAnswerOperation,
+  type AnswerPatchOperation,
+} from "@/lib/client-portal/questionnaire-answer-buffer";
 
 type SchemaSection = {
   id: string;
@@ -80,6 +84,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [errors, setErrors] = useState<Array<{ sectionId: string; questionId: string; message: string }>>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<CurrentResponse | null>(null);
+  const localAnswersRef = useRef<Record<string, unknown>>({});
+  const dirtyQuestionIdsRef = useRef<Set<string>>(new Set());
+  const saveInFlightRef = useRef(false);
+  const saveAgainRef = useRef(false);
   const sectionTitleRef = useRef<HTMLHeadingElement | null>(null);
 
   async function load() {
@@ -107,7 +115,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     }
     setData(json);
     dataRef.current = json;
-    setLocalAnswers(json.questionnaire.answers ?? {});
+    const answers = json.questionnaire.answers ?? {};
+    localAnswersRef.current = answers;
+    dirtyQuestionIdsRef.current.clear();
+    setLocalAnswers(answers);
     setSaving(initialQuestionnaireSaveState(json.questionnaire));
     setSaveErrorCode(null);
     setLoading(false);
@@ -166,72 +177,114 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     }
   }, [currentSectionId, reviewMode, loading, currentSection]);
 
-  async function flushSave(operations: Array<{ op: "set" | "clear"; questionId: string; value?: unknown }>, nextLocal?: Record<string, unknown>) {
+  async function flushSave() {
     const current = dataRef.current;
     if (!current) return;
-    const answerableOps = operations.filter((operation) => {
-      const question = current.template.schema.sections
-        .flatMap((section) => section.questions)
-        .find((item) => item.id === operation.questionId);
-      return question && !DISPLAY_ONLY_TYPES.has(question.type as never);
-    });
-    if (answerableOps.length === 0) {
+
+    if (saveInFlightRef.current) {
+      saveAgainRef.current = true;
+      return;
+    }
+
+    const dirtyIds = [...dirtyQuestionIdsRef.current];
+    if (dirtyIds.length === 0) {
       setSaveErrorCode(null);
       return;
     }
+
+    const snapshot = localAnswersRef.current;
+    const operations: Array<{ op: "set" | "clear"; questionId: string; value?: unknown }> = [];
+    for (const questionId of dirtyIds) {
+      const question = current.template.schema.sections
+        .flatMap((section) => section.questions)
+        .find((item) => item.id === questionId);
+      if (!question || DISPLAY_ONLY_TYPES.has(question.type as never)) continue;
+      if (question.readOnly || question.derivedFrom) continue;
+      if (!(questionId in snapshot) || snapshot[questionId] === "" || snapshot[questionId] === null || snapshot[questionId] === undefined) {
+        operations.push({ op: "clear", questionId });
+      } else {
+        operations.push({ op: "set", questionId, value: snapshot[questionId] });
+      }
+    }
+
+    if (operations.length === 0) {
+      dirtyQuestionIdsRef.current.clear();
+      setSaveErrorCode(null);
+      return;
+    }
+
+    // Clear dirty set for the fields we're sending; re-dirty if user edits during flight.
+    for (const op of operations) {
+      dirtyQuestionIdsRef.current.delete(op.questionId);
+    }
+
+    saveInFlightRef.current = true;
     setSaving("saving");
     setSaveErrorCode(null);
-    const res = await fetch("/api/client/questionnaire", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        baseRevision: current.questionnaire.revision,
-        operations: answerableOps,
-      }),
-    });
-    if (res.status === 409) {
-      setSaving("conflict");
-      return;
+    try {
+      const res = await fetch("/api/client/questionnaire", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          baseRevision: current.questionnaire.revision,
+          operations,
+        }),
+      });
+      if (res.status === 409) {
+        for (const op of operations) {
+          dirtyQuestionIdsRef.current.add(op.questionId);
+        }
+        setSaving("conflict");
+        return;
+      }
+      if (!res.ok) {
+        const errJson = (await res.json().catch(() => null)) as {
+          error?: { code?: string };
+        } | null;
+        // Re-queue failed fields so a later edit/save can retry.
+        for (const op of operations) {
+          dirtyQuestionIdsRef.current.add(op.questionId);
+        }
+        setSaveErrorCode(errJson?.error?.code ?? `HTTP_${res.status}`);
+        setSaving("error");
+        return;
+      }
+      const json = (await res.json()) as {
+        revision: number;
+        answers: Record<string, unknown>;
+        lastSavedAt: string;
+      };
+      // Keep typing buffer intact — never clobber localAnswers with a save snapshot.
+      const nextData: CurrentResponse = {
+        ...current,
+        questionnaire: {
+          ...current.questionnaire,
+          id: current.questionnaire.id ?? "created",
+          revision: json.revision,
+          answers: {
+            ...json.answers,
+            ...localAnswersRef.current,
+          },
+          lastSavedAt: json.lastSavedAt,
+          status: current.questionnaire.status === "not_started" ? "draft" : current.questionnaire.status,
+        },
+      };
+      dataRef.current = nextData;
+      setData(nextData);
+      setSaving("saved");
+    } finally {
+      saveInFlightRef.current = false;
+      if (saveAgainRef.current || dirtyQuestionIdsRef.current.size > 0) {
+        saveAgainRef.current = false;
+        scheduleSave();
+      }
     }
-    if (!res.ok) {
-      const errJson = (await res.json().catch(() => null)) as {
-        error?: { code?: string };
-      } | null;
-      setSaveErrorCode(errJson?.error?.code ?? `HTTP_${res.status}`);
-      setSaving("error");
-      return;
-    }
-    const json = (await res.json()) as {
-      revision: number;
-      answers: Record<string, unknown>;
-      lastSavedAt: string;
-    };
-    const nextData: CurrentResponse = {
-      ...current,
-      questionnaire: {
-        ...current.questionnaire,
-        id: current.questionnaire.id ?? "created",
-        revision: json.revision,
-        answers: json.answers,
-        lastSavedAt: json.lastSavedAt,
-        status: current.questionnaire.status === "not_started" ? "draft" : current.questionnaire.status,
-      },
-    };
-    dataRef.current = nextData;
-    setData(nextData);
-    if (nextLocal) {
-      setLocalAnswers(nextLocal);
-    }
-    setSaving("saved");
   }
 
-  function scheduleSave(
-    operations: Array<{ op: "set" | "clear"; questionId: string; value?: unknown }>,
-    nextLocal: Record<string, unknown>,
-  ) {
+  function scheduleSave() {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      void flushSave(operations, nextLocal);
+      void flushSave();
     }, 700);
   }
 
@@ -239,7 +292,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     questionType: string,
     questionId: string,
     rawValue: unknown,
-  ): { op: "set" | "clear"; questionId: string; value?: unknown } {
+  ): AnswerPatchOperation {
     if (questionType === "boolean") {
       return { op: "set", questionId, value: Boolean(rawValue) };
     }
@@ -255,12 +308,13 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   function onAnswer(questionId: string, questionType: string, value: unknown) {
     if (DISPLAY_ONLY_TYPES.has(questionType as never)) return;
     const operation = opForValue(questionType, questionId, value);
-    const next =
-      operation.op === "clear"
-        ? Object.fromEntries(Object.entries(localAnswers).filter(([k]) => k !== questionId))
-        : { ...localAnswers, [questionId]: operation.value };
-    setLocalAnswers(next);
-    scheduleSave([operation], next);
+    setLocalAnswers((prev) => {
+      const next = applyLocalAnswerOperation(prev, operation);
+      localAnswersRef.current = next;
+      dirtyQuestionIdsRef.current.add(questionId);
+      scheduleSave();
+      return next;
+    });
   }
 
   function focusFirstInvalid(questionId: string) {

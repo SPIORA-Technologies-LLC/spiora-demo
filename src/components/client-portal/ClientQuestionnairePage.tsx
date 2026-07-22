@@ -24,6 +24,7 @@ type SchemaSection = {
   id: string;
   order?: number;
   title: { en: string; ru: string };
+  description?: { en: string; ru: string };
   questions: Array<{
     id: string;
     type: string;
@@ -88,6 +89,31 @@ function currencyOptionSymbol(value: string): string {
   }
 }
 
+function asFileAnswer(
+  value: unknown,
+): { id: string; fileName: string; mimeType: string; sizeBytes: number } | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const rec = value as Record<string, unknown>;
+  if (typeof rec.id !== "string" || !rec.id || typeof rec.fileName !== "string" || !rec.fileName) {
+    return null;
+  }
+  return {
+    id: rec.id,
+    fileName: rec.fileName,
+    mimeType: typeof rec.mimeType === "string" ? rec.mimeType : "",
+    sizeBytes: typeof rec.sizeBytes === "number" ? rec.sizeBytes : 0,
+  };
+}
+
+function formatFileSize(bytes: number, locale: "en" | "ru"): string {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) {
+    return `${(bytes / 1024).toFixed(1)} ${locale === "ru" ? "КБ" : "KB"}`;
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} ${locale === "ru" ? "МБ" : "MB"}`;
+}
+
 export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props) {
   const t = useTranslations("clientPortal.questionnaire");
   const locale = useLocale() as "en" | "ru";
@@ -98,6 +124,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [saveErrorCode, setSaveErrorCode] = useState<string | null>(null);
   const [localAnswers, setLocalAnswers] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Array<{ sectionId: string; questionId: string; message: string }>>([]);
+  const [uploadingById, setUploadingById] = useState<Record<string, boolean>>({});
+  const [uploadErrorById, setUploadErrorById] = useState<Record<string, string>>({});
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<CurrentResponse | null>(null);
   const localAnswersRef = useRef<Record<string, unknown>>({});
@@ -352,6 +380,64 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       scheduleSave();
       return next;
     });
+  }
+
+  async function onUploadFile(questionId: string, file: File) {
+    setUploadErrorById((prev) => ({ ...prev, [questionId]: "" }));
+    setUploadingById((prev) => ({ ...prev, [questionId]: true }));
+    try {
+      const body = new FormData();
+      body.set("questionId", questionId);
+      body.set("file", file);
+      const res = await fetch("/api/client/questionnaire/attachments", {
+        method: "POST",
+        body,
+      });
+      const json = (await res.json().catch(() => null)) as {
+        attachment?: {
+          id: string;
+          fileName: string;
+          mimeType: string;
+          sizeBytes: number;
+        };
+        error?: { code?: string; message?: string };
+      } | null;
+      if (!res.ok || !json?.attachment) {
+        const code = json?.error?.code;
+        const message =
+          code === "FILE_TOO_LARGE"
+            ? t("fileTooLarge")
+            : code === "UNSUPPORTED_FILE_TYPE"
+              ? t("fileUnsupported")
+              : t("fileUploadError");
+        setUploadErrorById((prev) => ({ ...prev, [questionId]: message }));
+        return;
+      }
+      onAnswer(questionId, "file", {
+        id: json.attachment.id,
+        fileName: json.attachment.fileName,
+        mimeType: json.attachment.mimeType,
+        sizeBytes: json.attachment.sizeBytes,
+      });
+    } catch {
+      setUploadErrorById((prev) => ({ ...prev, [questionId]: t("fileUploadError") }));
+    } finally {
+      setUploadingById((prev) => ({ ...prev, [questionId]: false }));
+    }
+  }
+
+  async function onRemoveFile(questionId: string) {
+    const current = asFileAnswer(localAnswersRef.current[questionId]);
+    onAnswer(questionId, "file", null);
+    setUploadErrorById((prev) => ({ ...prev, [questionId]: "" }));
+    if (!current?.id) return;
+    try {
+      await fetch(`/api/client/questionnaire/attachments/${encodeURIComponent(current.id)}`, {
+        method: "DELETE",
+      });
+    } catch {
+      // Local clear already applied; orphan cleanup is best-effort.
+    }
   }
 
   function focusFirstInvalid(questionId: string) {
@@ -614,6 +700,9 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
             >
               {currentSection.title[locale]}
             </h2>
+            {currentSection.description ? (
+              <p className={styles.displayDescription}>{currentSection.description[locale]}</p>
+            ) : null}
             {currentSection.questions
               .filter((q) => !q.visibleWhen || isQuestionVisible(q as never, localAnswers))
               .map((q) =>
@@ -632,8 +721,13 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                   ) : null}
                 </div>
               ) : (
-              <label key={q.id} className={styles.field}>
-                <span>{q.label[locale]}{q.required ? " *" : ""}</span>
+              <div key={q.id} className={styles.field}>
+                <label htmlFor={`question-${q.id}`}>
+                  {q.label[locale]}{q.required ? " *" : ""}
+                </label>
+                {q.description && q.type !== "file" ? (
+                  <p className={styles.displayDescription}>{q.description[locale]}</p>
+                ) : null}
                 {q.type === "textarea" ? (
                   <textarea
                     id={`question-${q.id}`}
@@ -697,6 +791,62 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                       </option>
                     ))}
                   </select>
+                ) : q.type === "file" ? (
+                  <div className={styles.fileField}>
+                    {q.description ? (
+                      <p className={styles.displayDescription}>{q.description[locale]}</p>
+                    ) : null}
+                    {(() => {
+                      const fileAnswer = asFileAnswer(localAnswers[q.id]);
+                      const uploading = Boolean(uploadingById[q.id]);
+                      if (fileAnswer) {
+                        return (
+                          <div className={styles.fileAttached}>
+                            <a
+                              className={styles.fileLink}
+                              href={`/api/client/questionnaire/attachments/${encodeURIComponent(fileAnswer.id)}`}
+                            >
+                              {fileAnswer.fileName}
+                            </a>
+                            <span className={styles.fileMeta}>
+                              {formatFileSize(fileAnswer.sizeBytes, locale)}
+                            </span>
+                            {!q.readOnly && data.questionnaire.status !== "in_review" ? (
+                              <button
+                                type="button"
+                                className={styles.fileRemoveBtn}
+                                onClick={() => void onRemoveFile(q.id)}
+                              >
+                                {t("fileRemove")}
+                              </button>
+                            ) : null}
+                          </div>
+                        );
+                      }
+                      return (
+                        <>
+                          <input
+                            id={`question-${q.id}`}
+                            type="file"
+                            className={styles.fileInput}
+                            disabled={Boolean(q.readOnly) || uploading || data.questionnaire.status === "in_review"}
+                            accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.doc,.docx,.xls,.xlsx,application/pdf,image/*"
+                            aria-invalid={errors.some((err) => err.questionId === q.id)}
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              e.target.value = "";
+                              if (file) void onUploadFile(q.id, file);
+                            }}
+                          />
+                          <p className={styles.fileHint}>{t("fileHint")}</p>
+                          {uploading ? <p className={styles.fileMeta}>{t("fileUploading")}</p> : null}
+                        </>
+                      );
+                    })()}
+                    {uploadErrorById[q.id] ? (
+                      <span className={styles.errorText}>{uploadErrorById[q.id]}</span>
+                    ) : null}
+                  </div>
                 ) : q.type === "boolean" ? (
                   <input
                     id={`question-${q.id}`}
@@ -752,7 +902,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     {errors.find((err) => err.questionId === q.id)?.message}
                   </span>
                 ) : null}
-              </label>
+              </div>
               ))}
             <div className={styles.actions}>
               <button type="button" className={styles.secondaryBtn} onClick={onBack}>

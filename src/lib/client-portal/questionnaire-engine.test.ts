@@ -21,7 +21,7 @@ describe("questionnaire schema", () => {
     assert.equal(a.length, 64);
     assert.equal(
       a,
-      "5787bdf22ecd22b6bb0a8dd9261279946b60173af2486c4e630b3620c2d49451",
+      "33eabda0ac9cb6f7a0940f615f1fd6d55f1880e1891ee6bb80e6689dc5d4d1ca",
     );
   });
 });

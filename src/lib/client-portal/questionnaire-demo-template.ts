@@ -274,6 +274,78 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
       ],
     },
     {
+      id: "document_copies",
+      order: 65,
+      title: { en: "Document copies", ru: "Копии документов" },
+      description: {
+        en: "Attach scans or photos of supporting documents. PDF and images are preferred.",
+        ru: "Прикрепите сканы или фото документов. Предпочтительны PDF и изображения.",
+      },
+      questions: [
+        {
+          id: "documents_intro",
+          type: "information",
+          order: 5,
+          label: {
+            en: "Please upload copies where available: passport biodata page, employment contract, and a recent bank statement.",
+            ru: "По возможности загрузите копии: разворот паспорта, трудовой договор и свежую банковскую выписку.",
+          },
+        },
+        {
+          id: "doc_passport_page",
+          type: "file",
+          order: 10,
+          label: {
+            en: "Passport biodata page",
+            ru: "Первая страница / разворот паспорта",
+          },
+          description: {
+            en: "PDF or photo of the passport page with your photo and personal data.",
+            ru: "PDF или фото страницы паспорта с фото и личными данными.",
+          },
+        },
+        {
+          id: "doc_employment_contract",
+          type: "file",
+          order: 20,
+          label: {
+            en: "Employment contract",
+            ru: "Трудовой / рабочий контракт",
+          },
+          description: {
+            en: "PDF or photo of your current employment or service contract.",
+            ru: "PDF или фото действующего трудового или сервисного договора.",
+          },
+        },
+        {
+          id: "doc_bank_statement",
+          type: "file",
+          order: 30,
+          label: {
+            en: "Bank statement",
+            ru: "Выписка из банковского счёта",
+          },
+          description: {
+            en: "A recent account statement (PDF or clear photo).",
+            ru: "Недавняя выписка по счёту (PDF или чёткое фото).",
+          },
+        },
+        {
+          id: "doc_other",
+          type: "file",
+          order: 40,
+          label: {
+            en: "Other supporting document",
+            ru: "Другой подтверждающий документ",
+          },
+          description: {
+            en: "Optional: any other PDF, photo, or Office file that helps your case.",
+            ru: "По желанию: любой другой PDF, фото или файл Office по вашему делу.",
+          },
+        },
+      ],
+    },
+    {
       id: "additional_information",
       order: 70,
       title: { en: "Additional information", ru: "Дополнительные сведения" },

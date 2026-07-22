@@ -17,6 +17,7 @@ import {
 } from "./questionnaire-empty-values";
 import { flattenQuestions } from "./questionnaire-schema";
 import { isQuestionVisible } from "./questionnaire-visibility";
+import { isQuestionnaireFileAnswer } from "./questionnaire-attachment-formats";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+]?[\d\s()-]{6,20}$/;
@@ -206,6 +207,15 @@ function validateValueType(
     case "boolean": {
       if (typeof value !== "boolean") {
         return { code: "QUESTIONNAIRE_VALUE_INVALID", message: `${label} must be boolean` };
+      }
+      return null;
+    }
+    case "file": {
+      if (!isQuestionnaireFileAnswer(value)) {
+        return { code: "QUESTIONNAIRE_VALUE_INVALID", message: `${label} must be a file attachment` };
+      }
+      if (value.fileName.length > 255) {
+        return { code: "MAX_LENGTH", message: `${label} file name is too long` };
       }
       return null;
     }

@@ -2391,6 +2391,12 @@
       "navCompleted": "Completed section",
       "navIncomplete": "Incomplete section",
       "readOnlyFromAccount": "Taken from your account and cannot be edited",
+      "fileHint": "PDF, photo (JPG/PNG/WebP), or Word/Excel — up to 15 MB",
+      "fileUploading": "Uploading file…",
+      "fileRemove": "Remove",
+      "fileTooLarge": "File is too large (15 MB max)",
+      "fileUnsupported": "This file type is not supported",
+      "fileUploadError": "Could not upload the file",
       "save": {
         "idle": "Not saved yet",
         "saving": "Saving…",

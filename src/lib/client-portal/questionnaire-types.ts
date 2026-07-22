@@ -15,8 +15,17 @@ export type QuestionType =
   | "checkbox"
   | "boolean"
   | "country"
+  | "file"
   | "heading"
   | "information";
+
+/** Persisted answer for `file` questions (binary stored separately). */
+export type QuestionnaireFileAnswer = {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  sizeBytes: number;
+};
 
 export type VisibilityOperator =
   | "equals"
@@ -173,4 +182,5 @@ export const ANSWERABLE_TYPES: ReadonlySet<QuestionType> = new Set([
   "checkbox",
   "boolean",
   "country",
+  "file",
 ]);

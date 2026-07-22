@@ -16,6 +16,17 @@ export function isEmptyAnswer(value: unknown): boolean {
   if (value === null || value === undefined) return true;
   if (typeof value === "string" && value.trim() === "") return true;
   if (Array.isArray(value) && value.length === 0) return true;
+  if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+    const rec = value as Record<string, unknown>;
+    if ("fileName" in rec || "mimeType" in rec || "sizeBytes" in rec || "id" in rec) {
+      return (
+        typeof rec.id !== "string" ||
+        rec.id.length === 0 ||
+        typeof rec.fileName !== "string" ||
+        rec.fileName.length === 0
+      );
+    }
+  }
   return false;
 }
 

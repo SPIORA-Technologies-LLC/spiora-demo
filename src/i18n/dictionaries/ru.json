@@ -2389,6 +2389,12 @@
       "navCompleted": "Заполненный раздел",
       "navIncomplete": "Незаполненный раздел",
       "readOnlyFromAccount": "Взято из аккаунта, изменить нельзя",
+      "fileHint": "PDF, фото (JPG/PNG/WebP) или Word/Excel — до 15 МБ",
+      "fileUploading": "Загрузка файла…",
+      "fileRemove": "Удалить",
+      "fileTooLarge": "Файл слишком большой (максимум 15 МБ)",
+      "fileUnsupported": "Этот формат не поддерживается",
+      "fileUploadError": "Не удалось загрузить файл",
       "save": {
         "idle": "Ещё не сохранено",
         "saving": "Сохранение…",

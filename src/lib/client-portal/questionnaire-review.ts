@@ -1,6 +1,7 @@
 import type { QuestionDefinition, QuestionnaireAnswers } from "./questionnaire-types";
 import { DISPLAY_ONLY_TYPES } from "./questionnaire-types";
 import { isQuestionVisible } from "./questionnaire-visibility";
+import { isQuestionnaireFileAnswer } from "./questionnaire-attachment-formats";
 
 type ReviewQuestion = {
   id: string;
@@ -50,6 +51,10 @@ export function formatAnswerForReview(
   }
   if (question.type === "country" && typeof value === "string") {
     return countryLabel(value, locale);
+  }
+  if (question.type === "file") {
+    if (isQuestionnaireFileAnswer(value)) return value.fileName;
+    return "—";
   }
   if (typeof value === "string" || typeof value === "number") {
     return String(value);

@@ -34,6 +34,9 @@ export type ClientApiErrorCode =
   | "QUESTIONNAIRE_ACCESS_DENIED"
   | "QUESTIONNAIRE_ALREADY_IN_REVIEW"
   | "QUESTIONNAIRE_NOT_IN_REVIEW"
+  | "QUESTIONNAIRE_ALREADY_SUBMITTED"
+  | "INVALID_STATUS"
+  | "CASE_NOT_FOUND"
   | "INTERNAL";
 
 const MESSAGES: Record<ClientApiErrorCode, string> = {
@@ -70,6 +73,9 @@ const MESSAGES: Record<ClientApiErrorCode, string> = {
   QUESTIONNAIRE_ACCESS_DENIED: "Questionnaire access denied",
   QUESTIONNAIRE_ALREADY_IN_REVIEW: "Questionnaire is already in review",
   QUESTIONNAIRE_NOT_IN_REVIEW: "Questionnaire is not in review",
+  QUESTIONNAIRE_ALREADY_SUBMITTED: "Questionnaire is already submitted",
+  INVALID_STATUS: "Invalid case status",
+  CASE_NOT_FOUND: "Case not found",
   INTERNAL: "Something went wrong",
 };
 

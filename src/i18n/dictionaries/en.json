@@ -5,6 +5,7 @@
   "nav": {
     "dashboard": "Command Center",
     "clients": "Clients",
+    "clientIntake": "Questionnaire intake",
     "tasks": "Tasks",
     "calendar": "Calendar",
     "teamChat": "Team Chat",
@@ -2355,8 +2356,24 @@
     "home": {
       "title": "Welcome to Spiora Client",
       "inviteAccepted": "Invitation accepted",
+      "applicationReceived": "Application received",
+      "applicationStatus": "Application status",
       "hint": "Your secure client area. Complete your questionnaire and continue later at any time.",
-      "continueQuestionnaire": "Continue questionnaire"
+      "continueQuestionnaire": "Continue questionnaire",
+      "viewApplicationStatus": "View application status"
+    },
+    "process": {
+      "title": "Process status",
+      "nextStep": "Next step",
+      "history": "History"
+    },
+    "thankYou": {
+      "title": "Thank you!",
+      "body": "Your application and questionnaire were received successfully. Our specialist will start reviewing your case.",
+      "currentStatus": "Current status",
+      "submittedAt": "Submitted on",
+      "next": "You can return to the portal anytime to check your status.",
+      "backHome": "Back to portal"
     },
     "nav": {
       "questionnaire": "Questionnaire",
@@ -2380,6 +2397,7 @@
       "next": "Next →",
       "reviewQuestionnaire": "Review questionnaire",
       "submitQuestionnaire": "Submit questionnaire",
+      "viewSubmission": "View submission",
       "review": "Review questionnaire",
       "reviewTitle": "Questionnaire review",
       "reviewIntro": "Below are all of your answers. Review them, then submit or return to editing.",
@@ -2465,6 +2483,67 @@
       "authUnavailable": "Client authentication is not configured.",
       "authFailed": "Invalid email or password.",
       "notClient": "This account is not a Spiora Client portal user."
+    }
+  },
+  "clientIntake": {
+    "title": "New questionnaire clients",
+    "subtitle": "Applications submitted from the client portal.",
+    "searchPlaceholder": "Search by name, email, service…",
+    "loading": "Loading applications…",
+    "loadFailed": "Failed to load applications",
+    "empty": "No submitted applications yet",
+    "columns": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "service": "Service",
+      "submittedAt": "Submitted",
+      "assignee": "Assignee",
+      "status": "Status"
+    },
+    "detail": {
+      "sectionTitle": "Client application",
+      "subtitle": "Full case card from questionnaire submission",
+      "back": "Back to intake",
+      "loading": "Loading case…",
+      "notFound": "Case not found",
+      "commentFailed": "Could not add comment",
+      "statusFailed": "Could not update status",
+      "statusSaved": "Status updated",
+      "uploadFailed": "Could not upload document",
+      "tabs": {
+        "overview": "Overview",
+        "questionnaire": "Questionnaire",
+        "documents": "Documents",
+        "comments": "Comments",
+        "status": "Status",
+        "history": "History"
+      },
+      "fields": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "phone": "Phone",
+        "service": "Service",
+        "assignee": "Assignee",
+        "submittedAt": "Submitted",
+        "status": "Status"
+      },
+      "documents": {
+        "client": "Client documents",
+        "employee": "Employee documents",
+        "empty": "No client documents",
+        "upload": "Upload document",
+        "download": "Download"
+      },
+      "comments": {
+        "placeholder": "Internal comment (not visible to client)",
+        "add": "Add comment"
+      },
+      "status": {
+        "label": "Case status",
+        "save": "Save status"
+      }
     }
   },
   "errors": {

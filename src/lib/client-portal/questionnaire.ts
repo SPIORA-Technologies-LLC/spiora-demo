@@ -15,6 +15,7 @@ import {
   saveQuestionnaireDraft,
   validateQuestionnaireDraft,
 } from "./questionnaire-service";
+import { submitQuestionnaireAndCreateCase } from "./case-service";
 
 async function getStore() {
   if (isSupabaseConfigured()) {
@@ -86,5 +87,21 @@ export async function reopenClientQuestionnaireDraft(
   return reopenQuestionnaireDraft(
     { ...ctx, templateKey: await resolveInvitationTemplateKey(ctx.invitationId) },
     await getStore(),
+  );
+}
+
+export async function submitClientQuestionnaire(
+  ctx: ClientQuestionnaireContext,
+  locale: "en" | "ru",
+) {
+  const invitation = isSupabaseConfigured()
+    ? await sbGetInvitationById(ctx.invitationId)
+    : await localFindInvitationById(ctx.invitationId);
+  const assignedTo = invitation?.assignedTo ?? null;
+
+  return submitQuestionnaireAndCreateCase(
+    { ...ctx, templateKey: await resolveInvitationTemplateKey(ctx.invitationId) },
+    locale,
+    assignedTo,
   );
 }

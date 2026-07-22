@@ -4,6 +4,7 @@ import type {
   QuestionnaireAnswers,
   QuestionnairePublicState,
   QuestionnaireRecord,
+  QuestionnaireSchema,
   TemplateVersionRecord,
   ValidationErrorItem,
 } from "./questionnaire-types";
@@ -54,6 +55,7 @@ export type QuestionnaireStore = {
     baseRevision: number;
     status: ClientQuestionnaireStatus;
     reviewedAt?: string | null;
+    submittedAt?: string | null;
   }): Promise<
     | { ok: true; record: QuestionnaireRecord }
     | { ok: false; code: "QUESTIONNAIRE_REVISION_CONFLICT" }
@@ -76,6 +78,7 @@ export type CurrentQuestionnaireDto = {
     startedAt: string | null;
     lastSavedAt: string | null;
     reviewedAt: string | null;
+    submittedAt: string | null;
   };
   template: {
     id: string;
@@ -175,6 +178,7 @@ export async function getCurrentQuestionnaire(
         startedAt: record?.startedAt ?? null,
         lastSavedAt: record?.lastSavedAt ?? null,
         reviewedAt: record?.reviewedAt ?? null,
+        submittedAt: record?.submittedAt ?? null,
       },
       template: {
         id: resolved.id,
@@ -373,6 +377,9 @@ export async function reopenQuestionnaireDraft(
   const record = await store.getByInvitationId(ctx.invitationId);
   if (!record) return { ok: false, code: "QUESTIONNAIRE_NOT_AVAILABLE" };
   if (record.status === "draft") return { ok: true, record };
+  if (record.status === "submitted" || record.status === "locked") {
+    return { ok: false, code: "QUESTIONNAIRE_ALREADY_SUBMITTED" };
+  }
   if (record.status !== "in_review") {
     return { ok: false, code: "QUESTIONNAIRE_NOT_IN_REVIEW" };
   }
@@ -385,6 +392,91 @@ export async function reopenQuestionnaireDraft(
   });
   if (!updated.ok) return { ok: false, code: updated.code };
   return { ok: true, record: updated.record };
+}
+
+/**
+ * Final client submission: validates answers server-side, marks questionnaire
+ * submitted (immutable), and returns the record for case creation.
+ * Prefer submitQuestionnaireAndCreateCase for production atomicity.
+ */
+export async function prepareQuestionnaireSubmission(
+  ctx: ClientQuestionnaireContext,
+  store: QuestionnaireStore,
+  locale: "en" | "ru",
+): Promise<
+  | {
+      ok: true;
+      record: QuestionnaireRecord;
+      alreadySubmitted: boolean;
+      schema: QuestionnaireSchema;
+    }
+  | { ok: false; code: string; errors?: ValidationErrorItem[] }
+> {
+  const record = await store.getByInvitationId(ctx.invitationId);
+  if (!record) return { ok: false, code: "QUESTIONNAIRE_NOT_AVAILABLE" };
+  if (!assertQuestionnaireOwnership(record, ctx)) {
+    return { ok: false, code: "QUESTIONNAIRE_ACCESS_DENIED" };
+  }
+  if (record.status === "submitted" || record.status === "locked") {
+    const version = await store.getPublishedVersionById(record.templateVersionId);
+    const resolved = version ? resolvePublishedTemplateVersion(version) : null;
+    if (!resolved) return { ok: false, code: "QUESTIONNAIRE_SCHEMA_INVALID" };
+    return {
+      ok: true,
+      record,
+      alreadySubmitted: true,
+      schema: resolved.schema,
+    };
+  }
+  if (record.status !== "draft" && record.status !== "in_review") {
+    return { ok: false, code: "QUESTIONNAIRE_READ_ONLY" };
+  }
+
+  const version = await store.getPublishedVersionById(record.templateVersionId);
+  if (!version) return { ok: false, code: "QUESTIONNAIRE_NOT_AVAILABLE" };
+  const resolved = resolvePublishedTemplateVersion(version);
+  if (!resolved) return { ok: false, code: "QUESTIONNAIRE_SCHEMA_INVALID" };
+
+  const answers = hydrateDerivedAnswers(resolved.schema, record.answers, {
+    portalEmail: ctx.portalEmail,
+  });
+  const errors = validateAnswersAgainstSchema(resolved.schema, answers, locale);
+  if (errors.length > 0) {
+    return { ok: false, code: "QUESTIONNAIRE_VALIDATION_FAILED", errors };
+  }
+
+  return {
+    ok: true,
+    record,
+    alreadySubmitted: false,
+    schema: resolved.schema,
+  };
+}
+
+export async function submitQuestionnaire(
+  ctx: ClientQuestionnaireContext,
+  store: QuestionnaireStore,
+  locale: "en" | "ru",
+): Promise<
+  | { ok: true; record: QuestionnaireRecord; alreadySubmitted: boolean }
+  | { ok: false; code: string; errors?: ValidationErrorItem[] }
+> {
+  const prepared = await prepareQuestionnaireSubmission(ctx, store, locale);
+  if (!prepared.ok) return prepared;
+  if (prepared.alreadySubmitted) {
+    return { ok: true, record: prepared.record, alreadySubmitted: true };
+  }
+
+  const now = new Date().toISOString();
+  const updated = await store.setStatus({
+    id: prepared.record.id,
+    baseRevision: prepared.record.revision,
+    status: "submitted",
+    submittedAt: now,
+    reviewedAt: prepared.record.reviewedAt ?? now,
+  });
+  if (!updated.ok) return { ok: false, code: updated.code };
+  return { ok: true, record: updated.record, alreadySubmitted: false };
 }
 
 export function assertQuestionnaireOwnership(

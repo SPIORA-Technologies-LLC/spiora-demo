@@ -16,6 +16,13 @@ const NAV_CLIENTS: NavItem = {
   icon: "fa-solid fa-users",
 };
 
+const NAV_CLIENT_INTAKE: NavItem = {
+  href: "/clients/intake",
+  labelKey: "clientIntake",
+  labelNs: "nav",
+  icon: "fa-solid fa-inbox",
+};
+
 const NAV_CRM_LEADS: NavItem = {
   href: "/crm/leads",
   labelKey: "crmLeads",
@@ -118,6 +125,7 @@ const NAV_WEBSITE: NavItem = {
 const MANAGER_NAV: NavItem[] = [
   NAV_DASHBOARD,
   NAV_CLIENTS,
+  NAV_CLIENT_INTAKE,
   NAV_CRM_LEADS,
   NAV_NEW_FORMGRID_CLIENTS,
   NAV_AI,
@@ -135,6 +143,7 @@ const MANAGER_NAV: NavItem[] = [
 const OWNER_NAV: NavItem[] = [
   NAV_DASHBOARD,
   NAV_CLIENTS,
+  NAV_CLIENT_INTAKE,
   NAV_CRM_LEADS,
   NAV_NEW_FORMGRID_CLIENTS,
   NAV_AI,

@@ -2,18 +2,22 @@ import { getTranslations } from "next-intl/server";
 import { ClientPortalHome } from "@/components/client-portal/ClientPortalHome";
 import { getClientSession } from "@/lib/client-portal/session";
 import { getClientQuestionnaire } from "@/lib/client-portal/questionnaire";
+import { getPortalCaseForUser } from "@/lib/client-portal/case-service";
 import { redirect } from "next/navigation";
 
 export default async function ClientHomePage() {
   const session = await getClientSession();
   if (!session) redirect("/client/login");
   const t = await getTranslations("clientPortal");
-  const questionnaire = await getClientQuestionnaire({
-    portalUserId: session.id,
-    invitationId: session.invitationId,
-    portalEmail: session.email,
-    templateKey: null,
-  });
+  const [questionnaire, caseData] = await Promise.all([
+    getClientQuestionnaire({
+      portalUserId: session.id,
+      invitationId: session.invitationId,
+      portalEmail: session.email,
+      templateKey: null,
+    }),
+    getPortalCaseForUser(session.id),
+  ]);
   const questionnaireStatus = questionnaire.ok
     ? t(`questionnaire.status.${questionnaire.data.questionnaire.status}` as never)
     : t("questionnaire.status.unavailable");
@@ -23,20 +27,33 @@ export default async function ClientHomePage() {
       })
     : t("questionnaire.progressSummary", { percent: 0 });
   const questionnaireUnavailable = !questionnaire.ok;
+  const questionnaireSubmitted =
+    Boolean(caseData) ||
+    (questionnaire.ok &&
+      (questionnaire.data.questionnaire.status === "submitted" ||
+        questionnaire.data.questionnaire.status === "locked"));
 
   return (
     <ClientPortalHome
       email={session.email}
       title={t("home.title")}
       brand={t("brand")}
-      statusLabel={t("home.inviteAccepted")}
+      statusLabel={
+        questionnaireSubmitted
+          ? t("home.applicationReceived")
+          : t("home.inviteAccepted")
+      }
       questionnaireStatus={questionnaireStatus}
       questionnaireProgress={questionnaireProgress}
       questionnaireUnavailable={questionnaireUnavailable}
+      questionnaireSubmitted={questionnaireSubmitted}
+      initialCase={caseData}
       placeholders={{
         questionnaire: t("placeholders.questionnaire"),
         documents: t("placeholders.documents"),
-        status: t("placeholders.status"),
+        status: questionnaireSubmitted
+          ? t("home.applicationReceived")
+          : t("placeholders.status"),
       }}
       logoutLabel={t("logout")}
     />

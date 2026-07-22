@@ -180,6 +180,9 @@ export function createSupabaseQuestionnaireStore(
       if (input.reviewedAt !== undefined) {
         patch.reviewed_at = input.reviewedAt;
       }
+      if (input.submittedAt !== undefined) {
+        patch.submitted_at = input.submittedAt;
+      }
 
       const { data, error } = await client
         .from("client_questionnaires")

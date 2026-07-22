@@ -489,17 +489,22 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     window.location.href = "/client/questionnaire/review";
   }
 
-  async function moveToReview() {
+  async function submitFinalQuestionnaire() {
     const saved = await flushPendingSave();
     if (!saved) return;
-    const res = await fetch("/api/client/questionnaire/review", { method: "POST" });
+    const res = await fetch("/api/client/questionnaire/submit", { method: "POST" });
     if (res.ok) {
-      await load();
+      window.location.href = "/client/questionnaire/submitted";
       return;
     }
     const json = (await res.json()) as {
       errors?: Array<{ sectionId: string; questionId: string; message: string }>;
+      error?: { code?: string };
     };
+    if (json.error?.code === "QUESTIONNAIRE_ALREADY_SUBMITTED") {
+      window.location.href = "/client/questionnaire/submitted";
+      return;
+    }
     const nextErrors = json.errors ?? [];
     setErrors(nextErrors);
     const first = nextErrors[0];
@@ -542,8 +547,13 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     );
   }, [data, reviewMode, localAnswers, locale]);
 
+  const isSubmitted =
+    data?.questionnaire.status === "submitted" || data?.questionnaire.status === "locked";
   const canSubmitFromReview =
-    (data?.questionnaire.status === "draft" || data?.questionnaire.status === "not_started") &&
+    !isSubmitted &&
+    (data?.questionnaire.status === "draft" ||
+      data?.questionnaire.status === "not_started" ||
+      data?.questionnaire.status === "in_review") &&
     incompleteRequired.length === 0;
 
   if (loading) {
@@ -684,11 +694,21 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
               </article>
             ))}
             <div className={styles.actions}>
-              <button type="button" className={styles.secondaryBtn} onClick={() => void returnToEditing()}>
-                {t("reopen")}
-              </button>
-              {canSubmitFromReview ? (
-                <button type="button" className={styles.primaryBtn} onClick={() => void moveToReview()}>
+              {!isSubmitted ? (
+                <button type="button" className={styles.secondaryBtn} onClick={() => void returnToEditing()}>
+                  {t("reopen")}
+                </button>
+              ) : null}
+              {isSubmitted ? (
+                <a href="/client/questionnaire/submitted" className={styles.primaryBtn}>
+                  {t("viewSubmission")}
+                </a>
+              ) : canSubmitFromReview ? (
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  onClick={() => void submitFinalQuestionnaire()}
+                >
                   {t("submitQuestionnaire")}
                 </button>
               ) : null}
@@ -810,7 +830,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                       const fileAnswer = asFileAnswer(localAnswers[q.id]);
                       const uploading = Boolean(uploadingById[q.id]);
                       const uploadDisabled =
-                        Boolean(q.readOnly) || uploading || data.questionnaire.status === "in_review";
+                        Boolean(q.readOnly) ||
+                        uploading ||
+                        data.questionnaire.status === "in_review" ||
+                        data.questionnaire.status === "submitted" ||
+                        data.questionnaire.status === "locked";
                       if (fileAnswer) {
                         return (
                           <div className={styles.fileAttached}>
@@ -848,7 +872,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                                 {t("fileReady")}
                               </span>
                             </div>
-                            {!q.readOnly && data.questionnaire.status !== "in_review" ? (
+                            {!q.readOnly &&
+                            data.questionnaire.status !== "in_review" &&
+                            data.questionnaire.status !== "submitted" &&
+                            data.questionnaire.status !== "locked" ? (
                               <button
                                 type="button"
                                 className={styles.fileRemoveBtn}

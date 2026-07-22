@@ -20,6 +20,7 @@ export async function POST() {
       result.code as
         | "QUESTIONNAIRE_NOT_AVAILABLE"
         | "QUESTIONNAIRE_NOT_IN_REVIEW"
+        | "QUESTIONNAIRE_ALREADY_SUBMITTED"
         | "QUESTIONNAIRE_REVISION_CONFLICT",
       result.code === "QUESTIONNAIRE_NOT_AVAILABLE" ? 404 : 400,
     );

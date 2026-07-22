@@ -220,7 +220,12 @@ export async function createLocalQuestionnaireStore(): Promise<QuestionnaireStor
         ...current,
         status: input.status,
         revision: input.baseRevision + 1,
-        reviewedAt: input.reviewedAt ?? current.reviewedAt,
+        reviewedAt:
+          input.reviewedAt !== undefined ? input.reviewedAt : current.reviewedAt,
+        submittedAt:
+          input.submittedAt !== undefined
+            ? input.submittedAt
+            : current.submittedAt,
         updatedAt: now,
       };
       store.questionnaires[idx] = updated;

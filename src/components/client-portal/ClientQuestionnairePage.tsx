@@ -481,9 +481,17 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     id={`question-${q.id}`}
                     value={String(localAnswers[q.id] ?? "")}
                     onChange={(e) => onAnswer(q.id, q.type, e.target.value)}
-                    disabled={Boolean(q.readOnly)}
+                    readOnly={Boolean(q.readOnly)}
+                    className={q.readOnly ? styles.readOnlyControl : undefined}
                     aria-invalid={errors.some((err) => err.questionId === q.id)}
-                    aria-describedby={errors.some((err) => err.questionId === q.id) ? `error-${q.id}` : undefined}
+                    aria-describedby={
+                      [
+                        errors.some((err) => err.questionId === q.id) ? `error-${q.id}` : null,
+                        q.readOnly ? `hint-${q.id}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
+                    }
                   />
                 ) : q.type === "select" ? (
                   <select
@@ -491,6 +499,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     value={String(localAnswers[q.id] ?? "")}
                     onChange={(e) => onAnswer(q.id, q.type, e.target.value)}
                     disabled={Boolean(q.readOnly)}
+                    className={q.readOnly ? styles.readOnlyControl : undefined}
                     aria-invalid={errors.some((err) => err.questionId === q.id)}
                     aria-describedby={errors.some((err) => err.questionId === q.id) ? `error-${q.id}` : undefined}
                   >
@@ -514,7 +523,15 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 ) : (
                   <input
                     id={`question-${q.id}`}
-                    type={q.type === "date" ? "date" : q.type === "number" ? "number" : "text"}
+                    type={
+                      q.type === "date"
+                        ? "date"
+                        : q.type === "number"
+                          ? "number"
+                          : q.type === "email"
+                            ? "email"
+                            : "text"
+                    }
                     value={String(localAnswers[q.id] ?? "")}
                     onChange={(e) =>
                       onAnswer(
@@ -525,11 +542,24 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                           : e.target.value,
                       )
                     }
-                    disabled={Boolean(q.readOnly)}
+                    readOnly={Boolean(q.readOnly)}
+                    className={q.readOnly ? styles.readOnlyControl : undefined}
                     aria-invalid={errors.some((err) => err.questionId === q.id)}
-                    aria-describedby={errors.some((err) => err.questionId === q.id) ? `error-${q.id}` : undefined}
+                    aria-describedby={
+                      [
+                        errors.some((err) => err.questionId === q.id) ? `error-${q.id}` : null,
+                        q.readOnly ? `hint-${q.id}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
+                    }
                   />
                 )}
+                {q.readOnly ? (
+                  <span id={`hint-${q.id}`} className={styles.readOnlyHint}>
+                    {t("readOnlyFromAccount")}
+                  </span>
+                ) : null}
                 {errors.find((err) => err.questionId === q.id) ? (
                   <span id={`error-${q.id}`} className={styles.errorText}>
                     {errors.find((err) => err.questionId === q.id)?.message}

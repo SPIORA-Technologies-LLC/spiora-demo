@@ -21,6 +21,7 @@ import {
   GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
   hashQuestionnaireSchema,
 } from "./questionnaire-schema";
+import { hydrateDerivedAnswers } from "./questionnaire-derived";
 
 export type QuestionnaireStore = {
   getPublishedVersionByTemplateKey(
@@ -146,7 +147,11 @@ export async function getCurrentQuestionnaire(
   if (!resolved) {
     return { ok: false, code: "QUESTIONNAIRE_SCHEMA_INVALID" };
   }
-  const answers = record?.answers ?? {};
+  const answers = hydrateDerivedAnswers(
+    resolved.schema,
+    record?.answers ?? {},
+    { portalEmail: ctx.portalEmail },
+  );
   const progress = calculateQuestionnaireProgress(resolved.schema, answers);
 
   return {
@@ -237,7 +242,9 @@ export async function saveQuestionnaireDraft(
       ok: true,
       questionnaireId: created.id,
       revision: created.revision,
-      answers: created.answers,
+      answers: hydrateDerivedAnswers(resolved.schema, created.answers, {
+        portalEmail: ctx.portalEmail,
+      }),
       lastSavedAt: created.lastSavedAt ?? now,
       created: true,
     };
@@ -261,7 +268,9 @@ export async function saveQuestionnaireDraft(
     ok: true,
     questionnaireId: updated.record.id,
     revision: updated.record.revision,
-    answers: updated.record.answers,
+    answers: hydrateDerivedAnswers(resolved.schema, updated.record.answers, {
+      portalEmail: ctx.portalEmail,
+    }),
     lastSavedAt: updated.record.lastSavedAt ?? now,
     created: false,
   };

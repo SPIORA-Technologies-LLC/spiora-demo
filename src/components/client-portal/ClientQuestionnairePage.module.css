@@ -113,6 +113,25 @@
   padding: 0.7rem 0.8rem;
 }
 
+.field input.readOnlyControl,
+.field textarea.readOnlyControl,
+.field select.readOnlyControl,
+.field input:disabled,
+.field textarea:disabled,
+.field select:disabled {
+  opacity: 1;
+  color: #f6efe9;
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.12);
+  cursor: not-allowed;
+  -webkit-text-fill-color: #f6efe9;
+}
+
+.readOnlyHint {
+  color: rgba(246, 239, 233, 0.65);
+  font-size: 0.82rem;
+}
+
 .field textarea {
   min-height: 110px;
 }

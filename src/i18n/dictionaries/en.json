@@ -2386,6 +2386,7 @@
       "navCurrent": "Current section",
       "navCompleted": "Completed section",
       "navIncomplete": "Incomplete section",
+      "readOnlyFromAccount": "Taken from your account and cannot be edited",
       "save": {
         "idle": "Not saved yet",
         "saving": "Saving…",

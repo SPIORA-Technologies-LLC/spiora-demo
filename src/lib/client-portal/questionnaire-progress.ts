@@ -32,6 +32,7 @@ export function calculateQuestionnaireProgress(
 
     for (const q of section.questions) {
       if (DISPLAY_ONLY_TYPES.has(q.type)) continue;
+      if (q.readOnly || q.derivedFrom) continue;
       if (!isQuestionVisible(q, answers)) continue;
       if (!q.required) continue;
 

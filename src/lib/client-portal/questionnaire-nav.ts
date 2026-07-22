@@ -19,6 +19,8 @@ type NavQuestion = {
   id: string;
   type: string;
   required?: boolean;
+  readOnly?: boolean;
+  derivedFrom?: string;
   label?: { en: string; ru: string };
   visibleWhen?: { questionId: string; operator: string; value?: unknown };
 };
@@ -87,6 +89,7 @@ export function computeLiveSectionProgress(
     let secTotal = 0;
     for (const q of section.questions) {
       if (DISPLAY_ONLY_TYPES.has(q.type as QuestionType)) continue;
+      if (q.readOnly || q.derivedFrom) continue;
       if (!isQuestionVisible(q as never, answers)) continue;
       if (!q.required) continue;
       secTotal++;
@@ -112,6 +115,38 @@ export function computeLiveSectionProgress(
   };
 }
 
+export type IncompleteRequiredField = {
+  sectionId: string;
+  questionId: string;
+  sectionTitle: string;
+  label: string;
+};
+
+/** User-editable required fields that are still empty (excludes derived/read-only). */
+export function listIncompleteRequiredFields(
+  sections: Array<NavSection & { title?: { en: string; ru: string } }>,
+  answers: Record<string, unknown>,
+  locale: "en" | "ru",
+): IncompleteRequiredField[] {
+  const incomplete: IncompleteRequiredField[] = [];
+  for (const section of sections) {
+    for (const q of section.questions) {
+      if (DISPLAY_ONLY_TYPES.has(q.type as QuestionType)) continue;
+      if (q.readOnly || q.derivedFrom) continue;
+      if (!isQuestionVisible(q as never, answers)) continue;
+      if (!q.required) continue;
+      if (!isEmptyAnswer(answers[q.id])) continue;
+      incomplete.push({
+        sectionId: section.id,
+        questionId: q.id,
+        sectionTitle: section.title?.[locale] || section.title?.en || section.id,
+        label: q.label?.[locale] || q.label?.en || q.id,
+      });
+    }
+  }
+  return incomplete;
+}
+
 export type SectionValidationError = {
   sectionId: string;
   questionId: string;
@@ -128,6 +163,7 @@ export function validateSectionRequiredFields(
   for (const q of section.questions) {
     if (DISPLAY_ONLY_TYPES.has(q.type as QuestionType)) continue;
     if (!isQuestionVisible(q as never, answers)) continue;
+    if (q.readOnly || q.derivedFrom) continue;
     if (!q.required) continue;
     if (!isEmptyAnswer(answers[q.id])) continue;
     const label = q.label?.[locale] || q.label?.en || q.id;

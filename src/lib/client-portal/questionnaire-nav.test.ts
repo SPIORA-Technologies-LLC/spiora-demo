@@ -6,6 +6,7 @@ import {
   getAdjacentSectionIds,
   getSectionNavState,
   isSectionComplete,
+  listIncompleteRequiredFields,
   validateSectionRequiredFields,
 } from "./questionnaire-nav.ts";
 
@@ -75,6 +76,75 @@ describe("questionnaire-nav", () => {
     const filled = computeLiveSectionProgress(sections, { first_name: "Ivan" });
     assert.equal(filled.sectionProgress.personal?.percent, 100);
     assert.equal(countCompletedSections(["welcome", "personal"], filled.sectionProgress), 2);
+  });
+
+  it("excludes derived and read-only fields from progress", () => {
+    const sections = [
+      {
+        id: "contact",
+        title: { en: "Contact", ru: "Контакты" },
+        questions: [
+          {
+            id: "email",
+            type: "email",
+            required: true,
+            readOnly: true,
+            derivedFrom: "portal_email",
+            label: { en: "Email", ru: "Email" },
+          },
+          {
+            id: "phone",
+            type: "phone",
+            required: true,
+            label: { en: "Phone", ru: "Телефон" },
+          },
+        ],
+      },
+    ];
+    const progress = computeLiveSectionProgress(sections, { phone: "+123" });
+    assert.equal(progress.percent, 100);
+    assert.equal(progress.sectionProgress.contact?.total, 1);
+    assert.equal(progress.sectionProgress.contact?.completed, 1);
+  });
+
+  it("lists incomplete required fields for review guidance", () => {
+    const sections = [
+      {
+        id: "contact",
+        title: { en: "Contact", ru: "Контакты" },
+        questions: [
+          {
+            id: "email",
+            type: "email",
+            required: true,
+            readOnly: true,
+            derivedFrom: "portal_email",
+            label: { en: "Email", ru: "Email" },
+          },
+          {
+            id: "phone",
+            type: "phone",
+            required: true,
+            label: { en: "Phone", ru: "Телефон" },
+          },
+          {
+            id: "country",
+            type: "country",
+            required: true,
+            label: { en: "Country", ru: "Страна" },
+          },
+        ],
+      },
+    ];
+    const incomplete = listIncompleteRequiredFields(sections, { phone: "+1" }, "ru");
+    assert.deepEqual(incomplete, [
+      {
+        sectionId: "contact",
+        questionId: "country",
+        sectionTitle: "Контакты",
+        label: "Страна",
+      },
+    ]);
   });
 
   it("validates required fields for current section only", () => {

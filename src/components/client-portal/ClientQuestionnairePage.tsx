@@ -12,6 +12,7 @@ import {
   computeLiveSectionProgress,
   getAdjacentSectionIds,
   getSectionNavState,
+  listIncompleteRequiredFields,
   validateSectionRequiredFields,
 } from "@/lib/client-portal/questionnaire-nav";
 import {
@@ -437,6 +438,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     window.location.href = "/client/questionnaire";
   }
 
+  const incompleteRequired = useMemo(() => {
+    if (!data) return [];
+    return listIncompleteRequiredFields(orderedSections, localAnswers, locale);
+  }, [data, orderedSections, localAnswers, locale]);
+
   const reviewSections = useMemo(() => {
     if (!data || !reviewMode) return [];
     return buildReviewSections(
@@ -447,7 +453,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   }, [data, reviewMode, localAnswers, locale]);
 
   const canSubmitFromReview =
-    data?.questionnaire.status === "draft" || data?.questionnaire.status === "not_started";
+    (data?.questionnaire.status === "draft" || data?.questionnaire.status === "not_started") &&
+    incompleteRequired.length === 0;
 
   if (loading) {
     return <div className={styles.page}><p>{t("loading")}</p></div>;
@@ -552,6 +559,27 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
               <h2 className={styles.reviewTitle}>{t("reviewTitle")}</h2>
               <p className={styles.reviewIntro}>{t("reviewIntro")}</p>
             </header>
+            {incompleteRequired.length > 0 ? (
+              <section className={styles.errorSummary}>
+                <h2>{t("incompleteRequiredTitle")}</h2>
+                <p className={styles.reviewIntro}>{t("incompleteRequiredIntro")}</p>
+                <ul>
+                  {incompleteRequired.map((item) => (
+                    <li key={`${item.sectionId}:${item.questionId}`}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.location.href = `/client/questionnaire/${item.sectionId}`;
+                          setTimeout(() => focusFirstInvalid(item.questionId), 0);
+                        }}
+                      >
+                        {item.sectionTitle}: {item.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
             {reviewSections.map((section) => (
               <article key={section.id} className={`${styles.card} ${styles.reviewSection}`}>
                 <h3 className={styles.reviewSectionTitle}>{section.title}</h3>

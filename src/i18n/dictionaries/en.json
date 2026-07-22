@@ -2355,7 +2355,8 @@
     "home": {
       "title": "Welcome to Spiora Client",
       "inviteAccepted": "Invitation accepted",
-      "hint": "Your secure client area. Questionnaire and documents will appear here in the next releases."
+      "hint": "Your secure client area. Complete your questionnaire and continue later at any time.",
+      "continueQuestionnaire": "Continue questionnaire"
     },
     "nav": {
       "questionnaire": "Questionnaire",
@@ -2363,9 +2364,35 @@
       "status": "Status"
     },
     "placeholders": {
-      "questionnaire": "Coming soon",
+      "questionnaire": "Questionnaire available",
       "documents": "Coming soon",
       "status": "Coming soon"
+    },
+    "questionnaire": {
+      "loading": "Loading questionnaire…",
+      "sidebarTitle": "Sections",
+      "progress": "Progress: {percent}%",
+      "progressSummary": "Progress: {percent}%",
+      "selectPlaceholder": "Select…",
+      "backHome": "Back to home",
+      "review": "Review",
+      "reopen": "Return to editing",
+      "errorSummaryTitle": "Please fix the following fields",
+      "save": {
+        "idle": "Not saved yet",
+        "saving": "Saving…",
+        "saved": "Saved",
+        "error": "Save error",
+        "conflict": "Version conflict"
+      },
+      "status": {
+        "not_started": "Not started",
+        "draft": "In progress",
+        "in_review": "Ready for review",
+        "submitted": "Submitted",
+        "locked": "Locked",
+        "archived": "Archived"
+      }
     },
     "invite": {
       "loading": "Checking invitation…",

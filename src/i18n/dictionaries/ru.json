@@ -2353,7 +2353,8 @@
     "home": {
       "title": "Добро пожаловать в Spiora Client",
       "inviteAccepted": "Приглашение принято",
-      "hint": "Ваш защищённый кабинет. Анкета и документы появятся здесь в следующих релизах."
+      "hint": "Ваш защищённый кабинет. Заполняйте анкету и продолжайте позже в любое время.",
+      "continueQuestionnaire": "Продолжить анкету"
     },
     "nav": {
       "questionnaire": "Анкета",
@@ -2361,9 +2362,35 @@
       "status": "Статус"
     },
     "placeholders": {
-      "questionnaire": "Скоро",
+      "questionnaire": "Анкета доступна",
       "documents": "Скоро",
       "status": "Скоро"
+    },
+    "questionnaire": {
+      "loading": "Загрузка анкеты…",
+      "sidebarTitle": "Разделы",
+      "progress": "Прогресс: {percent}%",
+      "progressSummary": "Прогресс: {percent}%",
+      "selectPlaceholder": "Выберите…",
+      "backHome": "Назад",
+      "review": "Проверить",
+      "reopen": "Вернуться к редактированию",
+      "errorSummaryTitle": "Исправьте следующие поля",
+      "save": {
+        "idle": "Ещё не сохранено",
+        "saving": "Сохранение…",
+        "saved": "Сохранено",
+        "error": "Ошибка сохранения",
+        "conflict": "Конфликт версии"
+      },
+      "status": {
+        "not_started": "Не начата",
+        "draft": "В процессе",
+        "in_review": "Готова к проверке",
+        "submitted": "Отправлена",
+        "locked": "Заблокирована",
+        "archived": "Архивирована"
+      }
     },
     "invite": {
       "loading": "Проверяем приглашение…",

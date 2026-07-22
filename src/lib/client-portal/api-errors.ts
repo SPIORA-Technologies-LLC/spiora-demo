@@ -23,6 +23,17 @@ export type ClientApiErrorCode =
   | "AUTH_REQUIRED"
   | "AUTH_UNAVAILABLE"
   | "RATE_LIMITED"
+  | "QUESTIONNAIRE_NOT_AVAILABLE"
+  | "QUESTIONNAIRE_SCHEMA_INVALID"
+  | "QUESTIONNAIRE_READ_ONLY"
+  | "QUESTIONNAIRE_REVISION_CONFLICT"
+  | "QUESTIONNAIRE_VALIDATION_FAILED"
+  | "QUESTIONNAIRE_FIELD_UNKNOWN"
+  | "QUESTIONNAIRE_VALUE_INVALID"
+  | "QUESTIONNAIRE_PAYLOAD_TOO_LARGE"
+  | "QUESTIONNAIRE_ACCESS_DENIED"
+  | "QUESTIONNAIRE_ALREADY_IN_REVIEW"
+  | "QUESTIONNAIRE_NOT_IN_REVIEW"
   | "INTERNAL";
 
 const MESSAGES: Record<ClientApiErrorCode, string> = {
@@ -48,6 +59,17 @@ const MESSAGES: Record<ClientApiErrorCode, string> = {
   AUTH_REQUIRED: "Sign in required",
   AUTH_UNAVAILABLE: "Authentication is unavailable",
   RATE_LIMITED: "Too many requests",
+  QUESTIONNAIRE_NOT_AVAILABLE: "Questionnaire is not available",
+  QUESTIONNAIRE_SCHEMA_INVALID: "Questionnaire schema is invalid",
+  QUESTIONNAIRE_READ_ONLY: "Questionnaire is read-only",
+  QUESTIONNAIRE_REVISION_CONFLICT: "Questionnaire revision conflict",
+  QUESTIONNAIRE_VALIDATION_FAILED: "Questionnaire validation failed",
+  QUESTIONNAIRE_FIELD_UNKNOWN: "Questionnaire field is unknown",
+  QUESTIONNAIRE_VALUE_INVALID: "Questionnaire value is invalid",
+  QUESTIONNAIRE_PAYLOAD_TOO_LARGE: "Questionnaire payload is too large",
+  QUESTIONNAIRE_ACCESS_DENIED: "Questionnaire access denied",
+  QUESTIONNAIRE_ALREADY_IN_REVIEW: "Questionnaire is already in review",
+  QUESTIONNAIRE_NOT_IN_REVIEW: "Questionnaire is not in review",
   INTERNAL: "Something went wrong",
 };
 

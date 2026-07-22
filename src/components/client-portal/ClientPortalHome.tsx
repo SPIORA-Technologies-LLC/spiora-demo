@@ -10,6 +10,8 @@ type Props = {
   title: string;
   brand: string;
   statusLabel: string;
+  questionnaireStatus: string;
+  questionnaireProgress: string;
   placeholders: {
     questionnaire: string;
     documents: string;
@@ -23,6 +25,8 @@ export function ClientPortalHome({
   title,
   brand,
   statusLabel,
+  questionnaireStatus,
+  questionnaireProgress,
   placeholders,
   logoutLabel,
 }: Props) {
@@ -62,7 +66,9 @@ export function ClientPortalHome({
         <section className={styles.grid}>
           <article className={styles.placeholder}>
             <h2>{t("nav.questionnaire")}</h2>
-            <p>{placeholders.questionnaire}</p>
+            <p>{questionnaireStatus}</p>
+            <p>{questionnaireProgress}</p>
+            <a href="/client/questionnaire">{t("home.continueQuestionnaire")}</a>
           </article>
           <article className={styles.placeholder}>
             <h2>{t("nav.documents")}</h2>

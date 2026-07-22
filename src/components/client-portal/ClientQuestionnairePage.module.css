@@ -1,0 +1,116 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1rem;
+}
+
+.sidebar,
+.card {
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  padding: 1rem;
+  color: #f6efe9;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.header h1,
+.card h2 {
+  margin: 0 0 0.75rem;
+}
+
+.sectionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.sectionList a,
+.actions a {
+  color: #f8d8cc;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+
+.field input,
+.field textarea,
+.field select {
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(12,12,12,0.5);
+  color: inherit;
+  padding: 0.7rem 0.8rem;
+}
+
+.field textarea {
+  min-height: 110px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actions button {
+  border: 0;
+  border-radius: 999px;
+  background: #f0b6a0;
+  color: #1a0f10;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.saveState {
+  color: rgba(255,255,255,0.7);
+}
+
+.errorSummary {
+  border: 1px solid rgba(255, 150, 150, 0.35);
+  background: rgba(120, 24, 24, 0.18);
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.errorSummary button {
+  background: transparent;
+  border: 0;
+  color: #ffd7cf;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.errorText {
+  color: #ffb4a4;
+  font-size: 0.88rem;
+}
+
+.answerRow {
+  display: grid;
+  gap: 0.2rem;
+  margin-bottom: 0.85rem;
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+}

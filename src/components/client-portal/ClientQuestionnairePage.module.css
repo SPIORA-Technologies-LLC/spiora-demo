@@ -85,6 +85,10 @@
   margin-bottom: 0.9rem;
 }
 
+.fieldLabel {
+  font-weight: 560;
+}
+
 .displayHeading,
 .displayInfo {
   margin-bottom: 0.9rem;
@@ -289,54 +293,155 @@
 .fileField {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.55rem;
 }
 
-.fileInput {
-  border-radius: 12px;
-  border: 1px dashed rgba(255,255,255,0.22);
-  background: rgba(12,12,12,0.45);
-  color: inherit;
-  padding: 0.85rem;
+.fileInputHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.fileDropzone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 9.5rem;
+  padding: 1.25rem 1.1rem;
+  border-radius: 18px;
+  border: 1px dashed rgba(240, 182, 160, 0.38);
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(240, 182, 160, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(255,255,255,0.05), rgba(12,12,12,0.35));
+  color: #f6efe9;
+  text-align: center;
   cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.fileInput:disabled {
+.fileDropzone:hover:not(.fileDropzoneDisabled):not(.fileDropzoneBusy) {
+  border-color: rgba(240, 182, 160, 0.72);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+  transform: translateY(-1px);
+}
+
+.fileDropzone:focus-within {
+  outline: 2px solid rgba(var(--brand-orange-rgb), 0.45);
+  outline-offset: 3px;
+}
+
+.fileDropzoneBusy {
+  cursor: wait;
+  border-style: solid;
+  border-color: rgba(240, 182, 160, 0.55);
+}
+
+.fileDropzoneDisabled {
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.62;
+}
+
+.fileDropMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: 0.25rem;
+  border-radius: 999px;
+  color: #f0b6a0;
+  background: rgba(240, 182, 160, 0.12);
+  border: 1px solid rgba(240, 182, 160, 0.28);
+}
+
+.fileDropTitle {
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.fileDropAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.2rem;
+  padding: 0.42rem 0.95rem;
+  border-radius: 999px;
+  background: #f0b6a0;
+  color: #1a0f10;
+  font-size: 0.86rem;
+  font-weight: 650;
 }
 
 .fileHint {
-  margin: 0;
-  font-size: 0.82rem;
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+  line-height: 1.35;
   color: rgba(246, 239, 233, 0.62);
+  max-width: 28rem;
 }
 
 .fileAttached {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.55rem 0.85rem;
+  gap: 0.75rem 0.9rem;
+  border-radius: 18px;
+  border: 1px solid rgba(240, 182, 160, 0.28);
+  background:
+    linear-gradient(135deg, rgba(240, 182, 160, 0.12), transparent 45%),
+    rgba(12,12,12,0.45);
+  padding: 0.9rem 1rem;
+}
+
+.fileAttachedMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(12,12,12,0.45);
-  padding: 0.75rem 0.9rem;
+  color: #f0b6a0;
+  background: rgba(240, 182, 160, 0.12);
+  border: 1px solid rgba(240, 182, 160, 0.24);
+  flex: 0 0 auto;
+}
+
+.fileAttachedBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1 1 12rem;
 }
 
 .fileLink {
-  color: #f0b6a0;
-  font-weight: 600;
+  color: #f6efe9;
+  font-weight: 650;
   text-decoration: none;
   word-break: break-all;
 }
 
 .fileLink:hover {
-  text-decoration: underline;
+  color: #f0b6a0;
 }
 
 .fileMeta {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   color: rgba(246, 239, 233, 0.65);
 }
 
@@ -346,12 +451,14 @@
   border-radius: 999px;
   background: transparent;
   color: #f6efe9;
-  padding: 0.35rem 0.75rem;
+  padding: 0.42rem 0.85rem;
   cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
 
 .fileRemoveBtn:hover {
   border-color: rgba(240, 182, 160, 0.55);
+  background: rgba(240, 182, 160, 0.08);
 }
 
 .review {

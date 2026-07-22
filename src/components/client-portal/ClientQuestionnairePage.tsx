@@ -726,9 +726,15 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 </div>
               ) : (
               <div key={q.id} className={styles.field}>
-                <label htmlFor={`question-${q.id}`}>
-                  {q.label[locale]}{q.required ? " *" : ""}
-                </label>
+                {q.type === "file" ? (
+                  <span className={styles.fieldLabel}>
+                    {q.label[locale]}{q.required ? " *" : ""}
+                  </span>
+                ) : (
+                  <label htmlFor={`question-${q.id}`} className={styles.fieldLabel}>
+                    {q.label[locale]}{q.required ? " *" : ""}
+                  </label>
+                )}
                 {q.description && q.type !== "file" ? (
                   <p className={styles.displayDescription}>{q.description[locale]}</p>
                 ) : null}
@@ -803,18 +809,45 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     {(() => {
                       const fileAnswer = asFileAnswer(localAnswers[q.id]);
                       const uploading = Boolean(uploadingById[q.id]);
+                      const uploadDisabled =
+                        Boolean(q.readOnly) || uploading || data.questionnaire.status === "in_review";
                       if (fileAnswer) {
                         return (
                           <div className={styles.fileAttached}>
-                            <a
-                              className={styles.fileLink}
-                              href={`/api/client/questionnaire/attachments/${encodeURIComponent(fileAnswer.id)}`}
-                            >
-                              {fileAnswer.fileName}
-                            </a>
-                            <span className={styles.fileMeta}>
-                              {formatFileSize(fileAnswer.sizeBytes, locale)}
+                            <span className={styles.fileAttachedMark} aria-hidden>
+                              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                                <path
+                                  d="M8 4.75h5.2L18.25 9.8V19.25A1.75 1.75 0 0 1 16.5 21h-8.5A1.75 1.75 0 0 1 6.25 19.25v-12.5A1.75 1.75 0 0 1 8 4.75Z"
+                                  stroke="currentColor"
+                                  strokeWidth="1.5"
+                                />
+                                <path
+                                  d="M13.25 4.9V9.5H17.8"
+                                  stroke="currentColor"
+                                  strokeWidth="1.5"
+                                  strokeLinejoin="round"
+                                />
+                                <path
+                                  d="M9 13.25h6M9 16.5h4.2"
+                                  stroke="currentColor"
+                                  strokeWidth="1.5"
+                                  strokeLinecap="round"
+                                />
+                              </svg>
                             </span>
+                            <div className={styles.fileAttachedBody}>
+                              <a
+                                className={styles.fileLink}
+                                href={`/api/client/questionnaire/attachments/${encodeURIComponent(fileAnswer.id)}`}
+                              >
+                                {fileAnswer.fileName}
+                              </a>
+                              <span className={styles.fileMeta}>
+                                {formatFileSize(fileAnswer.sizeBytes, locale)}
+                                {formatFileSize(fileAnswer.sizeBytes, locale) ? " · " : ""}
+                                {t("fileReady")}
+                              </span>
+                            </div>
                             {!q.readOnly && data.questionnaire.status !== "in_review" ? (
                               <button
                                 type="button"
@@ -828,12 +861,31 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                         );
                       }
                       return (
-                        <>
+                        <label
+                          className={[
+                            styles.fileDropzone,
+                            uploading ? styles.fileDropzoneBusy : "",
+                            uploadDisabled ? styles.fileDropzoneDisabled : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                          onDragOver={(e) => {
+                            if (uploadDisabled) return;
+                            e.preventDefault();
+                            e.dataTransfer.dropEffect = "copy";
+                          }}
+                          onDrop={(e) => {
+                            if (uploadDisabled) return;
+                            e.preventDefault();
+                            const file = e.dataTransfer.files?.[0];
+                            if (file) void onUploadFile(q.id, file);
+                          }}
+                        >
                           <input
                             id={`question-${q.id}`}
                             type="file"
-                            className={styles.fileInput}
-                            disabled={Boolean(q.readOnly) || uploading || data.questionnaire.status === "in_review"}
+                            className={styles.fileInputHidden}
+                            disabled={uploadDisabled}
                             accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.heic,.doc,.docx,.xls,.xlsx,application/pdf,image/*"
                             aria-invalid={errors.some((err) => err.questionId === q.id)}
                             onChange={(e) => {
@@ -842,9 +894,37 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                               if (file) void onUploadFile(q.id, file);
                             }}
                           />
-                          <p className={styles.fileHint}>{t("fileHint")}</p>
-                          {uploading ? <p className={styles.fileMeta}>{t("fileUploading")}</p> : null}
-                        </>
+                          <span className={styles.fileDropMark} aria-hidden>
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                              <path
+                                d="M12 15.25V5.75"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                              />
+                              <path
+                                d="M8.75 9 12 5.75 15.25 9"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d="M5.75 14.5v3.75A1.75 1.75 0 0 0 7.5 20h9a1.75 1.75 0 0 0 1.75-1.75V14.5"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                              />
+                            </svg>
+                          </span>
+                          <span className={styles.fileDropTitle}>
+                            {uploading ? t("fileUploading") : t("fileDropTitle")}
+                          </span>
+                          {!uploading ? (
+                            <span className={styles.fileDropAction}>{t("fileBrowse")}</span>
+                          ) : null}
+                          <span className={styles.fileHint}>{t("fileHint")}</span>
+                        </label>
                       );
                     })()}
                     {uploadErrorById[q.id] ? (

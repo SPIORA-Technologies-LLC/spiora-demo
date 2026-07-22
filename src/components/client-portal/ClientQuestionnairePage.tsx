@@ -7,6 +7,30 @@ import { buildReviewSections } from "@/lib/client-portal/questionnaire-review";
 import { isQuestionVisible } from "@/lib/client-portal/questionnaire-visibility";
 import { DISPLAY_ONLY_TYPES } from "@/lib/client-portal/questionnaire-types";
 import { initialQuestionnaireSaveState } from "@/lib/client-portal/questionnaire-save-state";
+import {
+  countCompletedSections,
+  computeLiveSectionProgress,
+  getAdjacentSectionIds,
+  getSectionNavState,
+  validateSectionRequiredFields,
+} from "@/lib/client-portal/questionnaire-nav";
+
+type SchemaSection = {
+  id: string;
+  order?: number;
+  title: { en: string; ru: string };
+  questions: Array<{
+    id: string;
+    type: string;
+    required?: boolean;
+    readOnly?: boolean;
+    derivedFrom?: string;
+    label: { en: string; ru: string };
+    description?: { en: string; ru: string };
+    options?: Array<{ value: string; label: { en: string; ru: string } }>;
+    visibleWhen?: { questionId: string; operator: string; value?: unknown };
+  }>;
+};
 
 type CurrentResponse = {
   questionnaire: {
@@ -23,21 +47,7 @@ type CurrentResponse = {
     version: number;
     schema: {
       title: { en: string; ru: string };
-      sections: Array<{
-        id: string;
-        title: { en: string; ru: string };
-        questions: Array<{
-          id: string;
-          type: string;
-          required?: boolean;
-          readOnly?: boolean;
-          derivedFrom?: string;
-          label: { en: string; ru: string };
-          description?: { en: string; ru: string };
-          options?: Array<{ value: string; label: { en: string; ru: string } }>;
-          visibleWhen?: { questionId: string; operator: string; value?: unknown };
-        }>;
-      }>;
+      sections: SchemaSection[];
     };
     schemaHash: string;
   };
@@ -52,6 +62,12 @@ type Props = {
   reviewMode?: boolean;
 };
 
+function sectionNavMarker(state: "current" | "completed" | "incomplete"): string {
+  if (state === "current") return "●";
+  if (state === "completed") return "✓";
+  return "○";
+}
+
 export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props) {
   const t = useTranslations("clientPortal.questionnaire");
   const locale = useLocale() as "en" | "ru";
@@ -64,6 +80,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [errors, setErrors] = useState<Array<{ sectionId: string; questionId: string; message: string }>>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<CurrentResponse | null>(null);
+  const sectionTitleRef = useRef<HTMLHeadingElement | null>(null);
 
   async function load() {
     setLoading(true);
@@ -104,15 +121,50 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     dataRef.current = data;
   }, [data]);
 
+  const orderedSections = useMemo(() => {
+    if (!data) return [] as SchemaSection[];
+    return [...data.template.schema.sections].sort(
+      (a, b) => (a.order ?? 0) - (b.order ?? 0),
+    );
+  }, [data]);
+
+  const orderedSectionIds = useMemo(
+    () => orderedSections.map((section) => section.id),
+    [orderedSections],
+  );
+
   const currentSectionId =
     reviewMode
       ? null
-      : initialSectionId || data?.template.schema.sections[0]?.id || null;
+      : initialSectionId || orderedSections[0]?.id || null;
 
   const currentSection = useMemo(
-    () => data?.template.schema.sections.find((s) => s.id === currentSectionId) ?? null,
-    [data, currentSectionId],
+    () => orderedSections.find((s) => s.id === currentSectionId) ?? null,
+    [orderedSections, currentSectionId],
   );
+
+  const adjacent = useMemo(
+    () => getAdjacentSectionIds(orderedSectionIds, currentSectionId),
+    [orderedSectionIds, currentSectionId],
+  );
+
+  const liveProgress = useMemo(() => {
+    if (!data) return null;
+    return computeLiveSectionProgress(orderedSections, localAnswers);
+  }, [data, orderedSections, localAnswers]);
+
+  const completedSections = useMemo(() => {
+    if (!liveProgress) return 0;
+    return countCompletedSections(orderedSectionIds, liveProgress.sectionProgress);
+  }, [liveProgress, orderedSectionIds]);
+
+  useEffect(() => {
+    if (reviewMode || !currentSection || loading) return;
+    const title = sectionTitleRef.current;
+    if (title) {
+      title.focus();
+    }
+  }, [currentSectionId, reviewMode, loading, currentSection]);
 
   async function flushSave(operations: Array<{ op: "set" | "clear"; questionId: string; value?: unknown }>, nextLocal?: Record<string, unknown>) {
     const current = dataRef.current;
@@ -216,6 +268,43 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     if (el instanceof HTMLElement) el.focus();
   }
 
+  function validateCurrentSection(): boolean {
+    if (!currentSection) return true;
+    const sectionErrors = validateSectionRequiredFields(
+      currentSection,
+      localAnswers,
+      locale,
+    );
+    setErrors(sectionErrors);
+    if (sectionErrors.length > 0) {
+      const first = sectionErrors[0];
+      if (first) setTimeout(() => focusFirstInvalid(first.questionId), 0);
+      return false;
+    }
+    return true;
+  }
+
+  function goToSection(sectionId: string) {
+    window.location.href = `/client/questionnaire/${sectionId}`;
+  }
+
+  function onBack() {
+    if (adjacent.previousId) {
+      goToSection(adjacent.previousId);
+      return;
+    }
+    window.location.href = "/client";
+  }
+
+  function onPrimaryAction() {
+    if (!adjacent.isLast && adjacent.nextId) {
+      if (!validateCurrentSection()) return;
+      goToSection(adjacent.nextId);
+      return;
+    }
+    void moveToReview();
+  }
+
   async function moveToReview() {
     const res = await fetch("/api/client/questionnaire/review", { method: "POST" });
     if (res.ok) {
@@ -260,13 +349,49 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     <div className={styles.page}>
       <aside className={styles.sidebar}>
         <h2>{t("sidebarTitle")}</h2>
-        <p>{t("progress", { percent: data.progress.percent })}</p>
+        <p>{t("progress", { percent: liveProgress?.percent ?? data.progress.percent })}</p>
+        <p className={styles.sectionsCompleted}>
+          {t("sectionsCompleted", {
+            completed: completedSections,
+            total: orderedSections.length,
+          })}
+        </p>
         <ul className={styles.sectionList}>
-          {data.template.schema.sections.map((section) => (
-            <li key={section.id}>
-              <a href={`/client/questionnaire/${section.id}`}>{section.title[locale]}</a>
-            </li>
-          ))}
+          {orderedSections.map((section) => {
+            const navState = getSectionNavState(
+              section.id,
+              currentSectionId,
+              liveProgress?.sectionProgress ?? data.progress.sectionProgress,
+            );
+            const marker = sectionNavMarker(navState);
+            const stateLabel =
+              navState === "current"
+                ? t("navCurrent")
+                : navState === "completed"
+                  ? t("navCompleted")
+                  : t("navIncomplete");
+            return (
+              <li key={section.id}>
+                <a
+                  href={`/client/questionnaire/${section.id}`}
+                  className={
+                    navState === "current"
+                      ? styles.navLinkCurrent
+                      : navState === "completed"
+                        ? styles.navLinkCompleted
+                        : styles.navLinkIncomplete
+                  }
+                  aria-current={navState === "current" ? "page" : undefined}
+                  aria-label={`${stateLabel}: ${section.title[locale]}`}
+                >
+                  <span className={styles.navMarker} aria-hidden="true">
+                    {marker}
+                  </span>
+                  <span>{section.title[locale]}</span>
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </aside>
 
@@ -315,11 +440,22 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 ))}
               </article>
             ))}
-            <button type="button" onClick={() => void reopen()}>{t("reopen")}</button>
+            <div className={styles.actions}>
+              <button type="button" className={styles.secondaryBtn} onClick={() => void reopen()}>
+                {t("reopen")}
+              </button>
+            </div>
           </section>
         ) : currentSection ? (
           <section className={styles.card}>
-            <h2>{currentSection.title[locale]}</h2>
+            <h2
+              ref={sectionTitleRef}
+              id={`section-title-${currentSection.id}`}
+              className={styles.sectionTitle}
+              tabIndex={-1}
+            >
+              {currentSection.title[locale]}
+            </h2>
             {currentSection.questions
               .filter((q) => !q.visibleWhen || isQuestionVisible(q as never, localAnswers))
               .map((q) =>
@@ -402,8 +538,12 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
               </label>
               ))}
             <div className={styles.actions}>
-              <a href="/client">{t("backHome")}</a>
-              <button type="button" onClick={() => void moveToReview()}>{t("review")}</button>
+              <button type="button" className={styles.secondaryBtn} onClick={onBack}>
+                {t("back")}
+              </button>
+              <button type="button" className={styles.primaryBtn} onClick={onPrimaryAction}>
+                {adjacent.isLast ? t("reviewQuestionnaire") : t("next")}
+              </button>
             </div>
           </section>
         ) : null}

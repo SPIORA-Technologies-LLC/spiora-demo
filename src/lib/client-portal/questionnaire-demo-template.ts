@@ -238,7 +238,7 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
           id: "service_goal",
           type: "select",
           order: 10,
-          label: { en: "Service goal", ru: "Цель обращения" },
+          label: { en: "Type of service", ru: "Тип услуги" },
           required: true,
           options: [
             { value: "residence_permit", label: { en: "Residence permit", ru: "ВНЖ" } },

@@ -72,6 +72,21 @@ function sectionNavMarker(state: "current" | "completed" | "incomplete"): string
   return "○";
 }
 
+function currencyOptionSymbol(value: string): string {
+  switch (value) {
+    case "EUR":
+      return "€";
+    case "USD":
+      return "$";
+    case "RUB":
+      return "₽";
+    case "HRK":
+      return "kn";
+    default:
+      return "•";
+  }
+}
+
 export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props) {
   const t = useTranslations("clientPortal.questionnaire");
   const locale = useLocale() as "en" | "ru";
@@ -547,6 +562,35 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                         .join(" ") || undefined
                     }
                   />
+                ) : q.type === "select" && q.id === "income_currency" ? (
+                  <div
+                    id={`question-${q.id}`}
+                    className={styles.currencyChoices}
+                    role="radiogroup"
+                    aria-label={q.label[locale]}
+                    aria-invalid={errors.some((err) => err.questionId === q.id)}
+                    aria-describedby={errors.some((err) => err.questionId === q.id) ? `error-${q.id}` : undefined}
+                  >
+                    {q.options?.map((option) => {
+                      const selected = String(localAnswers[q.id] ?? "") === option.value;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          role="radio"
+                          aria-checked={selected}
+                          disabled={Boolean(q.readOnly)}
+                          className={`${styles.currencyChoice}${selected ? ` ${styles.currencyChoiceSelected}` : ""}`}
+                          onClick={() => onAnswer(q.id, q.type, option.value)}
+                        >
+                          <span className={styles.currencySymbol} aria-hidden>
+                            {currencyOptionSymbol(option.value)}
+                          </span>
+                          <span className={styles.currencyLabel}>{option.label[locale]}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 ) : q.type === "select" ? (
                   <select
                     id={`question-${q.id}`}

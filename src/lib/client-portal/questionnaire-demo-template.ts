@@ -220,9 +220,10 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
           order: 50,
           label: { en: "Income currency", ru: "Валюта дохода" },
           options: [
-            { value: "EUR", label: { en: "EUR", ru: "EUR" } },
-            { value: "USD", label: { en: "USD", ru: "USD" } },
-            { value: "HRK", label: { en: "HRK", ru: "HRK" } },
+            { value: "EUR", label: { en: "€ Euro", ru: "€ Евро" } },
+            { value: "USD", label: { en: "$ US Dollar", ru: "$ Доллар США" } },
+            { value: "RUB", label: { en: "₽ Ruble", ru: "₽ Рубль" } },
+            { value: "HRK", label: { en: "kn Kuna", ru: "kn Куна" } },
             { value: "OTHER", label: { en: "Other", ru: "Другое" } },
           ],
         },

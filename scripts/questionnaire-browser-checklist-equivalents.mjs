@@ -7,7 +7,7 @@ import { GENERAL_CLIENT_ONBOARDING_SCHEMA } from "../src/lib/client-portal/quest
 import { buildReviewSections, formatAnswerForReview } from "../src/lib/client-portal/questionnaire-review.ts";
 import { isQuestionVisible } from "../src/lib/client-portal/questionnaire-visibility.ts";
 import { applyAnswerOperations, validateAnswersAgainstSchema } from "../src/lib/client-portal/questionnaire-validation.ts";
-import { hashQuestionnaireSchema } from "../src/lib/client-portal/questionnaire-schema-hash.ts";
+import { hashQuestionnaireSchema, GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH } from "../src/lib/client-portal/questionnaire-schema-hash.ts";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
@@ -115,7 +115,7 @@ function manual(name, reason) {
 // Canonical hash stability (runtime verify contract)
 {
   const hash = hashQuestionnaireSchema(GENERAL_CLIENT_ONBOARDING_SCHEMA);
-  if (hash === "222a220a4f8ef5ddbdca34849ef57145208425060a9dfc12b5668132d40a24ac") {
+  if (hash === GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH) {
     pass("canonical_hash_locked");
   } else {
     fail("canonical_hash_locked", hash);

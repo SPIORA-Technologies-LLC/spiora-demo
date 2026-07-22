@@ -21,7 +21,7 @@ describe("questionnaire schema", () => {
     assert.equal(a.length, 64);
     assert.equal(
       a,
-      "222a220a4f8ef5ddbdca34849ef57145208425060a9dfc12b5668132d40a24ac",
+      "50bec4ccae383615d9a84d5658cebbe33cbee27852da2395d89c7ab080b882f9",
     );
   });
 });
@@ -268,6 +268,65 @@ describe("questionnaire draft lifecycle", () => {
       },
     );
     assert.equal(second.ok, true);
+  });
+
+  it("upgrades legacy demo schema hash to current in-code options", async () => {
+    const legacyHash =
+      "222a220a4f8ef5ddbdca34849ef57145208425060a9dfc12b5668132d40a24ac";
+    const legacySchema = structuredClone(GENERAL_CLIENT_ONBOARDING_SCHEMA);
+    const currency = legacySchema.sections
+      .flatMap((section) => section.questions)
+      .find((question) => question.id === "income_currency");
+    assert.ok(currency?.options);
+    currency.options = currency.options.filter((option) => option.value !== "RUB");
+
+    const version = {
+      id: "v-legacy",
+      templateId: "t1",
+      version: 1,
+      schema: legacySchema,
+      schemaHash: legacyHash,
+      status: "published" as const,
+      publishedAt: new Date().toISOString(),
+      createdAt: new Date().toISOString(),
+    };
+    const store = {
+      async getPublishedVersionByTemplateKey(templateKey: string) {
+        return templateKey === "general_client_onboarding" ? version : null;
+      },
+      async getPublishedVersionById() {
+        return version;
+      },
+      async getByInvitationId() {
+        return null;
+      },
+      async getById() {
+        return null;
+      },
+      async createDraft() {
+        throw new Error("not used");
+      },
+      async updateDraft() {
+        throw new Error("not used");
+      },
+      async setStatus() {
+        throw new Error("not used");
+      },
+    };
+
+    const result = await getCurrentQuestionnaire(ctx, store as any);
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(
+        result.data.template.schemaHash,
+        GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+      );
+      const options =
+        result.data.template.schema.sections
+          .flatMap((section) => section.questions)
+          .find((question) => question.id === "income_currency")?.options ?? [];
+      assert.ok(options.some((option) => option.value === "RUB"));
+    }
   });
 
   it("reconciles drifted DB schema when stored hash matches published constant", async () => {

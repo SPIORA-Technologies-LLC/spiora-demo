@@ -15,6 +15,7 @@ export {
   hashCanonicalJson,
   hashQuestionnaireSchema,
   GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+  GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY,
 } from "./questionnaire-schema-hash";
 
 /** @deprecated Prefer canonicalizeJson — kept for existing call sites. */

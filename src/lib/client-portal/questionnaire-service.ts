@@ -19,6 +19,7 @@ import {
 } from "./questionnaire-demo-template";
 import {
   GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+  GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY,
   hashQuestionnaireSchema,
 } from "./questionnaire-schema";
 import { hydrateDerivedAnswers } from "./questionnaire-derived";
@@ -96,19 +97,28 @@ function mapStatus(record: QuestionnaireRecord | null): QuestionnairePublicState
 }
 
 /**
- * When a published row's schema_hash matches the known demo constant, prefer the
- * in-code canonical schema. SQL seed / jsonb drift can leave schema JSON out of
- * sync with a repaired schema_hash (hash(schema) !== schema_hash).
+ * When a published row belongs to the demo onboarding template and its stored
+ * schema_hash is the current constant or a known legacy hash, prefer the
+ * in-code canonical schema (and current hash). This upgrades option lists
+ * (e.g. RUB) without requiring a SQL patch, and also heals jsonb drift.
  */
 export function reconcilePublishedTemplateVersion(
   version: TemplateVersionRecord,
 ): TemplateVersionRecord {
   const templateKey = version.schema?.templateKey;
+  const knownHashes = new Set<string>([
+    GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+    ...GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY,
+  ]);
   if (
     templateKey === GENERAL_CLIENT_ONBOARDING_TEMPLATE_KEY &&
-    version.schemaHash === GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH
+    knownHashes.has(version.schemaHash)
   ) {
-    return { ...version, schema: GENERAL_CLIENT_ONBOARDING_SCHEMA };
+    return {
+      ...version,
+      schema: GENERAL_CLIENT_ONBOARDING_SCHEMA,
+      schemaHash: GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
+    };
   }
   return version;
 }

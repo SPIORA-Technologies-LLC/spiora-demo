@@ -80,8 +80,8 @@ function currencyOptionSymbol(value: string): string {
       return "$";
     case "RUB":
       return "₽";
-    case "HRK":
-      return "kn";
+    case "KZT":
+      return "₸";
     default:
       return "•";
   }

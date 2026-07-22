@@ -223,7 +223,7 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
             { value: "EUR", label: { en: "€ Euro", ru: "€ Евро" } },
             { value: "USD", label: { en: "$ US Dollar", ru: "$ Доллар США" } },
             { value: "RUB", label: { en: "₽ Ruble", ru: "₽ Рубль" } },
-            { value: "HRK", label: { en: "kn Kuna", ru: "kn Куна" } },
+            { value: "KZT", label: { en: "₸ Tenge", ru: "₸ Тенге" } },
             { value: "OTHER", label: { en: "Other", ru: "Другое" } },
           ],
         },

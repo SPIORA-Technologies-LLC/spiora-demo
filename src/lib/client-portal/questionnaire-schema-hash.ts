@@ -98,7 +98,7 @@ export function hashQuestionnaireSchema(schema: QuestionnaireSchema): string {
 
 /** Fixed canonical hash for general_client_onboarding demo schema (current). */
 export const GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH =
-  "50bec4ccae383615d9a84d5658cebbe33cbee27852da2395d89c7ab080b882f9";
+  "2f43b03dbc7644e1220ab9b61e4bfe490dd834e34516e06e7f37d0f7bee2b577";
 
 /**
  * Previously published hashes for the same demo template.
@@ -106,4 +106,5 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH =
  */
 export const GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY = [
   "222a220a4f8ef5ddbdca34849ef57145208425060a9dfc12b5668132d40a24ac",
+  "50bec4ccae383615d9a84d5658cebbe33cbee27852da2395d89c7ab080b882f9",
 ] as const;

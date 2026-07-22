@@ -6,6 +6,7 @@ import styles from "./ClientQuestionnairePage.module.css";
 import { buildReviewSections } from "@/lib/client-portal/questionnaire-review";
 import { isQuestionVisible } from "@/lib/client-portal/questionnaire-visibility";
 import { DISPLAY_ONLY_TYPES } from "@/lib/client-portal/questionnaire-types";
+import { initialQuestionnaireSaveState } from "@/lib/client-portal/questionnaire-save-state";
 
 type CurrentResponse = {
   questionnaire: {
@@ -62,6 +63,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [localAnswers, setLocalAnswers] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<Array<{ sectionId: string; questionId: string; message: string }>>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dataRef = useRef<CurrentResponse | null>(null);
 
   async function load() {
     setLoading(true);
@@ -72,24 +74,35 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     };
     if (!res.ok) {
       setData(null);
+      dataRef.current = null;
       setLoadError(json.error?.code ?? `HTTP_${res.status}`);
+      setSaving("idle");
       setLoading(false);
       return;
     }
     if (!json.template?.schema?.sections) {
       setData(null);
+      dataRef.current = null;
       setLoadError("QUESTIONNAIRE_SCHEMA_INVALID");
+      setSaving("idle");
       setLoading(false);
       return;
     }
     setData(json);
+    dataRef.current = json;
     setLocalAnswers(json.questionnaire.answers ?? {});
+    setSaving(initialQuestionnaireSaveState(json.questionnaire));
+    setSaveErrorCode(null);
     setLoading(false);
   }
 
   useEffect(() => {
     void load();
   }, []);
+
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
 
   const currentSectionId =
     reviewMode
@@ -102,15 +115,15 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   );
 
   async function flushSave(operations: Array<{ op: "set" | "clear"; questionId: string; value?: unknown }>, nextLocal?: Record<string, unknown>) {
-    if (!data) return;
+    const current = dataRef.current;
+    if (!current) return;
     const answerableOps = operations.filter((operation) => {
-      const question = data.template.schema.sections
+      const question = current.template.schema.sections
         .flatMap((section) => section.questions)
         .find((item) => item.id === operation.questionId);
       return question && !DISPLAY_ONLY_TYPES.has(question.type as never);
     });
     if (answerableOps.length === 0) {
-      setSaving("idle");
       setSaveErrorCode(null);
       return;
     }
@@ -120,7 +133,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        baseRevision: data.questionnaire.revision,
+        baseRevision: current.questionnaire.revision,
         operations: answerableOps,
       }),
     });
@@ -129,10 +142,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       return;
     }
     if (!res.ok) {
-      const json = (await res.json().catch(() => null)) as {
+      const errJson = (await res.json().catch(() => null)) as {
         error?: { code?: string };
       } | null;
-      setSaveErrorCode(json?.error?.code ?? `HTTP_${res.status}`);
+      setSaveErrorCode(errJson?.error?.code ?? `HTTP_${res.status}`);
       setSaving("error");
       return;
     }
@@ -141,17 +154,19 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       answers: Record<string, unknown>;
       lastSavedAt: string;
     };
-    setData({
-      ...data,
+    const nextData: CurrentResponse = {
+      ...current,
       questionnaire: {
-        ...data.questionnaire,
-        id: data.questionnaire.id ?? "created",
+        ...current.questionnaire,
+        id: current.questionnaire.id ?? "created",
         revision: json.revision,
         answers: json.answers,
         lastSavedAt: json.lastSavedAt,
-        status: data.questionnaire.status === "not_started" ? "draft" : data.questionnaire.status,
+        status: current.questionnaire.status === "not_started" ? "draft" : current.questionnaire.status,
       },
-    });
+    };
+    dataRef.current = nextData;
+    setData(nextData);
     if (nextLocal) {
       setLocalAnswers(nextLocal);
     }

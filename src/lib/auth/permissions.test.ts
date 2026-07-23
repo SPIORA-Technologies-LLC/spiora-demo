@@ -25,4 +25,13 @@ describe("auth permissions", () => {
     assert.equal(ownerNav.includes("/settings"), true);
     assert.equal(managerNav.includes("/settings"), false);
   });
+
+  it("hides legacy leads and formgrid demo from sidebar", () => {
+    for (const role of ["owner", "manager"] as const) {
+      const hrefs = getNavItemsForRole(role).map((item) => item.href);
+      assert.equal(hrefs.includes("/crm/leads"), false);
+      assert.equal(hrefs.includes("/new-formgrid-clients"), false);
+      assert.equal(hrefs.includes("/clients/intake"), true);
+    }
+  });
 });

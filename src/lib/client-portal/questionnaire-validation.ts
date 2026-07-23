@@ -1,3 +1,20 @@
+import { isQuestionnaireFileAnswer } from "./questionnaire-attachment-formats";
+import { mapValidationCodeToReason } from "./questionnaire-validation-payload";
+import {
+  normalizeCountryAnswers,
+  resolveCountryToIso,
+} from "./questionnaire-countries";
+import { flattenQuestions } from "./questionnaire-flatten";
+import { isQuestionVisible } from "./questionnaire-visibility";
+import {
+  answersJsonByteSize,
+  isEmptyAnswer,
+  normalizeScalarString,
+} from "./questionnaire-empty-values";
+import {
+  DISPLAY_ONLY_TYPES,
+  QUESTIONNAIRE_LIMITS,
+} from "./questionnaire-types";
 import type {
   QuestionDefinition,
   QuestionnaireAnswers,
@@ -6,24 +23,10 @@ import type {
   ValidationReasonCode,
   PatchAnswerOperation,
 } from "./questionnaire-types";
-import {
-  DISPLAY_ONLY_TYPES,
-  QUESTIONNAIRE_LIMITS,
-} from "./questionnaire-types";
-import {
-  answersJsonByteSize,
-  isEmptyAnswer,
-  normalizeScalarString,
-} from "./questionnaire-empty-values";
-import { flattenQuestions } from "./questionnaire-flatten";
-import { isQuestionVisible } from "./questionnaire-visibility";
-import { isQuestionnaireFileAnswer } from "./questionnaire-attachment-formats";
-import { mapValidationCodeToReason } from "./questionnaire-validation-payload";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+]?[\d\s()-]{6,20}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const COUNTRY_RE = /^[A-Z]{2}$/;
 
 function labelFor(question: QuestionDefinition, locale: "en" | "ru"): string {
   return question.label[locale] || question.label.en || question.id;
@@ -59,6 +62,8 @@ export function validateAnswersAgainstSchema(
 ): ValidationErrorItem[] {
   const errors: ValidationErrorItem[] = [];
   const questions = flattenQuestions(schema);
+  // Accept country names by normalizing to ISO before checks.
+  answers = normalizeCountryAnswers(schema, answers);
 
   if (Object.keys(answers).length > QUESTIONNAIRE_LIMITS.maxAnswerKeys) {
     pushError(errors, {
@@ -197,12 +202,15 @@ function validateValueType(
           reason: "INVALID_FORMAT",
         };
       }
-      if (q.type === "country" && !COUNTRY_RE.test(s)) {
-        return {
-          code: "INVALID_COUNTRY",
-          message: `${label} must be ISO country code`,
-          reason: "INVALID_COUNTRY",
-        };
+      if (q.type === "country") {
+        const iso = resolveCountryToIso(s);
+        if (!iso) {
+          return {
+            code: "INVALID_COUNTRY",
+            message: `${label} must be a valid country`,
+            reason: "INVALID_COUNTRY",
+          };
+        }
       }
       return null;
     }
@@ -406,7 +414,17 @@ export function applyAnswerOperations(
     }
 
     if (op.op === "set") {
-      merged[op.questionId] = op.value;
+      const qType = questions.get(op.questionId)?.type;
+      if (qType === "country") {
+        const iso = resolveCountryToIso(op.value);
+        if (iso) {
+          merged[op.questionId] = iso;
+        } else {
+          merged[op.questionId] = op.value;
+        }
+      } else {
+        merged[op.questionId] = op.value;
+      }
       continue;
     }
 

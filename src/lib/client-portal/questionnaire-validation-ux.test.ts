@@ -43,10 +43,10 @@ describe("questionnaire validation UX payload", () => {
     const errors = validateAnswersAgainstSchema(
       GENERAL_CLIENT_ONBOARDING_SCHEMA,
       {
-        citizenship: "Russia",
-        country_of_residence: "Armenia",
+        citizenship: "NotARealCountryXYZ",
+        country_of_residence: "???",
         income_currency: "RUR",
-        target_country: "Croatia",
+        target_country: "NopeLand",
       },
       "ru",
     ).filter((e) =>
@@ -78,6 +78,23 @@ describe("questionnaire validation UX payload", () => {
       (d) => d.field === "citizenship",
     );
     assert.equal(citizenship?.reason, "INVALID_COUNTRY");
+  });
+
+  it("accepts country names and normalizes them to ISO codes", () => {
+    const errors = validateAnswersAgainstSchema(
+      GENERAL_CLIENT_ONBOARDING_SCHEMA,
+      {
+        citizenship: "Россия",
+        country_of_residence: "Armenia",
+        target_country: "Croatia",
+      },
+      "ru",
+    ).filter((e) =>
+      ["citizenship", "country_of_residence", "target_country"].includes(
+        e.questionId,
+      ),
+    );
+    assert.equal(errors.length, 0);
   });
 
   it("maps validation codes to stable reasons for future UX", () => {

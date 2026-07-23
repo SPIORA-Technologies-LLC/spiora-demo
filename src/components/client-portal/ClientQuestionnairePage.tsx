@@ -34,6 +34,10 @@ import {
   revalidateAnswersLocally,
   writeValidationSession,
 } from "@/lib/client-portal/questionnaire-validation-ui";
+import {
+  getCountryOptions,
+  resolveCountryToIso,
+} from "@/lib/client-portal/questionnaire-countries";
 
 type SchemaSection = {
   id: string;
@@ -738,6 +742,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     return orderValidationErrors(data.template.schema as never, errors);
   }, [data, errors]);
 
+  const countryOptions = useMemo(() => getCountryOptions(locale), [locale]);
+
   const isSubmitted =
     data?.questionnaire.status === "submitted" || data?.questionnaire.status === "locked";
   const canSubmitFromReview =
@@ -1068,6 +1074,31 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                       );
                     })}
                   </div>
+                ) : q.type === "country" ? (
+                  <select
+                    id={`question-${q.id}`}
+                    value={resolveCountryToIso(localAnswers[q.id]) ?? ""}
+                    onChange={(e) => onAnswer(q.id, q.type, e.target.value)}
+                    disabled={Boolean(q.readOnly)}
+                    className={q.readOnly ? styles.readOnlyControl : undefined}
+                    aria-invalid={errors.some((err) => err.questionId === q.id)}
+                    aria-describedby={
+                      [
+                        errors.some((err) => err.questionId === q.id) ? `error-${q.id}` : null,
+                        `country-hint-${q.id}`,
+                        q.readOnly ? `hint-${q.id}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
+                    }
+                  >
+                    <option value="">{t("selectPlaceholder")}</option>
+                    {countryOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
                 ) : q.type === "select" ? (
                   <select
                     id={`question-${q.id}`}
@@ -1267,6 +1298,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     }
                   />
                 )}
+                {q.type === "country" ? (
+                  <span id={`country-hint-${q.id}`} className={styles.displayDescription}>
+                    {t("countryHint")}
+                  </span>
+                ) : null}
                 {q.readOnly ? (
                   <span id={`hint-${q.id}`} className={styles.readOnlyHint}>
                     {t("readOnlyFromAccount")}

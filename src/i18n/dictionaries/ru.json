@@ -2390,6 +2390,7 @@
       "progressSummary": "Прогресс: {percent}%",
       "sectionsCompleted": "{completed} из {total} разделов заполнено",
       "selectPlaceholder": "Выберите…",
+      "countryHint": "Выберите страну из списка",
       "back": "← Назад",
       "backHome": "На главную",
       "next": "Далее →",

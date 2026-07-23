@@ -2,6 +2,7 @@ import type { QuestionDefinition, QuestionnaireAnswers } from "./questionnaire-t
 import { DISPLAY_ONLY_TYPES } from "./questionnaire-types";
 import { isQuestionVisible } from "./questionnaire-visibility";
 import { isQuestionnaireFileAnswer } from "./questionnaire-attachment-formats";
+import { countryLabel } from "./questionnaire-countries";
 
 type ReviewQuestion = {
   id: string;
@@ -19,15 +20,6 @@ type ReviewSchema = {
     questions: ReviewQuestion[];
   }>;
 };
-
-function countryLabel(code: string, locale: "en" | "ru"): string {
-  try {
-    const names = new Intl.DisplayNames([locale], { type: "region" });
-    return names.of(code.toUpperCase()) || code;
-  } catch {
-    return code;
-  }
-}
 
 export function formatAnswerForReview(
   question: ReviewQuestion,

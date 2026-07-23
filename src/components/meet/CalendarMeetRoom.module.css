@@ -277,6 +277,24 @@
   font-weight: 500;
 }
 
+.speakerLayoutLocalSharing {
+  gap: 0.5rem;
+}
+
+.localSharePlaceholder {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  border-radius: var(--radius-sm);
+  background: #111827;
+  color: #e5e7eb;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
 .speakerMainScreenShare {
   flex: 1;
   min-height: 0;

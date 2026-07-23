@@ -3,7 +3,9 @@ import { describe, it } from "node:test";
 import type { TrackReferenceOrPlaceholder } from "@livekit/components-core";
 import { Track } from "livekit-client";
 import {
+  isLocalScreenShareTrack,
   pickCameraTracks,
+  pickRemoteScreenShareTrack,
   pickScreenShareTrack,
   resolveSpeakerCarouselTracks,
   resolveSpeakerFocusTrack,
@@ -35,7 +37,7 @@ describe("meeting speaker focus", () => {
     assert.equal(pickScreenShareTrack(tracks)?.participant.identity, "b");
   });
 
-  it("prioritizes screen share over active speaker", () => {
+  it("prioritizes remote screen share over active speaker", () => {
     const cameras = [track("a"), track("b")];
     const focus = resolveSpeakerFocusTrack({
       cameraTracks: cameras,
@@ -45,6 +47,25 @@ describe("meeting speaker focus", () => {
     });
 
     assert.equal(focus?.source, Track.Source.ScreenShare);
+  });
+
+  it("does not put local screen share on the main stage", () => {
+    const cameras = [track("a"), track("b")];
+    const localShare = track("a", Track.Source.ScreenShare);
+    const focus = resolveSpeakerFocusTrack({
+      cameraTracks: cameras,
+      screenShareTrack: localShare,
+      activeSpeakers: [speaker("b")],
+      localParticipantIdentity: "a",
+    });
+
+    assert.equal(focus?.participant.identity, "b");
+    assert.equal(isLocalScreenShareTrack(localShare, "a"), true);
+    assert.equal(
+      pickRemoteScreenShareTrack([localShare, track("b")], "a")?.participant
+        .identity,
+      undefined,
+    );
   });
 
   it("follows the loudest active speaker over pin", () => {

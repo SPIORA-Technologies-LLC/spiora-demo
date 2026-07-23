@@ -17,6 +17,29 @@ export function pickScreenShareTrack(
   return tracks.find((track) => track.source === Track.Source.ScreenShare);
 }
 
+/** Remote share only — local share must not render as focus (avoids mirror loop). */
+export function pickRemoteScreenShareTrack(
+  tracks: TrackReferenceOrPlaceholder[],
+  localParticipantIdentity: string,
+): TrackReferenceOrPlaceholder | undefined {
+  return tracks.find(
+    (track) =>
+      track.source === Track.Source.ScreenShare &&
+      track.participant.identity !== localParticipantIdentity,
+  );
+}
+
+export function isLocalScreenShareTrack(
+  track: TrackReferenceOrPlaceholder | undefined,
+  localParticipantIdentity: string,
+): boolean {
+  return Boolean(
+    track &&
+      track.source === Track.Source.ScreenShare &&
+      track.participant.identity === localParticipantIdentity,
+  );
+}
+
 export function resolveSpeakerFocusTrack(params: {
   cameraTracks: TrackReferenceOrPlaceholder[];
   screenShareTrack?: TrackReferenceOrPlaceholder;
@@ -24,7 +47,12 @@ export function resolveSpeakerFocusTrack(params: {
   activeSpeakers: Participant[];
   localParticipantIdentity: string;
 }): TrackReferenceOrPlaceholder | null {
-  if (params.screenShareTrack) {
+  // Only remote screen share takes over the main stage.
+  if (
+    params.screenShareTrack &&
+    params.screenShareTrack.participant.identity !==
+      params.localParticipantIdentity
+  ) {
     return params.screenShareTrack;
   }
 

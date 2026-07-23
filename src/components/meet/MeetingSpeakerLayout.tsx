@@ -15,7 +15,9 @@ import {
 import { RoomEvent, Track } from "livekit-client";
 import {
   MEETING_GRID_MAX_PARTICIPANTS,
+  isLocalScreenShareTrack,
   pickCameraTracks,
+  pickRemoteScreenShareTrack,
   pickScreenShareTrack,
   resolveSpeakerCarouselTracks,
   resolveSpeakerFocusTrack,
@@ -49,10 +51,19 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
   );
 
   const cameraTracks = useMemo(() => pickCameraTracks(tracks), [tracks]);
-  const screenShareTrack = useMemo(() => pickScreenShareTrack(tracks), [tracks]);
+  const anyScreenShareTrack = useMemo(() => pickScreenShareTrack(tracks), [tracks]);
+  const screenShareTrack = useMemo(
+    () => pickRemoteScreenShareTrack(tracks, localParticipant.identity),
+    [localParticipant.identity, tracks],
+  );
+  const localIsSharing = isLocalScreenShareTrack(
+    anyScreenShareTrack,
+    localParticipant.identity,
+  );
 
   const useGridLayout =
     !screenShareTrack &&
+    !localIsSharing &&
     !compact &&
     cameraTracks.length <= MEETING_GRID_MAX_PARTICIPANTS;
 
@@ -171,10 +182,18 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
         styles.speakerLayout,
         compact ? styles.speakerLayoutCompact : "",
         styles.speakerLayoutStacked,
+        localIsSharing ? styles.speakerLayoutLocalSharing : "",
       ]
         .filter(Boolean)
         .join(" ")}
     >
+      {localIsSharing ? (
+        <div className={styles.shareBanner}>
+          Вы демонстрируете экран — себе превью не показывается, чтобы не было
+          «зеркала»
+        </div>
+      ) : null}
+
       {filmstrip}
 
       <div className={styles.speakerMain}>
@@ -183,7 +202,11 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
             trackRef={focusTrack}
             className={styles.speakerMainTile}
           />
-        ) : null}
+        ) : (
+          <div className={styles.localSharePlaceholder}>
+            Вы в эфире с демонстрацией экрана
+          </div>
+        )}
       </div>
     </div>
   );

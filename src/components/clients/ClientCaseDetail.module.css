@@ -136,16 +136,35 @@
 .upload {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
   cursor: pointer;
   border: 1px dashed var(--border-soft);
   border-radius: 10px;
-  padding: 0.55rem 0.8rem;
+  padding: 0.55rem 0.9rem;
   color: var(--gray-100);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.upload:hover {
+  border-color: var(--orange-400, #f5a623);
+  color: var(--white);
+}
+
+.upload:has(input:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .upload input {
-  max-width: 14rem;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .commentForm {

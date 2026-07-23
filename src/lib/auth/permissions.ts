@@ -16,6 +16,13 @@ const NAV_CLIENTS: NavItem = {
   icon: "fa-solid fa-users",
 };
 
+const NAV_CLIENT_INVITATIONS: NavItem = {
+  href: "/client-invitations",
+  labelKey: "clientInvitations",
+  labelNs: "nav",
+  icon: "fa-solid fa-link",
+};
+
 const NAV_CLIENT_INTAKE: NavItem = {
   href: "/clients/intake",
   labelKey: "clientIntake",
@@ -111,6 +118,7 @@ const NAV_WEBSITE: NavItem = {
 const MANAGER_NAV: NavItem[] = [
   NAV_DASHBOARD,
   NAV_CLIENTS,
+  NAV_CLIENT_INVITATIONS,
   NAV_CLIENT_INTAKE,
   NAV_AI,
   NAV_KB,
@@ -127,6 +135,7 @@ const MANAGER_NAV: NavItem[] = [
 const OWNER_NAV: NavItem[] = [
   NAV_DASHBOARD,
   NAV_CLIENTS,
+  NAV_CLIENT_INVITATIONS,
   NAV_CLIENT_INTAKE,
   NAV_AI,
   NAV_KB,

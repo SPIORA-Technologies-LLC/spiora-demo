@@ -41,8 +41,7 @@ const TASK_STATUSES: TaskStatus[] = [
 const TASK_PRIORITIES: TaskPriority[] = ["low", "medium", "high", "urgent"];
 
 const SIDEBAR_KEYS = [
-  "crmLeads",
-  "newFormgridClients",
+  "clientInvitations",
   "meetingRecordings",
   "relocation",
   "checkupsErevan",
@@ -166,7 +165,10 @@ describe("PR #11 — Sidebar nav i18n", () => {
   });
 
   it("RU: пункты sidebar на русском", () => {
-    assert.equal(translateMessage("ru", "nav.crmLeads"), "Новые лиды");
+    assert.equal(
+      translateMessage("ru", "nav.clientInvitations"),
+      "Приглашения клиентов",
+    );
     assert.equal(translateMessage("ru", "nav.relocation"), "Эмиграция");
     assert.match(translateMessage("ru", "nav.checkupsErevan"), /Ереван/);
     assert.equal(translateMessage("ru", "nav.analytics"), "Аналитика");

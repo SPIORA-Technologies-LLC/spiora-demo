@@ -20,6 +20,7 @@ const PUBLIC_PATHS = [
 const PROTECTED_PREFIXES = [
   "/dashboard",
   "/clients",
+  "/client-invitations",
   "/new-formgrid-clients",
   "/crm",
   "/ai-workspace",
@@ -166,6 +167,8 @@ export const config = {
     "/dashboard/:path*",
     "/clients",
     "/clients/:path*",
+    "/client-invitations",
+    "/client-invitations/:path*",
     "/new-formgrid-clients",
     "/new-formgrid-clients/:path*",
     "/crm",

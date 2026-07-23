@@ -32,6 +32,7 @@ describe("auth permissions", () => {
       assert.equal(hrefs.includes("/crm/leads"), false);
       assert.equal(hrefs.includes("/new-formgrid-clients"), false);
       assert.equal(hrefs.includes("/clients/intake"), true);
+      assert.equal(hrefs.includes("/client-invitations"), true);
     }
   });
 });

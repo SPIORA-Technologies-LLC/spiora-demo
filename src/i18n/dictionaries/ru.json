@@ -5,6 +5,7 @@
   "nav": {
     "dashboard": "Центр управления",
     "clients": "Клиенты",
+    "clientInvitations": "Приглашения клиентов",
     "clientIntake": "Новые клиенты из анкеты",
     "tasks": "Задачи",
     "calendar": "Календарь",

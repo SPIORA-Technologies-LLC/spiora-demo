@@ -5,6 +5,7 @@
   "nav": {
     "dashboard": "Command Center",
     "clients": "Clients",
+    "clientInvitations": "Client invitations",
     "clientIntake": "Questionnaire intake",
     "tasks": "Tasks",
     "calendar": "Calendar",

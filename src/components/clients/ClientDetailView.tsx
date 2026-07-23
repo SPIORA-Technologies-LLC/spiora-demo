@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import type { ClientDetail } from "@/lib/google-sheets/types";
-import { getClientSheetFields } from "@/lib/google-sheets/client-detail-fields";
-import { translateClientStatus } from "@/i18n/statuses";
-import type { AppLocale } from "@/i18n/config";
 import { Card } from "@/components/ui/Card";
 import { ClientAiActions } from "./ClientAiPanel";
+import { ClientCrmProfile } from "./ClientCrmProfile";
 import { ClientDocuments } from "./ClientDocuments";
 import { ClientNotes } from "./ClientNotes";
 import styles from "./ClientDetailView.module.css";
@@ -15,12 +13,8 @@ type ClientDetailViewProps = {
 };
 
 export async function ClientDetailView({ detail }: ClientDetailViewProps) {
-  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("clients.detail");
-  const tFields = await getTranslations("clients.fields");
   const { client, surveys, documents, notes } = detail;
-  const sheetFields = getClientSheetFields(client);
-  const statusLabel = translateClientStatus(locale, client.status);
 
   return (
     <div className={styles.page}>
@@ -28,53 +22,13 @@ export async function ClientDetailView({ detail }: ClientDetailViewProps) {
         <i className="fa-solid fa-arrow-left" aria-hidden /> {t("backToList")}
       </Link>
 
-      <div className={styles.summary}>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>{t("fullName")}</span>
-          <span className={styles.fieldValue}>{client.name}</span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>{t("passport")}</span>
-          <span className={styles.fieldValue}>
-            {client.passportNumber ?? client.id}
-          </span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>{t("status")}</span>
-          <span className={styles.fieldValue}>
-            <span className={styles.statusBadge}>{statusLabel}</span>
-          </span>
-        </div>
-        <div className={styles.fieldRow}>
-          <span className={styles.fieldLabel}>{t("source")}</span>
-          <span className={styles.fieldValue}>
-            {detail.source === "postgresql"
-              ? t("sourcePostgresql")
-              : detail.source === "google_sheets"
-                ? t("sourceSheets")
-                : t("sourceDemo")}
-            {client.rowIndex
-              ? ` · ${t("rowIndex", { index: client.rowIndex })}`
-              : null}
-          </span>
-        </div>
-      </div>
+      <ClientCrmProfile
+        client={client}
+        source={detail.source}
+        rowIndex={client.rowIndex}
+      />
 
       <div className={styles.detailLayout}>
-        <Card className={styles.panel}>
-          <h2 className={styles.panelTitle}>{t("sheetData")}</h2>
-          <div className={styles.fieldGrid}>
-            {sheetFields.map((field) => (
-              <div key={field.labelKey} className={styles.fieldRow}>
-                <span className={styles.fieldLabel}>
-                  {tFields(field.labelKey)}
-                </span>
-                <span className={styles.fieldValue}>{field.value}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
         {surveys.length > 0 ? (
           <Card className={styles.panel}>
             <h2 className={styles.panelTitle}>{t("surveys")}</h2>

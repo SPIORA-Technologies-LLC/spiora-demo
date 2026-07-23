@@ -385,6 +385,25 @@
       "next": "Next"
     },
     "openCardAria": "Open client card {name}",
+    "edit": {
+      "edit": "Edit",
+      "save": "Save",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "hint": "Update the fields and click Save.",
+      "fields": {
+        "phone": "Phone",
+        "citizenship": "Citizenship",
+        "country": "Country of residence",
+        "direction": "Destination"
+      },
+      "errors": {
+        "nameRequired": "Enter full name",
+        "saveFailed": "Could not save changes",
+        "storageUnavailable": "CRM is unavailable. Check the database connection.",
+        "forbidden": "You do not have permission to edit clients"
+      }
+    },
     "errors": {
       "loadFailed": "Failed to load clients"
     },

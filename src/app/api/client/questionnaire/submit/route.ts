@@ -1,6 +1,11 @@
 import { getClientSession } from "@/lib/client-portal/session";
 import { submitClientQuestionnaire } from "@/lib/client-portal/questionnaire";
 import { clientApiError, clientApiOk } from "@/lib/client-portal/api-errors";
+import {
+  buildValidationFailurePayload,
+  logQuestionnaireValidationFailure,
+} from "@/lib/client-portal/questionnaire-validation-payload";
+import type { ValidationErrorItem } from "@/lib/client-portal/questionnaire-types";
 
 export const dynamic = "force-dynamic";
 
@@ -25,14 +30,36 @@ export async function POST() {
         : result.code === "QUESTIONNAIRE_ACCESS_DENIED"
           ? 403
           : 400;
+
+    if (result.code === "QUESTIONNAIRE_VALIDATION_FAILED") {
+      const errors =
+        "errors" in result
+          ? ((result.errors ?? []) as ValidationErrorItem[])
+          : [];
+      logQuestionnaireValidationFailure(errors);
+      const payload = buildValidationFailurePayload(errors);
+      return Response.json(
+        {
+          error: {
+            code: payload.code,
+            message: payload.message,
+          },
+          invalidFields: payload.invalidFields,
+          invalidFieldDetails: payload.invalidFieldDetails,
+          errors: payload.errors,
+        },
+        {
+          status,
+          headers: { "Cache-Control": "no-store" },
+        },
+      );
+    }
+
     return Response.json(
       {
         error: {
           code: result.code,
-          message:
-            result.code === "QUESTIONNAIRE_VALIDATION_FAILED"
-              ? "Questionnaire validation failed"
-              : undefined,
+          message: undefined,
         },
         errors: "errors" in result ? (result.errors ?? []) : [],
       },

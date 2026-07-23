@@ -66,7 +66,7 @@ const MESSAGES: Record<ClientApiErrorCode, string> = {
   QUESTIONNAIRE_SCHEMA_INVALID: "Questionnaire schema is invalid",
   QUESTIONNAIRE_READ_ONLY: "Questionnaire is read-only",
   QUESTIONNAIRE_REVISION_CONFLICT: "Questionnaire revision conflict",
-  QUESTIONNAIRE_VALIDATION_FAILED: "Questionnaire validation failed",
+  QUESTIONNAIRE_VALIDATION_FAILED: "Questionnaire contains invalid answers.",
   QUESTIONNAIRE_FIELD_UNKNOWN: "Questionnaire field is unknown",
   QUESTIONNAIRE_VALUE_INVALID: "Questionnaire value is invalid",
   QUESTIONNAIRE_PAYLOAD_TOO_LARGE: "Questionnaire payload is too large",

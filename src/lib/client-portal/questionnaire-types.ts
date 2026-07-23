@@ -142,11 +142,37 @@ export type QuestionnairePublicState =
   | "locked"
   | "archived";
 
+/**
+ * Machine-readable validation reasons for client UX.
+ * Extend this union when adding new remediation copy — UI maps by reason key.
+ */
+export type ValidationReasonCode =
+  | "OPTION_NO_LONGER_EXISTS"
+  | "VALUE_DEPRECATED"
+  | "INVALID_COUNTRY"
+  | "INVALID_CURRENCY"
+  | "MISSING_REQUIRED"
+  | "INVALID_DOCUMENT"
+  | "SCHEMA_VERSION_MISMATCH"
+  | "INVALID_FORMAT"
+  | "UNKNOWN";
+
 export type ValidationErrorItem = {
   sectionId: string;
   questionId: string;
   code: string;
   message: string;
+  /** Stable reason for localized UX; optional for backward compatibility. */
+  reason?: ValidationReasonCode;
+  /** Localized field label at validation time. */
+  fieldLabel?: string;
+};
+
+export type ValidationFieldDetail = {
+  field: string;
+  section: string;
+  reason: ValidationReasonCode;
+  label?: string;
 };
 
 export type PatchAnswerOperation =

@@ -9,6 +9,7 @@ import {
   QUESTIONNAIRE_LIMITS,
 } from "./questionnaire-types";
 import { canonicalizeJson } from "./questionnaire-schema-hash";
+import { flattenQuestions } from "./questionnaire-flatten";
 
 export {
   canonicalizeJson,
@@ -18,21 +19,11 @@ export {
   GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY,
 } from "./questionnaire-schema-hash";
 
+export { flattenQuestions } from "./questionnaire-flatten";
+
 /** @deprecated Prefer canonicalizeJson — kept for existing call sites. */
 export function canonicalizeSchema(schema: QuestionnaireSchema): string {
   return canonicalizeJson(schema);
-}
-
-export function flattenQuestions(
-  schema: QuestionnaireSchema,
-): Map<string, QuestionDefinition & { sectionId: string }> {
-  const map = new Map<string, QuestionDefinition & { sectionId: string }>();
-  for (const section of schema.sections) {
-    for (const question of section.questions) {
-      map.set(question.id, { ...question, sectionId: section.id });
-    }
-  }
-  return map;
 }
 
 export function getOrderedSections(

@@ -5,7 +5,11 @@ import { useLocale, useTranslations } from "next-intl";
 import styles from "./ClientQuestionnairePage.module.css";
 import { buildReviewSections } from "@/lib/client-portal/questionnaire-review";
 import { isQuestionVisible } from "@/lib/client-portal/questionnaire-visibility";
-import { DISPLAY_ONLY_TYPES } from "@/lib/client-portal/questionnaire-types";
+import {
+  DISPLAY_ONLY_TYPES,
+  type ValidationErrorItem,
+  type ValidationReasonCode,
+} from "@/lib/client-portal/questionnaire-types";
 import { initialQuestionnaireSaveState } from "@/lib/client-portal/questionnaire-save-state";
 import {
   countCompletedSections,
@@ -19,6 +23,17 @@ import {
   applyLocalAnswerOperation,
   type AnswerPatchOperation,
 } from "@/lib/client-portal/questionnaire-answer-buffer";
+import {
+  buildSectionFocusHref,
+  clearValidationSession,
+  fieldLabelFromSchema,
+  getNextValidationError,
+  orderValidationErrors,
+  readFocusQuestionIdFromSearch,
+  readValidationSession,
+  revalidateAnswersLocally,
+  writeValidationSession,
+} from "@/lib/client-portal/questionnaire-validation-ui";
 
 type SchemaSection = {
   id: string;
@@ -123,7 +138,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [saving, setSaving] = useState<"idle" | "saving" | "saved" | "error" | "conflict">("idle");
   const [saveErrorCode, setSaveErrorCode] = useState<string | null>(null);
   const [localAnswers, setLocalAnswers] = useState<Record<string, unknown>>({});
-  const [errors, setErrors] = useState<Array<{ sectionId: string; questionId: string; message: string }>>([]);
+  const [errors, setErrors] = useState<ValidationErrorItem[]>([]);
+  const [validationGateActive, setValidationGateActive] = useState(false);
+  const [validationLiveMessage, setValidationLiveMessage] = useState("");
+  const [showUpdatedBanner, setShowUpdatedBanner] = useState(false);
   const [uploadingById, setUploadingById] = useState<Record<string, boolean>>({});
   const [uploadErrorById, setUploadErrorById] = useState<Record<string, string>>({});
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -133,6 +151,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const saveInFlightRef = useRef(false);
   const saveAgainRef = useRef(false);
   const sectionTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const focusAppliedRef = useRef(false);
+  const validationGateRef = useRef(false);
 
   async function load() {
     setLoading(true);
@@ -175,6 +195,34 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   useEffect(() => {
     dataRef.current = data;
   }, [data]);
+
+  useEffect(() => {
+    validationGateRef.current = validationGateActive;
+  }, [validationGateActive]);
+
+  useEffect(() => {
+    if (loading) return;
+    const stored = readValidationSession();
+    if (stored?.gateActive && stored.errors.length > 0) {
+      setErrors(stored.errors);
+      setValidationGateActive(true);
+      setValidationLiveMessage(
+        t("validation.announceErrors", { count: stored.errors.length }),
+      );
+    }
+
+    if (focusAppliedRef.current) return;
+    const focusId =
+      readFocusQuestionIdFromSearch(window.location.search) ||
+      stored?.focusQuestionId ||
+      null;
+    if (!focusId || reviewMode) return;
+    focusAppliedRef.current = true;
+    const timer = window.setTimeout(() => {
+      focusFirstInvalid(focusId);
+    }, 50);
+    return () => window.clearTimeout(timer);
+  }, [loading, reviewMode, t]);
 
   const orderedSections = useMemo(() => {
     if (!data) return [] as SchemaSection[];
@@ -378,6 +426,34 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       localAnswersRef.current = next;
       dirtyQuestionIdsRef.current.add(questionId);
       scheduleSave();
+
+      const current = dataRef.current;
+      if (validationGateRef.current && current?.template?.schema) {
+        const nextErrors = revalidateAnswersLocally(
+          current.template.schema as never,
+          next,
+          locale,
+        );
+        queueMicrotask(() => {
+          setErrors(nextErrors);
+          if (nextErrors.length === 0) {
+            setValidationGateActive(false);
+            setShowUpdatedBanner(true);
+            setValidationLiveMessage(t("validation.questionnaireUpdated"));
+            clearValidationSession();
+          } else {
+            writeValidationSession({
+              errors: nextErrors,
+              focusQuestionId: questionId,
+              gateActive: true,
+            });
+            setValidationLiveMessage(
+              t("validation.announceErrors", { count: nextErrors.length }),
+            );
+          }
+        });
+      }
+
       return next;
     });
   }
@@ -446,7 +522,84 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
 
   function focusFirstInvalid(questionId: string) {
     const el = document.getElementById(`question-${questionId}`);
-    if (el instanceof HTMLElement) el.focus();
+    if (el instanceof HTMLElement) {
+      el.focus();
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
+  function reasonMessage(reason: ValidationReasonCode | undefined, fallback: string) {
+    if (!reason) return fallback;
+    try {
+      return t(`validation.reasons.${reason}` as never);
+    } catch {
+      return fallback || t("validation.invalidOption");
+    }
+  }
+
+  function errorFieldLabel(error: ValidationErrorItem): string {
+    if (error.fieldLabel) return error.fieldLabel;
+    if (!data) return error.questionId;
+    return fieldLabelFromSchema(data.template.schema as never, error.questionId, locale);
+  }
+
+  function persistValidationGate(nextErrors: ValidationErrorItem[], focusQuestionId: string | null) {
+    const ordered = data
+      ? orderValidationErrors(data.template.schema as never, nextErrors)
+      : nextErrors;
+    setErrors(ordered);
+    setValidationGateActive(ordered.length > 0);
+    setShowUpdatedBanner(false);
+    if (ordered.length === 0) {
+      clearValidationSession();
+      setValidationLiveMessage(t("validation.questionnaireUpdated"));
+      return;
+    }
+    writeValidationSession({
+      errors: ordered,
+      focusQuestionId,
+      gateActive: true,
+    });
+    setValidationLiveMessage(
+      t("validation.announceErrors", { count: ordered.length }),
+    );
+  }
+
+  function jumpToValidationError(error: ValidationErrorItem | null) {
+    if (!error?.sectionId) return;
+    writeValidationSession({
+      errors,
+      focusQuestionId: error.questionId,
+      gateActive: true,
+    });
+    window.location.href = buildSectionFocusHref(error.sectionId, error.questionId);
+  }
+
+  function fixValidationErrors() {
+    const first =
+      data
+        ? orderValidationErrors(data.template.schema as never, errors)[0]
+        : errors[0];
+    jumpToValidationError(first ?? null);
+  }
+
+  function goToNextValidationError() {
+    if (!data) return;
+    const currentFocus =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement.id.replace(/^question-/, "")
+        : null;
+    const next = getNextValidationError(
+      data.template.schema as never,
+      errors,
+      currentFocus,
+    );
+    if (!next) return;
+    if (next.sectionId === currentSectionId) {
+      focusFirstInvalid(next.questionId);
+      return;
+    }
+    jumpToValidationError(next);
   }
 
   function validateCurrentSection(): boolean {
@@ -455,7 +608,14 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       currentSection,
       localAnswers,
       locale,
-    );
+    ).map((error) => ({
+      sectionId: error.sectionId,
+      questionId: error.questionId,
+      code: "REQUIRED",
+      message: error.message,
+      reason: "MISSING_REQUIRED" as const,
+      fieldLabel: error.message.replace(/ is required$/i, "") || error.questionId,
+    }));
     setErrors(sectionErrors);
     if (sectionErrors.length > 0) {
       const first = sectionErrors[0];
@@ -494,24 +654,46 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     if (!saved) return;
     const res = await fetch("/api/client/questionnaire/submit", { method: "POST" });
     if (res.ok) {
+      clearValidationSession();
       window.location.href = "/client/questionnaire/submitted";
       return;
     }
     const json = (await res.json()) as {
-      errors?: Array<{ sectionId: string; questionId: string; message: string }>;
-      error?: { code?: string };
+      errors?: ValidationErrorItem[];
+      invalidFields?: string[];
+      invalidFieldDetails?: Array<{
+        field: string;
+        section: string;
+        reason: ValidationReasonCode;
+        label?: string;
+      }>;
+      error?: { code?: string; message?: string };
     };
     if (json.error?.code === "QUESTIONNAIRE_ALREADY_SUBMITTED") {
+      clearValidationSession();
       window.location.href = "/client/questionnaire/submitted";
       return;
     }
-    const nextErrors = json.errors ?? [];
-    setErrors(nextErrors);
-    const first = nextErrors[0];
-    if (first?.sectionId) {
-      window.location.href = `/client/questionnaire/${first.sectionId}`;
-      setTimeout(() => focusFirstInvalid(first.questionId), 0);
+    if (json.error?.code !== "QUESTIONNAIRE_VALIDATION_FAILED") {
+      return;
     }
+
+    const nextErrors =
+      json.errors && json.errors.length > 0
+        ? json.errors
+        : (json.invalidFieldDetails ?? []).map((detail) => ({
+            sectionId: detail.section,
+            questionId: detail.field,
+            code: "INVALID_OPTION",
+            message: detail.label ?? detail.field,
+            reason: detail.reason,
+            fieldLabel: detail.label,
+          }));
+
+    const ordered = data
+      ? orderValidationErrors(data.template.schema as never, nextErrors)
+      : nextErrors;
+    persistValidationGate(ordered, ordered[0]?.questionId ?? null);
   }
 
   async function returnToEditing() {
@@ -519,6 +701,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     if (status === "in_review") {
       const res = await fetch("/api/client/questionnaire/reopen", { method: "POST" });
       if (!res.ok) return;
+    }
+    if (validationGateActive && errors.length > 0) {
+      fixValidationErrors();
+      return;
     }
     const fallbackId = orderedSections[orderedSections.length - 1]?.id;
     const targetId =
@@ -547,6 +733,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     );
   }, [data, reviewMode, localAnswers, locale]);
 
+  const orderedValidationErrors = useMemo(() => {
+    if (!data || errors.length === 0) return errors;
+    return orderValidationErrors(data.template.schema as never, errors);
+  }, [data, errors]);
+
   const isSubmitted =
     data?.questionnaire.status === "submitted" || data?.questionnaire.status === "locked";
   const canSubmitFromReview =
@@ -554,7 +745,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     (data?.questionnaire.status === "draft" ||
       data?.questionnaire.status === "not_started" ||
       data?.questionnaire.status === "in_review") &&
-    incompleteRequired.length === 0;
+    incompleteRequired.length === 0 &&
+    !(validationGateActive && orderedValidationErrors.length > 0);
 
   if (loading) {
     return <div className={styles.page}><p>{t("loading")}</p></div>;
@@ -622,6 +814,9 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       </aside>
 
       <main className={styles.main}>
+        <div className={styles.srOnly} aria-live="polite" aria-atomic="true">
+          {validationLiveMessage}
+        </div>
         <header className={styles.header}>
           <h1>{data.template.schema.title[locale]}</h1>
           <p>{t(`status.${data.questionnaire.status}` as never)}</p>
@@ -632,24 +827,53 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
           </p>
         </header>
 
-        {errors.length > 0 ? (
-          <section className={styles.errorSummary}>
-            <h2>{t("errorSummaryTitle")}</h2>
+        {showUpdatedBanner ? (
+          <section className={styles.updatedBanner} role="status">
+            <p>{t("validation.questionnaireUpdated")}</p>
+          </section>
+        ) : null}
+
+        {orderedValidationErrors.length > 0 ? (
+          <section className={styles.errorSummary} aria-labelledby="validation-summary-title">
+            <h2 id="validation-summary-title">
+              {validationGateActive
+                ? t("validation.summaryTitle")
+                : t("errorSummaryTitle")}
+            </h2>
+            {validationGateActive ? (
+              <p className={styles.reviewIntro}>{t("validation.summaryIntro")}</p>
+            ) : null}
+            <p className={styles.validationListTitle}>{t("validation.updateRequiredTitle")}</p>
             <ul>
-              {errors.map((error) => (
+              {orderedValidationErrors.map((error) => (
                 <li key={`${error.sectionId}:${error.questionId}`}>
                   <button
                     type="button"
-                    onClick={() => {
-                      window.location.href = `/client/questionnaire/${error.sectionId}`;
-                      setTimeout(() => focusFirstInvalid(error.questionId), 0);
-                    }}
+                    onClick={() => jumpToValidationError(error)}
                   >
-                    {error.message}
+                    {errorFieldLabel(error)}
                   </button>
                 </li>
               ))}
             </ul>
+            <div className={styles.validationActions}>
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                onClick={fixValidationErrors}
+              >
+                {t("validation.fixErrors")}
+              </button>
+              {!reviewMode && orderedValidationErrors.length > 1 ? (
+                <button
+                  type="button"
+                  className={styles.secondaryBtn}
+                  onClick={goToNextValidationError}
+                >
+                  {t("validation.nextError")}
+                </button>
+              ) : null}
+            </div>
           </section>
         ) : null}
 
@@ -669,8 +893,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                       <button
                         type="button"
                         onClick={() => {
-                          window.location.href = `/client/questionnaire/${item.sectionId}`;
-                          setTimeout(() => focusFirstInvalid(item.questionId), 0);
+                          window.location.href = buildSectionFocusHref(
+                            item.sectionId,
+                            item.questionId,
+                          );
                         }}
                       >
                         {item.sectionTitle}: {item.label}
@@ -678,6 +904,27 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     </li>
                   ))}
                 </ul>
+              </section>
+            ) : null}
+            {validationGateActive && orderedValidationErrors.length > 0 ? (
+              <section className={styles.reviewWarning} role="alert">
+                <h2>{t("validation.reviewWarningTitle")}</h2>
+                <p className={styles.reviewIntro}>{t("validation.reviewWarningIntro")}</p>
+                <p className={styles.validationListTitle}>{t("validation.updateRequiredTitle")}</p>
+                <ul>
+                  {orderedValidationErrors.map((error) => (
+                    <li key={`review-${error.sectionId}:${error.questionId}`}>
+                      {errorFieldLabel(error)}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  onClick={fixValidationErrors}
+                >
+                  {t("validation.fixErrors")}
+                </button>
               </section>
             ) : null}
             {reviewSections.map((section) => (
@@ -711,7 +958,16 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 >
                   {t("submitQuestionnaire")}
                 </button>
-              ) : null}
+              ) : (
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  disabled
+                  aria-disabled="true"
+                >
+                  {t("submitQuestionnaire")}
+                </button>
+              )}
             </div>
           </section>
         ) : currentSection ? (
@@ -745,7 +1001,15 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                   ) : null}
                 </div>
               ) : (
-              <div key={q.id} className={styles.field}>
+              <div
+                key={q.id}
+                className={[
+                  styles.field,
+                  errors.some((err) => err.questionId === q.id) ? styles.fieldInvalid : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+              >
                 {q.type === "file" ? (
                   <span className={styles.fieldLabel}>
                     {q.label[locale]}{q.required ? " *" : ""}
@@ -1009,8 +1273,15 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                   </span>
                 ) : null}
                 {errors.find((err) => err.questionId === q.id) ? (
-                  <span id={`error-${q.id}`} className={styles.errorText}>
-                    {errors.find((err) => err.questionId === q.id)?.message}
+                  <span id={`error-${q.id}`} className={styles.errorText} role="alert">
+                    <span className={styles.errorIcon} aria-hidden="true">
+                      !
+                    </span>
+                    {reasonMessage(
+                      errors.find((err) => err.questionId === q.id)?.reason,
+                      errors.find((err) => err.questionId === q.id)?.message ||
+                        t("validation.invalidOption"),
+                    )}
                   </span>
                 ) : null}
               </div>

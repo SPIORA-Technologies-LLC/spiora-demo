@@ -1,10 +1,10 @@
 import type {
-  LocaleLabel,
-  PatchAnswerOperation,
   QuestionDefinition,
   QuestionnaireAnswers,
   QuestionnaireSchema,
   ValidationErrorItem,
+  ValidationReasonCode,
+  PatchAnswerOperation,
 } from "./questionnaire-types";
 import {
   DISPLAY_ONLY_TYPES,
@@ -15,9 +15,10 @@ import {
   isEmptyAnswer,
   normalizeScalarString,
 } from "./questionnaire-empty-values";
-import { flattenQuestions } from "./questionnaire-schema";
+import { flattenQuestions } from "./questionnaire-flatten";
 import { isQuestionVisible } from "./questionnaire-visibility";
 import { isQuestionnaireFileAnswer } from "./questionnaire-attachment-formats";
+import { mapValidationCodeToReason } from "./questionnaire-validation-payload";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[+]?[\d\s()-]{6,20}$/;
@@ -26,6 +27,29 @@ const COUNTRY_RE = /^[A-Z]{2}$/;
 
 function labelFor(question: QuestionDefinition, locale: "en" | "ru"): string {
   return question.label[locale] || question.label.en || question.id;
+}
+
+function pushError(
+  errors: ValidationErrorItem[],
+  input: {
+    sectionId: string;
+    questionId: string;
+    code: string;
+    message: string;
+    fieldLabel?: string;
+    reason?: ValidationReasonCode;
+  },
+) {
+  errors.push({
+    sectionId: input.sectionId,
+    questionId: input.questionId,
+    code: input.code,
+    message: input.message,
+    fieldLabel: input.fieldLabel,
+    reason:
+      input.reason ??
+      mapValidationCodeToReason(input.code, input.questionId),
+  });
 }
 
 export function validateAnswersAgainstSchema(
@@ -37,21 +61,23 @@ export function validateAnswersAgainstSchema(
   const questions = flattenQuestions(schema);
 
   if (Object.keys(answers).length > QUESTIONNAIRE_LIMITS.maxAnswerKeys) {
-    errors.push({
+    pushError(errors, {
       sectionId: schema.sections[0]?.id ?? "unknown",
       questionId: "_payload",
       code: "QUESTIONNAIRE_PAYLOAD_TOO_LARGE",
       message: "Too many answer fields",
+      reason: "INVALID_FORMAT",
     });
     return errors;
   }
 
   if (answersJsonByteSize(answers) > QUESTIONNAIRE_LIMITS.maxAnswersJsonBytes) {
-    errors.push({
+    pushError(errors, {
       sectionId: schema.sections[0]?.id ?? "unknown",
       questionId: "_payload",
       code: "QUESTIONNAIRE_PAYLOAD_TOO_LARGE",
       message: "Answers payload too large",
+      reason: "INVALID_FORMAT",
     });
     return errors;
   }
@@ -59,20 +85,22 @@ export function validateAnswersAgainstSchema(
   for (const [questionId, value] of Object.entries(answers)) {
     const q = questions.get(questionId);
     if (!q) {
-      errors.push({
+      pushError(errors, {
         sectionId: "unknown",
         questionId,
         code: "QUESTIONNAIRE_FIELD_UNKNOWN",
         message: `Unknown field: ${questionId}`,
+        reason: "UNKNOWN",
       });
       continue;
     }
     if (DISPLAY_ONLY_TYPES.has(q.type)) {
-      errors.push({
+      pushError(errors, {
         sectionId: q.sectionId,
         questionId,
         code: "QUESTIONNAIRE_FIELD_UNKNOWN",
         message: `Display-only field cannot be answered: ${questionId}`,
+        reason: "UNKNOWN",
       });
     }
   }
@@ -89,11 +117,13 @@ export function validateAnswersAgainstSchema(
     }
 
     if (q.required && isEmptyAnswer(value)) {
-      errors.push({
+      pushError(errors, {
         sectionId: q.sectionId,
         questionId,
         code: "REQUIRED",
         message: `${label} is required`,
+        fieldLabel: label,
+        reason: "MISSING_REQUIRED",
       });
       continue;
     }
@@ -102,11 +132,13 @@ export function validateAnswersAgainstSchema(
 
     const typeError = validateValueType(q, value, locale);
     if (typeError) {
-      errors.push({
+      pushError(errors, {
         sectionId: q.sectionId,
         questionId,
         code: typeError.code,
         message: typeError.message,
+        fieldLabel: label,
+        reason: typeError.reason,
       });
     }
   }
@@ -118,7 +150,7 @@ function validateValueType(
   q: QuestionDefinition & { sectionId: string },
   value: unknown,
   locale: "en" | "ru",
-): { code: string; message: string } | null {
+): { code: string; message: string; reason: ValidationReasonCode } | null {
   const label = labelFor(q, locale);
   const v = q.validation;
 
@@ -129,93 +161,177 @@ function validateValueType(
     case "phone":
     case "country": {
       if (typeof value !== "string") {
-        return { code: "QUESTIONNAIRE_VALUE_INVALID", message: `${label} must be text` };
+        return {
+          code: "QUESTIONNAIRE_VALUE_INVALID",
+          message: `${label} must be text`,
+          reason: "INVALID_FORMAT",
+        };
       }
       const s = normalizeScalarString(value);
       if (!s) return null;
       if (s.length > (v?.maxLength ?? QUESTIONNAIRE_LIMITS.maxStringLength)) {
-        return { code: "MAX_LENGTH", message: `${label} is too long` };
+        return {
+          code: "MAX_LENGTH",
+          message: `${label} is too long`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (v?.minLength && s.length < v.minLength) {
-        return { code: "MIN_LENGTH", message: `${label} is too short` };
+        return {
+          code: "MIN_LENGTH",
+          message: `${label} is too short`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (q.type === "email" && !EMAIL_RE.test(s)) {
-        return { code: "INVALID_EMAIL", message: `${label} must be a valid email` };
+        return {
+          code: "INVALID_EMAIL",
+          message: `${label} must be a valid email`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (q.type === "phone" && !PHONE_RE.test(s)) {
-        return { code: "INVALID_PHONE", message: `${label} must be a valid phone` };
+        return {
+          code: "INVALID_PHONE",
+          message: `${label} must be a valid phone`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (q.type === "country" && !COUNTRY_RE.test(s)) {
-        return { code: "INVALID_COUNTRY", message: `${label} must be ISO country code` };
+        return {
+          code: "INVALID_COUNTRY",
+          message: `${label} must be ISO country code`,
+          reason: "INVALID_COUNTRY",
+        };
       }
       return null;
     }
     case "number": {
       if (typeof value !== "number" || Number.isNaN(value)) {
-        return { code: "QUESTIONNAIRE_VALUE_INVALID", message: `${label} must be a number` };
+        return {
+          code: "QUESTIONNAIRE_VALUE_INVALID",
+          message: `${label} must be a number`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (v?.integer && !Number.isInteger(value)) {
-        return { code: "INVALID_INTEGER", message: `${label} must be an integer` };
+        return {
+          code: "INVALID_INTEGER",
+          message: `${label} must be an integer`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (v?.min !== undefined && value < v.min) {
-        return { code: "MIN_VALUE", message: `${label} is below minimum` };
+        return {
+          code: "MIN_VALUE",
+          message: `${label} is below minimum`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (v?.max !== undefined && value > v.max) {
-        return { code: "MAX_VALUE", message: `${label} is above maximum` };
+        return {
+          code: "MAX_VALUE",
+          message: `${label} is above maximum`,
+          reason: "INVALID_FORMAT",
+        };
       }
       return null;
     }
     case "date": {
       if (typeof value !== "string" || !DATE_RE.test(value)) {
-        return { code: "INVALID_DATE", message: `${label} must be YYYY-MM-DD` };
+        return {
+          code: "INVALID_DATE",
+          message: `${label} must be YYYY-MM-DD`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (v?.minDate && value < v.minDate) {
-        return { code: "MIN_DATE", message: `${label} is too early` };
+        return {
+          code: "MIN_DATE",
+          message: `${label} is too early`,
+          reason: "INVALID_FORMAT",
+        };
       }
       if (v?.maxDate && value > v.maxDate) {
-        return { code: "MAX_DATE", message: `${label} is too late` };
+        return {
+          code: "MAX_DATE",
+          message: `${label} is too late`,
+          reason: "INVALID_FORMAT",
+        };
       }
       return null;
     }
     case "select":
     case "radio": {
       if (typeof value !== "string") {
-        return { code: "QUESTIONNAIRE_VALUE_INVALID", message: `${label} invalid` };
+        return {
+          code: "QUESTIONNAIRE_VALUE_INVALID",
+          message: `${label} invalid`,
+          reason: "INVALID_FORMAT",
+        };
       }
       const allowed = new Set(q.options?.map((o) => o.value));
       if (!allowed.has(value)) {
-        return { code: "INVALID_OPTION", message: `${label} has invalid option` };
+        return {
+          code: "INVALID_OPTION",
+          message: `${label} has invalid option`,
+          reason: mapValidationCodeToReason("INVALID_OPTION", q.id),
+        };
       }
       return null;
     }
     case "multiselect":
     case "checkbox": {
       if (!Array.isArray(value) || !value.every((x) => typeof x === "string")) {
-        return { code: "QUESTIONNAIRE_VALUE_INVALID", message: `${label} must be array` };
+        return {
+          code: "QUESTIONNAIRE_VALUE_INVALID",
+          message: `${label} must be array`,
+          reason: "INVALID_FORMAT",
+        };
       }
       const allowed = new Set(q.options?.map((o) => o.value));
       for (const item of value) {
         if (!allowed.has(item)) {
-          return { code: "INVALID_OPTION", message: `${label} has invalid option` };
+          return {
+            code: "INVALID_OPTION",
+            message: `${label} has invalid option`,
+            reason: mapValidationCodeToReason("INVALID_OPTION", q.id),
+          };
         }
       }
       if (v?.maxSelections && value.length > v.maxSelections) {
-        return { code: "MAX_SELECTIONS", message: `${label} has too many selections` };
+        return {
+          code: "MAX_SELECTIONS",
+          message: `${label} has too many selections`,
+          reason: "INVALID_FORMAT",
+        };
       }
       return null;
     }
     case "boolean": {
       if (typeof value !== "boolean") {
-        return { code: "QUESTIONNAIRE_VALUE_INVALID", message: `${label} must be boolean` };
+        return {
+          code: "QUESTIONNAIRE_VALUE_INVALID",
+          message: `${label} must be boolean`,
+          reason: "INVALID_FORMAT",
+        };
       }
       return null;
     }
     case "file": {
       if (!isQuestionnaireFileAnswer(value)) {
-        return { code: "QUESTIONNAIRE_VALUE_INVALID", message: `${label} must be a file attachment` };
+        return {
+          code: "QUESTIONNAIRE_VALUE_INVALID",
+          message: `${label} must be a file attachment`,
+          reason: "INVALID_DOCUMENT",
+        };
       }
       if (value.fileName.length > 255) {
-        return { code: "MAX_LENGTH", message: `${label} file name is too long` };
+        return {
+          code: "MAX_LENGTH",
+          message: `${label} file name is too long`,
+          reason: "INVALID_DOCUMENT",
+        };
       }
       return null;
     }

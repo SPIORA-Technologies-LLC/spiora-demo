@@ -207,6 +207,9 @@
   flex: 0 0 auto;
   min-height: 5.75rem;
   max-height: 7.5rem;
+  order: -1;
+  padding-bottom: 0.15rem;
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .filmstripCarousel {

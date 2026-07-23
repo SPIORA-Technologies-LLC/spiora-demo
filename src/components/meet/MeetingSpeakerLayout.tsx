@@ -34,7 +34,18 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
       { source: Track.Source.Camera, withPlaceholder: true },
       { source: Track.Source.ScreenShare, withPlaceholder: false },
     ],
-    { updateOnlyOn: [RoomEvent.ActiveSpeakersChanged], onlySubscribed: false },
+    {
+      updateOnlyOn: [
+        RoomEvent.ActiveSpeakersChanged,
+        RoomEvent.ParticipantConnected,
+        RoomEvent.ParticipantDisconnected,
+        RoomEvent.TrackSubscribed,
+        RoomEvent.TrackUnsubscribed,
+        RoomEvent.LocalTrackPublished,
+        RoomEvent.LocalTrackUnpublished,
+      ],
+      onlySubscribed: false,
+    },
   );
 
   const cameraTracks = useMemo(() => pickCameraTracks(tracks), [tracks]);
@@ -164,6 +175,8 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
         .filter(Boolean)
         .join(" ")}
     >
+      {filmstrip}
+
       <div className={styles.speakerMain}>
         {focusTrack ? (
           <FocusLayout
@@ -172,8 +185,6 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
           />
         ) : null}
       </div>
-
-      {filmstrip}
     </div>
   );
 }

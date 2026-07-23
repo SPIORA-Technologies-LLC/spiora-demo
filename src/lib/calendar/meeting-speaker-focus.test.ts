@@ -47,6 +47,30 @@ describe("meeting speaker focus", () => {
     assert.equal(focus?.source, Track.Source.ScreenShare);
   });
 
+  it("follows the loudest active speaker over pin", () => {
+    const cameras = [track("a"), track("b"), track("c")];
+    const focus = resolveSpeakerFocusTrack({
+      cameraTracks: cameras,
+      pinnedTrack: track("a"),
+      activeSpeakers: [speaker("c"), speaker("a")],
+      localParticipantIdentity: "a",
+    });
+
+    assert.equal(focus?.participant.identity, "c");
+  });
+
+  it("uses pin when nobody is speaking", () => {
+    const cameras = [track("a"), track("b")];
+    const focus = resolveSpeakerFocusTrack({
+      cameraTracks: cameras,
+      pinnedTrack: track("b"),
+      activeSpeakers: [],
+      localParticipantIdentity: "a",
+    });
+
+    assert.equal(focus?.participant.identity, "b");
+  });
+
   it("follows the loudest active speaker", () => {
     const cameras = [track("a"), track("b"), track("c")];
     const focus = resolveSpeakerFocusTrack({

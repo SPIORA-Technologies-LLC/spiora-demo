@@ -2,8 +2,8 @@ import type { TrackReferenceOrPlaceholder } from "@livekit/components-core";
 import type { Participant } from "livekit-client";
 import { Track } from "livekit-client";
 
-/** Up to this many cameras use an equal grid; above that, speaker + filmstrip. */
-export const MEETING_GRID_MAX_PARTICIPANTS = 4;
+/** Always use speaker + filmstrip (0 disables equal grid for any size). */
+export const MEETING_GRID_MAX_PARTICIPANTS = 0;
 
 export function pickCameraTracks(
   tracks: TrackReferenceOrPlaceholder[],
@@ -28,16 +28,23 @@ export function resolveSpeakerFocusTrack(params: {
     return params.screenShareTrack;
   }
 
-  if (params.pinnedTrack) {
-    return params.pinnedTrack;
-  }
-
+  // Active speaker always wins so the main stage follows who is talking.
   for (const speaker of params.activeSpeakers) {
     const match = params.cameraTracks.find(
       (track) => track.participant.identity === speaker.identity,
     );
     if (match) {
       return match;
+    }
+  }
+
+  if (params.pinnedTrack) {
+    const stillPresent = params.cameraTracks.some(
+      (track) =>
+        track.participant.identity === params.pinnedTrack?.participant.identity,
+    );
+    if (stillPresent) {
+      return params.pinnedTrack;
     }
   }
 

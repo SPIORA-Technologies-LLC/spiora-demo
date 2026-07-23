@@ -8,6 +8,7 @@ import {
   computeInvitationState,
   generateClientInviteToken,
   hashClientInviteToken,
+  isInternalTestInviteEmail,
   maskEmail,
   normalizeInviteEmail,
   verifyClientInviteToken,
@@ -78,6 +79,12 @@ describe("client invite tokens", () => {
     assert.equal(maskEmail("client@example.com"), "c***@example.com");
     assert.equal(normalizeInviteEmail("  A@B.COM "), "a@b.com");
     assert.equal(normalizeInviteEmail("not-an-email"), null);
+  });
+
+  it("detects internal smoke / example.com invites", () => {
+    assert.equal(isInternalTestInviteEmail("case-smoke-b-1@example.com"), true);
+    assert.equal(isInternalTestInviteEmail("q-smoke-x@example.com"), true);
+    assert.equal(isInternalTestInviteEmail("virineya1983@gmail.com"), false);
   });
 });
 

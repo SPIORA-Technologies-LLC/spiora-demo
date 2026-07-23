@@ -77,6 +77,24 @@ export function normalizeInviteEmail(email: string): string | null {
   return trimmed;
 }
 
+/**
+ * Smoke / staging cutover invites must not clutter the employee UI.
+ * Matches @example.com and common automated smoke email prefixes.
+ */
+export function isInternalTestInviteEmail(email: string): boolean {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return false;
+  if (normalized.endsWith("@example.com")) return true;
+  const local = normalized.split("@")[0] ?? "";
+  return (
+    local.startsWith("smoke-") ||
+    local.startsWith("case-smoke-") ||
+    local.startsWith("q-smoke-") ||
+    local.startsWith("demo-smoke-") ||
+    local.startsWith("bad-")
+  );
+}
+
 export function buildClientInvitePath(token: string): string {
   return `/client/invite/${encodeURIComponent(token)}`;
 }

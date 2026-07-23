@@ -38,6 +38,7 @@ import {
 import {
   computeInvitationState,
   hashClientInviteToken,
+  isInternalTestInviteEmail,
   normalizeInviteEmail,
   type ClientInvitationState,
 } from "./invite-token";
@@ -116,7 +117,8 @@ export async function listClientInvitations(): Promise<InvitationPublicDto[]> {
     ? (await sbListClientInvitations()).map(toRecord)
     : (await localListInvitations()).map(toRecord);
 
-  return mapInvitationRecordsToPublic(rows, assigneeNameResolver);
+  const visible = rows.filter((row) => !isInternalTestInviteEmail(row.email));
+  return mapInvitationRecordsToPublic(visible, assigneeNameResolver);
 }
 
 export async function revokeClientInvitation(

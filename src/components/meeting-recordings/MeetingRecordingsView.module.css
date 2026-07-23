@@ -25,12 +25,6 @@
   max-width: 42rem;
 }
 
-.layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-  gap: 1rem;
-}
-
 .list {
   margin: 0;
   padding: 0;
@@ -38,6 +32,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  max-width: 48rem;
 }
 
 .item {
@@ -113,10 +108,70 @@
   justify-content: center;
 }
 
-.playerPane {
-  position: sticky;
-  top: 1rem;
-  align-self: start;
+.playerOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.playerBackdrop {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.playerModal {
+  position: relative;
+  z-index: 1;
+  width: min(56rem, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: #0b1220;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+}
+
+.playerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.playerTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.playerClose {
+  flex: 0 0 auto;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e5e7eb;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.playerClose:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .player {
@@ -126,16 +181,14 @@
   aspect-ratio: 16 / 9;
 }
 
-.playerPlaceholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.playerLoading {
+  display: grid;
+  place-items: center;
   min-height: 12rem;
-  padding: 1rem;
-  border: 1px dashed var(--border-soft);
+  aspect-ratio: 16 / 9;
   border-radius: var(--radius-sm);
+  background: #111827;
   color: #94a3b8;
-  text-align: center;
 }
 
 .status,
@@ -146,24 +199,23 @@
 
 .error,
 .inlineError {
-  margin: 0.75rem 0 0;
+  margin: 0;
   color: #fca5a5;
   font-size: 0.9rem;
-}
-
-@media (max-width: 960px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-
-  .playerPane {
-    position: static;
-  }
 }
 
 @media (max-width: 640px) {
   .item {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .playerOverlay {
+    padding: 0.5rem;
+    align-items: flex-end;
+  }
+
+  .playerModal {
+    width: 100%;
   }
 }

@@ -47,6 +47,16 @@ export function MeetingRecordingsView() {
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
+  const activeRecording = recordings.find(
+    (recording) => recording.id === activeRecordingId,
+  );
+  const playerOpen = Boolean(activeRecordingId);
+
+  const closePlayer = useCallback(() => {
+    setActiveRecordingId(null);
+    setPlaybackUrl(null);
+  }, []);
+
   const loadRecordings = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -77,6 +87,21 @@ export function MeetingRecordingsView() {
     void loadRecordings();
   }, [loadRecordings]);
 
+  useEffect(() => {
+    if (!playerOpen) {
+      return;
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        closePlayer();
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [closePlayer, playerOpen]);
+
   async function handlePlay(recordingId: string) {
     setActiveRecordingId(recordingId);
     setPlaybackUrl(null);
@@ -92,6 +117,7 @@ export function MeetingRecordingsView() {
 
       if (!response.ok || !payload.playbackUrl) {
         setError(payload.error ?? "Не удалось открыть запись");
+        setActiveRecordingId(null);
         return;
       }
 
@@ -99,6 +125,7 @@ export function MeetingRecordingsView() {
       setError(null);
     } catch {
       setError("Не удалось открыть запись");
+      setActiveRecordingId(null);
     }
   }
 
@@ -124,8 +151,7 @@ export function MeetingRecordingsView() {
       }
 
       if (activeRecordingId === recordingId) {
-        setActiveRecordingId(null);
-        setPlaybackUrl(null);
+        closePlayer();
       }
       setRecordings((prev) => prev.filter((item) => item.id !== recordingId));
     } catch {
@@ -158,7 +184,8 @@ export function MeetingRecordingsView() {
           затем завершите звонок — файл появится здесь с датой сохранения.
         </p>
       ) : (
-        <div className={styles.layout}>
+        <>
+          {error ? <p className={styles.inlineError}>{error}</p> : null}
           <ul className={styles.list}>
             {recordings.map((recording) => (
               <li key={recording.id} className={styles.item}>
@@ -205,26 +232,54 @@ export function MeetingRecordingsView() {
               </li>
             ))}
           </ul>
+        </>
+      )}
 
-          <aside className={styles.playerPane}>
-            {playbackUrl && activeRecordingId ? (
+      {playerOpen ? (
+        <div
+          className={styles.playerOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-label={
+            activeRecording
+              ? `Просмотр: ${activeRecording.eventTitle}`
+              : "Просмотр записи"
+          }
+        >
+          <button
+            type="button"
+            className={styles.playerBackdrop}
+            aria-label="Закрыть просмотр"
+            onClick={closePlayer}
+          />
+          <div className={styles.playerModal}>
+            <div className={styles.playerHeader}>
+              <h2 className={styles.playerTitle}>
+                {activeRecording?.eventTitle ?? "Запись встречи"}
+              </h2>
+              <button
+                type="button"
+                className={styles.playerClose}
+                onClick={closePlayer}
+                aria-label="Закрыть"
+              >
+                ×
+              </button>
+            </div>
+            {playbackUrl ? (
               <video
                 className={styles.player}
                 src={playbackUrl}
                 controls
                 playsInline
+                autoPlay
               />
             ) : (
-              <div className={styles.playerPlaceholder}>
-                Выберите запись и нажмите «Смотреть»
-              </div>
+              <div className={styles.playerLoading}>Загрузка видео…</div>
             )}
-            {error && recordings.length > 0 ? (
-              <p className={styles.inlineError}>{error}</p>
-            ) : null}
-          </aside>
+          </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

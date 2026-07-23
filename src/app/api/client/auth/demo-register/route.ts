@@ -28,8 +28,9 @@ export async function POST(request: Request) {
 
   const email = typeof body.email === "string" ? body.email : "";
   const password = typeof body.password === "string" ? body.password : "";
+  const firstName = typeof body.firstName === "string" ? body.firstName : null;
 
-  const result = await demoRegisterConfirmedClientUser({ email, password });
+  const result = await demoRegisterConfirmedClientUser({ email, password, firstName });
   if (!result.ok) {
     const map: Record<string, Parameters<typeof clientApiError>[0]> = {
       DEMO_AUTH_DISABLED: "FORBIDDEN",

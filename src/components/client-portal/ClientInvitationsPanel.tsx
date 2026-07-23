@@ -47,6 +47,7 @@ export function ClientInvitationsPanel() {
   const [filter, setFilter] = useState<StateFilter>("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
   const [assignedTo, setAssignedTo] = useState("");
   const [preferredLocale, setPreferredLocale] = useState<"ru" | "en">("ru");
   const [serviceType, setServiceType] = useState("residence_permit");
@@ -148,7 +149,18 @@ export function ClientInvitationsPanel() {
         return;
       }
       if (data.inviteUrl) {
-        setCreatedUrl(data.inviteUrl);
+        const cleanedName = firstName.trim();
+        if (cleanedName) {
+          try {
+            const url = new URL(data.inviteUrl, window.location.origin);
+            url.searchParams.set("firstName", cleanedName);
+            setCreatedUrl(url.toString());
+          } catch {
+            setCreatedUrl(data.inviteUrl);
+          }
+        } else {
+          setCreatedUrl(data.inviteUrl);
+        }
       } else if (data.reused) {
         setFormError(t("errors.reusedNoUrl"));
       }
@@ -184,6 +196,7 @@ export function ClientInvitationsPanel() {
     setCopyDone(false);
     setFormError(null);
     setEmail(prefillEmail ?? "");
+    setFirstName("");
     setPreferredLocale(locale === "en" ? "en" : "ru");
     setServiceType("residence_permit");
     setExpiresInDays(7);
@@ -325,6 +338,17 @@ export function ClientInvitationsPanel() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
+                </label>
+                <label>
+                  {t("fields.firstName")}
+                  <input
+                    type="text"
+                    maxLength={80}
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Ольга"
+                  />
+                  <span className={styles.muted}>{t("fields.firstNameHint")}</span>
                 </label>
                 <label>
                   {t("fields.assignee")}

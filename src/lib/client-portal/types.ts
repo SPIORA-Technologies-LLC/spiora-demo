@@ -9,6 +9,8 @@ export type ClientSession = {
   id: string;
   authUserId: string;
   email: string;
+  /** First name from auth metadata when available (set at registration). */
+  firstName: string | null;
   preferredLocale: ClientPortalLocale;
   invitationId: string;
 };

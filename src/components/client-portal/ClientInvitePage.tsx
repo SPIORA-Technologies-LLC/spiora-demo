@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
+import { normalizeName } from "@/lib/client-portal/display-name";
 import {
   createSupabaseBrowserClient,
   isSupabaseBrowserConfigured,
@@ -25,18 +26,34 @@ type Preview =
 
 type Props = { token: string };
 
+function firstNameFromLocation(): string {
+  if (typeof window === "undefined") return "";
+  const params = new URLSearchParams(window.location.search);
+  return (
+    normalizeName(params.get("firstName")) ??
+    normalizeName(params.get("name")) ??
+    ""
+  );
+}
+
 export function ClientInvitePage({ token }: Props) {
   const t = useTranslations("clientPortal.invite");
   const locale = useLocale();
   const [preview, setPreview] = useState<Preview | null>(null);
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState<"login" | "register">("register");
+  const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [demoSkipEmailConfirm, setDemoSkipEmailConfirm] = useState(false);
+
+  useEffect(() => {
+    const fromQuery = firstNameFromLocation();
+    if (fromQuery) setFirstName(fromQuery);
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -79,7 +96,22 @@ export function ClientInvitePage({ token }: Props) {
     })();
   }, []);
 
-  async function acceptAfterAuth() {
+  async function ensureFirstNameMetadata(name: string) {
+    if (!name) return;
+    const supabase = createSupabaseBrowserClient();
+    await supabase.auth.updateUser({ data: { first_name: name } });
+  }
+
+  async function acceptAfterAuth(nameForMeta?: string) {
+    const cleaned = normalizeName(nameForMeta ?? firstName);
+    if (cleaned) {
+      try {
+        await ensureFirstNameMetadata(cleaned);
+      } catch {
+        // non-fatal — greeting may fall back to questionnaire later
+      }
+    }
+
     const res = await fetch(
       `/api/client/invite/${encodeURIComponent(token)}/accept`,
       { method: "POST" },
@@ -113,6 +145,13 @@ export function ClientInvitePage({ token }: Props) {
       setError(t("errors.authUnavailable"));
       return;
     }
+
+    const cleanedName = normalizeName(firstName);
+    if (mode === "register" && !cleanedName) {
+      setError(t("firstNameRequired"));
+      return;
+    }
+
     setBusy(true);
     try {
       const supabase = createSupabaseBrowserClient();
@@ -121,7 +160,11 @@ export function ClientInvitePage({ token }: Props) {
           const demoRes = await fetch("/api/client/auth/demo-register", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: email.trim(), password }),
+            body: JSON.stringify({
+              email: email.trim(),
+              password,
+              firstName: cleanedName,
+            }),
           });
           if (!demoRes.ok) {
             setError(t("errors.authFailed"));
@@ -139,6 +182,9 @@ export function ClientInvitePage({ token }: Props) {
           const { data, error: signErr } = await supabase.auth.signUp({
             email: email.trim(),
             password,
+            options: {
+              data: cleanedName ? { first_name: cleanedName } : undefined,
+            },
           });
           if (signErr) {
             setError(t("errors.authFailed"));
@@ -159,7 +205,7 @@ export function ClientInvitePage({ token }: Props) {
           return;
         }
       }
-      await acceptAfterAuth();
+      await acceptAfterAuth(cleanedName ?? undefined);
     } catch {
       setError(t("errors.acceptFailed"));
     } finally {
@@ -216,6 +262,20 @@ export function ClientInvitePage({ token }: Props) {
             </div>
 
             <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
+              {mode === "register" ? (
+                <label className={styles.label}>
+                  {t("firstNameField")}
+                  <input
+                    type="text"
+                    required
+                    autoComplete="given-name"
+                    maxLength={80}
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    className={styles.input}
+                  />
+                </label>
+              ) : null}
               <label className={styles.label}>
                 {t("emailField")}
                 <input

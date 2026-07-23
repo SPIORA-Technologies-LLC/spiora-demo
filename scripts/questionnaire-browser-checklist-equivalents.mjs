@@ -87,8 +87,8 @@ function manual(name, reason) {
   const flat = sections.flatMap((s) => s.items);
   const service = flat.find((i) => i.questionId === "service_goal");
   const spouse = flat.find((i) => i.questionId === "spouse_name");
-  const heading = flat.find((i) => i.questionId === "welcome_heading");
-  if (service?.value === "Консультация" && !spouse && !heading) {
+  const heading = flat.find((i) => i.questionId === "welcome_info");
+  if (service?.value === "Консультация" && !spouse && heading) {
     pass("review_option_labels_and_visibility");
   } else {
     fail("review_option_labels_and_visibility", "formatter output unexpected");

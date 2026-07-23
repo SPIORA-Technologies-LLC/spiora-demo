@@ -38,6 +38,7 @@ import {
   getCountryOptions,
   resolveCountryToIso,
 } from "@/lib/client-portal/questionnaire-countries";
+import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 
 type SchemaSection = {
   id: string;
@@ -80,6 +81,8 @@ type CurrentResponse = {
     percent: number;
     sectionProgress: Record<string, { completed: number; total: number; percent: number }>;
   };
+  authFirstName?: string | null;
+  displayName?: string | null;
 };
 
 type Props = {
@@ -248,6 +251,15 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const currentSection = useMemo(
     () => orderedSections.find((s) => s.id === currentSectionId) ?? null,
     [orderedSections, currentSectionId],
+  );
+
+  const displayName = useMemo(
+    () =>
+      resolveClientFirstName({
+        authFirstName: data?.authFirstName,
+        questionnaireFirstName: localAnswers.first_name,
+      }),
+    [data?.authFirstName, localAnswers.first_name],
   );
 
   const adjacent = useMemo(
@@ -984,7 +996,9 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
               className={styles.sectionTitle}
               tabIndex={-1}
             >
-              {currentSection.title[locale]}
+              {currentSection.id === "welcome" && displayName
+                ? t("welcomeNamed", { name: displayName })
+                : currentSection.title[locale]}
             </h2>
             {currentSection.description ? (
               <p className={styles.displayDescription}>{currentSection.description[locale]}</p>

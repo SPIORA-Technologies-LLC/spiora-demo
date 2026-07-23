@@ -2325,6 +2325,8 @@
     },
     "fields": {
       "email": "Email",
+      "firstName": "Client first name",
+      "firstNameHint": "Used in the welcome greeting after sign-in (e.g. Welcome, Olga!)",
       "assignee": "Assigned employee",
       "assigneePlaceholder": "Select employee",
       "locale": "Questionnaire language",
@@ -2354,7 +2356,8 @@
     "brand": "Spiora Client",
     "logout": "Log out",
     "home": {
-      "title": "Welcome to Spiora Client",
+      "title": "Welcome!",
+      "titleNamed": "Welcome, {name}!",
       "inviteAccepted": "Invitation accepted",
       "applicationReceived": "Application received",
       "applicationStatus": "Application status",
@@ -2388,6 +2391,7 @@
     "questionnaire": {
       "loading": "Loading questionnaire…",
       "sidebarTitle": "Sections",
+      "welcomeNamed": "Welcome, {name}!",
       "progress": "Progress: {percent}%",
       "progressSummary": "Progress: {percent}%",
       "sectionsCompleted": "{completed} of {total} sections completed",
@@ -2470,6 +2474,8 @@
       "expiresLabel": "Link valid until",
       "register": "Register",
       "signIn": "Sign in",
+      "firstNameField": "First name",
+      "firstNameRequired": "Enter your first name",
       "emailField": "Email",
       "passwordField": "Password",
       "emailMustMatch": "Use the same email address the invitation was sent to.",

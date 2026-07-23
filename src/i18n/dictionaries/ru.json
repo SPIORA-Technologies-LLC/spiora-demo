@@ -2323,6 +2323,8 @@
     },
     "fields": {
       "email": "Email",
+      "firstName": "Имя клиента",
+      "firstNameHint": "Попадёт в приветствие после входа (например: Добро пожаловать, Ольга!)",
       "assignee": "Ответственный сотрудник",
       "assigneePlaceholder": "Выберите сотрудника",
       "locale": "Язык анкеты",
@@ -2352,7 +2354,8 @@
     "brand": "Spiora Client",
     "logout": "Выйти",
     "home": {
-      "title": "Добро пожаловать в Spiora Client",
+      "title": "Добро пожаловать!",
+      "titleNamed": "Добро пожаловать, {name}!",
       "inviteAccepted": "Приглашение принято",
       "applicationReceived": "Заявка получена",
       "applicationStatus": "Статус заявки",
@@ -2386,6 +2389,7 @@
     "questionnaire": {
       "loading": "Загрузка анкеты…",
       "sidebarTitle": "Разделы",
+      "welcomeNamed": "Добро пожаловать, {name}!",
       "progress": "Прогресс: {percent}%",
       "progressSummary": "Прогресс: {percent}%",
       "sectionsCompleted": "{completed} из {total} разделов заполнено",
@@ -2468,6 +2472,8 @@
       "expiresLabel": "Ссылка действует до",
       "register": "Регистрация",
       "signIn": "Вход",
+      "firstNameField": "Имя",
+      "firstNameRequired": "Укажите имя",
       "emailField": "Email",
       "passwordField": "Пароль",
       "emailMustMatch": "Используйте тот же email, на который выписано приглашение.",

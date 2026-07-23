@@ -10,6 +10,7 @@ export async function GET() {
     session: {
       id: session.id,
       email: session.email,
+      firstName: session.firstName,
       preferredLocale: session.preferredLocale,
     },
   });

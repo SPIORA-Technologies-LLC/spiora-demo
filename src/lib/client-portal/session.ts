@@ -8,21 +8,26 @@ import {
 import {
   getLocalClientPortalUserByAuthUserId,
 } from "@/lib/client-portal/local-store";
+import { firstNameFromAuthMetadata } from "@/lib/client-portal/display-name";
 import type { ClientSession } from "./types";
 import { isClientPortalLocale } from "./types";
 
-function mapSession(row: {
-  id: string;
-  authUserId: string;
-  email: string;
-  preferredLocale: string;
-  invitationId: string;
-}): ClientSession | null {
+function mapSession(
+  row: {
+    id: string;
+    authUserId: string;
+    email: string;
+    preferredLocale: string;
+    invitationId: string;
+  },
+  firstName: string | null,
+): ClientSession | null {
   if (!isClientPortalLocale(row.preferredLocale)) return null;
   return {
     id: row.id,
     authUserId: row.authUserId,
     email: row.email,
+    firstName,
     preferredLocale: row.preferredLocale,
     invitationId: row.invitationId,
   };
@@ -41,15 +46,19 @@ export async function getClientSession(): Promise<ClientSession | null> {
     } = await auth.auth.getUser();
     if (!user?.id || !user.email) return null;
 
+    const firstName = firstNameFromAuthMetadata(
+      (user.user_metadata ?? null) as Record<string, unknown> | null,
+    );
+
     if (isSupabaseConfigured()) {
       const row = await sbGetClientPortalUserByAuthUserId(user.id);
       if (!row) return null;
-      return mapSession(row);
+      return mapSession(row, firstName);
     }
 
     const local = await getLocalClientPortalUserByAuthUserId(user.id);
     if (!local) return null;
-    return mapSession(local);
+    return mapSession(local, firstName);
   } catch {
     return null;
   }

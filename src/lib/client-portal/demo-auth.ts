@@ -18,6 +18,7 @@ export function isClientPortalDemoAuthEnabled(): boolean {
 export async function demoRegisterConfirmedClientUser(input: {
   email: string;
   password: string;
+  firstName?: string | null;
 }): Promise<{ ok: true } | { ok: false; code: string }> {
   if (!isClientPortalDemoAuthEnabled()) {
     return { ok: false, code: "DEMO_AUTH_DISABLED" };
@@ -29,12 +30,17 @@ export async function demoRegisterConfirmedClientUser(input: {
     return { ok: false, code: "INVALID_CREDENTIALS" };
   }
 
+  const firstName =
+    typeof input.firstName === "string" ? input.firstName.trim().slice(0, 80) : "";
+  const userMetadata = firstName ? { first_name: firstName } : undefined;
+
   const admin = getSupabaseAdmin();
 
   const { error: createError } = await admin.auth.admin.createUser({
     email,
     password: input.password,
     email_confirm: true,
+    user_metadata: userMetadata,
   });
 
   if (!createError) {
@@ -69,6 +75,7 @@ export async function demoRegisterConfirmedClientUser(input: {
     {
       email_confirm: true,
       password: input.password,
+      ...(userMetadata ? { user_metadata: userMetadata } : {}),
     },
   );
 

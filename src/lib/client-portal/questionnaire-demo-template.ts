@@ -18,19 +18,10 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
       order: 5,
       title: { en: "Welcome", ru: "Добро пожаловать" },
       description: {
-        en: "Welcome to Spiora Client. Please complete all sections.",
-        ru: "Добро пожаловать в Spiora Client. Пожалуйста, заполните все разделы.",
+        en: "Please complete all sections. You can save and continue later.",
+        ru: "Пожалуйста, заполните все разделы. Можно сохранять и продолжить позже.",
       },
       questions: [
-        {
-          id: "welcome_heading",
-          type: "heading",
-          order: 10,
-          label: {
-            en: "Welcome to Spiora Client",
-            ru: "Добро пожаловать в Spiora Client",
-          },
-        },
         {
           id: "welcome_info",
           type: "information",

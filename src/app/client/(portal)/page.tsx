@@ -3,6 +3,7 @@ import { ClientPortalHome } from "@/components/client-portal/ClientPortalHome";
 import { getClientSession } from "@/lib/client-portal/session";
 import { getClientQuestionnaire } from "@/lib/client-portal/questionnaire";
 import { getPortalCaseForUser } from "@/lib/client-portal/case-service";
+import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 import { redirect } from "next/navigation";
 
 export default async function ClientHomePage() {
@@ -33,10 +34,20 @@ export default async function ClientHomePage() {
       (questionnaire.data.questionnaire.status === "submitted" ||
         questionnaire.data.questionnaire.status === "locked"));
 
+  const firstName = resolveClientFirstName({
+    authFirstName: session.firstName,
+    questionnaireFirstName: questionnaire.ok
+      ? questionnaire.data.questionnaire.answers.first_name
+      : null,
+  });
+  const title = firstName
+    ? t("home.titleNamed", { name: firstName })
+    : t("home.title");
+
   return (
     <ClientPortalHome
       email={session.email}
-      title={t("home.title")}
+      title={title}
       brand={t("brand")}
       statusLabel={
         questionnaireSubmitted

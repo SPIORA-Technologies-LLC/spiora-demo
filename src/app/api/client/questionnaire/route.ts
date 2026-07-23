@@ -3,6 +3,7 @@ import {
   getClientQuestionnaire,
   saveClientQuestionnaireDraft,
 } from "@/lib/client-portal/questionnaire";
+import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 import { clientApiError, clientApiOk } from "@/lib/client-portal/api-errors";
 
 export const dynamic = "force-dynamic";
@@ -34,7 +35,16 @@ export async function GET() {
     );
   }
 
-  return clientApiOk(result.data);
+  const displayName = resolveClientFirstName({
+    authFirstName: session.firstName,
+    questionnaireFirstName: result.data.questionnaire.answers.first_name,
+  });
+
+  return clientApiOk({
+    ...result.data,
+    authFirstName: session.firstName,
+    displayName,
+  });
 }
 
 export async function PATCH(request: Request) {

@@ -273,12 +273,25 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
               {data.clientDocuments.map((doc) => (
                 <li key={doc.id}>
                   <div>
-                    <strong>{doc.fileName}</strong>
+                    <a
+                      className={styles.docNameLink}
+                      href={`/api/client-cases/${caseId}/documents/${doc.id}?inline=1`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {doc.fileName}
+                    </a>
                     <span>
                       {doc.category ?? "—"} · {doc.mimeType} ·{" "}
                       {formatDateTime(doc.createdAt, locale)}
                     </span>
                   </div>
+                  <a
+                    className={styles.docActionLink}
+                    href={`/api/client-cases/${caseId}/documents/${doc.id}`}
+                  >
+                    {t("documents.download")}
+                  </a>
                 </li>
               ))}
               {data.clientDocuments.length === 0 ? <li>{t("documents.empty")}</li> : null}
@@ -303,13 +316,23 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
               {data.employeeDocuments.map((doc) => (
                 <li key={doc.id}>
                   <div>
-                    <strong>{doc.fileName}</strong>
+                    <a
+                      className={styles.docNameLink}
+                      href={`/api/client-cases/${caseId}/documents/${doc.id}?inline=1`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {doc.fileName}
+                    </a>
                     <span>
                       {doc.category ?? "employee"} · {doc.uploadedByName ?? "—"} ·{" "}
                       {formatDateTime(doc.createdAt, locale)}
                     </span>
                   </div>
-                  <a href={`/api/client-cases/${caseId}/documents/${doc.id}`}>
+                  <a
+                    className={styles.docActionLink}
+                    href={`/api/client-cases/${caseId}/documents/${doc.id}`}
+                  >
                     {t("documents.download")}
                   </a>
                 </li>

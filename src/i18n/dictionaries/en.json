@@ -2558,7 +2558,8 @@
         "employee": "Employee documents",
         "empty": "No client documents",
         "upload": "Upload document",
-        "download": "Download"
+        "download": "Download",
+        "open": "Open"
       },
       "comments": {
         "placeholder": "Internal comment (not visible to client)",

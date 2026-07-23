@@ -102,6 +102,30 @@
   align-items: flex-start;
 }
 
+.docNameLink {
+  display: inline-block;
+  color: var(--orange-400, #f5a623);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.docNameLink:hover {
+  color: var(--orange-300, #ffb84d);
+}
+
+.docActionLink {
+  flex-shrink: 0;
+  color: var(--gray-200);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  font-size: 0.875rem;
+}
+
+.docActionLink:hover {
+  color: var(--gray-50);
+}
+
 .docList span {
   display: block;
   color: var(--gray-300);

@@ -56,11 +56,15 @@ export async function GET(request: Request, context: RouteContext) {
     );
   }
 
+  const inline = url.searchParams.get("inline") === "1";
+  const safeAsciiName = document.fileName.replace(/[^\x20-\x7E]/g, "_").replace(/["\\]/g, "_");
+  const utf8Name = encodeURIComponent(document.fileName);
+
   return new NextResponse(new Uint8Array(bytes), {
     status: 200,
     headers: {
-      "Content-Type": document.mimeType,
-      "Content-Disposition": `attachment; filename="${encodeURIComponent(document.fileName)}"`,
+      "Content-Type": document.mimeType || "application/octet-stream",
+      "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${safeAsciiName}"; filename*=UTF-8''${utf8Name}`,
       "Cache-Control": "no-store",
     },
   });

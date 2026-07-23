@@ -323,6 +323,33 @@
     "search": {
       "placeholder": "Поиск: имя, паспорт…"
     },
+    "create": {
+      "open": "Добавить клиента",
+      "title": "Новый клиент CRM",
+      "close": "Закрыть",
+      "cancel": "Отмена",
+      "submit": "Создать",
+      "saving": "Создание…",
+      "fields": {
+        "name": "ФИО *",
+        "email": "Email",
+        "phone": "Телефон",
+        "passport": "Номер паспорта",
+        "citizenship": "Гражданство",
+        "country": "Страна проживания",
+        "direction": "Направление",
+        "directionPlaceholder": "например, Хорватия",
+        "serviceType": "Услуга",
+        "servicePlaceholder": "например, ВНЖ",
+        "notes": "Заметки"
+      },
+      "errors": {
+        "nameRequired": "Укажите ФИО",
+        "createFailed": "Не удалось создать клиента",
+        "storageUnavailable": "CRM недоступна. Проверьте подключение к базе.",
+        "forbidden": "Недостаточно прав для создания клиента"
+      }
+    },
     "meta": {
       "loading": "Загрузка…",
       "count": "{count, plural, one {# клиент} few {# клиента} many {# клиентов} other {# клиента}}"

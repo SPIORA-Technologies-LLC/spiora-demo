@@ -11,6 +11,7 @@ import {
   type ClientsListResult,
 } from "@/lib/google-sheets/types";
 import { Card } from "@/components/ui/Card";
+import { CreateClientModal } from "./CreateClientModal";
 import styles from "./ClientsList.module.css";
 
 const PAGE_SIZE = 25;
@@ -45,6 +46,7 @@ export function ClientsList() {
   const [loadError, setLoadError] = useState(false);
 
   const [search, setSearch] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
@@ -177,6 +179,13 @@ export function ClientsList() {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        <button
+          type="button"
+          className={styles.addBtn}
+          onClick={() => setCreateOpen(true)}
+        >
+          {t("create.open")}
+        </button>
       </div>
 
       <p className={styles.meta}>
@@ -288,6 +297,15 @@ export function ClientsList() {
           </button>
         </div>
       ) : null}
+
+      <CreateClientModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={() => {
+          setPage(1);
+          void fetchClients();
+        }}
+      />
     </div>
   );
 }

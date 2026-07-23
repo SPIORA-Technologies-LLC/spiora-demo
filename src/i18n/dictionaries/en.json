@@ -323,6 +323,33 @@
     "search": {
       "placeholder": "Search: name, passport…"
     },
+    "create": {
+      "open": "Add client",
+      "title": "New CRM client",
+      "close": "Close",
+      "cancel": "Cancel",
+      "submit": "Create",
+      "saving": "Creating…",
+      "fields": {
+        "name": "Full name *",
+        "email": "Email",
+        "phone": "Phone",
+        "passport": "Passport number",
+        "citizenship": "Citizenship",
+        "country": "Country of residence",
+        "direction": "Destination",
+        "directionPlaceholder": "e.g. Croatia",
+        "serviceType": "Service",
+        "servicePlaceholder": "e.g. Residence permit",
+        "notes": "Notes"
+      },
+      "errors": {
+        "nameRequired": "Enter full name",
+        "createFailed": "Could not create client",
+        "storageUnavailable": "CRM is unavailable. Check the database connection.",
+        "forbidden": "You do not have permission to create clients"
+      }
+    },
     "meta": {
       "loading": "Loading…",
       "count": "{count, plural, one {# client} other {# clients}}"

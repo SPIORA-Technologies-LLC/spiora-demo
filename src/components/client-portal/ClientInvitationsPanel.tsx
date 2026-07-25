@@ -219,10 +219,7 @@ export function ClientInvitationsPanel() {
   return (
     <Card className={styles.wrap}>
       <div className={styles.toolbar}>
-        <div>
-          <h2 className={styles.title}>{t("title")}</h2>
-          <p className={styles.subtitle}>{t("subtitle")}</p>
-        </div>
+        <p className={styles.subtitle}>{t("subtitle")}</p>
         <button type="button" className={styles.primaryBtn} onClick={() => void openModal()}>
           {t("inviteClient")}
         </button>

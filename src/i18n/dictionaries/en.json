@@ -11,7 +11,7 @@
     "calendar": "Calendar",
     "teamChat": "Team Chat",
     "aiWorkspace": "AI Workspace",
-    "knowledgeBase": "Knowledge Base",
+    "knowledgeBase": "Database",
     "analytics": "Analytics",
     "team": "Team",
     "settings": "Settings",
@@ -777,14 +777,14 @@
       "externalPartnerCall": "External Partner Call",
       "quarterlyPlanning": "Quarterly Planning",
       "privateFocusTime": "Private Focus Time",
-      "knowledgeBaseReview": "Knowledge Base Review",
+      "knowledgeBaseReview": "Database Review",
       "upcomingMeetingPrep": "Upcoming Meeting Prep"
     }
   },
   "aiWorkspace": {
     "pageTitle": "AI Workspace",
     "assistantTitle": "AI Assistant",
-    "assistantSubtitle": "CRM · Knowledge Base · Tasks · Calendar",
+    "assistantSubtitle": "CRM · Database · Tasks · Calendar",
     "empty": {
       "heading": "How can I help the team today?",
       "hint": "Ask about clients, tasks, documents, or upcoming meetings.",
@@ -858,7 +858,7 @@
       "mergeAsOne": "Merge as one client"
     },
     "sources": {
-      "knowledgeBase": "Knowledge Base",
+      "knowledgeBase": "Database",
       "crm": "CRM",
       "crmCount": "CRM ({count})",
       "tasks": "Tasks",
@@ -902,7 +902,7 @@
       "aiRequest": "AI request failed. Please try again.",
       "server": "AI request failed. Check that the server is running and refresh the page.",
       "internal": "An internal error occurred. Please try again.",
-      "emptyMessage": "Type a question — I will use the Knowledge Base, CRM, tasks, and calendar context."
+      "emptyMessage": "Type a question — I will use the Database, CRM, tasks, and calendar context."
     },
     "guardrails": {
       "offTopic": "Spiora AI Workspace is designed for company work tasks."
@@ -928,9 +928,9 @@
       "summarizeClientCase": "**Case summary — Sofia Martins**\n\n- **Program:** Spain relocation (consultation stage)\n- **Manager:** Emma Wilson\n- **Timeline:** client since April 2026; consultation completed May 27\n- **Status:** awaiting document submission\n- **Open items:** program selection confirmation, passport copy, proof of remote income\n- **Risk:** low — responsive client, no compliance flags\n\n**Recommended action:** send document checklist and book document review within 5 business days.",
       "teamFocusToday": "**Team focus for today**\n\n1. **Clear overdue tasks** — 3 items need attention (visa review, booking, CRM notes).\n2. **Client consultations** — prep for Anna Kowalska video call at 11:00.\n3. **Pipeline hygiene** — update statuses for clients in \"Consultation\" and \"Documents\" stages.\n4. **Calendar** — 4 meetings today; confirm video links for external calls.\n\n**Capacity note:** Daniel Cooper and Emma Wilson have the heaviest client loads today.",
       "activeClients": "**Active clients overview**\n\n- **Total in CRM:** 12 demo clients\n- **In progress:** John Carter (Portugal), Anna Kowalska (Croatia)\n- **Consultation:** Sofia Martins (Spain)\n- **Documents:** Anna Kowalska\n- **New:** Marco Rossi (Slovakia)\n\nMost activity this week: consultation follow-ups and document collection.",
-      "knowledgeBase": "**Knowledge Base — program comparison (excerpt)**\n\n| Program | Stay | Income proof | Processing |\n|---------|------|--------------|------------|\n| Croatia Digital Nomad | 12 months | Remote contract | ~45 days |\n| Portugal D7 | Renewable | Passive/remote income | ~60 days |\n| Spain remote work | 1 year | Employment/contract | ~30 days |\n\nAsk for a specific country or client scenario for a tailored checklist.",
+      "knowledgeBase": "**Database — program comparison (excerpt)**\n\n| Program | Stay | Income proof | Processing |\n|---------|------|--------------|------------|\n| Croatia Digital Nomad | 12 months | Remote contract | ~45 days |\n| Portugal D7 | Renewable | Passive/remote income | ~60 days |\n| Spain remote work | 1 year | Employment/contract | ~30 days |\n\nAsk for a specific country or client scenario for a tailored checklist.",
       "formgridOverview": "**Formgrid applications**\n\n- **Recent submissions:** 3 this week\n- **Latest:** Marco Rossi — Slovakia direction, status \"New\"\n- **Pending review:** 1 application awaiting manager assignment\n\nOpen the Electronic resources section for full survey details or ask about a specific applicant.",
-      "generic": "I reviewed the available demo context (CRM, tasks, calendar, and Knowledge Base). Here is what stands out:\n\n- **4 clients** need attention this week (consultation or documents stage).\n- **3 tasks** are overdue.\n- **4 meetings** are scheduled in the next two days.\n\nTry a suggested prompt for a detailed breakdown, or ask about a specific client by name."
+      "generic": "I reviewed the available demo context (CRM, tasks, calendar, and Database). Here is what stands out:\n\n- **4 clients** need attention this week (consultation or documents stage).\n- **3 tasks** are overdue.\n- **4 meetings** are scheduled in the next two days.\n\nTry a suggested prompt for a detailed breakdown, or ask about a specific client by name."
     }
   },
   "teamChat": {
@@ -1063,7 +1063,7 @@
       "calendarLinkShare": "Calendar link for tomorrow's CRM Review is in the event card — copy the client invite from there if needed.",
       "meetingPrepAnna": "Before the 11:00 call with Anna Kowalska: check document status in CRM and note which items are still blocking submission.",
       "aiSummaryReady": "AI summary for Anna Kowalska is ready in AI Workspace — risks, open documents, and suggested next steps included.",
-      "kbArticleLink": "Useful KB material on Spain remote work requirements — share with Sofia Martins when sending the document list.",
+      "kbArticleLink": "Useful Database material on Spain remote work requirements — share with Sofia Martins when sending the document list.",
       "clientPipelineReview": "Client pipeline for this week: 4 active cases, 2 in consultation, 1 new application. Focus on document collection for Spain and Croatia.",
       "overdueTasksNote": "Heads-up: 3 tasks are overdue (visa review, Marco Rossi booking, CRM notes). Let's clear at least two before lunch.",
       "videoCallReminder": "Video consultation with Anna Kowalska starts in 1 hour — link is in the calendar event. Please review her file beforehand.",
@@ -1618,14 +1618,14 @@
     "documentCreateConflict": "Could not assign a unique document ID. Please try again."
   },
   "knowledgeBase": {
-    "title": "Knowledge Base",
+    "title": "Database",
     "subtitle": "Internal guides, policies, and workflows for the team",
     "demoBadge": "Demo data",
-    "breadcrumbRoot": "Knowledge Base",
-    "breadcrumbAria": "Knowledge base navigation",
+    "breadcrumbRoot": "Database",
+    "breadcrumbAria": "Database navigation",
     "search": {
       "placeholder": "Search materials, categories, tags…",
-      "label": "Search knowledge base",
+      "label": "Search database",
       "clear": "Clear search",
       "resultsCount": "{count} results",
       "noResults": "No materials match your search.",
@@ -1803,17 +1803,17 @@
     },
     "empty": {
       "noArticles": "No materials in this category yet.",
-      "unconfigured": "Knowledge Base is not configured.",
+      "unconfigured": "Database is not configured.",
       "folderEmpty": "This folder is empty.",
       "selectArticle": "Select a material to read or use search to find a topic."
     },
     "loading": {
       "list": "Loading materials…",
       "article": "Loading material…",
-      "drive": "Loading knowledge base…"
+      "drive": "Loading database…"
     },
     "errors": {
-      "loadFailed": "Could not load knowledge base data.",
+      "loadFailed": "Could not load database data.",
       "saveFailed": "Could not save the material.",
       "articleNotFound": "Material not found.",
       "accessDenied": "You do not have access to this resource.",
@@ -1876,7 +1876,7 @@
         "slugTaken": "This slug is already in use.",
         "aiFailed": "Could not create the template."
       },
-      "postgresRequired": "Material management requires PostgreSQL Knowledge Base (migration 026)."
+      "postgresRequired": "Material management requires PostgreSQL Database (migration 026)."
     },
     "upload": {
       "disabled": "File uploads are disabled in the public demo.",
@@ -1919,8 +1919,8 @@
       "edit": "Editing materials is disabled in the public demo.",
       "delete": "Deleting materials is disabled in the public demo."
     },
-    "aiContextHeader": "Knowledge Base (demo materials):",
-    "aiContextPostgresHeader": "Knowledge Base (PostgreSQL):",
+    "aiContextHeader": "Database (demo materials):",
+    "aiContextPostgresHeader": "Database (PostgreSQL):",
     "aiContextEmpty": "No matching demo materials found.",
     "categories": {
       "companyPolicies": "Company Policies",
@@ -1987,8 +1987,8 @@
       },
       "working-with-ai-workspace": {
         "title": "Working with AI Workspace",
-        "summary": "Safe use of AI Workspace with CRM, tasks, calendar, and Knowledge Base context.",
-        "content": "## Purpose\n\nAI Workspace helps summarize cases, draft follow-ups, and answer questions using connected demo sources.\n\n## Good prompts\n\n- \"Summarize today's priorities\"\n- \"Prepare a document checklist for Sofia Martins\"\n- \"What meetings do I have this week?\"\n\n## Limits\n\nAI responses in demo mode use canned and Knowledge Base context only — not production Google Drive. Always verify suggestions before sending to clients."
+        "summary": "Safe use of AI Workspace with CRM, tasks, calendar, and Database context.",
+        "content": "## Purpose\n\nAI Workspace helps summarize cases, draft follow-ups, and answer questions using connected demo sources.\n\n## Good prompts\n\n- \"Summarize today's priorities\"\n- \"Prepare a document checklist for Sofia Martins\"\n- \"What meetings do I have this week?\"\n\n## Limits\n\nAI responses in demo mode use canned and Database context only — not production Google Drive. Always verify suggestions before sending to clients."
       },
       "handling-uploaded-documents": {
         "title": "Handling uploaded documents",
@@ -2003,7 +2003,7 @@
       "team-member-onboarding": {
         "title": "Team member onboarding",
         "summary": "First-week guide for new managers joining Northstar Mobility.",
-        "content": "## Day 1\n\nPlatform tour: CRM, Tasks, Calendar, Team Chat, Knowledge Base, AI Workspace.\n\n## Week 1\n\nShadow two client consultations. Read Company Policies and Client Workflow categories.\n\n## Week 2\n\nTake a demo client case end-to-end with a buddy manager.\n\n## Certification\n\nComplete the data security quiz and confirm understanding of communication guidelines."
+        "content": "## Day 1\n\nPlatform tour: CRM, Tasks, Calendar, Team Chat, Database, AI Workspace.\n\n## Week 1\n\nShadow two client consultations. Read Company Policies and Client Workflow categories.\n\n## Week 2\n\nTake a demo client case end-to-end with a buddy manager.\n\n## Certification\n\nComplete the data security quiz and confirm understanding of communication guidelines."
       },
       "monthly-reporting-guide": {
         "title": "Monthly reporting guide",
@@ -2023,7 +2023,7 @@
       "quality-review-process": {
         "title": "Quality review process",
         "summary": "Peer review steps before submitting client packages or AI-generated drafts.",
-        "content": "## When to review\n\n- Before submitting a document package to authorities\n- Before sending AI-drafted client emails\n- After updating a Knowledge Base material (production only)\n\n## Reviewer checklist\n\n1. Facts match CRM and uploaded documents.\n2. No internal jargon or demo placeholders in client text.\n3. Dates and names are consistent.\n\n## Demo note\n\nIn public demo, edits are read-only — use this process as reference only."
+        "content": "## When to review\n\n- Before submitting a document package to authorities\n- Before sending AI-drafted client emails\n- After updating a Database material (production only)\n\n## Reviewer checklist\n\n1. Facts match CRM and uploaded documents.\n2. No internal jargon or demo placeholders in client text.\n3. Dates and names are consistent.\n\n## Demo note\n\nIn public demo, edits are read-only — use this process as reference only."
       }
     }
   },
@@ -2266,7 +2266,7 @@
       },
       "team-chat-kb-announcement": {
         "title": "Announce new KB material in Team Chat",
-        "description": "Post a short Team Chat message about the updated client onboarding checklist and pin the Knowledge Base link for new case managers."
+        "description": "Post a short Team Chat message about the updated client onboarding checklist and pin the Database link for new case managers."
       },
       "marco-rossi-intake-review": {
         "title": "Review Marco Rossi intake form",
@@ -2282,7 +2282,7 @@
       },
       "escalation-policy-review": {
         "title": "Review client escalation policy",
-        "description": "Read the updated escalation SOP in Knowledge Base and confirm overdue visa cases—such as John Carter's extension—are routed correctly."
+        "description": "Read the updated escalation SOP in Database and confirm overdue visa cases—such as John Carter's extension—are routed correctly."
       },
       "demo-data-security-quiz": {
         "title": "Complete demo data security quiz",

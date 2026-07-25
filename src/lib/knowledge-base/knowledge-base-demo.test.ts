@@ -29,7 +29,7 @@ function seedRecords() {
 
 describe("Knowledge Base i18n EN", () => {
   it("title without Cyrillic", () => {
-    assert.equal(translateKnowledgeBaseMessage("en", "title"), "Knowledge Base");
+    assert.equal(translateKnowledgeBaseMessage("en", "title"), "Database");
     assert.doesNotMatch(translateKnowledgeBaseMessage("en", "title"), /[А-Яа-яЁё]/);
   });
 
@@ -53,7 +53,7 @@ describe("Knowledge Base i18n EN", () => {
 
 describe("Knowledge Base i18n RU", () => {
   it("title in Russian", () => {
-    assert.equal(translateKnowledgeBaseMessage("ru", "title"), "База знаний");
+    assert.equal(translateKnowledgeBaseMessage("ru", "title"), "База данных");
     assert.match(translateKnowledgeBaseMessage("ru", "title"), /[А-Яа-яЁё]/);
   });
 
@@ -151,7 +151,7 @@ describe("Knowledge Base demo mode store", () => {
   it("AI receives only demo KB context", async () => {
     await resetDemoKnowledgeBaseStore();
     const text = await getDemoKnowledgeBaseTextForAi("en", "AI Workspace");
-    assert.match(text, /Knowledge Base \(demo materials\)|demo materials/i);
+    assert.match(text, /Database \(demo materials\)|demo materials/i);
     assert.ok(text.includes("working-with-ai-workspace") || text.includes("AI Workspace"));
     assert.doesNotMatch(text, /GOOGLE_DRIVE_KB_FOLDER_ID/);
   });

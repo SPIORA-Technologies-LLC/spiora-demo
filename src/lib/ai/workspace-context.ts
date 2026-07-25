@@ -184,7 +184,7 @@ export async function buildWorkspaceContext(
           locale,
         )
       : Promise.resolve(
-          "Knowledge Base: для этого вопроса не подключалась (ускорение ответа).",
+          "База данных: для этого вопроса не подключалась (ускорение ответа).",
         ),
   ]);
 

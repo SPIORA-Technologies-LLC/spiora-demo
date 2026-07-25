@@ -69,7 +69,7 @@ ${topic}
 
 ## Notes
 
-- Verify CRM and Knowledge Base references stay current.
+- Verify CRM and Database references stay current.
 - Update this material when the process changes.`;
 }
 

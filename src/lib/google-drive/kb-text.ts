@@ -656,7 +656,7 @@ export async function getKnowledgeBaseTextForAi(
 
   return getDriveTextForAi(
     process.env.GOOGLE_DRIVE_KB_FOLDER_ID!.trim(),
-    "Knowledge Base",
+    "Database",
     "kb-ai",
     MAX_FILES,
     userQuery,

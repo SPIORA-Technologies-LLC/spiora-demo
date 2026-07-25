@@ -554,7 +554,7 @@ async function prepareWorkspaceRequest(
       emigrantDeskText: "Emigrant Croatia Desk: не удалось загрузить статусы дел.",
       emigrantDriveText: "Папка ЭМИГРАНТ: не удалось загрузить Google Drive.",
       formgridText: "Formgrid: не удалось загрузить анкеты.",
-      knowledgeBaseText: "Knowledge Base: не удалось загрузить Drive.",
+      knowledgeBaseText: "База данных: не удалось загрузить Drive.",
       meta: {
         clientsTotal: 0,
         emigrantDeskTotal: 0,

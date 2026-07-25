@@ -387,6 +387,14 @@ export async function getCaseDocument(caseId: string, documentId: string) {
   return store.getDocument(caseId, documentId);
 }
 
+export async function archiveCaseDocument(
+  caseId: string,
+  documentId: string,
+): Promise<boolean> {
+  const store = await getCaseStore();
+  return store.archiveDocument(caseId, documentId);
+}
+
 export function newCaseDocumentStorageKey(caseId: string, fileName: string): string {
   const safe = fileName.replace(/[^\w.\-]+/g, "_").slice(0, 80);
   return `cases/${caseId}/${randomUUID()}-${safe}`;

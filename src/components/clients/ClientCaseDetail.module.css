@@ -126,6 +126,34 @@
   color: var(--gray-50);
 }
 
+.docActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.docDeleteBtn {
+  border: 1px solid rgba(168, 51, 61, 0.45);
+  border-radius: 0.45rem;
+  background: rgba(168, 51, 61, 0.14);
+  color: #fecaca;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.docDeleteBtn:hover:not(:disabled) {
+  background: rgba(168, 51, 61, 0.28);
+}
+
+.docDeleteBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .docList span {
   display: block;
   color: var(--gray-300);

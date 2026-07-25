@@ -102,6 +102,7 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
   const [comment, setComment] = useState("");
   const [status, setStatus] = useState<ClientCaseStatus>("application_received");
   const [busy, setBusy] = useState(false);
+  const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -173,6 +174,38 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
       return;
     }
     await load();
+  }
+
+  async function deleteDocument(doc: { id: string; fileName: string }) {
+    if (!window.confirm(t("documents.confirmDelete", { name: doc.fileName }))) {
+      return;
+    }
+    setDeletingDocId(doc.id);
+    setMessage(null);
+    try {
+      const res = await fetch(
+        `/api/client-cases/${encodeURIComponent(caseId)}/documents/${encodeURIComponent(doc.id)}`,
+        { method: "DELETE" },
+      );
+      if (!res.ok) {
+        setMessage(t("documents.deleteFailed"));
+        return;
+      }
+      setData((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          clientDocuments: prev.clientDocuments.filter((item) => item.id !== doc.id),
+          employeeDocuments: prev.employeeDocuments.filter(
+            (item) => item.id !== doc.id,
+          ),
+        };
+      });
+    } catch {
+      setMessage(t("documents.deleteFailed"));
+    } finally {
+      setDeletingDocId(null);
+    }
   }
 
   if (loading) return <p>{t("loading")}</p>;
@@ -286,12 +319,22 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
                       {formatDateTime(doc.createdAt, locale)}
                     </span>
                   </div>
-                  <a
-                    className={styles.docActionLink}
-                    href={`/api/client-cases/${caseId}/documents/${doc.id}`}
-                  >
-                    {t("documents.download")}
-                  </a>
+                  <div className={styles.docActions}>
+                    <a
+                      className={styles.docActionLink}
+                      href={`/api/client-cases/${caseId}/documents/${doc.id}`}
+                    >
+                      {t("documents.download")}
+                    </a>
+                    <button
+                      type="button"
+                      className={styles.docDeleteBtn}
+                      disabled={deletingDocId === doc.id}
+                      onClick={() => void deleteDocument(doc)}
+                    >
+                      {deletingDocId === doc.id ? "…" : t("documents.delete")}
+                    </button>
+                  </div>
                 </li>
               ))}
               {data.clientDocuments.length === 0 ? <li>{t("documents.empty")}</li> : null}
@@ -329,12 +372,22 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
                       {formatDateTime(doc.createdAt, locale)}
                     </span>
                   </div>
-                  <a
-                    className={styles.docActionLink}
-                    href={`/api/client-cases/${caseId}/documents/${doc.id}`}
-                  >
-                    {t("documents.download")}
-                  </a>
+                  <div className={styles.docActions}>
+                    <a
+                      className={styles.docActionLink}
+                      href={`/api/client-cases/${caseId}/documents/${doc.id}`}
+                    >
+                      {t("documents.download")}
+                    </a>
+                    <button
+                      type="button"
+                      className={styles.docDeleteBtn}
+                      disabled={deletingDocId === doc.id}
+                      onClick={() => void deleteDocument(doc)}
+                    >
+                      {deletingDocId === doc.id ? "…" : t("documents.delete")}
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>

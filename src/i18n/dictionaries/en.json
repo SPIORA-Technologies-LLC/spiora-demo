@@ -2616,7 +2616,10 @@
         "empty": "No client documents",
         "upload": "Upload document",
         "download": "Download",
-        "open": "Open"
+        "open": "Open",
+        "delete": "Delete",
+        "confirmDelete": "Are you sure you want to delete “{name}”?",
+        "deleteFailed": "Could not delete the document"
       },
       "comments": {
         "placeholder": "Internal comment (not visible to client)",

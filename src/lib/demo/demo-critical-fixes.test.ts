@@ -44,7 +44,6 @@ const SIDEBAR_KEYS = [
   "clientInvitations",
   "meetingRecordings",
   "relocation",
-  "checkupsErevan",
 ] as const;
 
 describe("PR #11 — Tasks i18n (EN)", () => {
@@ -170,19 +169,14 @@ describe("PR #11 — Sidebar nav i18n", () => {
       "Приглашения клиентов",
     );
     assert.equal(translateMessage("ru", "nav.relocation"), "Эмиграция");
-    assert.match(translateMessage("ru", "nav.checkupsErevan"), /Ереван/);
     assert.equal(translateMessage("ru", "nav.analytics"), "Аналитика");
     assert.equal(translateMessage("ru", "nav.team"), "Команда");
     assert.equal(translateMessage("ru", "nav.settings"), "Настройки");
   });
 
-  it("RU: страницы Эмиграция и Чекапы переведены", () => {
+  it("RU: страница Эмиграция переведена", () => {
     assert.match(
       translateMessage("ru", "relocationPage.resources.croatia-clients-sheet.title"),
-      /[а-яА-ЯёЁ]/,
-    );
-    assert.match(
-      translateMessage("ru", "checkupsPage.resources.yerevan-checkups-site.title"),
       /[а-яА-ЯёЁ]/,
     );
   });

@@ -20,8 +20,7 @@
     "crmLeads": "Lead Review",
     "newFormgridClients": "Formgrid Clients",
     "meetingRecordings": "Meeting Recordings",
-    "relocation": "Relocation",
-    "checkupsErevan": "Checkups in Yerevan"
+    "relocation": "Relocation"
   },
   "actions": {
     "save": "Save",
@@ -1425,39 +1424,6 @@
         "country": "Europe",
         "audience": "Demo channel",
         "actionLabel": "Open demo link"
-      }
-    }
-  },
-  "checkupsPage": {
-    "title": "Checkups in Yerevan",
-    "headerSubtitle": "Checkups info site, team documents, and Formula Health app",
-    "sections": {
-      "yerevan": {
-        "title": "Demo checkups hub",
-        "subtitle": "Sample links for wellness program demonstrations"
-      }
-    },
-    "resources": {
-      "yerevan-checkups-site": {
-        "title": "Demo checkups overview",
-        "description": "Placeholder presentation page for corporate wellness checkup programs.",
-        "location": "Demo city",
-        "audience": "For clients",
-        "actionLabel": "Open demo site"
-      },
-      "yerevan-checkups-docs": {
-        "title": "Demo checkups documents",
-        "description": "Placeholder folder with sample pricing sheets and program outlines.",
-        "location": "Demo city",
-        "audience": "For team",
-        "actionLabel": "Open demo folder"
-      },
-      "formula-health-app": {
-        "title": "Demo partner app",
-        "description": "Placeholder login page for a third-party wellness partner application.",
-        "location": "Demo city",
-        "audience": "Demo portal",
-        "actionLabel": "Open demo app"
       }
     }
   },

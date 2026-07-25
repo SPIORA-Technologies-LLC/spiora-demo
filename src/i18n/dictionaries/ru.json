@@ -20,8 +20,7 @@
     "crmLeads": "Новые лиды",
     "newFormgridClients": "Новые клиенты из анкеты",
     "meetingRecordings": "Записи встреч",
-    "relocation": "Эмиграция",
-    "checkupsErevan": "Чекапы в Ереване"
+    "relocation": "Эмиграция"
   },
   "actions": {
     "save": "Сохранить",
@@ -1423,39 +1422,6 @@
         "country": "Европа",
         "audience": "Демо-канал",
         "actionLabel": "Открыть demo-ссылку"
-      }
-    }
-  },
-  "checkupsPage": {
-    "title": "Чекапы в Ереване",
-    "headerSubtitle": "Сайт с информацией о чекапах, документы команды и приложение «Формула Здоровья»",
-    "sections": {
-      "yerevan": {
-        "title": "Демо-хаб чекапов",
-        "subtitle": "Примеры ссылок для демонстраций wellness-программ"
-      }
-    },
-    "resources": {
-      "yerevan-checkups-site": {
-        "title": "Демо-обзор чекапов",
-        "description": "Заглушка презентационной страницы корпоративных wellness-программ.",
-        "location": "Демо-город",
-        "audience": "Для клиентов",
-        "actionLabel": "Открыть demo-сайт"
-      },
-      "yerevan-checkups-docs": {
-        "title": "Демо-документы по чекапам",
-        "description": "Заглушка папки с примерами прайсов и описаний программ.",
-        "location": "Демо-город",
-        "audience": "Для команды",
-        "actionLabel": "Открыть demo-папку"
-      },
-      "formula-health-app": {
-        "title": "Демо-приложение партнёра",
-        "description": "Заглушка страницы входа в wellness-приложение стороннего партнёра.",
-        "location": "Демо-город",
-        "audience": "Демо-портал",
-        "actionLabel": "Открыть demo-приложение"
       }
     }
   },

@@ -79,13 +79,6 @@ const NAV_RELOCATION: NavItem = {
   icon: "fa-solid fa-plane-departure",
 };
 
-const NAV_CHECKUPS_EREVAN: NavItem = {
-  href: "/checkups-erevan",
-  labelKey: "checkupsErevan",
-  labelNs: "nav",
-  icon: "fa-solid fa-stethoscope",
-};
-
 const NAV_ANALYTICS: NavItem = {
   href: "/analytics",
   labelKey: "analytics",
@@ -127,7 +120,6 @@ const MANAGER_NAV: NavItem[] = [
   NAV_MEETING_RECORDINGS,
   NAV_TEAM_CHAT,
   NAV_RELOCATION,
-  NAV_CHECKUPS_EREVAN,
   NAV_TEAM,
   NAV_WEBSITE,
 ];
@@ -144,7 +136,6 @@ const OWNER_NAV: NavItem[] = [
   NAV_MEETING_RECORDINGS,
   NAV_TEAM_CHAT,
   NAV_RELOCATION,
-  NAV_CHECKUPS_EREVAN,
   NAV_ANALYTICS,
   NAV_TEAM,
   NAV_SETTINGS,

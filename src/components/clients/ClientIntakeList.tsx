@@ -12,7 +12,7 @@ function formatDate(iso: string, locale: string) {
   try {
     return new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-GB", {
       day: "2-digit",
-      month: "short",
+      month: "2-digit",
       year: "numeric",
     }).format(new Date(iso));
   } catch {

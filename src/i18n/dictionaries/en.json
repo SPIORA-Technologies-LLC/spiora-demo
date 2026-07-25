@@ -2572,6 +2572,7 @@
     "delete": "Delete",
     "confirmDelete": "Are you sure you want to remove “{name}” from the list?",
     "columns": {
+      "name": "Client",
       "firstName": "First name",
       "lastName": "Last name",
       "email": "Email",

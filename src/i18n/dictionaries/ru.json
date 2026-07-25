@@ -2570,6 +2570,7 @@
     "delete": "Удалить",
     "confirmDelete": "Вы действительно хотите удалить заявку «{name}» из списка?",
     "columns": {
+      "name": "Клиент",
       "firstName": "Имя",
       "lastName": "Фамилия",
       "email": "Email",

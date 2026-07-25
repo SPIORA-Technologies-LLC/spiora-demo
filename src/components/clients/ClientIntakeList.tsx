@@ -102,8 +102,7 @@ export function ClientIntakeList() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>{t("columns.firstName")}</th>
-                  <th>{t("columns.lastName")}</th>
+                  <th>{t("columns.name")}</th>
                   <th>{t("columns.email")}</th>
                   <th>{t("columns.service")}</th>
                   <th>{t("columns.submittedAt")}</th>
@@ -113,12 +112,21 @@ export function ClientIntakeList() {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item) => (
+                {items.map((item) => {
+                  const fullName = [item.firstName, item.lastName]
+                    .filter((part) => part && part !== "—")
+                    .join(" ")
+                    .trim();
+                  return (
                   <tr key={item.id}>
                     <td>
-                      <Link href={`/clients/intake/${item.id}`}>{item.firstName}</Link>
+                      <Link
+                        href={`/clients/intake/${item.id}`}
+                        className={styles.nameLink}
+                      >
+                        {fullName || item.email}
+                      </Link>
                     </td>
-                    <td>{item.lastName}</td>
                     <td>{item.email}</td>
                     <td>{item.serviceType ?? "—"}</td>
                     <td>{formatDate(item.submittedAt, locale)}</td>
@@ -135,7 +143,8 @@ export function ClientIntakeList() {
                       </button>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

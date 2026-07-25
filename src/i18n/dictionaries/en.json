@@ -2564,11 +2564,13 @@
   },
   "clientIntake": {
     "title": "New questionnaire clients",
-    "subtitle": "Applications submitted from the client portal.",
+    "subtitle": "Applications submitted from the Spiora Client app.",
     "searchPlaceholder": "Search by name, email, service…",
     "loading": "Loading applications…",
     "loadFailed": "Failed to load applications",
     "empty": "No submitted applications yet",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to remove “{name}” from the list?",
     "columns": {
       "firstName": "First name",
       "lastName": "Last name",
@@ -2576,7 +2578,8 @@
       "service": "Service",
       "submittedAt": "Submitted",
       "assignee": "Assignee",
-      "status": "Status"
+      "status": "Status",
+      "actions": "Actions"
     },
     "detail": {
       "sectionTitle": "Client application",

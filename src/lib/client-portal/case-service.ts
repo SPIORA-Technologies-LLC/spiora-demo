@@ -253,6 +253,11 @@ export async function listIntakeCases(input?: {
   };
 }
 
+export async function archiveIntakeCase(caseId: string): Promise<boolean> {
+  const store = await getCaseStore();
+  return store.archiveCase(caseId);
+}
+
 export async function getEmployeeCaseDetail(caseId: string, locale: "en" | "ru" = "en") {
   const store = await getCaseStore();
   const record = await store.getById(caseId);

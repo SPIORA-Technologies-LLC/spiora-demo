@@ -148,6 +148,8 @@ export type CaseStore = {
     documentId: string,
   ): Promise<CaseDocumentRecord | null>;
   archiveDocument(caseId: string, documentId: string): Promise<boolean>;
+  /** Soft-delete from staff intake list (sets archived_at). */
+  archiveCase(caseId: string): Promise<boolean>;
 };
 
 export class CaseStoreConfigurationError extends Error {

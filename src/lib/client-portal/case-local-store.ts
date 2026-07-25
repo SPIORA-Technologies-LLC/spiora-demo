@@ -397,5 +397,21 @@ export async function createLocalCaseStore(): Promise<CaseStore> {
       await writeStore(store);
       return true;
     },
+
+    async archiveCase(caseId) {
+      const store = await readStore();
+      const idx = store.cases.findIndex(
+        (item) => item.id === caseId && !item.archivedAt,
+      );
+      if (idx < 0) return false;
+      const now = new Date().toISOString();
+      store.cases[idx] = {
+        ...store.cases[idx]!,
+        archivedAt: now,
+        updatedAt: now,
+      };
+      await writeStore(store);
+      return true;
+    },
   };
 }

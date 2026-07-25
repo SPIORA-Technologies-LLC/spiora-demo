@@ -267,6 +267,28 @@
   color: var(--gray-300);
 }
 
+.intakeDeleteBtn {
+  min-height: 2rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(168, 51, 61, 0.45);
+  background: rgba(168, 51, 61, 0.14);
+  color: #fecaca;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.intakeDeleteBtn:hover:not(:disabled) {
+  background: rgba(168, 51, 61, 0.28);
+}
+
+.intakeDeleteBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
 .pagination {
   display: flex;
   align-items: center;

@@ -538,5 +538,18 @@ export function createSupabaseCaseStore(client: SupabaseClient): CaseStore {
       if (error) throw error;
       return Boolean(data);
     },
+
+    async archiveCase(caseId) {
+      const now = new Date().toISOString();
+      const { data, error } = await client
+        .from("client_cases")
+        .update({ archived_at: now, updated_at: now })
+        .eq("id", caseId)
+        .is("archived_at", null)
+        .select("id")
+        .maybeSingle();
+      if (error) throw error;
+      return Boolean(data);
+    },
   };
 }

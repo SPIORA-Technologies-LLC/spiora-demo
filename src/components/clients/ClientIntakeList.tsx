@@ -27,6 +27,7 @@ export function ClientIntakeList() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -55,6 +56,25 @@ export function ClientIntakeList() {
     }, search ? 200 : 0);
     return () => clearTimeout(timer);
   }, [fetchItems, search]);
+
+  async function onDelete(item: ClientCaseIntakeItem) {
+    const name = [item.firstName, item.lastName].filter(Boolean).join(" ").trim();
+    if (!window.confirm(t("confirmDelete", { name: name || item.email }))) {
+      return;
+    }
+    setDeletingId(item.id);
+    try {
+      const res = await fetch(`/api/client-cases/${encodeURIComponent(item.id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("failed");
+      setItems((prev) => prev.filter((row) => row.id !== item.id));
+    } catch {
+      setError(true);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
     <div className={styles.wrap}>
@@ -89,6 +109,7 @@ export function ClientIntakeList() {
                   <th>{t("columns.submittedAt")}</th>
                   <th>{t("columns.assignee")}</th>
                   <th>{t("columns.status")}</th>
+                  <th>{t("columns.actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -103,6 +124,16 @@ export function ClientIntakeList() {
                     <td>{formatDate(item.submittedAt, locale)}</td>
                     <td>{item.assignedName ?? "—"}</td>
                     <td>{caseStatusLabel(item.currentStatus, locale)}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className={styles.intakeDeleteBtn}
+                        disabled={deletingId === item.id}
+                        onClick={() => void onDelete(item)}
+                      >
+                        {deletingId === item.id ? "…" : t("delete")}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>

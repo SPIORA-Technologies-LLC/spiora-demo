@@ -88,16 +88,11 @@ describe("PR #14 — production foundation", () => {
       "utf8",
     );
 
-    function rows(sql: string) {
-      const start = sql.indexOf(") values");
-      const end = sql.indexOf("on conflict (external_id)");
-      return sql
-        .slice(start, end)
-        .split("\n")
-        .map((line) => line.trim().replace(/,\s*$/, ""))
-        .filter((line) => line.startsWith("('DEMO-"));
-    }
-
-    assert.deepEqual(rows(supabase), rows(editor));
+    assert.match(editor, /delete from clients/i);
+    assert.match(supabase, /delete from clients/i);
+    assert.doesNotMatch(editor, /insert into clients/i);
+    assert.doesNotMatch(supabase, /insert into clients/i);
+    assert.doesNotMatch(editor, /\('DEMO-\d{4}'/);
+    assert.doesNotMatch(supabase, /\('DEMO-\d{4}'/);
   });
 });

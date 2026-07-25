@@ -182,47 +182,15 @@ describe("demo seed notes and documents", () => {
     supabase: path.join(process.cwd(), "supabase/seeds/clients-demo.sql"),
   };
 
-  function countMatches(sql: string, pattern: RegExp): number {
-    return [...sql.matchAll(pattern)].length;
-  }
-
-  it("seed содержит 10 demo-заметок и 16 document metadata", () => {
+  it("seed clears demo notes/documents instead of inserting them", () => {
     for (const filePath of Object.values(seedPaths)) {
       const sql = readFileSync(filePath, "utf8");
-      assert.equal(countMatches(sql, /'NT-DEMO-\d+'/g), 10, filePath);
-      assert.equal(countMatches(sql, /'DOC-DEMO-\d+'/g), 16, filePath);
-      assert.match(sql, /on conflict \(id\) do nothing/i);
-      assert.match(sql, /on conflict \(external_id\) do nothing/i);
-    }
-  });
-
-  it("SPIORA_DEMO_SEED.sql и clients-demo.sql совпадают по notes/documents блокам", () => {
-    const editor = readFileSync(seedPaths.sqlEditor, "utf8");
-    const supabase = readFileSync(seedPaths.supabase, "utf8");
-    const noteBlock = (s: string) => {
-      const start = s.indexOf("insert into client_notes");
-      const end = s.indexOf("insert into client_documents", start);
-      assert.ok(start >= 0 && end > start);
-      return s.slice(start, end).trim();
-    };
-    const docBlock = (s: string) => {
-      const start = s.indexOf("insert into client_documents");
-      const marker = "on conflict (external_id) do nothing;";
-      const end = s.indexOf(marker, start);
-      assert.ok(start >= 0 && end > start);
-      return s.slice(start, end + marker.length).trim();
-    };
-    assert.equal(noteBlock(editor), noteBlock(supabase));
-    assert.equal(docBlock(editor), docBlock(supabase));
-  });
-
-  it("seed использует fictional paths и machine keys", () => {
-    for (const filePath of Object.values(seedPaths)) {
-      const sql = readFileSync(filePath, "utf8");
-      assert.match(sql, /passport_copy/);
-      assert.match(sql, /under_review/);
-      assert.match(sql, /demo\/clients\/DEMO-/);
-      assert.doesNotMatch(sql, /signedUrl/i);
+      assert.match(sql, /delete from client_documents/i);
+      assert.match(sql, /delete from client_notes/i);
+      assert.doesNotMatch(sql, /insert into client_notes/i);
+      assert.doesNotMatch(sql, /insert into client_documents/i);
+      assert.doesNotMatch(sql, /'NT-DEMO-\d+'/);
+      assert.doesNotMatch(sql, /'DOC-DEMO-\d+'/);
     }
   });
 });

@@ -2346,7 +2346,7 @@
   },
   "clientInvitations": {
     "title": "Client invitations",
-    "subtitle": "Create a one-time Spiora Client link. Email delivery is not enabled yet — copy the link after creating.",
+    "subtitle": "Create a one-time link for the Spiora Client app. Copy the link and send it to the client.",
     "inviteClient": "Invite client",
     "loading": "Loading invitations…",
     "empty": "No invitations yet",

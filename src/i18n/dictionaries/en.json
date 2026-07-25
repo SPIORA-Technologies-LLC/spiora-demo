@@ -1318,7 +1318,8 @@
     "title": "Team",
     "subtitle": "Platform user list",
     "subtitleOnline": "Platform user list · {count} online",
-    "deleteHint": "Deletion is available to designated administrators (Owner and selected managers). A deleted user will not be able to sign in.",
+    "deleteHint": "Only the owner can add or remove managers. A removed manager can no longer sign in.",
+    "addManager": "Add manager",
     "onlineBar": {
       "loading": "Checking who is online…",
       "empty": "No one is online right now.",
@@ -1335,25 +1336,54 @@
     "youLabel": "(you)",
     "aiRequests": "AI requests",
     "perMonth": "this month",
+    "onlineToday": "Online today",
+    "onlineNone": "Not online today",
+    "workStart": "Started",
+    "workEnd": "Ended",
+    "hoursShort": "{hours}h {minutes}m",
+    "minutesShort": "{minutes}m",
     "delete": "Delete",
     "demoPreviewDelete": "User deletion is preview-only in demo mode.",
     "modal": {
-      "title": "Delete user?",
-      "body": "The user will lose access to the platform.",
+      "title": "Delete manager?",
+      "body": "The manager will lose access to the platform and will not be able to sign in.",
       "cancel": "Cancel",
       "deleting": "Deleting…",
       "deleteBtn": "Delete"
     },
+    "addModal": {
+      "title": "Add manager",
+      "body": "Create a manager account. Share the email and password so they can sign in.",
+      "name": "Full name",
+      "email": "Email",
+      "password": "Password",
+      "generatePassword": "Generate password",
+      "cancel": "Cancel",
+      "creating": "Creating…",
+      "createBtn": "Add manager",
+      "createdTitle": "Manager added",
+      "createdBody": "Save this password — it will not be shown again.",
+      "copyPassword": "Copy password",
+      "done": "Done"
+    },
     "toasts": {
       "memberDeleted": "{name} removed from the team.",
-      "deleteFailed": "Could not delete user."
+      "deleteFailed": "Could not delete user.",
+      "memberCreated": "{name} added as manager.",
+      "createFailed": "Could not add manager.",
+      "passwordCopied": "Password copied."
     },
     "errors": {
       "deleteFailed": "Could not delete user.",
       "deleteForbidden": "Insufficient permissions to delete this user.",
       "notFound": "User not found.",
       "alreadyDeleted": "User is already deleted.",
-      "saveFailed": "Failed to save changes."
+      "saveFailed": "Failed to save changes.",
+      "createForbidden": "Only the owner can add managers.",
+      "invalidName": "Enter a valid full name.",
+      "invalidEmail": "Enter a valid email address.",
+      "invalidPassword": "Enter a password of at least 8 characters.",
+      "emailTaken": "A user with this email already exists."
     }
   },
   "teamMembers": {

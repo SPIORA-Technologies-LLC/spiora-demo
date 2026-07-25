@@ -131,6 +131,11 @@ export async function getSession(): Promise<SessionUser | null> {
 
   const legacy = await getLegacySession();
   if (!legacy || !isSessionAccessAllowed(legacy)) return null;
+
+  const { findTeamUserById, isUserDeleted } = await import("@/lib/team/store");
+  if (await isUserDeleted(legacy.id)) return null;
+  if (!(await findTeamUserById(legacy.id))) return null;
+
   return legacy;
 }
 

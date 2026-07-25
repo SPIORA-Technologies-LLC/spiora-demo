@@ -10,11 +10,10 @@ import {
   destroySession,
 } from "@/lib/auth/session";
 import {
-  findUserByEmail,
   toSessionUser,
 } from "@/lib/auth/users";
 import { verifyUserPassword } from "@/lib/auth/verify-password";
-import { isUserDeleted } from "@/lib/team/store";
+import { findTeamUserByEmail, isUserDeleted } from "@/lib/team/store";
 import { getAuthProvider, isLegacyAuthAllowed } from "@/lib/auth/provider";
 import {
   checkRequestOrigin,
@@ -90,7 +89,7 @@ export async function signInAction(
     return { error: t("invalidCredentials") };
   }
 
-  const user = findUserByEmail(email);
+  const user = await findTeamUserByEmail(email);
   if (!user) {
     return { error: t("emailNotRegistered") };
   }

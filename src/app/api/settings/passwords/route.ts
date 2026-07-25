@@ -4,14 +4,17 @@ import { translateAdminMessage } from "@/i18n/admin-messages";
 import { enforceAdminDemoGuard } from "@/lib/admin/demo-guard";
 import { isDemoMode } from "@/lib/demo/demo-mode";
 import { getSession } from "@/lib/auth/session";
-import { listTeamUsers } from "@/lib/auth/users";
 import {
   generateTemporaryPassword,
   getStoredPasswordMeta,
   setUserPassword,
   validateNewPassword,
 } from "@/lib/auth/password-store";
-import { isUserDeleted } from "@/lib/team/store";
+import {
+  findTeamUserById,
+  isUserDeleted,
+  listAllTeamUsers,
+} from "@/lib/team/store";
 
 export async function GET() {
   const session = await getSession();
@@ -22,8 +25,9 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const users = await listAllTeamUsers();
   const members = await Promise.all(
-    listTeamUsers().map(async (user) => {
+    users.map(async (user) => {
       const meta = await getStoredPasswordMeta(user.id);
       const deleted = await isUserDeleted(user.id);
       return {
@@ -69,7 +73,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "User is required" }, { status: 400 });
   }
 
-  const user = listTeamUsers().find((item) => item.id === userId);
+  const user = await findTeamUserById(userId);
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }

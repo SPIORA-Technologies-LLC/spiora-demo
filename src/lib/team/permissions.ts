@@ -1,17 +1,20 @@
 import type { SessionUser } from "@/lib/auth/types";
 
-const TEAM_DELETE_ALLOWED_IDS = new Set(["olivia-bennett", "daniel-cooper"]);
+/** Only the platform owner can add or remove managers. */
+export function canManageTeam(user: SessionUser): boolean {
+  return user.role === "owner";
+}
 
 export function canDeleteTeamMembers(user: SessionUser): boolean {
-  return TEAM_DELETE_ALLOWED_IDS.has(user.id);
+  return canManageTeam(user);
 }
 
 export function canDeleteTeamMember(
   actor: SessionUser,
-  targetId: string,
+  target: { id: string; role: string },
 ): boolean {
-  if (!canDeleteTeamMembers(actor)) return false;
-  if (actor.id === targetId) return false;
-  if (targetId === "olivia-bennett" && actor.id !== "olivia-bennett") return false;
+  if (!canManageTeam(actor)) return false;
+  if (actor.id === target.id) return false;
+  if (target.role !== "manager") return false;
   return true;
 }

@@ -90,22 +90,31 @@ describe("team RBAC", () => {
   };
 
   it("manager cannot delete owner", () => {
-    assert.equal(canDeleteTeamMember(manager, "olivia-bennett"), false);
+    assert.equal(
+      canDeleteTeamMember(manager, { id: "olivia-bennett", role: "owner" }),
+      false,
+    );
   });
 
-  it("manager cannot delete if not in allowed list", () => {
-    assert.equal(canDeleteTeamMember(manager, "lucas-martin"), false);
+  it("manager cannot delete other managers", () => {
+    assert.equal(
+      canDeleteTeamMember(manager, { id: "lucas-martin", role: "manager" }),
+      false,
+    );
   });
 
   it("owner cannot delete self", () => {
-    assert.equal(canDeleteTeamMember(owner, "olivia-bennett"), false);
+    assert.equal(
+      canDeleteTeamMember(owner, { id: "olivia-bennett", role: "owner" }),
+      false,
+    );
   });
 
-  it("designated manager can delete another manager", () => {
-    assert.equal(canDeleteTeamMember(
-      { ...manager, id: "daniel-cooper", name: "Daniel Cooper" },
-      "emma-wilson",
-    ), true);
+  it("owner can delete a manager", () => {
+    assert.equal(
+      canDeleteTeamMember(owner, { id: "emma-wilson", role: "manager" }),
+      true,
+    );
   });
 });
 

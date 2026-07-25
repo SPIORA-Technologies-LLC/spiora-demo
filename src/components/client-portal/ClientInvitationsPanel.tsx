@@ -57,6 +57,8 @@ export function ClientInvitationsPanel() {
   const [copyDone, setCopyDone] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
   const load = useCallback(async () => {
     setLoading(true);
     setError(false);
@@ -180,6 +182,19 @@ export function ClientInvitationsPanel() {
     if (res.ok) await load();
   }
 
+  async function onDelete(id: string) {
+    if (!window.confirm(t("confirmDelete"))) return;
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/client-invitations/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) await load();
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   async function copyUrl() {
     if (!createdUrl) return;
     try {
@@ -272,7 +287,7 @@ export function ClientInvitationsPanel() {
                       {row.state === "pending" || row.state === "expired" ? (
                         <button
                           type="button"
-                          className={styles.linkBtn}
+                          className={styles.actionBtn}
                           onClick={() => void onRevoke(row.id)}
                         >
                           {t("revoke")}
@@ -280,10 +295,18 @@ export function ClientInvitationsPanel() {
                       ) : null}
                       <button
                         type="button"
-                        className={styles.linkBtn}
+                        className={styles.actionBtn}
                         onClick={() => void openModal(row.email)}
                       >
                         {t("inviteAgain")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.deleteBtn}
+                        disabled={deletingId === row.id}
+                        onClick={() => void onDelete(row.id)}
+                      >
+                        {deletingId === row.id ? "…" : t("delete")}
                       </button>
                     </div>
                   </td>

@@ -42,6 +42,10 @@ import {
   normalizeInviteEmail,
   type ClientInvitationState,
 } from "./invite-token";
+import {
+  hideInvitationFromStaffList,
+  listHiddenInvitationIds,
+} from "./invitation-list-visibility";
 import type { ClientPortalLocale } from "./types";
 
 export type {
@@ -117,7 +121,11 @@ export async function listClientInvitations(): Promise<InvitationPublicDto[]> {
     ? (await sbListClientInvitations()).map(toRecord)
     : (await localListInvitations()).map(toRecord);
 
-  const visible = rows.filter((row) => !isInternalTestInviteEmail(row.email));
+  const hiddenIds = await listHiddenInvitationIds();
+  const visible = rows.filter(
+    (row) =>
+      !isInternalTestInviteEmail(row.email) && !hiddenIds.has(row.id),
+  );
   return mapInvitationRecordsToPublic(visible, assigneeNameResolver);
 }
 
@@ -143,6 +151,28 @@ export async function revokeClientInvitation(
 
   if (!after) return { ok: false, code: "NOT_FOUND" };
   return { ok: true, invitation: invitationRecordToPublic(toRecord(after)) };
+}
+
+/** Remove from staff list; revoke pending/expired links so they stop working. */
+export async function deleteClientInvitation(
+  id: string,
+): Promise<{ ok: true } | { ok: false; code: string }> {
+  const before = isSupabaseConfigured()
+    ? await sbGetInvitationById(id)
+    : await localFindInvitationById(id);
+  if (!before) return { ok: false, code: "NOT_FOUND" };
+
+  const state = computeInvitationState(before);
+  if (state === "pending" || state === "expired") {
+    const revoked = isSupabaseConfigured()
+      ? await sbRevokeClientInvitation(id)
+      : await localRevokeInvitation(id);
+    if (!revoked) return { ok: false, code: "NOT_FOUND" };
+  }
+
+  const hidden = await hideInvitationFromStaffList(id);
+  if (!hidden) return { ok: false, code: "INTERNAL" };
+  return { ok: true };
 }
 
 export type InvitePreview =

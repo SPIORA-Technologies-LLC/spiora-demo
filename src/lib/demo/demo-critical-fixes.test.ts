@@ -168,13 +168,13 @@ describe("PR #11 — Sidebar nav i18n", () => {
       translateMessage("ru", "nav.clientInvitations"),
       "Приглашения клиентов",
     );
-    assert.equal(translateMessage("ru", "nav.relocation"), "Эмиграция");
+    assert.equal(translateMessage("ru", "nav.relocation"), "Электронные ресурсы");
     assert.equal(translateMessage("ru", "nav.analytics"), "Аналитика");
     assert.equal(translateMessage("ru", "nav.team"), "Команда");
     assert.equal(translateMessage("ru", "nav.settings"), "Настройки");
   });
 
-  it("RU: страница Эмиграция переведена", () => {
+  it("RU: страница Электронные ресурсы переведена", () => {
     assert.match(
       translateMessage("ru", "relocationPage.resources.croatia-clients-sheet.title"),
       /[а-яА-ЯёЁ]/,

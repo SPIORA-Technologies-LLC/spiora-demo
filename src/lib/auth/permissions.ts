@@ -76,7 +76,7 @@ const NAV_RELOCATION: NavItem = {
   href: "/relocation",
   labelKey: "relocation",
   labelNs: "nav",
-  icon: "fa-solid fa-plane-departure",
+  icon: "fa-solid fa-folder-open",
 };
 
 const NAV_ANALYTICS: NavItem = {

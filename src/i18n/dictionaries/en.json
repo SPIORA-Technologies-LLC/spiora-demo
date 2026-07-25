@@ -20,7 +20,7 @@
     "crmLeads": "Lead Review",
     "newFormgridClients": "Formgrid Clients",
     "meetingRecordings": "Meeting Recordings",
-    "relocation": "Relocation"
+    "relocation": "Electronic resources"
   },
   "actions": {
     "save": "Save",
@@ -929,7 +929,7 @@
       "teamFocusToday": "**Team focus for today**\n\n1. **Clear overdue tasks** — 3 items need attention (visa review, booking, CRM notes).\n2. **Client consultations** — prep for Anna Kowalska video call at 11:00.\n3. **Pipeline hygiene** — update statuses for clients in \"Consultation\" and \"Documents\" stages.\n4. **Calendar** — 4 meetings today; confirm video links for external calls.\n\n**Capacity note:** Daniel Cooper and Emma Wilson have the heaviest client loads today.",
       "activeClients": "**Active clients overview**\n\n- **Total in CRM:** 12 demo clients\n- **In progress:** John Carter (Portugal), Anna Kowalska (Croatia)\n- **Consultation:** Sofia Martins (Spain)\n- **Documents:** Anna Kowalska\n- **New:** Marco Rossi (Slovakia)\n\nMost activity this week: consultation follow-ups and document collection.",
       "knowledgeBase": "**Knowledge Base — program comparison (excerpt)**\n\n| Program | Stay | Income proof | Processing |\n|---------|------|--------------|------------|\n| Croatia Digital Nomad | 12 months | Remote contract | ~45 days |\n| Portugal D7 | Renewable | Passive/remote income | ~60 days |\n| Spain remote work | 1 year | Employment/contract | ~30 days |\n\nAsk for a specific country or client scenario for a tailored checklist.",
-      "formgridOverview": "**Formgrid applications**\n\n- **Recent submissions:** 3 this week\n- **Latest:** Marco Rossi — Slovakia direction, status \"New\"\n- **Pending review:** 1 application awaiting manager assignment\n\nOpen the Immigration section for full survey details or ask about a specific applicant.",
+      "formgridOverview": "**Formgrid applications**\n\n- **Recent submissions:** 3 this week\n- **Latest:** Marco Rossi — Slovakia direction, status \"New\"\n- **Pending review:** 1 application awaiting manager assignment\n\nOpen the Electronic resources section for full survey details or ask about a specific applicant.",
       "generic": "I reviewed the available demo context (CRM, tasks, calendar, and Knowledge Base). Here is what stands out:\n\n- **4 clients** need attention this week (consultation or documents stage).\n- **3 tasks** are overdue.\n- **4 meetings** are scheduled in the next two days.\n\nTry a suggested prompt for a detailed breakdown, or ask about a specific client by name."
     }
   },
@@ -1363,11 +1363,11 @@
     "lucas-martin": "Lucas Martin"
   },
   "relocationPage": {
-    "title": "Relocation",
-    "headerSubtitle": "Croatia, Europe: forms, data, Emigrant-SK website and Telegram",
+    "title": "Electronic resources",
+    "headerSubtitle": "Spreadsheets, forms, website, and other company electronic resources",
     "sections": {
       "croatia": {
-        "title": "Demo relocation hub",
+        "title": "Demo resource hub",
         "subtitle": "Sample resources for {company} demonstrations"
       },
       "emigrant-eu": {

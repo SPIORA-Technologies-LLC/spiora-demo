@@ -2354,7 +2354,7 @@
     "inviteAgain": "New invite",
     "delete": "Delete",
     "confirmRevoke": "Revoke this invitation?",
-    "confirmDelete": "Remove this invitation from the list? An active link will stop working.",
+    "confirmDelete": "Remove this invitation from the list? If the link is still active, it will stop working.",
     "modalTitle": "Invite client to Spiora Client",
     "close": "Close",
     "create": "Create invitation",

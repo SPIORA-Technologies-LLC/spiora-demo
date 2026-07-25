@@ -174,14 +174,6 @@ export function ClientInvitationsPanel() {
     }
   }
 
-  async function onRevoke(id: string) {
-    if (!window.confirm(t("confirmRevoke"))) return;
-    const res = await fetch(`/api/client-invitations/${id}/revoke`, {
-      method: "POST",
-    });
-    if (res.ok) await load();
-  }
-
   async function onDelete(id: string) {
     if (!window.confirm(t("confirmDelete"))) return;
     setDeletingId(id);
@@ -284,15 +276,6 @@ export function ClientInvitationsPanel() {
                   </td>
                   <td>
                     <div className={styles.actions}>
-                      {row.state === "pending" || row.state === "expired" ? (
-                        <button
-                          type="button"
-                          className={styles.actionBtn}
-                          onClick={() => void onRevoke(row.id)}
-                        >
-                          {t("revoke")}
-                        </button>
-                      ) : null}
                       <button
                         type="button"
                         className={styles.actionBtn}

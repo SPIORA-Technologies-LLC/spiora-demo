@@ -321,9 +321,10 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
                   </div>
                   <div className={styles.docActions}>
                     <a
-                      className={styles.docActionLink}
+                      className={styles.docActionBtn}
                       href={`/api/client-cases/${caseId}/documents/${doc.id}`}
                     >
+                      <i className="fa-solid fa-download" aria-hidden />
                       {t("documents.download")}
                     </a>
                     <button
@@ -332,6 +333,7 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
                       disabled={deletingDocId === doc.id}
                       onClick={() => void deleteDocument(doc)}
                     >
+                      <i className="fa-solid fa-trash-can" aria-hidden />
                       {deletingDocId === doc.id ? "…" : t("documents.delete")}
                     </button>
                   </div>
@@ -374,9 +376,10 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
                   </div>
                   <div className={styles.docActions}>
                     <a
-                      className={styles.docActionLink}
+                      className={styles.docActionBtn}
                       href={`/api/client-cases/${caseId}/documents/${doc.id}`}
                     >
+                      <i className="fa-solid fa-download" aria-hidden />
                       {t("documents.download")}
                     </a>
                     <button
@@ -385,6 +388,7 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
                       disabled={deletingDocId === doc.id}
                       onClick={() => void deleteDocument(doc)}
                     >
+                      <i className="fa-solid fa-trash-can" aria-hidden />
                       {deletingDocId === doc.id ? "…" : t("documents.delete")}
                     </button>
                   </div>

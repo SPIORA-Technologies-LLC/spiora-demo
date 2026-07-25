@@ -99,59 +99,103 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  align-items: flex-start;
+  align-items: center;
+  padding: 0.85rem 0.95rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.035),
+    rgba(0, 0, 0, 0.18)
+  );
 }
 
 .docNameLink {
   display: inline-block;
-  color: var(--orange-400, #f5a623);
+  color: #f0d2a8;
   font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
+  text-decoration: none;
+  letter-spacing: 0.01em;
 }
 
 .docNameLink:hover {
-  color: var(--orange-300, #ffb84d);
-}
-
-.docActionLink {
-  flex-shrink: 0;
-  color: var(--gray-200);
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-  font-size: 0.875rem;
-}
-
-.docActionLink:hover {
-  color: var(--gray-50);
+  color: #ffd9a8;
 }
 
 .docActions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
   flex-shrink: 0;
+  padding: 0.22rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.docActionBtn,
+.docDeleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  min-height: 2.15rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 0;
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.docActionBtn {
+  background: linear-gradient(180deg, rgba(255, 196, 120, 0.22), rgba(168, 90, 30, 0.18));
+  color: #ffe7c4;
+  box-shadow: inset 0 1px 0 rgba(255, 230, 190, 0.18);
+}
+
+.docActionBtn:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(255, 196, 120, 0.34), rgba(168, 90, 30, 0.28));
+  color: #fff4e4;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 230, 190, 0.22),
+    0 8px 18px rgba(0, 0, 0, 0.28);
 }
 
 .docDeleteBtn {
-  border: 1px solid rgba(168, 51, 61, 0.45);
-  border-radius: 0.45rem;
-  background: rgba(168, 51, 61, 0.14);
-  color: #fecaca;
-  padding: 0.25rem 0.55rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
+  background: linear-gradient(180deg, rgba(196, 72, 82, 0.34), rgba(110, 28, 36, 0.42));
+  color: #ffd5d5;
+  box-shadow: inset 0 1px 0 rgba(255, 180, 180, 0.14);
 }
 
 .docDeleteBtn:hover:not(:disabled) {
-  background: rgba(168, 51, 61, 0.28);
+  transform: translateY(-1px);
+  background: linear-gradient(180deg, rgba(214, 78, 88, 0.48), rgba(120, 28, 36, 0.55));
+  color: #fff0f0;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 180, 180, 0.18),
+    0 8px 18px rgba(90, 12, 18, 0.35);
 }
 
 .docDeleteBtn:disabled {
   opacity: 0.55;
   cursor: default;
+  transform: none;
+}
+
+.docActionBtn i,
+.docDeleteBtn i {
+  font-size: 0.78rem;
+  line-height: 1;
 }
 
 .docList span {
@@ -159,6 +203,18 @@
   color: var(--gray-300);
   font-size: 0.8rem;
   margin-top: 0.2rem;
+}
+
+@media (max-width: 640px) {
+  .docList li {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .docActions {
+    width: fit-content;
+    align-self: flex-end;
+  }
 }
 
 .upload {

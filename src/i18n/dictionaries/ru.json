@@ -2388,9 +2388,7 @@
     "states": {
       "all": "Все",
       "pending": "Ожидает",
-      "accepted": "Принято",
-      "expired": "Истекло",
-      "revoked": "Отозвано"
+      "accepted": "Принято"
     },
     "errors": {
       "loadFailed": "Не удалось загрузить приглашения",

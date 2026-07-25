@@ -26,7 +26,7 @@ type Assignee = {
   role: "owner" | "manager";
 };
 
-type StateFilter = "all" | Invitation["state"];
+type StateFilter = "all" | "pending" | "accepted";
 
 function newRequestId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -229,9 +229,7 @@ export function ClientInvitationsPanel() {
       </div>
 
       <div className={styles.filters}>
-        {(
-          ["all", "pending", "accepted", "expired", "revoked"] as StateFilter[]
-        ).map((key) => (
+        {(["all", "pending", "accepted"] as StateFilter[]).map((key) => (
           <button
             key={key}
             type="button"

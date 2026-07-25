@@ -2390,9 +2390,7 @@
     "states": {
       "all": "All",
       "pending": "Pending",
-      "accepted": "Accepted",
-      "expired": "Expired",
-      "revoked": "Revoked"
+      "accepted": "Accepted"
     },
     "errors": {
       "loadFailed": "Failed to load invitations",

@@ -122,10 +122,13 @@ export async function listClientInvitations(): Promise<InvitationPublicDto[]> {
     : (await localListInvitations()).map(toRecord);
 
   const hiddenIds = await listHiddenInvitationIds();
-  const visible = rows.filter(
-    (row) =>
-      !isInternalTestInviteEmail(row.email) && !hiddenIds.has(row.id),
-  );
+  const visible = rows.filter((row) => {
+    if (isInternalTestInviteEmail(row.email) || hiddenIds.has(row.id)) {
+      return false;
+    }
+    const state = computeInvitationState(row);
+    return state === "pending" || state === "accepted";
+  });
   return mapInvitationRecordsToPublic(visible, assigneeNameResolver);
 }
 

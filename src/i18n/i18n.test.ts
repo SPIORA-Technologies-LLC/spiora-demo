@@ -62,12 +62,12 @@ describe("i18n config", () => {
 describe("i18n messages", () => {
   it("возвращает английские shared navigation labels", () => {
     assert.equal(translateMessage("en", "nav.dashboard"), "Command Center");
-    assert.equal(translateMessage("en", "nav.clients"), "Clients");
+    assert.equal(translateMessage("en", "nav.clients"), "Client base");
     assert.equal(translateMessage("en", "nav.logout"), "Logout");
   });
 
   it("возвращает русские shared navigation labels", () => {
-    assert.equal(translateMessage("ru", "nav.clients"), "Клиенты");
+    assert.equal(translateMessage("ru", "nav.clients"), "База клиентов");
     assert.equal(translateMessage("ru", "nav.tasks"), "Задачи");
     assert.equal(translateMessage("ru", "nav.logout"), "Выйти");
   });
@@ -88,7 +88,7 @@ describe("i18n messages", () => {
     const ruMessages = getMessagesForLocale("ru");
     assert.equal((enMessages.nav as { dashboard: string }).dashboard, "Command Center");
     assert.equal((ruMessages.nav as { dashboard: string }).dashboard, "Центр управления");
-    assert.equal((ruMessages.nav as { clients: string }).clients, "Клиенты");
+    assert.equal((ruMessages.nav as { clients: string }).clients, "База клиентов");
   });
 });
 
@@ -174,7 +174,7 @@ describe("core modules i18n — Dashboard (legacy keys)", () => {
     );
     assert.equal(
       translateMessage("en", "dashboard.platformStats.clients"),
-      "Clients",
+      "Client base",
     );
     assert.equal(
       translateMessage("en", "dashboard.quickActions.createTask"),
@@ -189,7 +189,7 @@ describe("core modules i18n — Dashboard (legacy keys)", () => {
     );
     assert.equal(
       translateMessage("ru", "dashboard.platformStats.clients"),
-      "Клиенты",
+      "База клиентов",
     );
     assert.equal(
       translateMessage("ru", "dashboard.sections.quickActions"),
@@ -200,7 +200,7 @@ describe("core modules i18n — Dashboard (legacy keys)", () => {
 
 describe("core modules i18n — Clients", () => {
   it("возвращает английские clients labels", () => {
-    assert.equal(translateMessage("en", "clients.title"), "Clients");
+    assert.equal(translateMessage("en", "clients.title"), "Client base");
     assert.equal(
       translateMessage("en", "clients.search.placeholder"),
       "Search: name, passport…",
@@ -216,7 +216,7 @@ describe("core modules i18n — Clients", () => {
   });
 
   it("возвращает русские clients labels", () => {
-    assert.equal(translateMessage("ru", "clients.title"), "Клиенты");
+    assert.equal(translateMessage("ru", "clients.title"), "База клиентов");
     assert.equal(
       translateMessage("ru", "clients.empty.notFound"),
       "Клиенты не найдены",

@@ -4,7 +4,7 @@
   },
   "nav": {
     "dashboard": "Центр управления",
-    "clients": "Клиенты",
+    "clients": "База клиентов",
     "clientInvitations": "Приглашения клиентов",
     "clientIntake": "Новые клиенты из анкеты",
     "tasks": "Задачи",
@@ -233,7 +233,7 @@
       "overdueHintNone": "требуют внимания"
     },
     "platformStats": {
-      "clients": "Клиенты",
+      "clients": "База клиентов",
       "clientsHint": "в CRM",
       "newForms": "Новые анкеты",
       "newFormsHint": "за 7 дней",
@@ -319,7 +319,7 @@
     }
   },
   "clients": {
-    "title": "Клиенты",
+    "title": "База клиентов",
     "subtitle": "Данные клиентов хранятся в PostgreSQL (CRM)",
     "search": {
       "placeholder": "Поиск: имя, паспорт…"
@@ -409,7 +409,7 @@
       "loadFailed": "Не удалось загрузить клиентов"
     },
     "detail": {
-      "sectionTitle": "Клиенты · {name}",
+      "sectionTitle": "База клиентов · {name}",
       "subtitle": "Карточка клиента CRM",
       "backToList": "К списку клиентов",
       "fullName": "ФИО",

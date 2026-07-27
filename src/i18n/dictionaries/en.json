@@ -4,7 +4,7 @@
   },
   "nav": {
     "dashboard": "Command Center",
-    "clients": "Clients",
+    "clients": "Client base",
     "clientInvitations": "Client invitations",
     "clientIntake": "Questionnaire intake",
     "tasks": "Tasks",
@@ -233,7 +233,7 @@
       "overdueHintNone": "need attention"
     },
     "platformStats": {
-      "clients": "Clients",
+      "clients": "Client base",
       "clientsHint": "in CRM",
       "newForms": "New applications",
       "newFormsHint": "last 7 days",
@@ -319,7 +319,7 @@
     }
   },
   "clients": {
-    "title": "Clients",
+    "title": "Client base",
     "subtitle": "Client data is stored in PostgreSQL (CRM)",
     "search": {
       "placeholder": "Search: name, passport…"
@@ -409,7 +409,7 @@
       "loadFailed": "Failed to load clients"
     },
     "detail": {
-      "sectionTitle": "Clients · {name}",
+      "sectionTitle": "Client base · {name}",
       "subtitle": "CRM client profile",
       "backToList": "Back to clients",
       "fullName": "Full name",

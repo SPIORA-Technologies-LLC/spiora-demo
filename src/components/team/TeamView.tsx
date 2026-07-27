@@ -218,7 +218,9 @@ export function TeamView({ user }: TeamViewProps) {
       ) : (
         <ul className={styles.list}>
           {members.map((member) => {
-            const isSelf = member.id === user.id;
+            const isSelf =
+              member.email.trim().toLowerCase() ===
+              user.email.trim().toLowerCase();
             const memberName = translateTeamMemberName(
               locale,
               member.id,

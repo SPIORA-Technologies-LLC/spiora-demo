@@ -31,6 +31,11 @@ describe("team owner management permissions", () => {
     assert.equal(canManageTeam(manager), false);
   });
 
+  it("maps demo owner email to roster id used by Team presence reads", async () => {
+    const { findUserByEmail } = await import("@/lib/auth/users.ts");
+    assert.equal(findUserByEmail("olivia@spiora.demo")?.id, "olivia-bennett");
+  });
+
   it("owner can delete managers but not self or other owners", () => {
     assert.equal(
       canDeleteTeamMember(owner, { id: "emma-wilson", role: "manager" }),

@@ -2659,7 +2659,8 @@
       "allDirections": "Все направления",
       "noDirection": "Без направления",
       "allStatuses": "Все статусы",
-      "pageSize": "{n} строк"
+      "pageSize": "По {n} на странице",
+      "pageSizeAria": "Сколько клиентов показывать на одной странице"
     },
     "table": {
       "client": "Клиент",

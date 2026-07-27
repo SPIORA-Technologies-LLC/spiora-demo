@@ -11,6 +11,7 @@
  *   finance.filters.noDirection
  *   finance.filters.allStatuses
  *   finance.filters.pageSize
+ *   finance.filters.pageSizeAria
  *   finance.table.client
  *   finance.table.direction
  *   finance.table.contract
@@ -221,6 +222,8 @@ export function FinanceDashboard() {
             className={styles.select}
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
+            aria-label={t("filters.pageSizeAria")}
+            title={t("filters.pageSizeAria")}
           >
             {[20, 50, 100].map((n) => (
               <option key={n} value={n}>{t("filters.pageSize", { n })}</option>

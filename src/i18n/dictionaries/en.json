@@ -2661,7 +2661,8 @@
       "allDirections": "All directions",
       "noDirection": "No direction",
       "allStatuses": "All statuses",
-      "pageSize": "{n} rows"
+      "pageSize": "{n} per page",
+      "pageSizeAria": "How many clients to show on one page"
     },
     "table": {
       "client": "Client",

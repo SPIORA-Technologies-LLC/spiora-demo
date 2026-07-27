@@ -206,17 +206,40 @@ export function KnowledgeBaseView() {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.demoHeader}>
-        {demoListing?.demo ? (
-          <span className={styles.demoBadge}>{t("demoBadge")}</span>
-        ) : null}
-        <span className={styles.source}>
-          {t(`sources.${demoListing?.source ?? "unconfigured"}`)}
-        </span>
-      </div>
+      <div className={styles.topBar}>
+        <form className={styles.searchRow} onSubmit={handleSearchSubmit}>
+          <label className={styles.searchLabel} htmlFor="kb-search">
+            {t("search.label")}
+          </label>
+          <div className={styles.searchFieldWrap}>
+            <button
+              type="submit"
+              className={styles.searchSubmit}
+              aria-label={t("search.label")}
+            >
+              <i className="fa-solid fa-magnifying-glass" aria-hidden />
+            </button>
+            <input
+              id="kb-search"
+              className={styles.searchInput}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder={t("search.placeholder")}
+            />
+            {searchInput ? (
+              <button
+                type="button"
+                className={styles.clearBtn}
+                onClick={handleClearSearch}
+                aria-label={t("search.clear")}
+              >
+                <i className="fa-solid fa-xmark" aria-hidden />
+              </button>
+            ) : null}
+          </div>
+        </form>
 
-      {canManage ? (
-        <div className={styles.ownerToolbar}>
+        {canManage ? (
           <div className={styles.addMaterialWrap} ref={addMenuRef}>
             <button
               type="button"
@@ -317,36 +340,8 @@ export function KnowledgeBaseView() {
               </div>
             ) : null}
           </div>
-        </div>
-      ) : null}
-
-      <form className={styles.searchRow} onSubmit={handleSearchSubmit}>
-        <label className={styles.searchLabel} htmlFor="kb-search">
-          {t("search.label")}
-        </label>
-        <div className={styles.searchFieldWrap}>
-          <input
-            id="kb-search"
-            className={styles.searchInput}
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder={t("search.placeholder")}
-          />
-          {searchInput ? (
-            <button
-              type="button"
-              className={styles.clearBtn}
-              onClick={handleClearSearch}
-            >
-              {t("search.clear")}
-            </button>
-          ) : null}
-          <button type="submit" className={styles.searchBtn}>
-            <i className="fa-solid fa-magnifying-glass" aria-hidden />
-          </button>
-        </div>
-        <p className={styles.searchHint}>{t("search.hint")}</p>
-      </form>
+        ) : null}
+      </div>
 
       <div className={styles.demoLayout}>
         <aside className={styles.sidebar}>
@@ -376,76 +371,87 @@ export function KnowledgeBaseView() {
                   })
                 }
               >
-                {cat.label}
+                <span className={styles.filterLabel}>{cat.label}</span>
                 <span className={styles.filterCount}>{cat.count}</span>
               </button>
             ))}
           </div>
 
-          <div className={styles.filterBlock}>
-            <p className={styles.filterTitle}>{t("filters.tagLabel")}</p>
-            <button
-              type="button"
-              className={`${styles.filterBtn} ${!tag ? styles.filterActive : ""}`}
-              onClick={() =>
-                updateRoute({ q: query, category, status: statusFilter, article: undefined })
-              }
-            >
-              {t("filters.allTags")}
-            </button>
-            {tags.map((tagItem) => (
-              <button
-                key={tagItem.id}
-                type="button"
-                className={`${styles.filterBtn} ${tag === tagItem.id ? styles.filterActive : ""}`}
-                onClick={() =>
-                  updateRoute({
-                    q: query,
-                    category,
-                    tag: tagItem.id,
-                    status: statusFilter,
-                    article: undefined,
-                  })
-                }
-              >
-                {tagItem.label}
-              </button>
-            ))}
-          </div>
-
-          {canManage ? (
+          {tags.length > 0 ? (
             <div className={styles.filterBlock}>
-              <p className={styles.filterTitle}>{t("editor.status.draft")}</p>
-              {(
-                [
-                  ["published", t("editor.filters.published")],
-                  ["draft", t("editor.filters.draft")],
-                  ["archived", t("editor.filters.archived")],
-                ] as const
-              ).map(([value, label]) => (
+              <p className={styles.filterTitle}>{t("filters.tagLabel")}</p>
+              <div className={styles.tagFilterWrap}>
                 <button
-                  key={value}
                   type="button"
-                  className={`${styles.filterBtn} ${statusFilter === value ? styles.filterActive : ""}`}
+                  className={`${styles.tagFilterChip} ${!tag ? styles.tagFilterActive : ""}`}
                   onClick={() =>
                     updateRoute({
                       q: query,
                       category,
-                      tag,
-                      status: statusFilter === value ? undefined : value,
+                      status: statusFilter,
                       article: undefined,
                     })
                   }
                 >
-                  {label}
+                  {t("filters.allTags")}
                 </button>
-              ))}
+                {tags.map((tagItem) => (
+                  <button
+                    key={tagItem.id}
+                    type="button"
+                    className={`${styles.tagFilterChip} ${tag === tagItem.id ? styles.tagFilterActive : ""}`}
+                    onClick={() =>
+                      updateRoute({
+                        q: query,
+                        category,
+                        tag: tagItem.id,
+                        status: statusFilter,
+                        article: undefined,
+                      })
+                    }
+                  >
+                    {tagItem.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {canManage ? (
+            <div className={styles.filterBlock}>
+              <p className={styles.filterTitle}>{t("filters.statusLabel")}</p>
+              <label className={styles.statusSelectLabel}>
+                <span className={styles.searchLabel}>{t("filters.statusLabel")}</span>
+                <select
+                  className={styles.statusSelect}
+                  value={statusFilter ?? ""}
+                  onChange={(e) =>
+                    updateRoute({
+                      q: query,
+                      category,
+                      tag,
+                      status: e.target.value || undefined,
+                      article: undefined,
+                    })
+                  }
+                >
+                  <option value="">{t("filters.allStatuses")}</option>
+                  <option value="published">{t("editor.filters.published")}</option>
+                  <option value="draft">{t("editor.filters.draft")}</option>
+                  <option value="archived">{t("editor.filters.archived")}</option>
+                </select>
+              </label>
             </div>
           ) : null}
 
           {demoListing?.uploadDisabled ? (
             <p className={styles.uploadDisabled}>{t("upload.disabled")}</p>
           ) : null}
+
+          <p className={styles.sourceMeta}>
+            {demoListing?.demo ? `${t("demoBadge")} · ` : null}
+            {t(`sources.${demoListing?.source ?? "unconfigured"}`)}
+          </p>
         </aside>
 
         <main className={styles.mainPanel}>
@@ -508,11 +514,13 @@ export function KnowledgeBaseView() {
             />
           ) : (
             <>
-              <p className={styles.meta}>
-                {query
-                  ? t("search.resultsCount", { count: articles.length })
-                  : null}
-              </p>
+              <div className={styles.listHeader}>
+                <p className={styles.listCount}>
+                  {query
+                    ? t("search.resultsCount", { count: articles.length })
+                    : t("list.count", { count: articles.length })}
+                </p>
+              </div>
               {articles.length === 0 ? (
                 <p className={styles.emptyState}>
                   {query ? t("search.noResults") : t("empty.selectArticle")}
@@ -561,8 +569,35 @@ function ArticleCard({
   t: ReturnType<typeof useTranslations<"knowledgeBase">>;
 }) {
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const visibleTags = article.tagLabels.slice(0, 3);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const onPointerDown = (event: PointerEvent) => {
+      const root = menuRef.current;
+      if (!root) return;
+      if (event.target instanceof Node && !root.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
 
   const quickPublish = async () => {
+    setMenuOpen(false);
     await fetch(`/api/knowledge-base/${encodeURIComponent(article.slug)}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -572,6 +607,7 @@ function ArticleCard({
   };
 
   const quickArchive = async () => {
+    setMenuOpen(false);
     if (!window.confirm(t("confirm.archiveBody"))) return;
     await fetch(`/api/knowledge-base/${encodeURIComponent(article.slug)}`, {
       method: "PATCH",
@@ -582,6 +618,7 @@ function ArticleCard({
   };
 
   const duplicate = async () => {
+    setMenuOpen(false);
     const res = await fetch(
       `/api/knowledge-base/${encodeURIComponent(article.slug)}/duplicate`,
       { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
@@ -592,62 +629,96 @@ function ArticleCard({
   };
 
   return (
-    <Card className={styles.articleCard}>
-      <div className={styles.articleCardHead}>
-        <span className={styles.articleCategory}>{article.categoryLabel}</span>
-        <span className={styles.articleDate}>
-          {article.externalUrl ? (
-            <span className={styles.linkBadge}>{t("link.badge")}</span>
-          ) : null}{" "}
-          {article.status && canManage ? (
-            <span className={`${styles.statusChip} ${styles[`statusChip_${article.status}`]}`}>
-              {t(`editor.status.${article.status}` as "editor.status.draft")}
-            </span>
-          ) : null}{" "}
-          {t("article.updated", { date: article.updatedAt })}
-        </span>
-      </div>
-      <h3 className={styles.articleTitle}>{article.title}</h3>
-      <p className={styles.articleSummary}>{article.summary}</p>
-      <div className={styles.tagRow}>
-        {article.tagLabels.map((label) => (
-          <span key={label} className={styles.tagChip}>
-            {label}
+    <article className={styles.articleRow}>
+      <button type="button" className={styles.articleMain} onClick={onOpen}>
+        <div className={styles.articleCardHead}>
+          <span className={styles.articleCategory}>{article.categoryLabel}</span>
+          <span className={styles.articleDate}>
+            {article.externalUrl ? (
+              <span className={styles.linkBadge}>{t("link.badge")}</span>
+            ) : null}
+            {article.status && canManage ? (
+              <span
+                className={`${styles.statusChip} ${styles[`statusChip_${article.status}`]}`}
+              >
+                {t(`editor.status.${article.status}` as "editor.status.draft")}
+              </span>
+            ) : null}
+            <span>{t("article.updated", { date: article.updatedAt })}</span>
           </span>
-        ))}
-      </div>
-      <div className={styles.cardActions}>
-        <button type="button" className={styles.primaryBtn} onClick={onOpen}>
-          {t("actions.open")}
-        </button>
-        <button type="button" className={styles.linkBtn} onClick={onOpen}>
-          {t("actions.preview")}
-        </button>
-        {canManage ? (
-          <>
-            <Link
-              href={`/knowledge-base/edit/${encodeURIComponent(article.slug)}`}
-              className={styles.linkBtn}
-            >
-              {t("actions.edit")}
-            </Link>
-            <button type="button" className={styles.linkBtn} onClick={() => void duplicate()}>
-              {t("actions.duplicate")}
-            </button>
-            {article.status === "draft" ? (
-              <button type="button" className={styles.linkBtn} onClick={() => void quickPublish()}>
-                {t("actions.publish")}
-              </button>
-            ) : null}
-            {article.status === "published" ? (
-              <button type="button" className={styles.linkBtn} onClick={() => void quickArchive()}>
-                {t("actions.archive")}
-              </button>
-            ) : null}
-          </>
+        </div>
+        <h3 className={styles.articleTitle}>{article.title}</h3>
+        {article.summary ? (
+          <p className={styles.articleSummary}>{article.summary}</p>
         ) : null}
-      </div>
-    </Card>
+        {visibleTags.length > 0 ? (
+          <div className={styles.tagRow}>
+            {visibleTags.map((label) => (
+              <span key={label} className={styles.tagChip}>
+                {label}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </button>
+
+      {canManage ? (
+        <div className={styles.rowMenu} ref={menuRef}>
+          <button
+            type="button"
+            className={styles.menuBtn}
+            aria-label={t("actions.more")}
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <i className="fa-solid fa-ellipsis" aria-hidden />
+          </button>
+          {menuOpen ? (
+            <div className={styles.menuDropdown} role="menu">
+              <button type="button" className={styles.menuItem} role="menuitem" onClick={onOpen}>
+                {t("actions.open")}
+              </button>
+              <Link
+                href={`/knowledge-base/edit/${encodeURIComponent(article.slug)}`}
+                className={styles.menuItem}
+                role="menuitem"
+                onClick={() => setMenuOpen(false)}
+              >
+                {t("actions.edit")}
+              </Link>
+              <button
+                type="button"
+                className={styles.menuItem}
+                role="menuitem"
+                onClick={() => void duplicate()}
+              >
+                {t("actions.duplicate")}
+              </button>
+              {article.status === "draft" ? (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  role="menuitem"
+                  onClick={() => void quickPublish()}
+                >
+                  {t("actions.publish")}
+                </button>
+              ) : null}
+              {article.status === "published" ? (
+                <button
+                  type="button"
+                  className={styles.menuItem}
+                  role="menuitem"
+                  onClick={() => void quickArchive()}
+                >
+                  {t("actions.archive")}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </article>
   );
 }
 

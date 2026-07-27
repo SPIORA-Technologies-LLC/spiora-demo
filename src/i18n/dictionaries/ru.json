@@ -1654,12 +1654,15 @@
   },
   "knowledgeBase": {
     "title": "База данных",
-    "subtitle": "Внутренние инструкции, политики и рабочие процессы для команды",
+    "subtitle": "Инструкции и политики команды",
     "demoBadge": "Демонстрационные данные",
     "breadcrumbRoot": "База данных",
     "breadcrumbAria": "Навигация по базе данных",
+    "list": {
+      "count": "{count} материалов"
+    },
     "search": {
-      "placeholder": "Поиск по материалам, категориям, тегам…",
+      "placeholder": "Поиск материалов…",
       "label": "Поиск в базе данных",
       "clear": "Очистить поиск",
       "resultsCount": "Найдено: {count}",
@@ -1669,9 +1672,11 @@
     },
     "filters": {
       "allCategories": "Все категории",
-      "allTags": "Все теги",
+      "allTags": "Все",
       "categoryLabel": "Категория",
-      "tagLabel": "Тег"
+      "tagLabel": "Тег",
+      "statusLabel": "Статус",
+      "allStatuses": "Все статусы"
     },
     "actions": {
       "open": "Открыть",
@@ -1687,7 +1692,8 @@
       "delete": "Удалить",
       "upload": "Загрузить файл",
       "back": "К списку",
-      "backToCategory": "Назад"
+      "backToCategory": "Назад",
+      "more": "Ещё действия"
     },
     "addMaterial": {
       "text": "Текст",

@@ -1656,12 +1656,15 @@
   },
   "knowledgeBase": {
     "title": "Database",
-    "subtitle": "Internal guides, policies, and workflows for the team",
+    "subtitle": "Team guides and policies",
     "demoBadge": "Demo data",
     "breadcrumbRoot": "Database",
     "breadcrumbAria": "Database navigation",
+    "list": {
+      "count": "{count} materials"
+    },
     "search": {
-      "placeholder": "Search materials, categories, tags…",
+      "placeholder": "Search materials…",
       "label": "Search database",
       "clear": "Clear search",
       "resultsCount": "{count} results",
@@ -1671,9 +1674,11 @@
     },
     "filters": {
       "allCategories": "All categories",
-      "allTags": "All tags",
+      "allTags": "All",
       "categoryLabel": "Category",
-      "tagLabel": "Tag"
+      "tagLabel": "Tag",
+      "statusLabel": "Status",
+      "allStatuses": "All statuses"
     },
     "actions": {
       "open": "Open",
@@ -1689,7 +1694,8 @@
       "delete": "Delete",
       "upload": "Upload file",
       "back": "Back to list",
-      "backToCategory": "Back"
+      "backToCategory": "Back",
+      "more": "More actions"
     },
     "addMaterial": {
       "text": "Text",

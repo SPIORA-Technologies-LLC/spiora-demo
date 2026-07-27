@@ -1671,12 +1671,14 @@
       "hint": "Ищите по заголовку, описанию, категории, тегам или тексту материала."
     },
     "filters": {
-      "allCategories": "Все категории",
-      "allTags": "Все",
+      "allCategories": "Все",
+      "allTags": "Все теги",
       "categoryLabel": "Категория",
       "tagLabel": "Тег",
       "statusLabel": "Статус",
-      "allStatuses": "Все статусы"
+      "allStatuses": "Все статусы",
+      "moreFilters": "Фильтр по тегам",
+      "activeTag": "Тег: {tag}"
     },
     "actions": {
       "open": "Открыть",

@@ -1673,12 +1673,14 @@
       "hint": "Search by title, summary, category, tags, or material content."
     },
     "filters": {
-      "allCategories": "All categories",
-      "allTags": "All",
+      "allCategories": "All",
+      "allTags": "All tags",
       "categoryLabel": "Category",
       "tagLabel": "Tag",
       "statusLabel": "Status",
-      "allStatuses": "All statuses"
+      "allStatuses": "All statuses",
+      "moreFilters": "Filter by tags",
+      "activeTag": "Tag: {tag}"
     },
     "actions": {
       "open": "Open",

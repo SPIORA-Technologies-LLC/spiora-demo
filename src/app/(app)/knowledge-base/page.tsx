@@ -8,7 +8,7 @@ export default async function KnowledgeBasePage() {
 
   return (
     <AppShell sectionTitle={t("title")}>
-      <SectionHeader title={t("title")} subtitle={t("subtitle")} />
+      <SectionHeader title={t("title")} />
       <KnowledgeBaseView />
     </AppShell>
   );

@@ -343,214 +343,212 @@ export function KnowledgeBaseView() {
         ) : null}
       </div>
 
-      <div className={styles.demoLayout}>
-        <aside className={styles.sidebar}>
-          <div className={styles.filterBlock}>
-            <p className={styles.filterTitle}>{t("filters.categoryLabel")}</p>
+      {!selectedArticle ? (
+        <div className={styles.categoryStrip} role="tablist" aria-label={t("filters.categoryLabel")}>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={!category}
+            className={`${styles.categoryChip} ${!category ? styles.categoryChipActive : ""}`}
+            onClick={() =>
+              updateRoute({ q: query, tag, status: statusFilter, article: undefined })
+            }
+          >
+            {t("filters.allCategories")}
+          </button>
+          {categories.map((cat) => (
             <button
+              key={cat.id}
               type="button"
-              className={`${styles.filterBtn} ${!category ? styles.filterActive : ""}`}
+              role="tab"
+              aria-selected={category === cat.id}
+              className={`${styles.categoryChip} ${category === cat.id ? styles.categoryChipActive : ""}`}
               onClick={() =>
-                updateRoute({ q: query, tag, status: statusFilter, article: undefined })
+                updateRoute({
+                  q: query,
+                  category: cat.id,
+                  tag: undefined,
+                  status: statusFilter,
+                  article: undefined,
+                })
               }
             >
-              {t("filters.allCategories")}
+              {cat.label}
+              <span className={styles.categoryChipCount}>{cat.count}</span>
             </button>
-            {categories.map((cat) => (
+          ))}
+        </div>
+      ) : null}
+
+      {tags.length > 0 && !selectedArticle ? (
+        <details className={styles.moreFilters} open={Boolean(tag)}>
+          <summary className={styles.moreFiltersSummary}>
+            {tag
+              ? t("filters.activeTag", {
+                  tag: tags.find((item) => item.id === tag)?.label ?? tag,
+                })
+              : t("filters.moreFilters")}
+          </summary>
+          <div className={styles.tagFilterWrap}>
+            <button
+              type="button"
+              className={`${styles.tagFilterChip} ${!tag ? styles.tagFilterActive : ""}`}
+              onClick={() =>
+                updateRoute({
+                  q: query,
+                  category,
+                  status: statusFilter,
+                  article: undefined,
+                })
+              }
+            >
+              {t("filters.allTags")}
+            </button>
+            {tags.map((tagItem) => (
               <button
-                key={cat.id}
+                key={tagItem.id}
                 type="button"
-                className={`${styles.filterBtn} ${category === cat.id ? styles.filterActive : ""}`}
+                className={`${styles.tagFilterChip} ${tag === tagItem.id ? styles.tagFilterActive : ""}`}
                 onClick={() =>
                   updateRoute({
                     q: query,
-                    category: cat.id,
-                    tag: undefined,
+                    category,
+                    tag: tagItem.id,
                     status: statusFilter,
                     article: undefined,
                   })
                 }
               >
-                <span className={styles.filterLabel}>{cat.label}</span>
-                <span className={styles.filterCount}>{cat.count}</span>
+                {tagItem.label}
               </button>
             ))}
           </div>
+        </details>
+      ) : null}
 
-          {tags.length > 0 ? (
-            <div className={styles.filterBlock}>
-              <p className={styles.filterTitle}>{t("filters.tagLabel")}</p>
-              <div className={styles.tagFilterWrap}>
+      {demoListing?.uploadDisabled ? (
+        <p className={styles.uploadDisabled}>{t("upload.disabled")}</p>
+      ) : null}
+
+      <main className={styles.mainPanel}>
+        {category || selectedArticle ? (
+          <nav className={styles.breadcrumb} aria-label={t("breadcrumbAria")}>
+            <button
+              type="button"
+              className={styles.crumbBtn}
+              onClick={() =>
+                updateRoute({
+                  q: query,
+                  category: undefined,
+                  tag,
+                  article: undefined,
+                })
+              }
+            >
+              {t("breadcrumbRoot")}
+            </button>
+            {category ? (
+              <>
+                <span className={styles.crumbSep}>/</span>
                 <button
                   type="button"
-                  className={`${styles.tagFilterChip} ${!tag ? styles.tagFilterActive : ""}`}
+                  className={styles.crumbBtn}
                   onClick={() =>
-                    updateRoute({
-                      q: query,
-                      category,
-                      status: statusFilter,
-                      article: undefined,
-                    })
+                    updateRoute({ q: query, category, tag, article: undefined })
                   }
                 >
-                  {t("filters.allTags")}
+                  {categories.find((c) => c.id === category)?.label ?? category}
                 </button>
-                {tags.map((tagItem) => (
-                  <button
-                    key={tagItem.id}
-                    type="button"
-                    className={`${styles.tagFilterChip} ${tag === tagItem.id ? styles.tagFilterActive : ""}`}
-                    onClick={() =>
+              </>
+            ) : null}
+            {selectedArticle ? (
+              <>
+                <span className={styles.crumbSep}>/</span>
+                <span>{selectedArticle.title}</span>
+              </>
+            ) : null}
+          </nav>
+        ) : null}
+
+        {loading ? (
+          <p className={styles.meta}>{t("loading.list")}</p>
+        ) : searchError ? (
+          <p className={styles.emptyState}>{t("search.unavailable")}</p>
+        ) : demoListing?.source === "unconfigured" ? (
+          <p className={styles.emptyState}>
+            {demoListing.errorMessage ?? t("empty.unconfigured")}
+          </p>
+        ) : selectedArticle ? (
+          <ArticleDetailView
+            article={selectedArticle}
+            canManage={canManage}
+            onBack={() =>
+              updateRoute({ q: query, category, tag, status: statusFilter, article: undefined })
+            }
+            onCopyLink={handleCopyLink}
+            t={t}
+          />
+        ) : (
+          <>
+            <div className={styles.listHeader}>
+              <p className={styles.listCount}>
+                {query
+                  ? t("search.resultsCount", { count: articles.length })
+                  : t("list.count", { count: articles.length })}
+              </p>
+              {canManage ? (
+                <label className={styles.statusSelectInline}>
+                  <span className={styles.searchLabel}>{t("filters.statusLabel")}</span>
+                  <select
+                    className={styles.statusSelect}
+                    value={statusFilter ?? ""}
+                    onChange={(e) =>
                       updateRoute({
                         q: query,
                         category,
-                        tag: tagItem.id,
-                        status: statusFilter,
+                        tag,
+                        status: e.target.value || undefined,
                         article: undefined,
                       })
                     }
                   >
-                    {tagItem.label}
-                  </button>
+                    <option value="">{t("filters.allStatuses")}</option>
+                    <option value="published">{t("editor.filters.published")}</option>
+                    <option value="draft">{t("editor.filters.draft")}</option>
+                    <option value="archived">{t("editor.filters.archived")}</option>
+                  </select>
+                </label>
+              ) : null}
+            </div>
+            {articles.length === 0 ? (
+              <p className={styles.emptyState}>
+                {query ? t("search.noResults") : t("empty.selectArticle")}
+              </p>
+            ) : (
+              <div className={styles.articleList}>
+                {articles.map((article) => (
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    canManage={canManage}
+                    onOpen={() =>
+                      updateRoute({
+                        q: query,
+                        category,
+                        tag,
+                        status: statusFilter,
+                        article: article.slug,
+                      })
+                    }
+                    onRefresh={() => void fetchListing()}
+                    t={t}
+                  />
                 ))}
               </div>
-            </div>
-          ) : null}
-
-          {canManage ? (
-            <div className={styles.filterBlock}>
-              <p className={styles.filterTitle}>{t("filters.statusLabel")}</p>
-              <label className={styles.statusSelectLabel}>
-                <span className={styles.searchLabel}>{t("filters.statusLabel")}</span>
-                <select
-                  className={styles.statusSelect}
-                  value={statusFilter ?? ""}
-                  onChange={(e) =>
-                    updateRoute({
-                      q: query,
-                      category,
-                      tag,
-                      status: e.target.value || undefined,
-                      article: undefined,
-                    })
-                  }
-                >
-                  <option value="">{t("filters.allStatuses")}</option>
-                  <option value="published">{t("editor.filters.published")}</option>
-                  <option value="draft">{t("editor.filters.draft")}</option>
-                  <option value="archived">{t("editor.filters.archived")}</option>
-                </select>
-              </label>
-            </div>
-          ) : null}
-
-          {demoListing?.uploadDisabled ? (
-            <p className={styles.uploadDisabled}>{t("upload.disabled")}</p>
-          ) : null}
-
-          <p className={styles.sourceMeta}>
-            {demoListing?.demo ? `${t("demoBadge")} · ` : null}
-            {t(`sources.${demoListing?.source ?? "unconfigured"}`)}
-          </p>
-        </aside>
-
-        <main className={styles.mainPanel}>
-          {category || selectedArticle ? (
-            <nav className={styles.breadcrumb} aria-label={t("breadcrumbAria")}>
-              <button
-                type="button"
-                className={styles.crumbBtn}
-                onClick={() =>
-                  updateRoute({
-                    q: query,
-                    category: undefined,
-                    tag,
-                    article: undefined,
-                  })
-                }
-              >
-                {t("breadcrumbRoot")}
-              </button>
-              {category ? (
-                <>
-                  <span className={styles.crumbSep}>/</span>
-                  <button
-                    type="button"
-                    className={styles.crumbBtn}
-                    onClick={() =>
-                      updateRoute({ q: query, category, tag, article: undefined })
-                    }
-                  >
-                    {categories.find((c) => c.id === category)?.label ?? category}
-                  </button>
-                </>
-              ) : null}
-              {selectedArticle ? (
-                <>
-                  <span className={styles.crumbSep}>/</span>
-                  <span>{selectedArticle.title}</span>
-                </>
-              ) : null}
-            </nav>
-          ) : null}
-
-          {loading ? (
-            <p className={styles.meta}>{t("loading.list")}</p>
-          ) : searchError ? (
-            <p className={styles.emptyState}>{t("search.unavailable")}</p>
-          ) : demoListing?.source === "unconfigured" ? (
-            <p className={styles.emptyState}>
-              {demoListing.errorMessage ?? t("empty.unconfigured")}
-            </p>
-          ) : selectedArticle ? (
-            <ArticleDetailView
-              article={selectedArticle}
-              canManage={canManage}
-              onBack={() =>
-                updateRoute({ q: query, category, tag, status: statusFilter, article: undefined })
-              }
-              onCopyLink={handleCopyLink}
-              t={t}
-            />
-          ) : (
-            <>
-              <div className={styles.listHeader}>
-                <p className={styles.listCount}>
-                  {query
-                    ? t("search.resultsCount", { count: articles.length })
-                    : t("list.count", { count: articles.length })}
-                </p>
-              </div>
-              {articles.length === 0 ? (
-                <p className={styles.emptyState}>
-                  {query ? t("search.noResults") : t("empty.selectArticle")}
-                </p>
-              ) : (
-                <div className={styles.articleList}>
-                  {articles.map((article) => (
-                    <ArticleCard
-                      key={article.id}
-                      article={article}
-                      canManage={canManage}
-                      onOpen={() =>
-                        updateRoute({
-                          q: query,
-                          category,
-                          tag,
-                          status: statusFilter,
-                          article: article.slug,
-                        })
-                      }
-                      onRefresh={() => void fetchListing()}
-                      t={t}
-                    />
-                  ))}
-                </div>
-              )}
-            </>
-          )}
-        </main>
-      </div>
+            )}
+          </>
+        )}
+      </main>
     </div>
   );
 }
@@ -571,7 +569,8 @@ function ArticleCard({
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const visibleTags = article.tagLabels.slice(0, 3);
+  const showStatus =
+    canManage && article.status && article.status !== "published";
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -631,35 +630,26 @@ function ArticleCard({
   return (
     <article className={styles.articleRow}>
       <button type="button" className={styles.articleMain} onClick={onOpen}>
-        <div className={styles.articleCardHead}>
-          <span className={styles.articleCategory}>{article.categoryLabel}</span>
-          <span className={styles.articleDate}>
-            {article.externalUrl ? (
-              <span className={styles.linkBadge}>{t("link.badge")}</span>
-            ) : null}
-            {article.status && canManage ? (
-              <span
-                className={`${styles.statusChip} ${styles[`statusChip_${article.status}`]}`}
-              >
-                {t(`editor.status.${article.status}` as "editor.status.draft")}
-              </span>
-            ) : null}
-            <span>{t("article.updated", { date: article.updatedAt })}</span>
-          </span>
+        <div className={styles.articleTitleRow}>
+          <h3 className={styles.articleTitle}>{article.title}</h3>
+          {showStatus ? (
+            <span
+              className={`${styles.statusChip} ${styles[`statusChip_${article.status}`]}`}
+            >
+              {t(`editor.status.${article.status}` as "editor.status.draft")}
+            </span>
+          ) : null}
+          {article.externalUrl ? (
+            <span className={styles.linkBadge}>{t("link.badge")}</span>
+          ) : null}
         </div>
-        <h3 className={styles.articleTitle}>{article.title}</h3>
-        {article.summary ? (
-          <p className={styles.articleSummary}>{article.summary}</p>
-        ) : null}
-        {visibleTags.length > 0 ? (
-          <div className={styles.tagRow}>
-            {visibleTags.map((label) => (
-              <span key={label} className={styles.tagChip}>
-                {label}
-              </span>
-            ))}
-          </div>
-        ) : null}
+        <p className={styles.articleMetaLine}>
+          <span>{article.categoryLabel}</span>
+          <span className={styles.metaDot} aria-hidden>
+            ·
+          </span>
+          <span>{article.updatedAt}</span>
+        </p>
       </button>
 
       {canManage ? (

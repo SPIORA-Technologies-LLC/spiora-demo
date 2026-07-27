@@ -20,7 +20,8 @@
     "crmLeads": "Lead Review",
     "newFormgridClients": "Formgrid Clients",
     "meetingRecordings": "Meeting Recordings",
-    "relocation": "Electronic resources"
+    "relocation": "Electronic resources",
+    "finance": "Finance"
   },
   "actions": {
     "save": "Save",
@@ -69,7 +70,8 @@
     "mainNavAria": "Main navigation",
     "roleOwner": "Owner",
     "roleManager": "Manager",
-    "demoCompanySite": "Northstar Mobility website"
+    "demoCompanySite": "Northstar Mobility website",
+    "roleFinanceManager": "Finance manager"
   },
   "notifications": {
     "ariaLabel": "Notifications",
@@ -421,7 +423,9 @@
       "sheetData": "Spreadsheet data",
       "surveys": "Applications",
       "documents": "Documents",
-      "managerNotes": "Manager notes"
+      "managerNotes": "Manager notes",
+      "tabOverview": "Overview",
+      "tabFinance": "Finance"
     },
     "fields": {
       "lastName": "Last name",
@@ -1094,7 +1098,9 @@
       "inactive": "Inactive",
       "invited": "Invited",
       "suspended": "Suspended"
-    }
+    },
+    "finance_manager": "Finance manager",
+    "consultant": "Consultant"
   },
   "analytics": {
     "title": "Analytics",
@@ -1390,7 +1396,8 @@
     "olivia-bennett": "Olivia Bennett",
     "daniel-cooper": "Daniel Cooper",
     "emma-wilson": "Emma Wilson",
-    "lucas-martin": "Lucas Martin"
+    "lucas-martin": "Lucas Martin",
+    "sofia-reyes": "Sofia Reyes"
   },
   "relocationPage": {
     "title": "Electronic resources",
@@ -2638,6 +2645,122 @@
       "description": "An unexpected error occurred. Please try again later.",
       "retry": "Try again",
       "backHome": "Back to dashboard"
+    }
+  },
+  "finance": {
+    "title": "Finance",
+    "openAnalytics": "Analytics",
+    "kpi": {
+      "totalContracts": "Total contract amount",
+      "received": "Received",
+      "outstandingDebt": "Outstanding debt",
+      "clientsWithDebt": "Clients with debt"
+    },
+    "filters": {
+      "searchPlaceholder": "Search client…",
+      "allDirections": "All directions",
+      "noDirection": "No direction",
+      "allStatuses": "All statuses",
+      "pageSize": "{n} rows"
+    },
+    "table": {
+      "client": "Client",
+      "direction": "Direction",
+      "contract": "Contract amount",
+      "paid": "Paid",
+      "balance": "Balance",
+      "status": "Payment status",
+      "lastPayment": "Last payment"
+    },
+    "empty": {
+      "noData": "Financial data has not been added yet",
+      "noMatch": "No clients match the selected filters"
+    },
+    "meta": {
+      "loading": "Loading…",
+      "count": "{count} clients"
+    },
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next"
+    },
+    "status": {
+      "no_contract": "No contract",
+      "unpaid": "Unpaid",
+      "partial": "Partially paid",
+      "paid": "Paid in full",
+      "overpaid": "Overpaid"
+    },
+    "directions": {
+      "Spain": "Spain",
+      "Croatia": "Croatia",
+      "Slovenia": "Slovenia"
+    },
+    "analytics": {
+      "title": "Finance analytics",
+      "backToFinance": "Back to Finance",
+      "periodYear": "Year",
+      "periodMonth": "Month",
+      "allDirections": "All directions",
+      "loading": "Loading…",
+      "noData": "No analytics data for this period",
+      "chartReceived": "Received",
+      "chartContracts": "New contracts",
+      "chartReceivedTitle": "Received by month",
+      "chartContractsTitle": "New contracts by month",
+      "kpi": {
+        "contractsSigned": "Contracts signed",
+        "newClients": "New clients",
+        "received": "Received",
+        "paymentsCount": "Payments count"
+      },
+      "months": {
+        "m1": "Jan",
+        "m2": "Feb",
+        "m3": "Mar",
+        "m4": "Apr",
+        "m5": "May",
+        "m6": "Jun",
+        "m7": "Jul",
+        "m8": "Aug",
+        "m9": "Sep",
+        "m10": "Oct",
+        "m11": "Nov",
+        "m12": "Dec"
+      }
+    },
+    "client": {
+      "loading": "Loading finance…",
+      "noData": "Could not load finance data",
+      "saveFailed": "Could not save finance data",
+      "saving": "Saving…",
+      "contractTitle": "Contract details",
+      "contractAmount": "Contract amount",
+      "contractDate": "Contract date",
+      "direction": "Direction",
+      "paid": "Paid",
+      "balance": "Balance",
+      "overpayment": "Overpayment: {amount}",
+      "changeAmount": "Change amount",
+      "changeDate": "Change date",
+      "createContract": "Save contract amount",
+      "paymentsTitle": "Payments",
+      "addPayment": "Add payment",
+      "noPayments": "No payments yet",
+      "voidedPayments": "Voided payments",
+      "voidReason": "Reason",
+      "void": "Void",
+      "changeAmountTitle": "Change contract amount",
+      "changeDateTitle": "Change contract date",
+      "addPaymentTitle": "Add payment",
+      "voidPaymentTitle": "Void payment",
+      "amount": "Amount",
+      "newDate": "New date",
+      "paymentDate": "Payment date",
+      "comment": "Comment",
+      "reason": "Reason for change",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     }
   }
 }

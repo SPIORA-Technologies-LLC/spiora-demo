@@ -34,6 +34,13 @@ const TEAM_USERS: TeamUser[] = [
     role: "manager",
     passwordEnvKey: "AUTH_PASSWORD_MANAGER_3",
   },
+  {
+    id: "sofia-reyes",
+    email: "sofia@spiora.demo",
+    name: "Sofia Reyes",
+    role: "finance_manager",
+    passwordEnvKey: "AUTH_PASSWORD_FINANCE",
+  },
 ];
 
 const DEV_DEFAULT_PASSWORDS: Record<string, string> = {
@@ -41,6 +48,7 @@ const DEV_DEFAULT_PASSWORDS: Record<string, string> = {
   "daniel-cooper": "demo-manager-local-1",
   "emma-wilson": "demo-manager-local-2",
   "lucas-martin": "demo-manager-local-3",
+  "sofia-reyes": "demo-finance-local",
 };
 
 export function getEnvStoredPassword(user: TeamUser): string | undefined {
@@ -73,5 +81,5 @@ export function toSessionUser(user: TeamUser): SessionUser {
 }
 
 export function isUserRole(value: string): value is UserRole {
-  return value === "owner" || value === "manager";
+  return value === "owner" || value === "manager" || value === "finance_manager";
 }

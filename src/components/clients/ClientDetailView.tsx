@@ -6,18 +6,25 @@ import { ClientAiActions } from "./ClientAiPanel";
 import { ClientCrmProfile } from "./ClientCrmProfile";
 import { ClientDocuments } from "./ClientDocuments";
 import { ClientNotes } from "./ClientNotes";
+import { ClientDetailTabs } from "./ClientDetailTabs";
 import styles from "./ClientDetailView.module.css";
 
 type ClientDetailViewProps = {
   detail: ClientDetail;
+  canViewFinance?: boolean;
+  initialTab?: "overview" | "finance";
 };
 
-export async function ClientDetailView({ detail }: ClientDetailViewProps) {
+export async function ClientDetailView({
+  detail,
+  canViewFinance = false,
+  initialTab = "overview",
+}: ClientDetailViewProps) {
   const t = await getTranslations("clients.detail");
   const { client, surveys, documents, notes } = detail;
 
-  return (
-    <div className={styles.page}>
+  const overviewContent = (
+    <>
       <Link href="/clients" className={styles.back}>
         <i className="fa-solid fa-arrow-left" aria-hidden /> {t("backToList")}
       </Link>
@@ -57,6 +64,17 @@ export async function ClientDetailView({ detail }: ClientDetailViewProps) {
         <h2 className={styles.panelTitle}>{t("managerNotes")}</h2>
         <ClientNotes clientId={client.id} initialNotes={notes} />
       </Card>
+    </>
+  );
+
+  return (
+    <div className={styles.page}>
+      <ClientDetailTabs
+        clientId={client.id}
+        canViewFinance={canViewFinance}
+        initialTab={initialTab}
+        overviewContent={overviewContent}
+      />
     </div>
   );
 }

@@ -20,7 +20,8 @@
     "crmLeads": "Новые лиды",
     "newFormgridClients": "Новые клиенты из анкеты",
     "meetingRecordings": "Записи встреч",
-    "relocation": "Электронные ресурсы"
+    "relocation": "Электронные ресурсы",
+    "finance": "Финансы"
   },
   "actions": {
     "save": "Сохранить",
@@ -69,7 +70,8 @@
     "mainNavAria": "Основная навигация",
     "roleOwner": "Владелец",
     "roleManager": "Менеджер",
-    "demoCompanySite": "Сайт Northstar Mobility"
+    "demoCompanySite": "Сайт Northstar Mobility",
+    "roleFinanceManager": "Финансовый менеджер"
   },
   "notifications": {
     "ariaLabel": "Уведомления",
@@ -421,7 +423,9 @@
       "sheetData": "Данные из таблицы",
       "surveys": "Анкеты",
       "documents": "Документы",
-      "managerNotes": "Заметки менеджеров"
+      "managerNotes": "Заметки менеджеров",
+      "tabOverview": "Обзор",
+      "tabFinance": "Финансы"
     },
     "fields": {
       "lastName": "Фамилия",
@@ -1092,7 +1096,9 @@
       "inactive": "Неактивен",
       "invited": "Приглашён",
       "suspended": "Приостановлен"
-    }
+    },
+    "finance_manager": "Финансовый менеджер",
+    "consultant": "Консультант"
   },
   "analytics": {
     "title": "Analytics",
@@ -1388,7 +1394,8 @@
     "olivia-bennett": "Оливия Беннетт",
     "daniel-cooper": "Даниэл Купер",
     "emma-wilson": "Эмма Уилсон",
-    "lucas-martin": "Лукас Мартин"
+    "lucas-martin": "Лукас Мартин",
+    "sofia-reyes": "София Рейес"
   },
   "relocationPage": {
     "title": "Электронные ресурсы",
@@ -2636,6 +2643,122 @@
       "description": "Произошла непредвиденная ошибка. Попробуйте позже.",
       "retry": "Попробовать снова",
       "backHome": "На главную"
+    }
+  },
+  "finance": {
+    "title": "Финансы",
+    "openAnalytics": "Аналитика",
+    "kpi": {
+      "totalContracts": "Общая сумма по договорам",
+      "received": "Получено",
+      "outstandingDebt": "Задолженность по всем клиентам",
+      "clientsWithDebt": "Клиентов с задолженностью"
+    },
+    "filters": {
+      "searchPlaceholder": "Поиск клиента…",
+      "allDirections": "Все направления",
+      "noDirection": "Без направления",
+      "allStatuses": "Все статусы",
+      "pageSize": "{n} строк"
+    },
+    "table": {
+      "client": "Клиент",
+      "direction": "Направление",
+      "contract": "Сумма договора",
+      "paid": "Оплачено",
+      "balance": "Остаток",
+      "status": "Статус оплаты",
+      "lastPayment": "Последний платёж"
+    },
+    "empty": {
+      "noData": "Финансовые данные ещё не добавлены",
+      "noMatch": "Клиенты по выбранным фильтрам не найдены"
+    },
+    "meta": {
+      "loading": "Загрузка…",
+      "count": "{count} клиентов"
+    },
+    "pagination": {
+      "prev": "Назад",
+      "next": "Далее"
+    },
+    "status": {
+      "no_contract": "Не заполнен договор",
+      "unpaid": "Не оплачено",
+      "partial": "Частично оплачено",
+      "paid": "Оплачено",
+      "overpaid": "Переплата"
+    },
+    "directions": {
+      "Spain": "Испания",
+      "Croatia": "Хорватия",
+      "Slovenia": "Словения"
+    },
+    "analytics": {
+      "title": "Финансовая аналитика",
+      "backToFinance": "Назад к Финансам",
+      "periodYear": "Год",
+      "periodMonth": "Месяц",
+      "allDirections": "Все направления",
+      "loading": "Загрузка…",
+      "noData": "Нет данных аналитики за период",
+      "chartReceived": "Поступления",
+      "chartContracts": "Новые договоры",
+      "chartReceivedTitle": "Поступления по месяцам",
+      "chartContractsTitle": "Сумма новых договоров по месяцам",
+      "kpi": {
+        "contractsSigned": "Сумма заключённых договоров",
+        "newClients": "Количество новых клиентов",
+        "received": "Получено денег",
+        "paymentsCount": "Количество платежей"
+      },
+      "months": {
+        "m1": "Янв",
+        "m2": "Фев",
+        "m3": "Мар",
+        "m4": "Апр",
+        "m5": "Май",
+        "m6": "Июн",
+        "m7": "Июл",
+        "m8": "Авг",
+        "m9": "Сен",
+        "m10": "Окт",
+        "m11": "Ноя",
+        "m12": "Дек"
+      }
+    },
+    "client": {
+      "loading": "Загрузка финансов…",
+      "noData": "Не удалось загрузить финансы",
+      "saveFailed": "Не удалось сохранить",
+      "saving": "Сохранение…",
+      "contractTitle": "Параметры договора",
+      "contractAmount": "Стоимость договора",
+      "contractDate": "Дата договора",
+      "direction": "Направление",
+      "paid": "Оплачено",
+      "balance": "Остаток",
+      "overpayment": "Переплата: {amount}",
+      "changeAmount": "Изменить сумму",
+      "changeDate": "Изменить дату",
+      "createContract": "Сохранить сумму договора",
+      "paymentsTitle": "Платежи",
+      "addPayment": "Добавить платёж",
+      "noPayments": "Платежей пока нет",
+      "voidedPayments": "Аннулированные платежи",
+      "voidReason": "Причина",
+      "void": "Аннулировать",
+      "changeAmountTitle": "Изменить сумму договора",
+      "changeDateTitle": "Изменить дату договора",
+      "addPaymentTitle": "Добавить платёж",
+      "voidPaymentTitle": "Аннулировать платёж",
+      "amount": "Сумма",
+      "newDate": "Новая дата",
+      "paymentDate": "Дата оплаты",
+      "comment": "Комментарий",
+      "reason": "Причина изменения",
+      "cancel": "Отмена",
+      "confirm": "Подтвердить"
     }
   }
 }

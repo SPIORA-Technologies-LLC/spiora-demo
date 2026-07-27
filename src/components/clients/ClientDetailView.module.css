@@ -145,3 +145,35 @@
     padding: 0.55rem 0.65rem;
   }
 }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border-soft);
+  margin-bottom: 1rem;
+}
+
+.tab {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  background: transparent;
+  color: var(--gray-300);
+  font-family: Inter, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition:
+    color var(--transition-base),
+    border-color var(--transition-base);
+}
+
+.tab:hover {
+  color: var(--white);
+}
+
+.tabActive {
+  color: var(--white);
+  border-bottom-color: var(--accent-burgundy-light);
+}

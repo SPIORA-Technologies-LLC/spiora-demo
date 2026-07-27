@@ -1,4 +1,4 @@
-export type UserRole = "owner" | "manager";
+export type UserRole = "owner" | "manager" | "finance_manager";
 
 export type PlannedUserRole = UserRole | "consultant" | "viewer";
 
@@ -23,11 +23,13 @@ export type SessionUser = {
 export const ROLE_LABELS: Record<UserRole, string> = {
   owner: "Владелец",
   manager: "Менеджер",
+  finance_manager: "Финансовый менеджер",
 };
 
 export const PLANNED_ROLE_LABELS: Record<PlannedUserRole, string> = {
   owner: "Владелец",
   manager: "Менеджер",
+  finance_manager: "Финансовый менеджер",
   consultant: "Консультант",
   viewer: "Наблюдатель",
 };

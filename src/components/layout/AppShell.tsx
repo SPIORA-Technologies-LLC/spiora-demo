@@ -40,7 +40,9 @@ export async function AppShell({
           session
             ? session.role === "owner"
               ? t("roleOwner")
-              : t("roleManager")
+              : session.role === "finance_manager"
+                ? t("roleFinanceManager")
+                : t("roleManager")
             : ""
         }
         searchPlaceholder={searchPlaceholder}

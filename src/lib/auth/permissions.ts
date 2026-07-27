@@ -79,6 +79,13 @@ const NAV_RELOCATION: NavItem = {
   icon: "fa-solid fa-folder-open",
 };
 
+const NAV_FINANCE: NavItem = {
+  href: "/finance",
+  labelKey: "finance",
+  labelNs: "nav",
+  icon: "fa-solid fa-euro-sign",
+};
+
 const NAV_ANALYTICS: NavItem = {
   href: "/analytics",
   labelKey: "analytics",
@@ -124,6 +131,23 @@ const MANAGER_NAV: NavItem[] = [
   NAV_WEBSITE,
 ];
 
+const FINANCE_MANAGER_NAV: NavItem[] = [
+  NAV_DASHBOARD,
+  NAV_CLIENTS,
+  NAV_CLIENT_INVITATIONS,
+  NAV_CLIENT_INTAKE,
+  NAV_AI,
+  NAV_KB,
+  NAV_TASKS,
+  NAV_CALENDAR,
+  NAV_MEETING_RECORDINGS,
+  NAV_TEAM_CHAT,
+  NAV_RELOCATION,
+  NAV_FINANCE,
+  NAV_TEAM,
+  NAV_WEBSITE,
+];
+
 const OWNER_NAV: NavItem[] = [
   NAV_DASHBOARD,
   NAV_CLIENTS,
@@ -136,6 +160,7 @@ const OWNER_NAV: NavItem[] = [
   NAV_MEETING_RECORDINGS,
   NAV_TEAM_CHAT,
   NAV_RELOCATION,
+  NAV_FINANCE,
   NAV_ANALYTICS,
   NAV_TEAM,
   NAV_SETTINGS,
@@ -143,14 +168,24 @@ const OWNER_NAV: NavItem[] = [
 ];
 
 const OWNER_ONLY_PREFIXES = ["/analytics", "/settings"];
+const FINANCE_PREFIX = "/finance";
 
 export function getNavItemsForRole(role: UserRole): NavItem[] {
-  return role === "owner" ? OWNER_NAV : MANAGER_NAV;
+  if (role === "owner") return OWNER_NAV;
+  if (role === "finance_manager") return FINANCE_MANAGER_NAV;
+  return MANAGER_NAV;
 }
 
 export function canAccessPath(role: UserRole, pathname: string): boolean {
   if (role === "owner") {
     return true;
+  }
+
+  const isFinancePath =
+    pathname === FINANCE_PREFIX || pathname.startsWith(`${FINANCE_PREFIX}/`);
+
+  if (isFinancePath) {
+    return role === "finance_manager";
   }
 
   if (
@@ -161,9 +196,13 @@ export function canAccessPath(role: UserRole, pathname: string): boolean {
     return false;
   }
 
-  const allowedPrefixes = MANAGER_NAV.filter((item) => !item.external).map(
-    (item) => item.href,
-  );
+  const baseNav =
+    role === "finance_manager" ? FINANCE_MANAGER_NAV : MANAGER_NAV;
+  const allowedPrefixes = baseNav
+    .filter((item) => !item.external)
+    .map((item) => item.href)
+    .filter((href) => href !== FINANCE_PREFIX);
+
   return allowedPrefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );

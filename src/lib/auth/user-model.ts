@@ -30,6 +30,7 @@ export type PlatformSessionClaims = {
 export const PLATFORM_USER_ROLES: readonly PlannedUserRole[] = [
   "owner",
   "manager",
+  "finance_manager",
   "consultant",
   "viewer",
 ];

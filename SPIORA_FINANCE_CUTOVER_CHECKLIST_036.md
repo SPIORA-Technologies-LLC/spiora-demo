@@ -20,6 +20,8 @@ Finance module PostgreSQL runtime: contracts, payments, dashboard KPIs, analytic
 
 ## Pre-apply
 1. Run `SPIORA_FINANCE_PREFLIGHT_036.sql` → `READY_TO_APPLY` or `ALREADY_APPLIED`.
+   - Preflight uses `pg_temp` + dynamic `EXECUTE` so absent finance tables do not
+     fail at PostgreSQL parse time (do not rewrite with static `FROM public.client_finance_*`).
 2. Confirm `clients.id` uuid PK + `external_id`, `user_profiles` role check, RLS helpers (025).
 3. Backup staging DB.
 

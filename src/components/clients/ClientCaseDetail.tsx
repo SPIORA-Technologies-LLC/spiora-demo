@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { ClientCaseFinanceTab } from "@/components/clients/ClientCaseFinanceTab";
 import {
   CLIENT_CASE_STATUSES,
   type ClientCaseStatus,
@@ -77,7 +78,8 @@ type TabId =
   | "documents"
   | "comments"
   | "status"
-  | "history";
+  | "history"
+  | "finance";
 
 function formatDateTime(iso: string, locale: string) {
   try {
@@ -93,7 +95,13 @@ function formatDateTime(iso: string, locale: string) {
   }
 }
 
-export function ClientCaseDetail({ caseId }: { caseId: string }) {
+export function ClientCaseDetail({
+  caseId,
+  canViewFinance = false,
+}: {
+  caseId: string;
+  canViewFinance?: boolean;
+}) {
   const locale = useLocale() as "en" | "ru";
   const t = useTranslations("clientIntake.detail");
   const [tab, setTab] = useState<TabId>("overview");
@@ -218,6 +226,9 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
     { id: "comments", label: t("tabs.comments") },
     { id: "status", label: t("tabs.status") },
     { id: "history", label: t("tabs.history") },
+    ...(canViewFinance
+      ? ([{ id: "finance" as const, label: t("tabs.finance") }] as const)
+      : []),
   ];
 
   return (
@@ -467,6 +478,10 @@ export function ClientCaseDetail({ caseId }: { caseId: string }) {
             ))}
           </ul>
         </Card>
+      ) : null}
+
+      {tab === "finance" && canViewFinance ? (
+        <ClientCaseFinanceTab caseId={caseId} />
       ) : null}
     </div>
   );

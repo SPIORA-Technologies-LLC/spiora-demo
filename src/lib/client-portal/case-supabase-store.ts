@@ -551,5 +551,29 @@ export function createSupabaseCaseStore(client: SupabaseClient): CaseStore {
       if (error) throw error;
       return Boolean(data);
     },
+
+    async linkCrmClient(caseId, crmClientId) {
+      const existing = await this.getById(caseId);
+      if (!existing) return null;
+      if (existing.crmClientId) {
+        if (existing.crmClientId === crmClientId) return existing;
+        throw new Error("CASE_CRM_ALREADY_LINKED");
+      }
+
+      const now = new Date().toISOString();
+      const { data, error } = await client
+        .from("client_cases")
+        .update({ crm_client_id: crmClientId, updated_at: now })
+        .eq("id", caseId)
+        .is("crm_client_id", null)
+        .is("archived_at", null)
+        .select(CASE_SELECT)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) return mapCase(data as unknown as DbCase);
+
+      // Concurrent link won the race — re-read
+      return this.getById(caseId);
+    },
   };
 }

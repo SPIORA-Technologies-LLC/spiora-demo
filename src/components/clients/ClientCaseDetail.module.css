@@ -319,6 +319,24 @@
   margin: 0;
 }
 
+.financeWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.financeHint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--gray-300);
+}
+
+.financeStatus {
+  margin: 0;
+  padding: 1rem 0;
+  color: var(--gray-200);
+}
+
 @media (max-width: 800px) {
   .fieldGrid,
   .answerRow {

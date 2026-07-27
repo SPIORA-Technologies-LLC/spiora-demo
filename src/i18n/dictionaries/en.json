@@ -2601,7 +2601,13 @@
         "documents": "Documents",
         "comments": "Comments",
         "status": "Status",
-        "history": "History"
+        "history": "History",
+        "finance": "Finance"
+      },
+      "finance": {
+        "linking": "Connecting client card for Finance…",
+        "linkFailed": "Could not link this intake case to a CRM client for Finance",
+        "linkedHint": "Contracts and payments are stored in the shared Finance section. The client appears there after a contract is created."
       },
       "fields": {
         "firstName": "First name",

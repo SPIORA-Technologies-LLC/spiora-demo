@@ -413,5 +413,25 @@ export async function createLocalCaseStore(): Promise<CaseStore> {
       await writeStore(store);
       return true;
     },
+
+    async linkCrmClient(caseId, crmClientId) {
+      const store = await readStore();
+      const idx = store.cases.findIndex(
+        (item) => item.id === caseId && !item.archivedAt,
+      );
+      if (idx < 0) return null;
+      const current = store.cases[idx]!;
+      if (current.crmClientId) {
+        if (current.crmClientId === crmClientId) return current;
+        throw new Error("CASE_CRM_ALREADY_LINKED");
+      }
+      store.cases[idx] = {
+        ...current,
+        crmClientId,
+        updatedAt: new Date().toISOString(),
+      };
+      await writeStore(store);
+      return store.cases[idx]!;
+    },
   };
 }

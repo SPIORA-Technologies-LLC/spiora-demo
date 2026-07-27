@@ -150,6 +150,14 @@ export type CaseStore = {
   archiveDocument(caseId: string, documentId: string): Promise<boolean>;
   /** Soft-delete from staff intake list (sets archived_at). */
   archiveCase(caseId: string): Promise<boolean>;
+  /**
+   * Link case to CRM client uuid (clients.id). Idempotent when already linked
+   * to the same id; refuses overwrite to a different client.
+   */
+  linkCrmClient(
+    caseId: string,
+    crmClientId: string,
+  ): Promise<ClientCaseRecord | null>;
 };
 
 export class CaseStoreConfigurationError extends Error {

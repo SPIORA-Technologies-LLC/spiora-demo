@@ -112,6 +112,38 @@ export async function sbGetClientUuidByExternalId(
   return data ? String((data as { id: string }).id) : null;
 }
 
+export async function sbGetClientByUuid(
+  clientUuid: string,
+): Promise<Client | null> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("clients")
+    .select("*")
+    .eq("id", clientUuid)
+    .is("archived_at", null)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? mapRow(data as ClientRow) : null;
+}
+
+/** Find active CRM client by email (case-insensitive). */
+export async function sbFindClientByEmail(
+  email: string,
+): Promise<Client | null> {
+  const trimmed = email.trim();
+  if (!trimmed) return null;
+  const { data, error } = await getSupabaseAdmin()
+    .from("clients")
+    .select("*")
+    .ilike("email", trimmed)
+    .is("archived_at", null)
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data ? mapRow(data as ClientRow) : null;
+}
+
 export async function sbGetClientByExternalId(
   externalId: string,
 ): Promise<Client | null> {

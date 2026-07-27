@@ -62,6 +62,10 @@ export const CASE_ACTIVITY_LABELS: Record<
   comment_added: { en: "Comment added", ru: "Добавлен комментарий" },
   status_changed: { en: "Status changed", ru: "Статус изменён" },
   employee_assigned: { en: "Specialist assigned", ru: "Назначен специалист" },
+  crm_client_linked: {
+    en: "CRM client linked for Finance",
+    ru: "CRM-клиент связан для финансов",
+  },
 };
 
 export function caseStatusLabel(

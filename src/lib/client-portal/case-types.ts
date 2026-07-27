@@ -24,6 +24,7 @@ export const CLIENT_CASE_ACTIVITY_TYPES = [
   "comment_added",
   "status_changed",
   "employee_assigned",
+  "crm_client_linked",
 ] as const;
 
 export type ClientCaseActivityType = (typeof CLIENT_CASE_ACTIVITY_TYPES)[number];

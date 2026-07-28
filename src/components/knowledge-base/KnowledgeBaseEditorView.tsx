@@ -17,6 +17,7 @@ import type {
   KbArticleStatus,
   KbCategoryId,
   KbEditorArticle,
+  KbScope,
 } from "@/lib/knowledge-base/types";
 import { slugifyKbTitle, suggestDuplicateSlug } from "@/lib/knowledge-base/kb-slug";
 import type { KbAiDraftResult } from "@/lib/knowledge-base/kb-ai-draft";
@@ -116,9 +117,13 @@ function toPayload(form: EditorForm, status: "draft" | "published") {
 export function KnowledgeBaseEditorView({
   mode,
   slug: initialSlug,
+  basePath = "/knowledge-base",
+  scope = "corporate",
 }: {
   mode: EditorMode;
   slug?: string;
+  basePath?: string;
+  scope?: KbScope;
 }) {
   const t = useTranslations("knowledgeBase");
   const uiLocale = useLocale() as AppLocale;
@@ -153,7 +158,9 @@ export function KnowledgeBaseEditorView({
   useEffect(() => {
     if (mode !== "edit" || !initialSlug) return;
     setLoading(true);
-    void fetch(`/api/knowledge-base/${encodeURIComponent(initialSlug)}/editor`)
+    void fetch(
+      `/api/knowledge-base/${encodeURIComponent(initialSlug)}/editor?scope=${encodeURIComponent(scope)}`,
+    )
       .then(async (res) => {
         if (!res.ok) throw new Error("load failed");
         const data = (await res.json()) as { article: KbEditorArticle };
@@ -163,7 +170,7 @@ export function KnowledgeBaseEditorView({
       })
       .catch(() => setError(t("errors.loadFailed")))
       .finally(() => setLoading(false));
-  }, [mode, initialSlug, t]);
+  }, [initialSlug, mode, scope, t]);
 
   useEffect(() => {
     if (loading) return;
@@ -255,7 +262,7 @@ export function KnowledgeBaseEditorView({
         ],
       };
 
-      const res = await fetch("/api/knowledge-base", {
+      const res = await fetch(`/api/knowledge-base?scope=${encodeURIComponent(scope)}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -288,7 +295,7 @@ export function KnowledgeBaseEditorView({
     }
 
     throw new Error("slug_taken");
-  }, []);
+  }, [scope]);
 
   const ensureDraft = useCallback(async (): Promise<string> => {
     try {
@@ -335,12 +342,14 @@ export function KnowledgeBaseEditorView({
     try {
       if (mode === "create" && !articlePersisted) {
         const createdSlug = await ensureDraft();
-        void router.replace(`/knowledge-base/edit/${encodeURIComponent(createdSlug)}`);
+        void router.replace(`${basePath}/edit/${encodeURIComponent(createdSlug)}`);
         return;
       }
 
       const payload = toPayload(form, "draft");
-      const res = await fetch(`/api/knowledge-base/${encodeURIComponent(form.slug)}`, {
+      const res = await fetch(
+        `/api/knowledge-base/${encodeURIComponent(form.slug)}?scope=${encodeURIComponent(scope)}`,
+        {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -354,7 +363,8 @@ export function KnowledgeBaseEditorView({
             { locale: "ru", ...form.ru },
           ],
         }),
-      });
+        },
+      );
 
       if (res.status === 409) {
         setError(t("editor.errors.slugTaken"));
@@ -373,7 +383,7 @@ export function KnowledgeBaseEditorView({
         return;
       }
 
-      router.push("/knowledge-base");
+      router.push(basePath);
     } catch (err) {
       if (err instanceof Error && err.message === "slug_taken") {
         setError(t("editor.errors.slugTaken"));
@@ -394,7 +404,9 @@ export function KnowledgeBaseEditorView({
           ? await ensureDraft()
           : form.slug;
 
-      const res = await fetch(`/api/knowledge-base/${encodeURIComponent(slug)}`, {
+      const res = await fetch(
+        `/api/knowledge-base/${encodeURIComponent(slug)}?scope=${encodeURIComponent(scope)}`,
+        {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -407,9 +419,10 @@ export function KnowledgeBaseEditorView({
             { locale: "ru", ...form.ru },
           ],
         }),
-      });
+        },
+      );
       if (!res.ok) throw new Error("publish failed");
-      router.push("/knowledge-base");
+      router.push(basePath);
     } catch (err) {
       if (err instanceof Error && err.message === "prepare_failed") {
         setError(t("attachments.prepareFailed"));
@@ -427,13 +440,16 @@ export function KnowledgeBaseEditorView({
     if (!window.confirm(t("confirm.archiveBody"))) return;
     setSaving(true);
     try {
-      const res = await fetch(`/api/knowledge-base/${encodeURIComponent(form.slug)}`, {
+      const res = await fetch(
+        `/api/knowledge-base/${encodeURIComponent(form.slug)}?scope=${encodeURIComponent(scope)}`,
+        {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "archive" }),
-      });
+        },
+      );
       if (!res.ok) throw new Error("archive failed");
-      router.push("/knowledge-base?status=archived");
+      router.push(`${basePath}?status=archived`);
     } catch {
       setError(t("errors.saveFailed"));
     } finally {
@@ -485,7 +501,7 @@ export function KnowledgeBaseEditorView({
   return (
     <div className={styles.editorWrap}>
       <div className={styles.editorToolbar}>
-        <Link href="/knowledge-base" className={styles.linkBtn}>
+        <Link href={basePath} className={styles.linkBtn}>
           <i className="fa-solid fa-arrow-left" aria-hidden /> {t("actions.back")}
         </Link>
         <span className={`${styles.statusBadge} ${styles[`status_${form.status}`]}`}>

@@ -3,10 +3,11 @@ import { getSession } from "@/lib/auth/session";
 import { getRequestLocale } from "@/i18n/api-messages";
 import { translateKnowledgeBaseMessage } from "@/i18n/knowledge-base-messages";
 import { isKnowledgeBasePostgresEnabled } from "@/lib/knowledge-base/config";
+import { parseKbScope } from "@/lib/knowledge-base/scope";
 import { sbGetKnowledgeBaseEditorArticle } from "@/lib/supabase/knowledge-base-repo";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ slug: string }> },
 ) {
   const session = await getSession();
@@ -31,9 +32,10 @@ export async function GET(
   }
 
   const { slug } = await context.params;
+  const scope = parseKbScope(new URL(request.url).searchParams.get("scope"));
 
   try {
-    const article = await sbGetKnowledgeBaseEditorArticle(slug);
+    const article = await sbGetKnowledgeBaseEditorArticle(slug, scope);
     if (!article) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }

@@ -7,14 +7,17 @@ import type {
   KbArticleRecord,
   KbListingResponse,
   KbSearchParams,
+  KbScope,
 } from "./types";
 
-function seedDemoRecords(): KbArticleRecord[] {
+function seedDemoRecords(scope: KbScope): KbArticleRecord[] {
+  if (scope === "client") return [];
   const now = new Date().toISOString();
   return DEMO_KB_ARTICLE_SEEDS.map((seed) => ({
     ...seed,
     id: seed.slug,
     createdAt: now,
+    scope,
   }));
 }
 
@@ -23,7 +26,11 @@ export function listEmbeddedKnowledgeBase(
   locale: AppLocale,
   params: KbSearchParams = {},
 ): KbListingResponse {
-  const listing = searchDemoArticles(seedDemoRecords(), locale, params);
+  const listing = searchDemoArticles(
+    seedDemoRecords(params.scope ?? "corporate"),
+    locale,
+    params,
+  );
   return {
     ...listing,
     source: "embedded",
@@ -34,10 +41,11 @@ export function listEmbeddedKnowledgeBase(
 export function getEmbeddedKnowledgeBaseTextForAi(
   locale: AppLocale,
   userQuery: string,
+  scope: KbScope = "corporate",
 ): string {
-  return buildDemoAiKnowledgeBaseText(seedDemoRecords(), locale, userQuery);
+  return buildDemoAiKnowledgeBaseText(seedDemoRecords(scope), locale, userQuery);
 }
 
 export function getEmbeddedDemoRecords(): KbArticleRecord[] {
-  return seedDemoRecords();
+  return seedDemoRecords("corporate");
 }

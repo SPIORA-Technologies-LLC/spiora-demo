@@ -29,7 +29,7 @@ function seedRecords() {
 
 describe("Knowledge Base i18n EN", () => {
   it("title without Cyrillic", () => {
-    assert.equal(translateKnowledgeBaseMessage("en", "title"), "Database");
+    assert.equal(translateKnowledgeBaseMessage("en", "title"), "Corporate Database");
     assert.doesNotMatch(translateKnowledgeBaseMessage("en", "title"), /[А-Яа-яЁё]/);
   });
 
@@ -53,7 +53,7 @@ describe("Knowledge Base i18n EN", () => {
 
 describe("Knowledge Base i18n RU", () => {
   it("title in Russian", () => {
-    assert.equal(translateKnowledgeBaseMessage("ru", "title"), "База данных");
+    assert.equal(translateKnowledgeBaseMessage("ru", "title"), "Корпоративная база данных");
     assert.match(translateKnowledgeBaseMessage("ru", "title"), /[А-Яа-яЁё]/);
   });
 

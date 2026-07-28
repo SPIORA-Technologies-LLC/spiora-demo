@@ -5,6 +5,7 @@ import { translateKnowledgeBaseMessage } from "@/i18n/knowledge-base-messages";
 import { isKnowledgeBasePostgresEnabled } from "@/lib/knowledge-base/config";
 import { normalizeKbSlug } from "@/lib/knowledge-base/knowledge-base-api";
 import { suggestDuplicateSlug } from "@/lib/knowledge-base/kb-slug";
+import { parseKbScope } from "@/lib/knowledge-base/scope";
 import {
   sbDuplicateKnowledgeBaseArticle,
   sbGetKnowledgeBaseRecord,
@@ -36,6 +37,7 @@ export async function POST(
   }
 
   const { slug } = await context.params;
+  const scope = parseKbScope(new URL(request.url).searchParams.get("scope"));
 
   let requestedSlug: string | undefined;
   try {
@@ -55,7 +57,7 @@ export async function POST(
       candidate = suggestDuplicateSlug(slug, attempt + 1);
     }
 
-    const article = await sbDuplicateKnowledgeBaseArticle(slug, candidate);
+    const article = await sbDuplicateKnowledgeBaseArticle(slug, candidate, scope);
     return NextResponse.json({ article, slug: candidate }, { status: 201 });
   } catch (error) {
     console.error("[knowledge-base] duplicate failed", error);

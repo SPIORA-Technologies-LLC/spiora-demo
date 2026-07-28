@@ -3,13 +3,17 @@ import { AppShell } from "@/components/layout/AppShell";
 import { KnowledgeBaseView } from "@/components/knowledge-base/KnowledgeBaseView";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
-export default async function KnowledgeBasePage() {
+export default async function ClientKnowledgeBasePage() {
   const t = await getTranslations("knowledgeBase");
 
   return (
-    <AppShell sectionTitle={t("corporateTitle")}>
-      <SectionHeader title={t("corporateTitle")} />
-      <KnowledgeBaseView rootLabel={t("corporateTitle")} />
+    <AppShell sectionTitle={t("clientTitle")}>
+      <SectionHeader title={t("clientTitle")} />
+      <KnowledgeBaseView
+        basePath="/client-knowledge-base"
+        scope="client"
+        rootLabel={t("clientTitle")}
+      />
     </AppShell>
   );
 }

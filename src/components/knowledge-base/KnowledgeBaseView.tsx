@@ -13,6 +13,7 @@ import type {
   KbArticleDetail,
   KbArticleListItem,
   KbListingResponse,
+  KbScope,
 } from "@/lib/knowledge-base/types";
 import { buildKbListQuery } from "@/lib/knowledge-base/kb-locale";
 import { Card } from "@/components/ui/Card";
@@ -45,7 +46,15 @@ function buildQueryString(params: Record<string, string | undefined>): string {
   return qs ? `?${qs}` : "";
 }
 
-export function KnowledgeBaseView() {
+export function KnowledgeBaseView({
+  basePath = "/knowledge-base",
+  scope = "corporate",
+  rootLabel,
+}: {
+  basePath?: string;
+  scope?: KbScope;
+  rootLabel?: string;
+}) {
   const t = useTranslations("knowledgeBase");
   const locale = useLocale() as AppLocale;
   const router = useRouter();
@@ -93,11 +102,11 @@ export function KnowledgeBaseView() {
 
   const updateRoute = useCallback(
     (next: Record<string, string | undefined>) => {
-      router.replace(`/knowledge-base${buildQueryString(next)}`, {
+      router.replace(`${basePath}${buildQueryString(next)}`, {
         scroll: false,
       });
     },
-    [router],
+    [basePath, router],
   );
 
   const fetchListing = useCallback(async () => {
@@ -106,6 +115,7 @@ export function KnowledgeBaseView() {
     try {
       const qs = buildKbListQuery({
         locale,
+        scope,
         q: query,
         category,
         tag,
@@ -125,7 +135,7 @@ export function KnowledgeBaseView() {
     } finally {
       setLoading(false);
     }
-  }, [locale, query, category, tag, articleSlug, currentFolderId, statusFilter]);
+  }, [articleSlug, category, currentFolderId, locale, query, scope, statusFilter, tag]);
 
   useEffect(() => {
     void fetchListing();
@@ -156,7 +166,7 @@ export function KnowledgeBaseView() {
   };
 
   const handleCopyLink = async (slug: string) => {
-    const url = `${window.location.origin}/knowledge-base?article=${encodeURIComponent(slug)}`;
+    const url = `${window.location.origin}${basePath}?article=${encodeURIComponent(slug)}`;
     try {
       await navigator.clipboard.writeText(url);
     } catch {
@@ -193,6 +203,7 @@ export function KnowledgeBaseView() {
           setCurrentFolderId(listing.parentId ?? undefined);
           updateRoute({ folderId: listing.parentId ?? undefined });
         }}
+        rootLabel={rootLabel ?? t("breadcrumbRoot")}
         t={t}
       />
     );
@@ -253,7 +264,7 @@ export function KnowledgeBaseView() {
                 <div className={styles.addMaterialMenuIntro}>{t("actions.addMaterial")}</div>
                 <div className={styles.addMaterialGrid}>
                   <Link
-                    href="/knowledge-base/new"
+                    href={`${basePath}/new`}
                     className={styles.addMaterialItem}
                     role="menuitem"
                     onClick={() => setAddMenuOpen(false)}
@@ -267,7 +278,7 @@ export function KnowledgeBaseView() {
                     </span>
                   </Link>
                   <Link
-                    href="/knowledge-base/new?focus=table&intent=table"
+                    href={`${basePath}/new?focus=table&intent=table`}
                     className={styles.addMaterialItem}
                     role="menuitem"
                     onClick={() => setAddMenuOpen(false)}
@@ -281,7 +292,7 @@ export function KnowledgeBaseView() {
                     </span>
                   </Link>
                   <Link
-                    href="/knowledge-base/new?focus=files&intent=image"
+                    href={`${basePath}/new?focus=files&intent=image`}
                     className={styles.addMaterialItem}
                     role="menuitem"
                     onClick={() => setAddMenuOpen(false)}
@@ -295,7 +306,7 @@ export function KnowledgeBaseView() {
                     </span>
                   </Link>
                   <Link
-                    href="/knowledge-base/new?focus=files&intent=pdf"
+                    href={`${basePath}/new?focus=files&intent=pdf`}
                     className={styles.addMaterialItem}
                     role="menuitem"
                     onClick={() => setAddMenuOpen(false)}
@@ -309,7 +320,7 @@ export function KnowledgeBaseView() {
                     </span>
                   </Link>
                   <Link
-                    href="/knowledge-base/new?focus=files&intent=link"
+                    href={`${basePath}/new?focus=files&intent=link`}
                     className={styles.addMaterialItem}
                     role="menuitem"
                     onClick={() => setAddMenuOpen(false)}
@@ -323,7 +334,7 @@ export function KnowledgeBaseView() {
                     </span>
                   </Link>
                   <Link
-                    href="/knowledge-base/new?focus=files&intent=media"
+                    href={`${basePath}/new?focus=files&intent=media`}
                     className={styles.addMaterialItem}
                     role="menuitem"
                     onClick={() => setAddMenuOpen(false)}
@@ -445,7 +456,7 @@ export function KnowledgeBaseView() {
                 })
               }
             >
-              {t("breadcrumbRoot")}
+                {rootLabel ?? t("breadcrumbRoot")}
             </button>
             {category ? (
               <>
@@ -481,6 +492,7 @@ export function KnowledgeBaseView() {
         ) : selectedArticle ? (
           <ArticleDetailView
             article={selectedArticle}
+            basePath={basePath}
             canManage={canManage}
             onBack={() =>
               updateRoute({ q: query, category, tag, status: statusFilter, article: undefined })
@@ -530,6 +542,7 @@ export function KnowledgeBaseView() {
                   <ArticleCard
                     key={article.id}
                     article={article}
+                    basePath={basePath}
                     canManage={canManage}
                     onOpen={() =>
                       updateRoute({
@@ -555,12 +568,14 @@ export function KnowledgeBaseView() {
 
 function ArticleCard({
   article,
+  basePath,
   canManage,
   onOpen,
   onRefresh,
   t,
 }: {
   article: KbArticleListItem;
+  basePath: string;
   canManage: boolean;
   onOpen: () => void;
   onRefresh: () => void;
@@ -597,7 +612,7 @@ function ArticleCard({
 
   const quickPublish = async () => {
     setMenuOpen(false);
-    await fetch(`/api/knowledge-base/${encodeURIComponent(article.slug)}`, {
+    await fetch(`/api/knowledge-base/${encodeURIComponent(article.slug)}?scope=${encodeURIComponent(article.scope ?? "corporate")}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "publish" }),
@@ -608,7 +623,7 @@ function ArticleCard({
   const quickArchive = async () => {
     setMenuOpen(false);
     if (!window.confirm(t("confirm.archiveBody"))) return;
-    await fetch(`/api/knowledge-base/${encodeURIComponent(article.slug)}`, {
+    await fetch(`/api/knowledge-base/${encodeURIComponent(article.slug)}?scope=${encodeURIComponent(article.scope ?? "corporate")}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ action: "archive" }),
@@ -619,12 +634,12 @@ function ArticleCard({
   const duplicate = async () => {
     setMenuOpen(false);
     const res = await fetch(
-      `/api/knowledge-base/${encodeURIComponent(article.slug)}/duplicate`,
+      `/api/knowledge-base/${encodeURIComponent(article.slug)}/duplicate?scope=${encodeURIComponent(article.scope ?? "corporate")}`,
       { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
     );
     if (!res.ok) return;
     const data = (await res.json()) as { slug: string };
-    router.push(`/knowledge-base/edit/${encodeURIComponent(data.slug)}`);
+    router.push(`${basePath}/edit/${encodeURIComponent(data.slug)}`);
   };
 
   return (
@@ -669,7 +684,7 @@ function ArticleCard({
                 {t("actions.open")}
               </button>
               <Link
-                href={`/knowledge-base/edit/${encodeURIComponent(article.slug)}`}
+                href={`${basePath}/edit/${encodeURIComponent(article.slug)}`}
                 className={styles.menuItem}
                 role="menuitem"
                 onClick={() => setMenuOpen(false)}
@@ -714,12 +729,14 @@ function ArticleCard({
 
 function ArticleDetailView({
   article,
+  basePath,
   canManage,
   onBack,
   onCopyLink,
   t,
 }: {
   article: KbArticleDetail;
+  basePath: string;
   canManage: boolean;
   onBack: () => void;
   onCopyLink: (slug: string) => void;
@@ -740,7 +757,7 @@ function ArticleDetailView({
         </button>
         {canManage ? (
           <Link
-            href={`/knowledge-base/edit/${encodeURIComponent(article.slug)}`}
+            href={`${basePath}/edit/${encodeURIComponent(article.slug)}`}
             className={styles.linkBtn}
           >
             {t("actions.edit")}
@@ -791,6 +808,7 @@ function DriveBrowserView({
   onOpenFolder,
   onGoRoot,
   onGoUp,
+  rootLabel,
   t,
 }: {
   listing: DriveKbListing;
@@ -801,6 +819,7 @@ function DriveBrowserView({
   onOpenFolder: (folderId: string) => void;
   onGoRoot: () => void;
   onGoUp: () => void;
+  rootLabel: string;
   t: ReturnType<typeof useTranslations<"knowledgeBase">>;
 }) {
   const rootUrl = `https://drive.google.com/drive/folders/${listing.rootFolderId}`;
@@ -810,7 +829,7 @@ function DriveBrowserView({
       <div className={styles.toolbar}>
         <nav className={styles.breadcrumb} aria-label={t("breadcrumbAria")}>
           <button type="button" className={styles.crumbBtn} onClick={onGoRoot}>
-            {t("breadcrumbRoot")}
+            {rootLabel}
           </button>
           {history.map((folderId) => (
             <span key={folderId} className={styles.crumbSep}>

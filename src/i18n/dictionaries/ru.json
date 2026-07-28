@@ -11,7 +11,8 @@
     "calendar": "Календарь",
     "teamChat": "Командный чат",
     "aiWorkspace": "AI Workspace",
-    "knowledgeBase": "База данных",
+    "knowledgeBase": "Корпоративная база данных",
+    "clientKnowledgeBase": "Клиентская база данных",
     "analytics": "Аналитика",
     "team": "Команда",
     "settings": "Настройки",
@@ -1653,10 +1654,12 @@
     "documentCreateConflict": "Не удалось назначить уникальный ID документа. Попробуйте ещё раз."
   },
   "knowledgeBase": {
-    "title": "База данных",
+    "title": "Корпоративная база данных",
+    "corporateTitle": "Корпоративная база данных",
+    "clientTitle": "Клиентская база данных",
     "subtitle": "Инструкции и политики команды",
     "demoBadge": "Демонстрационные данные",
-    "breadcrumbRoot": "База данных",
+    "breadcrumbRoot": "Корпоративная база данных",
     "breadcrumbAria": "Навигация по базе данных",
     "list": {
       "count": "{count} материалов"

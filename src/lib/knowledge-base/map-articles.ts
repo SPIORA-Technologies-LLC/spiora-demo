@@ -11,12 +11,14 @@ import type {
   KbArticleListItem,
   KbCategoryId,
   KbCategorySummary,
+  KbScope,
   KbTagSummary,
 } from "./types";
 
 export type KbArticleRow = {
   id: string;
   slug: string;
+  scope: KbScope;
   category_id: KbCategoryId;
   tag_keys: string[];
   author_key: string;
@@ -93,6 +95,7 @@ export function mapKbListItem(
   return {
     id: row.id,
     slug: row.slug,
+    scope: row.scope,
     title: row.title,
     summary: row.summary,
     categoryId: row.category_id,
@@ -116,6 +119,7 @@ export function mapKbDetail(
   return {
     ...mapKbListItem(row, locale),
     content: row.content,
+    scope: row.scope,
   };
 }
 

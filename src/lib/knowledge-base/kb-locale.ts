@@ -54,6 +54,7 @@ export function resolveKbRequestLocale(
 /** Build list URL query; always includes locale (cache key + refetch signal). */
 export function buildKbListQuery(params: {
   locale: AppLocale;
+  scope?: string;
   q?: string;
   category?: string;
   tag?: string;
@@ -63,6 +64,7 @@ export function buildKbListQuery(params: {
 }): string {
   const search = new URLSearchParams();
   search.set("locale", params.locale);
+  if (params.scope) search.set("scope", params.scope);
   if (params.q) search.set("q", params.q);
   if (params.category) search.set("category", params.category);
   if (params.tag) search.set("tag", params.tag);

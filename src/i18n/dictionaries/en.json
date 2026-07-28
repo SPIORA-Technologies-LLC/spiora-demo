@@ -11,7 +11,8 @@
     "calendar": "Calendar",
     "teamChat": "Team Chat",
     "aiWorkspace": "AI Workspace",
-    "knowledgeBase": "Database",
+    "knowledgeBase": "Corporate Database",
+    "clientKnowledgeBase": "Client Database",
     "analytics": "Analytics",
     "team": "Team",
     "settings": "Settings",
@@ -1655,10 +1656,12 @@
     "documentCreateConflict": "Could not assign a unique document ID. Please try again."
   },
   "knowledgeBase": {
-    "title": "Database",
+    "title": "Corporate Database",
+    "corporateTitle": "Corporate Database",
+    "clientTitle": "Client Database",
     "subtitle": "Team guides and policies",
     "demoBadge": "Demo data",
-    "breadcrumbRoot": "Database",
+    "breadcrumbRoot": "Corporate Database",
     "breadcrumbAria": "Database navigation",
     "list": {
       "count": "{count} materials"

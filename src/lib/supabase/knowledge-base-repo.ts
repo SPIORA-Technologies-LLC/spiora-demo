@@ -24,10 +24,11 @@ import type {
   KbEditorArticle,
   KbListingResponse,
   KbSearchParams,
+  KbScope,
 } from "@/lib/knowledge-base/types";
 
 const ARTICLE_SELECT =
-  "id, slug, category_id, tag_keys, author_key, status, updated_at, published_at, archived_at, external_url";
+  "id, slug, scope, category_id, tag_keys, author_key, status, updated_at, published_at, archived_at, external_url";
 
 type TranslationJoinRow = KbArticleRow & {
   knowledge_base_article_translations: KbJoinTranslation[];
@@ -43,6 +44,7 @@ function flattenRow(
 async function fetchArticles(
   locale: AppLocale,
   options: {
+    scope: KbScope;
     includeDrafts?: boolean;
     statusFilter?: KbSearchParams["status"];
   },
@@ -50,6 +52,7 @@ async function fetchArticles(
   let query = getSupabaseAdmin()
     .from("knowledge_base_articles")
     .select(`${ARTICLE_SELECT}, knowledge_base_article_translations ( locale, title, summary, content )`)
+    .eq("scope", options.scope)
     .order("updated_at", { ascending: false });
 
   const statusFilter = options.statusFilter;
@@ -91,8 +94,10 @@ export async function sbListKnowledgeBase(
   params: KbSearchParams,
   options: { includeDrafts?: boolean } = {},
 ): Promise<KbListingResponse> {
+  const scope = params.scope ?? "corporate";
   const includeDrafts = options.includeDrafts ?? false;
   const rows = await fetchArticles(locale, {
+    scope,
     includeDrafts,
     statusFilter: params.status,
   });
@@ -157,20 +162,25 @@ export async function sbListKnowledgeBase(
 
 export async function sbGetKnowledgeBaseRecord(
   slug: string,
+  scope?: KbScope,
 ): Promise<KbArticleRow | null> {
-  const { data, error } = await getSupabaseAdmin()
+  let query = getSupabaseAdmin()
     .from("knowledge_base_articles")
     .select(ARTICLE_SELECT)
-    .eq("slug", slug)
-    .maybeSingle();
+    .eq("slug", slug);
+  if (scope) {
+    query = query.eq("scope", scope);
+  }
+  const { data, error } = await query.maybeSingle();
   if (error) throw error;
   return (data as KbArticleRow | null) ?? null;
 }
 
 export async function sbGetKnowledgeBaseEditorArticle(
   slug: string,
+  scope?: KbScope,
 ): Promise<KbEditorArticle | null> {
-  const record = await sbGetKnowledgeBaseRecord(slug);
+  const record = await sbGetKnowledgeBaseRecord(slug, scope);
   if (!record) return null;
 
   const { data, error } = await getSupabaseAdmin()
@@ -194,6 +204,7 @@ export async function sbGetKnowledgeBaseEditorArticle(
 
   return {
     slug: record.slug,
+    scope: record.scope,
     categoryId: record.category_id,
     tagKeys: record.tag_keys,
     authorKey: record.author_key,
@@ -207,8 +218,9 @@ export async function sbGetKnowledgeBaseEditorArticle(
 export async function sbDuplicateKnowledgeBaseArticle(
   sourceSlug: string,
   newSlug: string,
+  scope?: KbScope,
 ): Promise<KbArticleDetail> {
-  const editor = await sbGetKnowledgeBaseEditorArticle(sourceSlug);
+  const editor = await sbGetKnowledgeBaseEditorArticle(sourceSlug, scope);
   if (!editor) throw new Error("kb_source_not_found");
 
   const translations = (["en", "ru"] as const)
@@ -220,6 +232,7 @@ export async function sbDuplicateKnowledgeBaseArticle(
 
   return sbUpsertKnowledgeBaseArticle({
     slug: newSlug,
+    scope: editor.scope,
     categoryId: editor.categoryId,
     tagKeys: editor.tagKeys,
     authorKey: editor.authorKey,
@@ -232,12 +245,16 @@ export async function sbDuplicateKnowledgeBaseArticle(
 export async function sbGetKnowledgeBaseBySlug(
   slug: string,
   locale: AppLocale,
+  scope?: KbScope,
 ): Promise<KbArticleDetail | null> {
-  const { data, error } = await getSupabaseAdmin()
+  let query = getSupabaseAdmin()
     .from("knowledge_base_articles")
     .select(`${ARTICLE_SELECT}, knowledge_base_article_translations ( locale, title, summary, content )`)
-    .eq("slug", slug)
-    .maybeSingle();
+    .eq("slug", slug);
+  if (scope) {
+    query = query.eq("scope", scope);
+  }
+  const { data, error } = await query.maybeSingle();
 
   if (error) throw error;
   if (!data) return null;
@@ -248,10 +265,12 @@ export async function sbGetKnowledgeBaseBySlug(
 export async function sbGetKnowledgeBaseTextForAi(
   locale: AppLocale,
   userQuery: string,
+  scope: KbScope = "corporate",
 ): Promise<string> {
-  const listing = await sbListKnowledgeBase(locale, { q: userQuery });
+  const listing = await sbListKnowledgeBase(locale, { q: userQuery, scope });
   const header = translateKnowledgeBaseMessage(locale, "aiContextPostgresHeader");
   const resolved: string[] = [];
+  const basePath = scope === "client" ? "/client-knowledge-base" : "/knowledge-base";
 
   for (const article of listing.articles.slice(0, 8)) {
     const detail = await sbGetKnowledgeBaseBySlug(article.slug, locale);
@@ -259,7 +278,7 @@ export async function sbGetKnowledgeBaseTextForAi(
       ? detail.content.replace(/\s+/g, " ").trim().slice(0, 600)
       : article.summary;
     resolved.push(
-      `--- ${article.title} (${article.categoryLabel})\n${excerpt}\nLink: /knowledge-base?article=${article.slug}`,
+      `--- ${article.title} (${article.categoryLabel})\n${excerpt}\nLink: ${basePath}?article=${article.slug}`,
     );
   }
 
@@ -271,6 +290,7 @@ export async function sbGetKnowledgeBaseTextForAi(
 
 export type KbUpsertInput = {
   slug: string;
+  scope: KbScope;
   categoryId: KbCategoryId;
   tagKeys: string[];
   authorKey: string;
@@ -298,6 +318,7 @@ export async function sbUpsertKnowledgeBaseArticle(
 
   const articlePayload: Record<string, unknown> = {
     slug: input.slug,
+    scope: input.scope,
     category_id: input.categoryId,
     tag_keys: input.tagKeys,
     author_key: input.authorKey,

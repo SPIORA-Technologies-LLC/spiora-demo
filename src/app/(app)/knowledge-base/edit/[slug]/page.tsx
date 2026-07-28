@@ -21,7 +21,7 @@ export default async function EditKnowledgeBaseArticlePage({
   const t = await getTranslations("knowledgeBase");
 
   return (
-    <AppShell sectionTitle={t("title")}>
+    <AppShell sectionTitle={t("corporateTitle")}>
       <SectionHeader title={t("editor.editTitle")} subtitle={slug} />
       <KnowledgeBaseEditorView mode="edit" slug={slug} />
     </AppShell>

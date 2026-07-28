@@ -44,6 +44,13 @@ const NAV_KB: NavItem = {
   icon: "fa-solid fa-book",
 };
 
+const NAV_CLIENT_KB: NavItem = {
+  href: "/client-knowledge-base",
+  labelKey: "clientKnowledgeBase",
+  labelNs: "nav",
+  icon: "fa-solid fa-book-open-reader",
+};
+
 const NAV_TASKS: NavItem = {
   href: "/tasks",
   labelKey: "tasks",
@@ -122,6 +129,7 @@ const MANAGER_NAV: NavItem[] = [
   NAV_CLIENT_INTAKE,
   NAV_AI,
   NAV_KB,
+  NAV_CLIENT_KB,
   NAV_TASKS,
   NAV_CALENDAR,
   NAV_MEETING_RECORDINGS,
@@ -138,6 +146,7 @@ const FINANCE_MANAGER_NAV: NavItem[] = [
   NAV_CLIENT_INTAKE,
   NAV_AI,
   NAV_KB,
+  NAV_CLIENT_KB,
   NAV_TASKS,
   NAV_CALENDAR,
   NAV_MEETING_RECORDINGS,
@@ -155,6 +164,7 @@ const OWNER_NAV: NavItem[] = [
   NAV_CLIENT_INTAKE,
   NAV_AI,
   NAV_KB,
+  NAV_CLIENT_KB,
   NAV_TASKS,
   NAV_CALENDAR,
   NAV_MEETING_RECORDINGS,

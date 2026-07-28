@@ -6,6 +6,7 @@ import { translateKnowledgeBaseMessage } from "@/i18n/knowledge-base-messages";
 import { listKnowledgeBaseFolder } from "@/lib/google-drive/kb-drive";
 import { isGoogleDriveKbConfigured } from "@/lib/google-sheets/auth";
 import { isKbUploadDisabled } from "@/lib/knowledge-base/demo-guard";
+import { parseKbScope } from "@/lib/knowledge-base/scope";
 import {
   isKnowledgeBasePostgresEnabled,
   shouldPreferEmbeddedKnowledgeBase,
@@ -82,6 +83,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const locale = resolveKbRequestLocale(url.searchParams.get("locale"), cookieLocale);
   const params = parseSearchParams(url, session.role === "owner");
+  params.scope = parseKbScope(url.searchParams.get("scope"));
 
   if (
     isKnowledgeBasePostgresEnabled() ||
@@ -174,6 +176,7 @@ export async function POST(request: Request) {
 
   const input: KbUpsertInput = {
     slug: parsed.data.slug,
+    scope: parseKbScope(new URL(request.url).searchParams.get("scope")),
     categoryId: parsed.data.categoryId,
     tagKeys: parsed.data.tagKeys,
     authorKey: parsed.data.authorKey,

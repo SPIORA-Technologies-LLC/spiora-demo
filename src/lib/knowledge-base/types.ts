@@ -7,6 +7,8 @@ export type KbCategoryId =
   | "team-onboarding"
   | "ai-automation";
 
+export type KbScope = "corporate" | "client";
+
 export type KbArticleSeed = {
   slug: string;
   categoryId: KbCategoryId;
@@ -18,6 +20,7 @@ export type KbArticleSeed = {
 export type KbArticleRecord = KbArticleSeed & {
   id: string;
   createdAt: string;
+  scope: KbScope;
 };
 
 export type KbArticleStatus = "draft" | "published" | "archived";
@@ -25,6 +28,7 @@ export type KbArticleStatus = "draft" | "published" | "archived";
 export type KbArticleListItem = {
   id: string;
   slug: string;
+  scope?: KbScope;
   title: string;
   summary: string;
   categoryId: KbCategoryId;
@@ -43,6 +47,7 @@ export type KbArticleListItem = {
 
 export type KbArticleDetail = KbArticleListItem & {
   content: string;
+  scope?: KbScope;
 };
 
 export type KbCategorySummary = {
@@ -93,6 +98,7 @@ export type KbEditorTranslation = {
 
 export type KbEditorArticle = {
   slug: string;
+  scope: KbScope;
   categoryId: KbCategoryId;
   tagKeys: string[];
   authorKey: string;
@@ -103,6 +109,7 @@ export type KbEditorArticle = {
 };
 
 export type KbSearchParams = {
+  scope?: KbScope;
   q?: string;
   category?: string;
   tag?: string;

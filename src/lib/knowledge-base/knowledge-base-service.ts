@@ -16,6 +16,7 @@ import {
 import type {
   KbListingResponse,
   KbSearchParams,
+  KbScope,
 } from "@/lib/knowledge-base/types";
 import {
   sbCountKnowledgeBaseArticles,
@@ -103,12 +104,13 @@ export async function listKnowledgeBase(
 export async function getKnowledgeBaseTextForAi(
   locale: AppLocale,
   userQuery: string,
+  scope: KbScope = "corporate",
 ): Promise<string> {
   if (isKnowledgeBasePostgresEnabled()) {
     try {
       const count = await sbCountKnowledgeBaseArticles();
       if (count > 0) {
-        return sbGetKnowledgeBaseTextForAi(locale, userQuery);
+        return sbGetKnowledgeBaseTextForAi(locale, userQuery, scope);
       }
     } catch (error) {
       console.error("[knowledge-base] postgres AI context failed", error);
@@ -119,7 +121,7 @@ export async function getKnowledgeBaseTextForAi(
     isKnowledgeBaseEmbeddedFallbackEnabled() ||
     shouldPreferEmbeddedKnowledgeBase()
   ) {
-    return getEmbeddedKnowledgeBaseTextForAi(locale, userQuery);
+    return getEmbeddedKnowledgeBaseTextForAi(locale, userQuery, scope);
   }
 
   return translateKnowledgeBaseMessage(locale, "empty.unconfigured");

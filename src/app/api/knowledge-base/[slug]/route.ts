@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth/session";
 import { getRequestLocale } from "@/i18n/api-messages";
 import { translateKnowledgeBaseMessage } from "@/i18n/knowledge-base-messages";
 import { isKnowledgeBasePostgresEnabled } from "@/lib/knowledge-base/config";
+import { parseKbScope } from "@/lib/knowledge-base/scope";
 import {
   isXssSafeMarkdownInput,
   parseKbPatchBody,
@@ -30,7 +31,7 @@ function parseErrorStatus(error: import("@/lib/knowledge-base/knowledge-base-api
 }
 
 export async function GET(
-  _request: Request,
+  request: Request,
   context: { params: Promise<{ slug: string }> },
 ) {
   const session = await getSession();
@@ -40,6 +41,7 @@ export async function GET(
 
   const locale = await getRequestLocale();
   const { slug } = await context.params;
+  const scope = parseKbScope(new URL(request.url).searchParams.get("scope"));
 
   if (!isKnowledgeBasePostgresEnabled()) {
     return NextResponse.json(
@@ -49,7 +51,7 @@ export async function GET(
   }
 
   try {
-    const article = await sbGetKnowledgeBaseBySlug(slug, locale);
+    const article = await sbGetKnowledgeBaseBySlug(slug, locale, scope);
     if (!article) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -89,6 +91,7 @@ export async function PATCH(
   }
 
   const { slug } = await context.params;
+  const scope = parseKbScope(new URL(request.url).searchParams.get("scope"));
 
   let body: unknown;
   try {
@@ -116,7 +119,7 @@ export async function PATCH(
   }
 
   try {
-    const record = await sbGetKnowledgeBaseRecord(slug);
+    const record = await sbGetKnowledgeBaseRecord(slug, scope);
     if (!record) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -130,11 +133,11 @@ export async function PATCH(
 
     if (patch.action === "archive" || patch.status === "archived") {
       await sbArchiveKnowledgeBaseArticle(slug);
-      const article = await sbGetKnowledgeBaseBySlug(slug, locale);
+      const article = await sbGetKnowledgeBaseBySlug(slug, locale, scope);
       return NextResponse.json({ article });
     }
 
-    const existing = await sbGetKnowledgeBaseBySlug(slug, locale);
+    const existing = await sbGetKnowledgeBaseBySlug(slug, locale, scope);
 
     const status =
       patch.action === "publish"
@@ -143,6 +146,7 @@ export async function PATCH(
 
     const input: KbUpsertInput = {
       slug,
+      scope,
       categoryId: patch.categoryId ?? record.category_id,
       tagKeys: patch.tagKeys ?? record.tag_keys,
       authorKey: patch.authorKey ?? record.author_key,

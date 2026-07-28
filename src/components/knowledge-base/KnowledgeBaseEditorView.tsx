@@ -73,6 +73,13 @@ type EditorForm = {
 
 type EditorMode = "create" | "edit";
 
+function applyScopeSlug(scope: KbScope, slug: string): string {
+  const normalized = slug.trim();
+  if (!normalized) return normalized;
+  if (scope !== "client") return normalized;
+  return normalized.endsWith("-client") ? normalized : `${normalized}-client`;
+}
+
 function emptyForm(): EditorForm {
   return {
     slug: "",
@@ -213,12 +220,12 @@ export function KnowledgeBaseEditorView({
       setForm((prev) => {
         const next = { ...prev, en: { ...prev.en, title } };
         if (!slugManual && mode === "create" && !slugLocked) {
-          next.slug = slugifyKbTitle(title);
+          next.slug = applyScopeSlug(scope, slugifyKbTitle(title));
         }
         return next;
       });
     },
-    [slugManual, mode, slugLocked],
+    [mode, scope, slugLocked, slugManual],
   );
 
   const createDraftOnServer = useCallback(async (): Promise<string> => {
@@ -228,7 +235,10 @@ export function KnowledgeBaseEditorView({
       Boolean(current.slug.trim()) &&
       /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(current.slug.trim());
     const baseSlug =
-      (hasManualSlug ? current.slug.trim() : slugifyKbTitle(titles.en)) || "article";
+      applyScopeSlug(
+        scope,
+        hasManualSlug ? current.slug.trim() : slugifyKbTitle(titles.en),
+      ) || applyScopeSlug(scope, "article");
     // Empty create (e.g. focus=table) must not collide with a prior "untitled-material".
     const uniqueBase =
       !current.en.title.trim() && !current.ru.title.trim() && !hasManualSlug
@@ -471,7 +481,10 @@ export function KnowledgeBaseEditorView({
       const data = (await res.json()) as { draft: KbAiDraftResult };
       setForm((prev) => ({
         ...prev,
-        slug: mode === "create" && !slugManual ? data.draft.slug : prev.slug,
+        slug:
+          mode === "create" && !slugManual
+            ? applyScopeSlug(scope, data.draft.slug)
+            : prev.slug,
         categoryId: data.draft.categoryId,
         tagKeys: data.draft.tagKeys,
         authorKey: data.draft.authorKey,
@@ -604,7 +617,10 @@ export function KnowledgeBaseEditorView({
               disabled={!slugEditable || isArchived}
               onChange={(e) => {
                 setSlugManual(true);
-                setForm((prev) => ({ ...prev, slug: e.target.value }));
+                setForm((prev) => ({
+                  ...prev,
+                  slug: applyScopeSlug(scope, slugifyKbTitle(e.target.value) || e.target.value),
+                }));
               }}
             />
           </label>

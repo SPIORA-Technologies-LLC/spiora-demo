@@ -129,6 +129,7 @@ export async function sbListKnowledgeBase(
   const baseRows: KbArticleRow[] = rows.map((r) => ({
     id: r.id,
     slug: r.slug,
+    scope: r.scope,
     category_id: r.category_id,
     tag_keys: r.tag_keys,
     author_key: r.author_key,

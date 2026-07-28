@@ -1969,7 +1969,7 @@
     "aiContextPostgresHeader": "База данных (PostgreSQL):",
     "aiContextEmpty": "Подходящие демо-материалы не найдены.",
     "categories": {
-      "companyPolicies": "Политики компании",
+      "companyPolicies": "Политика компании",
       "clientWorkflow": "Работа с клиентами",
       "documentManagement": "Управление документами",
       "teamOnboarding": "Адаптация сотрудников",

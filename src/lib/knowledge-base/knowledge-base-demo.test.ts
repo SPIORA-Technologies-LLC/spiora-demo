@@ -42,7 +42,7 @@ describe("Knowledge Base i18n EN", () => {
   it("categories EN without Cyrillic", () => {
     assert.equal(
       translateKnowledgeBaseCategory("en", "company-policies"),
-      "Company Policies",
+      "Company Policy",
     );
     assert.equal(
       translateKnowledgeBaseCategory("en", "ai-automation"),

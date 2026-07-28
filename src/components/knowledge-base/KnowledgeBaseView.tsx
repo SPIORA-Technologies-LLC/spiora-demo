@@ -46,6 +46,17 @@ function buildQueryString(params: Record<string, string | undefined>): string {
   return qs ? `?${qs}` : "";
 }
 
+function formatMaterialsCount(locale: AppLocale, count: number, fallback: string): string {
+  if (locale !== "ru") return fallback;
+  const mod10 = count % 10;
+  const mod100 = count % 100;
+  if (mod10 === 1 && mod100 !== 11) return `${count} материал`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+    return `${count} материала`;
+  }
+  return `${count} материалов`;
+}
+
 export function KnowledgeBaseView({
   basePath = "/knowledge-base",
   scope = "corporate",
@@ -506,7 +517,11 @@ export function KnowledgeBaseView({
               <p className={styles.listCount}>
                 {query
                   ? t("search.resultsCount", { count: articles.length })
-                  : t("list.count", { count: articles.length })}
+                  : formatMaterialsCount(
+                      locale,
+                      articles.length,
+                      t("list.count", { count: articles.length }),
+                    )}
               </p>
               {canManage ? (
                 <label className={styles.statusSelectInline}>

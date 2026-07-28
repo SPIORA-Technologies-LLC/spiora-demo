@@ -126,7 +126,7 @@ function parseTranslations(
       continue;
     }
 
-    if (!title || !summary) return "empty_field";
+    if (!title) return "empty_field";
     if (!content && !contentOptional) return "empty_field";
     locales.add(locale);
     parsed.push({ locale, title, summary, content });

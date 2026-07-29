@@ -125,7 +125,6 @@ export function AiWorkspaceView() {
     lastSyncedAt: string;
     searchColumns?: {
       clients: string[];
-      newClients: string[];
     };
     recentSearches?: Array<{
       query: string;
@@ -142,12 +141,6 @@ export function AiWorkspaceView() {
       }>;
     }>;
     clientsTable: {
-      label: string;
-      count: number;
-      source: string;
-      samples: Array<{ rowIndex: number; name: string; details: string }>;
-    };
-    newClientsTable: {
       label: string;
       count: number;
       source: string;
@@ -912,34 +905,12 @@ export function AiWorkspaceView() {
                   ))}
                 </ul>
               </div>
-              <div className={styles.diagnosticBlock}>
-                <strong>
-                  {clientsDiagnostic.newClientsTable.label}:{" "}
-                  {clientsDiagnostic.newClientsTable.count} (
-                  {clientsDiagnostic.newClientsTable.source})
-                </strong>
-                <ul className={styles.diagnosticList}>
-                  {clientsDiagnostic.newClientsTable.samples.map((sample) => (
-                    <li key={`fg-${sample.rowIndex}-${sample.name}`}>
-                      {t("diagnostic.row", {
-                        index: sample.rowIndex,
-                        name: sample.name,
-                      })}
-                      {sample.details ? ` — ${sample.details}` : ""}
-                    </li>
-                  ))}
-                </ul>
-              </div>
               {clientsDiagnostic.searchColumns ? (
                 <div className={styles.diagnosticBlock}>
                   <strong>{t("diagnostic.searchFields")}</strong>
                   <div>
                     {t("diagnostic.clientsColumns")}{" "}
                     {clientsDiagnostic.searchColumns.clients.join(", ")}
-                  </div>
-                  <div>
-                    {t("diagnostic.newClientsColumns")}{" "}
-                    {clientsDiagnostic.searchColumns.newClients.join(", ")}
                   </div>
                 </div>
               ) : null}

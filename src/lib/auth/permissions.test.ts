@@ -46,7 +46,7 @@ describe("auth permissions", () => {
     assert.equal(financeNav.includes("/settings"), false);
   });
 
-  it("hides legacy leads and formgrid demo from sidebar", () => {
+  it("hides retired leads routes from sidebar", () => {
     for (const role of ["owner", "manager", "finance_manager"] as const) {
       const hrefs = getNavItemsForRole(role).map((item) => item.href);
       assert.equal(hrefs.includes("/crm/leads"), false);

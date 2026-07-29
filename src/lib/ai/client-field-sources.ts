@@ -5,7 +5,7 @@ import type {
 } from "@/lib/ai/client-context";
 import { extractPassportFromClientRecord } from "@/lib/ai/client-passport";
 
-export type DataSourceLabel = "CRM" | "Formgrid" | "Emigrant Desk";
+export type DataSourceLabel = "CRM" | "Emigrant Desk";
 
 export type EmigrantDeskContextSlice = {
   name: string;
@@ -41,13 +41,13 @@ const SHEET_FIELD_PRIORITY: Record<
   "email" | "phone" | "status" | "manager" | "country" | "direction" | "lastActivity",
   ClientContextSource[]
 > = {
-  email: ["new_clients", "clients"],
-  phone: ["new_clients", "clients"],
-  status: ["clients", "new_clients"],
-  manager: ["clients", "new_clients"],
-  country: ["clients", "new_clients"],
-  direction: ["clients", "new_clients"],
-  lastActivity: ["clients", "new_clients"],
+  email: ["clients"],
+  phone: ["clients"],
+  status: ["clients"],
+  manager: ["clients"],
+  country: ["clients"],
+  direction: ["clients"],
+  lastActivity: ["clients"],
 };
 
 const CRM_TABLE_FIELD_KEYS: Array<{ keys: string[]; label: string }> = [
@@ -100,8 +100,8 @@ const FIELD_LABELS: Record<keyof typeof SHEET_FIELD_PRIORITY, string> = {
   lastActivity: "Последняя активность",
 };
 
-export function partSourceLabel(part: ClientContext): DataSourceLabel {
-  return part.source === "clients" ? "CRM" : "Formgrid";
+export function partSourceLabel(_part: ClientContext): DataSourceLabel {
+  return "CRM";
 }
 
 function partFieldValue(
@@ -156,39 +156,20 @@ export function buildManagerSourceSummary(sources: DataSourceLabel[]): string {
   const unique = [...new Set(sources)];
   if (unique.length === 0) return "";
   if (unique.length === 1) {
-    if (unique[0] === "CRM") return "Данные из таблицы «Клиенты».";
-    if (unique[0] === "Formgrid") {
-      return "Данные получены из анкеты Formgrid (новые клиенты).";
-    }
+    if (unique[0] === "CRM") return "Данные из раздела «Клиенты».";
     return "Данные получены из Emigrant Desk.";
   }
-  const names = unique.map((source) => {
-    if (source === "CRM") return "CRM";
-    if (source === "Formgrid") return "Formgrid";
-    return "Emigrant Desk";
-  });
-  if (names.length === 2) {
-    return `Данные объединены из ${names[0]} и ${names[1]}.`;
-  }
-  return `Данные объединены из ${names.slice(0, -1).join(", ")} и ${names.at(-1)}.`;
+  return "Данные объединены из CRM и Emigrant Desk.";
 }
 
 export function buildContactSourceHint(fields: AttributedField[]): string {
-  const formgridContacts = fields.filter(
-    (field) =>
-      (field.label === "Email" || field.label === "Телефон") &&
-      field.source === "Formgrid",
-  );
-  if (formgridContacts.length > 0) {
-    return "Контактные данные получены из анкеты Formgrid.";
-  }
   const crmContacts = fields.filter(
     (field) =>
       (field.label === "Email" || field.label === "Телефон") &&
       field.source === "CRM",
   );
   if (crmContacts.length > 0) {
-    return "Контактные данные получены из CRM.";
+    return "Контактные данные получены из Клиентов.";
   }
   return "";
 }
@@ -248,33 +229,6 @@ export function resolveClientContextAttribution(
     appendCrmTableFields(fields, crmPart);
   }
 
-  const formPart = parts.find((part) => part.source === "new_clients");
-  if (formPart) {
-    const passport = extractPassportFromClientRecord(formPart);
-    if (passport.raw) {
-      const existing = fields.find((field) => field.label === "Паспорт");
-      if (!existing) {
-        fields.push({
-          label: "Паспорт",
-          value: passport.raw,
-          source: "Formgrid",
-        });
-      } else if (
-        passport.normalized &&
-        existing.value &&
-        passport.normalized !== extractPassportFromClientRecord({ debugRow: { passport: existing.value } }).normalized
-      ) {
-        conflicts.push({
-          field: "Паспорт",
-          values: [
-            { source: existing.source, value: existing.value },
-            { source: "Formgrid", value: passport.raw },
-          ],
-        });
-      }
-    }
-  }
-
   if (desk) {
     if (desk.caseNumber) {
       fields.push({
@@ -332,9 +286,6 @@ export function resolveClientContextAttribution(
 
   const activeSources: DataSourceLabel[] = [];
   if (parts.some((part) => part.source === "clients")) activeSources.push("CRM");
-  if (parts.some((part) => part.source === "new_clients")) {
-    activeSources.push("Formgrid");
-  }
   if (desk) activeSources.push("Emigrant Desk");
 
   const contactHint = buildContactSourceHint(fields);
@@ -351,7 +302,7 @@ export function resolveClientContextAttribution(
 }
 
 export function formatSourceChecklist(sources: DataSourceLabel[]): string[] {
-  const order: DataSourceLabel[] = ["CRM", "Formgrid", "Emigrant Desk"];
+  const order: DataSourceLabel[] = ["CRM", "Emigrant Desk"];
   return order.map((source) => {
     const active = sources.includes(source);
     return `${active ? "✅" : "⬜"} ${source}`;
@@ -377,27 +328,18 @@ export function formatFieldConflicts(conflicts: FieldConflict[]): string[] {
 export function formatPartsTechnicalBlocks(
   parts: ClientContext[],
   crmData: string,
-  surveyData: string,
+  _surveyData: string,
   desk?: EmigrantDeskContextSlice | null,
 ): string[] {
   const lines: string[] = ["--- Технические блоки по источникам ---"];
 
   const crmPart = parts.find((part) => part.source === "clients");
-  const formPart = parts.find((part) => part.source === "new_clients");
 
   if (crmPart) {
     lines.push(
       "",
       `CRM (строка ${crmPart.rowIndex}):`,
       crmPart.surveyData || crmData || "(нет дополнительных полей)",
-    );
-  }
-
-  if (formPart?.surveyData || surveyData) {
-    lines.push(
-      "",
-      `Formgrid (строка ${formPart?.rowIndex ?? "?"}):`,
-      formPart?.surveyData ?? surveyData,
     );
   }
 

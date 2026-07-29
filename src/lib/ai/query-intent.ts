@@ -1,22 +1,15 @@
 import { extractPersonNameTokens } from "@/lib/ai/name-matching";
 
 export type WorkspaceQueryIntent = {
-  /** Букинг/адрес конкретного клиента — ответ из таблицы без AI */
+  /** Букинг/адрес конкретного клиента — ответ из CRM без широкого контекста */
   fastClientLookup: boolean;
   needsKb: boolean;
-  /** Полный текст документов (медленно) */
-  needsKbFullText: boolean;
-  /** Папка Google Drive «ЭМИГРАНТ» — документы клиентов */
-  needsEmigrantDrive: boolean;
-  needsEmigrantDriveFullText: boolean;
-  /** Запрос явно про папку ЭМИГРАНТ — не обрывать на «клиент не в таблице» */
-  emigrantDrivePrimary: boolean;
   needsClients: boolean;
+  needsIntake: boolean;
   needsEmigrantDesk: boolean;
-  needsFormgrid: boolean;
 };
 
-/** Номер паспорта из таблицы «Клиенты», а не скан/PDF в Drive. */
+/** Номер паспорта из CRM «Клиенты», а не скан/PDF документа. */
 export function isPassportNumberLookupQuery(query: string): boolean {
   const lower = query.toLowerCase();
   if (
@@ -47,21 +40,8 @@ export function isPassportNumberLookupQuery(query: string): boolean {
   );
 }
 
-/** Запрос про папку «ЭМИГРАНТ» в Google Drive, а не про таблицы клиентов. */
-export function isEmigrantDrivePrimaryQuery(query: string): boolean {
-  const lower = query.toLowerCase();
-  return (
-    lower.includes("эмигрант") ||
-    lower.includes("emigrant folder") ||
-    lower.includes("emigrant drive") ||
-    (lower.includes("папк") &&
-      (lower.includes("эмигрант") || lower.includes("emigrant")))
-  );
-}
-
 export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
   const lower = query.toLowerCase();
-  const emigrantDrivePrimary = isEmigrantDrivePrimaryQuery(query);
 
   const asksPassportFromTable = isPassportNumberLookupQuery(query);
 
@@ -75,14 +55,9 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
       lower.includes("статус") ||
       asksPassportFromTable);
 
-  const needsFormgrid =
-    lower.includes("formgrid") ||
-    lower.includes("анкет") ||
-    lower.includes("заявк") ||
-    lower.includes("лид");
-
   const needsKb =
     lower.includes("база знан") ||
+    lower.includes("база данн") ||
     lower.includes("knowledge") ||
     lower.includes("программ") ||
     lower.includes("digital nomad") ||
@@ -90,25 +65,20 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
     lower.includes("immigration") ||
     lower.includes("иммиграц");
 
-  const needsEmigrantDrive =
-    emigrantDrivePrimary ||
-    lower.includes("эмигрант") ||
-    lower.includes("emigrant") ||
-    lower.includes("папк") ||
-    lower.includes("pdf") ||
-    lower.includes("скан") ||
-    lower.includes("копи") ||
-    (lower.includes("паспорт") && !asksPassportFromTable) ||
-    lower.includes("документ") ||
-    lower.includes("drive") ||
-    lower.includes("внж") ||
-    (hasClientName &&
-      (lower.includes("файл") ||
-        lower.includes("документ") ||
-        lower.includes("pdf")));
+  const needsIntake =
+    lower.includes("анкет") ||
+    lower.includes("intake") ||
+    lower.includes("questionnaire") ||
+    lower.includes("новые клиенты из анкет") ||
+    /нов(?:ые|ая|ую)\s+заявк/iu.test(query) ||
+    (lower.includes("заявк") &&
+      (lower.includes("анкет") ||
+        lower.includes("intake") ||
+        lower.includes("questionnaire")));
 
   const needsEmigrantDesk =
-    (!emigrantDrivePrimary && lower.includes("emigrant")) ||
+    lower.includes("emigrant") ||
+    lower.includes("эмигрант") ||
     lower.includes("кабинет") ||
     lower.includes("статус дела") ||
     lower.includes("статус клиента") ||
@@ -119,9 +89,8 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
     lower.includes("дело no") ||
     (lower.includes("статус") && lower.includes("клиент"));
 
-  const needsClients =
+  const needsClientsBase =
     !needsKb ||
-    needsFormgrid ||
     needsEmigrantDesk ||
     fastClientLookup ||
     lower.includes("клиент") ||
@@ -130,38 +99,19 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
     lower.includes("хорват") ||
     lower.includes("сколько");
 
-  const needsKbFullText =
-    needsKb &&
-    !fastClientLookup &&
-    (lower.includes("сравн") ||
-      lower.includes("требован") ||
-      lower.includes("программ") ||
-      lower.includes("чек"));
-
-  const needsEmigrantDriveFullText =
-    needsEmigrantDrive &&
-    !fastClientLookup &&
-    (emigrantDrivePrimary ||
-      lower.includes("содерж") ||
-      lower.includes("текст") ||
-      lower.includes("что в") ||
-      lower.includes("прочит") ||
-      lower.includes("открой") ||
-      lower.includes("покажи документ") ||
-      lower.includes("найди") ||
-      lower.includes("информац"));
+  const needsClients =
+    needsIntake
+      ? hasClientName ||
+        lower.includes("клиент") ||
+        lower.includes("базе клиент") ||
+        lower.includes("база клиент")
+      : needsClientsBase;
 
   return {
     fastClientLookup,
     needsKb: needsKb && !fastClientLookup,
-    needsKbFullText,
-    needsEmigrantDrive: needsEmigrantDrive && !fastClientLookup,
-    needsEmigrantDriveFullText,
-    emigrantDrivePrimary,
-    needsClients:
-      !emigrantDrivePrimary && (needsClients || !needsFormgrid),
-    /** Desk — отдельный продукт; не подмешивать к запросам о клиентах из Google Sheets CRM */
-    needsEmigrantDesk: !emigrantDrivePrimary && needsEmigrantDesk,
-    needsFormgrid,
+    needsClients,
+    needsIntake: needsIntake && !fastClientLookup,
+    needsEmigrantDesk,
   };
 }

@@ -9,7 +9,6 @@ import {
 export type NotificationSection =
   | "team-chat"
   | "tasks"
-  | "formgrid"
   | "calendar"
   | "ai-workspace"
   | "clients";
@@ -77,7 +76,7 @@ export function getNotificationSection(
       return "tasks";
     case "client_new":
     case "consultation_assigned":
-      return "formgrid";
+      return "clients";
     case "calendar_reminder":
     case "calendar_video_invite":
       return "calendar";
@@ -106,7 +105,7 @@ export function getNotificationHref(
       return "/tasks";
     case "client_new":
     case "consultation_assigned":
-      return "/new-formgrid-clients";
+      return "/clients";
     case "calendar_reminder":
     case "calendar_video_invite": {
       const { eventId, isVideoMeeting } = decodeCalendarReminderMessage(
@@ -153,11 +152,6 @@ export function pathnameMatchesNotificationSection(
       );
     case "tasks":
       return pathname === "/tasks" || pathname.startsWith("/tasks/");
-    case "formgrid":
-      return (
-        pathname === "/new-formgrid-clients" ||
-        pathname.startsWith("/new-formgrid-clients/")
-      );
     case "calendar":
       return pathname === "/calendar" || pathname.startsWith("/calendar/");
     case "ai-workspace":

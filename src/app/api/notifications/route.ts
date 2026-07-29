@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getRequestLocale } from "@/i18n/api-messages";
 import { getSession } from "@/lib/auth/session";
-import { runFormgridNotificationWatchIfDue } from "@/lib/notifications/formgrid-watch";
 import {
   getUnreadCount,
   listNotificationsForUser,
@@ -19,8 +18,7 @@ export async function GET(request: Request) {
 
   const locale = await getRequestLocale();
 
-  const [, notifications, unread] = await Promise.all([
-    runFormgridNotificationWatchIfDue(),
+  const [notifications, unread] = await Promise.all([
     listNotificationsForUser(session.id, { limit, since, locale }),
     getUnreadCount(session.id),
   ]);

@@ -86,7 +86,7 @@ describe("AI Workspace demo scenarios", () => {
     assert.doesNotMatch(ru.reply, /OPENROUTER_API_KEY/i);
   });
 
-  it("supports at least 10 demo scenario ids", () => {
+  it("supports at least 9 demo scenario ids", () => {
     const ids = new Set([
       matchDemoScenario("Summarize today's priorities"),
       matchDemoScenario("Show overdue tasks"),
@@ -98,9 +98,8 @@ describe("AI Workspace demo scenarios", () => {
       matchDemoScenario("What should the team focus on today?"),
       matchDemoScenario("How many clients in progress"),
       matchDemoScenario("Compare programs knowledge base"),
-      matchDemoScenario("Latest formgrid applications"),
     ]);
-    assert.ok(ids.size >= 10);
+    assert.ok(ids.size >= 9);
   });
 });
 

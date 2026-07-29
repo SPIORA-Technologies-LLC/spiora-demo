@@ -7,7 +7,6 @@ import {
 } from "@/lib/ai/context-redaction";
 import {
   crmClientToContext,
-  formgridRowToContext,
   isMergedClientContext,
   type ClientContext,
   type ClientDebugScanHit,
@@ -45,14 +44,12 @@ import {
   type ClientSearchIntentType,
 } from "@/lib/ai/client-search-intent";
 import { executeStructuredClientSearch } from "@/lib/ai/structured-client-search";
-import { isEmigrantDrivePrimaryQuery } from "@/lib/ai/query-intent";
 import {
   getRecentClientSearches,
   recordClientSearch,
 } from "@/lib/ai/client-search-history";
 import { isWorkspaceDiagnosticsEnabled } from "@/lib/ai/workspace-demo-safe";
-import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
-import { listAllClients } from "@/lib/google-sheets/service";
+import { listAllClients } from "@/lib/clients/store";
 import type { Client } from "@/lib/google-sheets/types";
 
 const DEBUG_PREFIX = /^\/debug_client(?:\s+(.+))?$/iu;
@@ -73,9 +70,7 @@ export type ClientLookupResult =
 
 export type SheetsConnectionHealth = {
   clientsCount: number;
-  newClientsCount: number;
   clientsSource: string;
-  newClientsSource: string;
   lastSyncedAt: string;
   configured: boolean;
 };
@@ -125,33 +120,6 @@ function crmClientToSearchFields(client: Client): SearchField[] {
   pushField(fields, "страна", client.country, "other");
   pushField(fields, "направление", client.direction, "other");
   pushField(fields, "статус", client.status, "other");
-  return fields;
-}
-
-function formgridRowToSearchFields(headers: string[], row: string[]): SearchField[] {
-  const fields: SearchField[] = [];
-  const nameValues: string[] = [];
-
-  headers.forEach((header, index) => {
-    const value = (row[index] ?? "").trim();
-    if (!header || !value) return;
-
-    let category: SearchField["category"] = "other";
-    if (/фио|name|имя|фамил|surname|first|last/i.test(header)) {
-      category = "name";
-      nameValues.push(value);
-    } else if (/телефон|phone|whatsapp|telegram|тел\./i.test(header)) {
-      category = "phone";
-    } else if (/email|почта|e-mail|электронн|mail/i.test(header)) {
-      category = "email";
-    } else if (/коммент|замет|note|comment/i.test(header)) {
-      category = "notes";
-    }
-
-    fields.push({ label: header, value, category });
-  });
-
-  appendNormalizedNameFields(fields, ...nameValues);
   return fields;
 }
 
@@ -296,7 +264,6 @@ export function isClientRelatedQuery(query: string): boolean {
 
 export function needsClientLookup(query: string): boolean {
   if (isDebugClientCommand(query)) return true;
-  if (isEmigrantDrivePrimaryQuery(query)) return false;
   if (isClientContextualQuery(query)) return true;
 
   const searchQuery = buildClientSearchQuery(query);
@@ -478,23 +445,6 @@ async function collectClientMatches(
     }
   }
 
-  const formgrid = await getFormgridLeadsTable();
-  formgrid.rows.forEach((row, index) => {
-    const fields = formgridRowToSearchFields(formgrid.headers, row);
-    const { score, matchedFields } = scoreClientRecord(searchQuery, fields);
-    if (score >= minScore) {
-      matches.push(
-        formgridRowToContext(
-          formgrid.headers,
-          row,
-          index,
-          score,
-          matchedFields,
-        ),
-      );
-    }
-  });
-
   return matches.sort((a, b) => b.score - a.score);
 }
 
@@ -526,26 +476,6 @@ export async function scanRawRowsForTokens(
       }
     }
   }
-
-  const formgrid = await getFormgridLeadsTable();
-  formgrid.rows.forEach((row, index) => {
-    formgrid.headers.forEach((header, colIndex) => {
-      const value = (row[colIndex] ?? "").trim();
-      if (!value || isSensitiveFieldKey(header)) return;
-      const hay = value.toLowerCase();
-      for (const token of tokenLower) {
-        if (hay.includes(token)) {
-          hits.push({
-            source: "Новые клиенты",
-            rowIndex: index + 2,
-            column: header || `col ${colIndex}`,
-            value,
-            matchedToken: token,
-          });
-        }
-      }
-    });
-  });
 
   return hits;
 }
@@ -624,17 +554,12 @@ export async function lookupClientsInSheets(
 
 export async function getSheetsConnectionHealth(): Promise<SheetsConnectionHealth> {
   const syncedAt = new Date().toISOString();
-  const [{ items, source: clientsSource }, formgrid] = await Promise.all([
-    listAllClients(),
-    getFormgridLeadsTable(),
-  ]);
+  const { items, source: clientsSource } = await listAllClients();
 
   return {
     clientsCount: items.length,
-    newClientsCount: formgrid.rows.length,
     clientsSource,
-    newClientsSource: formgrid.source,
     lastSyncedAt: syncedAt,
-    configured: clientsSource === "google_sheets",
+    configured: clientsSource === "postgresql" || clientsSource === "google_sheets",
   };
 }

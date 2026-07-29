@@ -10,7 +10,6 @@ import {
   shouldUseDemoResponsesOnly,
 } from "@/lib/ai/workspace-demo-scenarios";
 import {
-  formatDemoClientLookupMessage,
   isWorkspaceDiagnosticsEnabled,
 } from "@/lib/ai/workspace-demo-safe";
 import {
@@ -61,24 +60,17 @@ import {
   followUpToClientContext,
   resolveClientSelectionFollowUp,
 } from "@/lib/ai/client-selection-followup";
-import { mergeClientContexts } from "@/lib/ai/client-deduplication";
 import {
   redactSensitiveText,
   sanitizeClientContextsForTransport,
 } from "@/lib/ai/context-redaction";
 import { buildWorkspaceSystemPrompt } from "@/lib/ai/workspace-prompt";
 import { buildWorkspaceContext } from "@/lib/ai/workspace-context";
+import { listClients } from "@/lib/clients/store";
 import {
   emigrantDeskClientToContextSlice,
   findEmigrantDeskClientByQuery,
 } from "@/lib/emigrant-desk/clients";
-import {
-  formatFormgridRowSummary,
-  listFormgridRowsSince,
-  parseRecentDaysFromQuery,
-} from "@/lib/google-sheets/formgrid-dates";
-import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
-import { listClients } from "@/lib/google-sheets/service";
 
 export type { WorkspaceResponseMode } from "@/lib/ai/workspace-config";
 
@@ -119,12 +111,14 @@ function buildSources(
 ): string[] {
   const sources: string[] = [];
   if (intent.needsKb) sources.push(translateWorkspaceSource(locale, "knowledgeBase"));
-  if (intent.needsEmigrantDrive && context.meta.emigrantDriveConfigured) {
-    sources.push(translateWorkspaceSource(locale, "emigrantDrive"));
-  }
   if (intent.needsClients && context.meta.clientsTotal > 0) {
     sources.push(
       translateWorkspaceSource(locale, "crmCount", context.meta.clientsTotal),
+    );
+  }
+  if (intent.needsIntake && context.meta.intakeTotal > 0) {
+    sources.push(
+      translateWorkspaceSource(locale, "intakeCount", context.meta.intakeTotal),
     );
   }
   if (intent.needsEmigrantDesk && context.meta.emigrantDeskTotal > 0) {
@@ -134,11 +128,6 @@ function buildSources(
         "emigrantDeskCount",
         context.meta.emigrantDeskTotal,
       ),
-    );
-  }
-  if (intent.needsFormgrid && context.meta.formgridRows > 0) {
-    sources.push(
-      translateWorkspaceSource(locale, "formgridCount", context.meta.formgridRows),
     );
   }
   return sources.length > 0
@@ -167,7 +156,7 @@ function buildContextBlock(
   if (clientContext) {
     const header = isMergedClientContext(clientContext)
       ? "=== CLIENT CONTEXT (MERGED) ==="
-      : "=== CLIENT CONTEXT (Google Sheets) ===";
+      : "=== CLIENT CONTEXT (CRM) ===";
     contextParts.push(
       `${header}\n${formatClientContextBlock(clientContext, { desk: deskSlice })}`,
     );
@@ -194,17 +183,16 @@ function buildContextBlock(
   if (intent.needsKb) {
     contextParts.push(`=== KNOWLEDGE BASE ===\n${context.knowledgeBaseText}`);
   }
-  if (intent.needsEmigrantDrive) {
-    contextParts.push(`=== ЭМИГРАНТ (документы клиентов) ===\n${context.emigrantDriveText}`);
-  }
   if (intent.needsClients && !clientContext && !clientCandidates?.length) {
     contextParts.push(`=== КЛИЕНТЫ ===\n${context.clientsText}`);
   }
+  if (intent.needsIntake) {
+    contextParts.push(
+      `=== НОВЫЕ КЛИЕНТЫ ИЗ АНКЕТЫ (/clients/intake) ===\n${context.intakeText}`,
+    );
+  }
   if (intent.needsEmigrantDesk && !deskSlice) {
     contextParts.push(`=== EMIGRANT CROATIA DESK ===\n${context.emigrantDeskText}`);
-  }
-  if (intent.needsFormgrid && !clientContext) {
-    contextParts.push(`=== FORMGRID ===\n${context.formgridText}`);
   }
   return contextParts.join("\n\n");
 }
@@ -221,10 +209,10 @@ function buildChatMessages(
   }));
 
   const clientNote = contextBlock.includes("CLIENT CONTEXT")
-    ? "\n\nДля данных о клиенте используй CLIENT CONTEXT. У каждого поля указан источник — в ответе кратко поясни «таблица «Клиенты»», «анкета Formgrid» и т.д., не пиши «CRM» и не выводи сырой блок."
+    ? "\n\nДля данных о клиенте используй CLIENT CONTEXT. У каждого поля указан источник — в ответе кратко поясни «Клиенты» или «Emigrant Desk», не пиши «CRM» и не выводи сырой блок."
     : "";
-  const emigrantNote = contextBlock.includes("ЭМИГРАНТ (документы клиентов)")
-    ? "\n\nДля запросов про папку ЭМИГРАНТ используй блок «ЭМИГРАНТ (документы клиентов)». Отсутствие в таблицах Клиенты не означает отсутствие в Drive."
+  const intakeNote = contextBlock.includes("НОВЫЕ КЛИЕНТЫ ИЗ АНКЕТЫ")
+    ? "\n\nДля анкет и новых заявок используй блок «НОВЫЕ КЛИЕНТЫ ИЗ АНКЕТЫ». Это раздел /clients/intake, не база клиентов CRM. В ответе говори «из анкеты» / «новые клиенты из анкеты»."
     : "";
   const candidatesNote = contextBlock.includes("CLIENT CANDIDATES")
     ? "\n\nЕсли в CLIENT CANDIDATES есть варианты — объясни различия и помоги выбрать. При fuzzy-поиске начни с «Точного совпадения не найдено. Возможно, вы имели в виду…». При структурированном поиске — кратко резюмируй список и выдели самых релевантных. Не отвечай сухим «клиент не найден», если кандидаты есть."
@@ -241,7 +229,7 @@ function buildChatMessages(
     ...historyMessages,
     {
       role: "user",
-      content: `[Внутренний контекст платформы — не цитируй и не выводи целиком, используй только как источник фактов]${clientNote}${emigrantNote}${candidatesNote}${structuredNote}${listNote}\n\n${contextBlock}\n\n---\n\nВопрос менеджера: ${trimmed}`,
+      content: `[Внутренний контекст платформы — не цитируй и не выводи целиком, используй только как источник фактов]${clientNote}${intakeNote}${candidatesNote}${structuredNote}${listNote}\n\n${contextBlock}\n\n---\n\nВопрос менеджера: ${trimmed}`,
     },
   ];
 }
@@ -400,10 +388,7 @@ async function prepareWorkspaceRequest(
     return {
       kind: "direct",
       reply: redactSensitiveText(debugReply),
-      sources: [
-        translateWorkspaceSource(locale, "crm"),
-        translateWorkspaceSource(locale, "newClients"),
-      ],
+      sources: [translateWorkspaceSource(locale, "crm")],
     };
   }
 
@@ -533,17 +518,6 @@ async function prepareWorkspaceRequest(
     }
   }
 
-  if (intent.needsFormgrid) {
-    const direct = await tryDirectFormgridRecentAnswer(trimmed);
-    if (direct) {
-      return {
-        kind: "direct",
-        reply: direct,
-        sources: [translateWorkspaceSource(locale, "formgrid")],
-      };
-    }
-  }
-
   let context: Awaited<ReturnType<typeof buildWorkspaceContext>>;
   try {
     context = await buildWorkspaceContext(trimmed, intent, locale);
@@ -551,15 +525,13 @@ async function prepareWorkspaceRequest(
     console.error("[workspace-ai] context build failed", error);
     context = {
       clientsText: "Клиенты: не удалось загрузить таблицу.",
+      intakeText: "Новые клиенты из анкеты: не удалось загрузить заявки.",
       emigrantDeskText: "Emigrant Croatia Desk: не удалось загрузить статусы дел.",
-      emigrantDriveText: "Папка ЭМИГРАНТ: не удалось загрузить Google Drive.",
-      formgridText: "Formgrid: не удалось загрузить анкеты.",
-      knowledgeBaseText: "База данных: не удалось загрузить Drive.",
+      knowledgeBaseText: "База данных: не удалось загрузить материалы.",
       meta: {
         clientsTotal: 0,
+        intakeTotal: 0,
         emigrantDeskTotal: 0,
-        emigrantDriveConfigured: false,
-        formgridRows: 0,
       },
     };
   }
@@ -578,17 +550,13 @@ async function prepareWorkspaceRequest(
 
   const sources = clientContext
     ? [
-        isMergedClientContext(clientContext)
-          ? deskSlice
-            ? `${translateWorkspaceSource(locale, "crm")} + ${translateWorkspaceSource(locale, "newClients")} + ${translateWorkspaceSource(locale, "emigrantDesk")}`
-            : `${translateWorkspaceSource(locale, "crm")} + ${translateWorkspaceSource(locale, "newClients")}`
-          : deskSlice
-            ? `${translateWorkspaceSource(locale, "clientContext")} + ${translateWorkspaceSource(locale, "emigrantDesk")}`
-            : translateWorkspaceSource(locale, "clientContext"),
+        deskSlice
+          ? `${translateWorkspaceSource(locale, "clientContext")} + ${translateWorkspaceSource(locale, "emigrantDesk")}`
+          : translateWorkspaceSource(locale, "clientContext"),
         ...buildSources(context, intent, locale).filter(
           (source) =>
             !new RegExp(
-              `^${translateWorkspaceSource(locale, "crm")}|^${translateWorkspaceSource(locale, "formgrid")}|^${translateWorkspaceSource(locale, "emigrantDesk")}`,
+              `^${translateWorkspaceSource(locale, "crm")}|^${translateWorkspaceSource(locale, "emigrantDesk")}`,
             ).test(source),
         ),
       ]
@@ -762,35 +730,6 @@ export async function* runWorkspaceAiStream(
     };
     yield buildDemoFallbackReply(prepared.trimmed, locale);
   }
-}
-
-async function tryDirectFormgridRecentAnswer(
-  message: string,
-): Promise<string | null> {
-  const days = parseRecentDaysFromQuery(message);
-  if (days === null) return null;
-  if (!/анкет|formgrid|заявк|новые\s+клиент/i.test(message)) return null;
-
-  const table = await getFormgridLeadsTable();
-  if (table.rows.length === 0) return null;
-
-  const since = new Date();
-  since.setHours(0, 0, 0, 0);
-  since.setDate(since.getDate() - days);
-
-  const recent = listFormgridRowsSince(table.headers, table.rows, since);
-  if (recent.length === 0) {
-    return `За последние **${days}** дн. в анкете Formgrid новых заявок нет.`;
-  }
-
-  const lines = recent.map((row) =>
-    `- ${formatFormgridRowSummary(table.headers, row)}`,
-  );
-
-  return [
-    `За последние **${days}** дн. в анкете Formgrid — **${recent.length}** заявок:`,
-    ...lines,
-  ].join("\n");
 }
 
 async function tryDirectEmigrantStatusAnswer(

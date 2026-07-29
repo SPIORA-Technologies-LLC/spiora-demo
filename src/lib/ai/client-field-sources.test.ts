@@ -11,7 +11,7 @@ function ctx(
   partial: Partial<ClientContext> & Pick<ClientContext, "source" | "name">,
 ): ClientContext {
   return {
-    sourceLabel: partial.source === "clients" ? "Клиенты" : "Новые клиенты",
+    sourceLabel: "Клиенты",
     rowIndex: partial.rowIndex ?? 1,
     phone: "",
     email: "",
@@ -29,23 +29,17 @@ function ctx(
 }
 
 describe("resolveClientContextAttribution", () => {
-  it("attributes contacts to Formgrid and status to CRM", () => {
+  it("attributes CRM contacts and Desk case number", () => {
     const crm = ctx({
       source: "clients",
       name: "Давлятова Лола",
       status: "В работе",
-      debugRow: { passport: "762762123" },
-    });
-    const form = ctx({
-      source: "new_clients",
-      name: "Давлятова Лола Бахтиёровна",
-      rowIndex: 5,
       email: "demo.client.f@example.com",
       phone: "79099550114",
       debugRow: { passport: "762762123" },
     });
 
-    const attribution = resolveClientContextAttribution([crm, form], {
+    const attribution = resolveClientContextAttribution([crm], {
       name: "Давлятова Лола Бахтиёровна",
       email: "demo.client.f@example.com",
       caseNumber: "765946434",
@@ -57,10 +51,10 @@ describe("resolveClientContextAttribution", () => {
       internalComment: "",
     });
 
-    assert.deepEqual(attribution.activeSources, ["CRM", "Formgrid", "Emigrant Desk"]);
+    assert.deepEqual(attribution.activeSources, ["CRM", "Emigrant Desk"]);
     assert.equal(
       attribution.fields.find((field) => field.label === "Email")?.source,
-      "Formgrid",
+      "CRM",
     );
     assert.equal(
       attribution.fields.find((field) => field.label === "Статус")?.source,
@@ -70,9 +64,8 @@ describe("resolveClientContextAttribution", () => {
       attribution.fields.find((field) => field.label === "Номер дела")?.value,
       "765946434",
     );
-    assert.match(attribution.managerSummary, /CRM.*Formgrid/);
+    assert.match(attribution.managerSummary, /CRM.*Emigrant Desk|Клиенты/);
     assert.match(attribution.managerSummary, /Emigrant Desk/);
-    assert.match(attribution.managerSummary, /анкеты Formgrid/);
   });
 
   it("includes latin, partner and contract from CRM debug row", () => {
@@ -134,19 +127,21 @@ describe("resolveClientContextAttribution", () => {
     );
   });
 
-  it("detects phone conflicts between CRM and Formgrid", () => {
-    const crm = ctx({
+  it("detects phone conflicts between duplicate CRM rows", () => {
+    const left = ctx({
       source: "clients",
       name: "Иванов",
       phone: "79001112233",
+      rowIndex: 1,
     });
-    const form = ctx({
-      source: "new_clients",
+    const right = ctx({
+      source: "clients",
       name: "Иванов Иван",
       phone: "79009998877",
+      rowIndex: 2,
     });
 
-    const attribution = resolveClientContextAttribution([crm, form]);
+    const attribution = resolveClientContextAttribution([left, right]);
     const phoneConflict = attribution.conflicts.find(
       (conflict) => conflict.field === "Телефон",
     );
@@ -169,7 +164,7 @@ describe("formatMergedClientContextWithSources", () => {
       status: "В работе",
       manager: "",
       lastActivity: "",
-      surveyData: "Formgrid row",
+      surveyData: "CRM row detail",
       crmData: "CRM row",
       score: 80,
       matchedFields: [],
@@ -179,12 +174,14 @@ describe("formatMergedClientContextWithSources", () => {
           source: "clients",
           name: "Давлятова Лола",
           status: "В работе",
+          rowIndex: 2,
         }),
         ctx({
-          source: "new_clients",
+          source: "clients",
           name: "Давлятова Лола Бахтиёровна",
           email: "demo.client.f@example.com",
           phone: "79099550114",
+          rowIndex: 5,
         }),
       ],
       conflicts: [],
@@ -193,8 +190,8 @@ describe("formatMergedClientContextWithSources", () => {
 
     const text = formatMergedClientContextWithSources(merged);
     assert.match(text, /✅ CRM/);
-    assert.match(text, /✅ Formgrid/);
-    assert.match(text, /Email:\ndemo.client.f@example.com\nИсточник: Formgrid/);
+    assert.match(text, /⬜ Emigrant Desk/);
+    assert.match(text, /Email:\ndemo.client.f@example.com\nИсточник: CRM/);
     assert.match(text, /Технические блоки по источникам/);
   });
 });
@@ -202,8 +199,8 @@ describe("formatMergedClientContextWithSources", () => {
 describe("buildManagerSourceSummary", () => {
   it("formats two-source summary", () => {
     assert.equal(
-      buildManagerSourceSummary(["CRM", "Formgrid"]),
-      "Данные объединены из CRM и Formgrid.",
+      buildManagerSourceSummary(["CRM", "Emigrant Desk"]),
+      "Данные объединены из CRM и Emigrant Desk.",
     );
   });
 });

@@ -15,7 +15,6 @@ export type DemoScenarioId =
   | "teamFocusToday"
   | "activeClients"
   | "knowledgeBase"
-  | "formgridOverview"
   | "generic";
 
 type ScenarioMatcher = {
@@ -114,14 +113,6 @@ const SCENARIO_MATCHERS: ScenarioMatcher[] = [
       /compare\s+programs/i,
       /база\s+знаний/iu,
       /требовани(?:я|й)\s+по\s+программ/iu,
-    ],
-  },
-  {
-    id: "formgridOverview",
-    patterns: [
-      /formgrid/i,
-      /анкет/iu,
-      /заявк/iu,
     ],
   },
 ];

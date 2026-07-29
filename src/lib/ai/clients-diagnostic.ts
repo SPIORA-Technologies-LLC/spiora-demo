@@ -1,19 +1,11 @@
 import "server-only";
 
-import {
-  SEARCH_COLUMNS_CLIENTS,
-  SEARCH_COLUMNS_NEW_CLIENTS,
-} from "@/lib/ai/client-search";
+import { SEARCH_COLUMNS_CLIENTS } from "@/lib/ai/client-search";
 import {
   getRecentClientSearches,
   type ClientSearchHistoryEntry,
 } from "@/lib/ai/client-search-history";
-import {
-  formatFormgridRowSummary,
-  getFormgridClientName,
-} from "@/lib/google-sheets/formgrid-dates";
-import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
-import { listAllClients } from "@/lib/google-sheets/service";
+import { listAllClients } from "@/lib/clients/store";
 
 export type ClientTableSample = {
   rowIndex: number;
@@ -25,18 +17,9 @@ export type ClientsDiagnosticReport = {
   lastSyncedAt: string;
   searchColumns: {
     clients: string[];
-    newClients: string[];
   };
   recentSearches: ClientSearchHistoryEntry[];
   clientsTable: {
-    label: string;
-    count: number;
-    source: string;
-    spreadsheetEnv: string;
-    gidEnv: string;
-    samples: ClientTableSample[];
-  };
-  newClientsTable: {
     label: string;
     count: number;
     source: string;
@@ -48,16 +31,12 @@ export type ClientsDiagnosticReport = {
 
 export async function getClientsDiagnosticReport(): Promise<ClientsDiagnosticReport> {
   const syncedAt = new Date().toISOString();
-  const [{ items, source: clientsSource }, formgrid] = await Promise.all([
-    listAllClients(),
-    getFormgridLeadsTable(),
-  ]);
+  const { items, source: clientsSource } = await listAllClients();
 
   return {
     lastSyncedAt: syncedAt,
     searchColumns: {
       clients: [...SEARCH_COLUMNS_CLIENTS],
-      newClients: [...SEARCH_COLUMNS_NEW_CLIENTS],
     },
     recentSearches: getRecentClientSearches(),
     clientsTable: {
@@ -82,18 +61,6 @@ export async function getClientsDiagnosticReport(): Promise<ClientsDiagnosticRep
         ]
           .filter(Boolean)
           .join(" · "),
-      })),
-    },
-    newClientsTable: {
-      label: "Новые клиенты",
-      count: formgrid.rows.length,
-      source: formgrid.source,
-      spreadsheetEnv: "GOOGLE_SHEETS_FORMGRID_SPREADSHEET_ID",
-      gidEnv: "GOOGLE_SHEETS_FORMGRID_GID",
-      samples: formgrid.rows.slice(0, 3).map((row, index) => ({
-        rowIndex: index + 2,
-        name: getFormgridClientName(formgrid.headers, row),
-        details: formatFormgridRowSummary(formgrid.headers, row),
       })),
     },
   };

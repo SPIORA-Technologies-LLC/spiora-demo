@@ -18,8 +18,6 @@
     "settings": "Settings",
     "notifications": "Notifications",
     "logout": "Logout",
-    "crmLeads": "Lead Review",
-    "newFormgridClients": "Formgrid Clients",
     "meetingRecordings": "Meeting Recordings",
     "relocation": "Electronic resources",
     "finance": "Finance"
@@ -236,8 +234,6 @@
     "platformStats": {
       "clients": "Client base",
       "clientsHint": "in CRM",
-      "newForms": "New applications",
-      "newFormsHint": "last 7 days",
       "consultations": "Active consultations",
       "consultationsHint": "this week",
       "aiRequests": "AI requests",
@@ -870,12 +866,10 @@
       "calendar": "Calendar",
       "documents": "Documents",
       "clientContext": "Client Context",
-      "formgrid": "Formgrid",
-      "formgridCount": "Formgrid ({count})",
+      "intake": "Questionnaire intake",
+      "intakeCount": "Questionnaire intake ({count})",
       "emigrantDesk": "Emigrant Desk",
-      "emigrantDeskCount": "Emigrant Desk ({count})",
-      "emigrantDrive": "Emigrant Drive",
-      "newClients": "New clients"
+      "emigrantDeskCount": "Emigrant Desk ({count})"
     },
     "demo": {
       "badge": "Demo response",
@@ -891,7 +885,6 @@
       "row": "row {index}: {name}",
       "searchFields": "Search fields",
       "clientsColumns": "Clients:",
-      "newClientsColumns": "New clients:",
       "recentSearches": "Recent searches (up to 5)",
       "recentSearchesEmpty": "No searches yet — run a query in the chat.",
       "matchLine": "{name} — {source}, row {row}",
@@ -934,7 +927,6 @@
       "teamFocusToday": "**Team focus for today**\n\n1. **Clear overdue tasks** — 3 items need attention (visa review, booking, CRM notes).\n2. **Client consultations** — prep for Anna Kowalska video call at 11:00.\n3. **Pipeline hygiene** — update statuses for clients in \"Consultation\" and \"Documents\" stages.\n4. **Calendar** — 4 meetings today; confirm video links for external calls.\n\n**Capacity note:** Daniel Cooper and Emma Wilson have the heaviest client loads today.",
       "activeClients": "**Active clients overview**\n\n- **Total in CRM:** 12 demo clients\n- **In progress:** John Carter (Portugal), Anna Kowalska (Croatia)\n- **Consultation:** Sofia Martins (Spain)\n- **Documents:** Anna Kowalska\n- **New:** Marco Rossi (Slovakia)\n\nMost activity this week: consultation follow-ups and document collection.",
       "knowledgeBase": "**Database — program comparison (excerpt)**\n\n| Program | Stay | Income proof | Processing |\n|---------|------|--------------|------------|\n| Croatia Digital Nomad | 12 months | Remote contract | ~45 days |\n| Portugal D7 | Renewable | Passive/remote income | ~60 days |\n| Spain remote work | 1 year | Employment/contract | ~30 days |\n\nAsk for a specific country or client scenario for a tailored checklist.",
-      "formgridOverview": "**Formgrid applications**\n\n- **Recent submissions:** 3 this week\n- **Latest:** Marco Rossi — Slovakia direction, status \"New\"\n- **Pending review:** 1 application awaiting manager assignment\n\nOpen the Electronic resources section for full survey details or ask about a specific applicant.",
       "generic": "I reviewed the available demo context (CRM, tasks, calendar, and Database). Here is what stands out:\n\n- **4 clients** need attention this week (consultation or documents stage).\n- **3 tasks** are overdue.\n- **4 meetings** are scheduled in the next two days.\n\nTry a suggested prompt for a detailed breakdown, or ask about a specific client by name."
     }
   },
@@ -1428,26 +1420,12 @@
         "audience": "For clients",
         "actionLabel": "Open demo form"
       },
-      "croatia-formgrid-results": {
-        "title": "Demo form results",
-        "description": "Placeholder admin view for submitted demo forms.",
-        "country": "Demo region",
-        "audience": "Admins",
-        "actionLabel": "Open demo results"
-      },
       "croatia-emigrant-app": {
         "title": "Demo desk application",
         "description": "Placeholder internal case management app for demos.",
         "country": "Demo region",
         "audience": "For team",
         "actionLabel": "Open demo app"
-      },
-      "croatia-formgrid-sheet": {
-        "title": "Demo responses sheet",
-        "description": "Placeholder spreadsheet for demo form responses.",
-        "country": "Demo region",
-        "audience": "Form data",
-        "actionLabel": "Open demo sheet"
       },
       "emigrant-sk-website": {
         "title": "Demo public website",

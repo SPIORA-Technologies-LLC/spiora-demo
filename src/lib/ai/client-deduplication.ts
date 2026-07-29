@@ -224,7 +224,6 @@ function pickFirstNonEmpty(values: string[]): string {
 export function mergeClientContexts(parts: ClientContext[]): MergedClientContext {
   const sorted = [...parts].sort((a, b) => b.score - a.score);
   const crm = parts.find((part) => part.source === "clients");
-  const formgrid = parts.find((part) => part.source === "new_clients");
   const primary = crm ?? sorted[0];
 
   const mergeReasons = new Set<string>();
@@ -234,9 +233,6 @@ export function mergeClientContexts(parts: ClientContext[]): MergedClientContext
       check.reasons.forEach((reason) => mergeReasons.add(reason));
     }
   }
-
-  const statusCrm = crm?.status ?? "";
-  const statusForm = formgrid?.status ?? "";
 
   const conflicts: MergedClientContext["conflicts"] = [];
   for (const key of ["email", "phone", "status"] as const) {
@@ -261,15 +257,14 @@ export function mergeClientContexts(parts: ClientContext[]): MergedClientContext
     email: pickFirstNonEmpty(parts.map((part) => part.email)),
     country: pickFirstNonEmpty(parts.map((part) => part.country)),
     direction: pickFirstNonEmpty(parts.map((part) => part.direction)),
-    status: pickFirstNonEmpty([statusCrm, statusForm]),
+    status: pickFirstNonEmpty(parts.map((part) => part.status)),
     manager: pickFirstNonEmpty(parts.map((part) => part.manager)),
     lastActivity: pickFirstNonEmpty(parts.map((part) => part.lastActivity)),
     surveyData: parts
-      .filter((part) => part.source === "new_clients")
       .map((part) => part.surveyData)
       .filter(Boolean)
       .join("\n\n"),
-    crmData: crm?.surveyData ?? "",
+    crmData: crm?.surveyData ?? primary.surveyData ?? "",
     score: Math.max(...parts.map((part) => part.score)),
     matchedFields: [...new Set(parts.flatMap((part) => part.matchedFields))],
     mergeReasons: [...mergeReasons],

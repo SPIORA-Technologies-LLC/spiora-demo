@@ -1,12 +1,9 @@
 import "server-only";
 
-export type ClientStatusSource = "clients" | "new_clients" | "merged";
+export type ClientStatusSource = "clients" | "merged";
 
 /** Внутреннее значение «статус не задан» в модели Client. */
 export const CLIENT_STATUS_UNSPECIFIED = "—";
-
-/** Статус для анкет Formgrid (не путать с источником «Новые клиенты»). */
-export const FORMGRID_LEAD_STATUS = "Новая заявка";
 
 const DEBUG_STATUS_NAMES = /акунов|алмастанова/i;
 
@@ -62,18 +59,11 @@ export function sanitizeCrmClientStatus(status: string | undefined): string {
   return trimmed;
 }
 
-/**
- * Статус для AI CONTEXT / Claude.
- * Источник «Новые клиенты» ≠ статус «Новая заявка».
- */
+/** Статус для AI CONTEXT / Claude. */
 export function formatStatusForAiContext(
   status: string,
-  source: ClientStatusSource,
+  _source: ClientStatusSource = "clients",
 ): string {
-  if (source === "new_clients") {
-    return status.trim() || FORMGRID_LEAD_STATUS;
-  }
-
   const normalized = sanitizeCrmClientStatus(status);
   if (normalized === CLIENT_STATUS_UNSPECIFIED) {
     return "Статус не указан";

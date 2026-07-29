@@ -2,8 +2,6 @@ import "server-only";
 
 import { isClientStatus } from "@/i18n/statuses";
 import { parseFlexibleDate } from "@/lib/analytics/dates";
-import { countFormgridRowsSince } from "@/lib/google-sheets/formgrid-dates";
-import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
 import { listAllClients } from "@/lib/clients/store";
 import {
   AI_REQUEST_STATS_DAYS,
@@ -12,22 +10,13 @@ import {
 
 export type DashboardStats = {
   clientsTotal: number;
-  newFormgridLeads7Days: number;
   activeConsultations: number;
   aiRequestsThisMonth: number;
   sources: {
     clients: "postgresql" | "google_sheets" | "demo";
-    formgrid: "google_sheets" | "unavailable";
     ai: "workspace_chats" | "unavailable";
   };
 };
-
-function daysAgo(days: number): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() - days);
-  return d;
-}
 
 function startOfWeekMonday(now = new Date()): Date {
   const d = new Date(now);
@@ -40,24 +29,6 @@ function startOfWeekMonday(now = new Date()): Date {
 
 function isOnOrAfter(date: Date, boundary: Date): boolean {
   return date >= boundary;
-}
-
-async function countFormgridLeadsLastDays(
-  days: number,
-): Promise<{ count: number; source: "google_sheets" | "unavailable" }> {
-  try {
-    const table = await getFormgridLeadsTable();
-    if (table.rows.length === 0) {
-      return { count: 0, source: "google_sheets" };
-    }
-
-    const since = daysAgo(days);
-    const count = countFormgridRowsSince(table.headers, table.rows, since);
-
-    return { count, source: "google_sheets" };
-  } catch {
-    return { count: 0, source: "unavailable" };
-  }
 }
 
 function countConsultationsThisWeek(
@@ -84,24 +55,18 @@ function countConsultationsThisWeek(
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const [{ items: clients, source: clientsSource }, formgridResult, aiCount] =
+  const [{ items: clients, source: clientsSource }, aiCount] =
     await Promise.all([
       listAllClients(),
-      countFormgridLeadsLastDays(7),
       countAiUserMessagesLastDaysForDashboard(AI_REQUEST_STATS_DAYS),
     ]);
 
   return {
     clientsTotal: clients.length,
-    newFormgridLeads7Days: formgridResult.count,
     activeConsultations: countConsultationsThisWeek(clients),
     aiRequestsThisMonth: aiCount,
     sources: {
       clients: clientsSource,
-      formgrid:
-        formgridResult.source === "google_sheets"
-          ? "google_sheets"
-          : "unavailable",
       ai: "workspace_chats",
     },
   };

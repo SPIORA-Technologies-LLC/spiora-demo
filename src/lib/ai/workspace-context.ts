@@ -3,31 +3,17 @@ import {
   formatClientForAi,
   formatClientOneLiner,
 } from "@/lib/ai/format-client";
+import { buildIntakeContextForAi } from "@/lib/ai/intake-context";
 import {
   scorePersonName,
   tokenizeSearchQuery,
 } from "@/lib/ai/name-matching";
 import type { WorkspaceQueryIntent } from "@/lib/ai/query-intent";
+import { listClients } from "@/lib/clients/store";
 import { buildEmigrantDeskContextForAi } from "@/lib/emigrant-desk/clients";
-import {
-  getEmigrantDriveTextForAi,
-  getKnowledgeBaseTextForAi,
-} from "@/lib/google-drive/kb-text";
-import { isGoogleDriveEmigrantConfigured } from "@/lib/google-sheets/auth";
-import {
-  formatFormgridRowSummary,
-  sortFormgridRowsByDate,
-} from "@/lib/google-sheets/formgrid-dates";
-import {
-  formatFormgridRowDetailed,
-  scoreFormgridRow,
-} from "@/lib/google-sheets/formgrid-lookup";
-import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
-import { listClients } from "@/lib/google-sheets/service";
 import type { Client } from "@/lib/google-sheets/types";
 
 const MAX_CLIENTS = 300;
-const MAX_FORMGRID_ROWS = 80;
 
 function clientLine(client: Client, detailed = false): string {
   if (detailed) {
@@ -75,7 +61,7 @@ export async function buildClientsContextForAi(
       ["букинг", "адрес", "паспорт"].some((k) => t.includes(k) || k.includes(t)),
     );
   const lines = selected.map((c) => clientLine(c, detailed || selected.length <= 3));
-  const header = `Клиенты (таблица «Клиенты Хорватия», источник: ${source}): всего ${total}, в контексте ${lines.length}.`;
+  const header = `Клиенты (источник: ${source}): всего ${total}, в контексте ${lines.length}.`;
 
   return {
     text: `${header}\n${lines.join("\n")}`,
@@ -83,66 +69,15 @@ export async function buildClientsContextForAi(
   };
 }
 
-export async function buildFormgridContextForAi(
-  userQuery: string,
-): Promise<{ text: string; rowCount: number }> {
-  const table = await getFormgridLeadsTable();
-  const { headers, rows, source } = table;
-
-  if (rows.length === 0) {
-    return {
-      text: "Новые клиенты из анкеты (Formgrid): данных нет или нет доступа к таблице.",
-      rowCount: 0,
-    };
-  }
-
-  const tokens = tokenizeSearchQuery(userQuery);
-  const sorted = sortFormgridRowsByDate(headers, rows);
-  const recent = sorted.slice(0, MAX_FORMGRID_ROWS);
-
-  const scored = recent.map((row, index) => ({
-    row,
-    index,
-    score: scoreFormgridRow(headers, row, tokens),
-  }));
-
-  const selected =
-    tokens.length === 0
-      ? scored.slice(0, 15)
-      : scored.some((r) => r.score > 0)
-        ? scored.filter((r) => r.score > 0).slice(0, 8)
-        : scored.slice(0, 12);
-
-  const detailed =
-    tokens.length > 0 ||
-    selected.length <= 3 ||
-    /паспорт|email|телефон|почт/i.test(userQuery);
-
-  const body = selected
-    .map(({ row }) =>
-      detailed
-        ? formatFormgridRowDetailed(headers, row)
-        : formatFormgridRowSummary(headers, row),
-    )
-    .join("\n");
-
-  return {
-    text: `Новые клиенты из анкеты Formgrid (источник: ${source}): всего ${rows.length}, в контексте ${selected.length}. Сортировка: сначала самые свежие по дате подачи (Submitted At).\n${body}`,
-    rowCount: rows.length,
-  };
-}
-
 export type WorkspaceContextBundle = {
   clientsText: string;
+  intakeText: string;
   emigrantDeskText: string;
-  emigrantDriveText: string;
-  formgridText: string;
   knowledgeBaseText: string;
   meta: {
     clientsTotal: number;
+    intakeTotal: number;
     emigrantDeskTotal: number;
-    emigrantDriveConfigured: boolean;
-    formgridRows: number;
   };
 };
 
@@ -151,38 +86,29 @@ export async function buildWorkspaceContext(
   intent: WorkspaceQueryIntent,
   locale: AppLocale = "en",
 ): Promise<WorkspaceContextBundle> {
-  const [clients, emigrantDesk, emigrantDriveText, formgrid, knowledgeBaseText] =
-    await Promise.all([
+  const [clients, intake, emigrantDesk, knowledgeBaseText] = await Promise.all([
     intent.needsClients
       ? buildClientsContextForAi(userMessage)
       : Promise.resolve({ text: "Клиенты: не запрашивались.", count: 0 }),
+    intent.needsIntake
+      ? buildIntakeContextForAi(userMessage, locale)
+      : Promise.resolve({
+          text: "Новые клиенты из анкеты: не запрашивались.",
+          count: 0,
+        }),
     intent.needsEmigrantDesk
       ? buildEmigrantDeskContextForAi(userMessage)
       : Promise.resolve({
           text: "Emigrant Croatia Desk: не запрашивался.",
           count: 0,
         }),
-    intent.needsEmigrantDrive
-      ? getEmigrantDriveTextForAi(userMessage, {
-          full: intent.needsEmigrantDriveFullText,
-        })
-      : Promise.resolve(
-          "Папка ЭМИГРАНТ (Google Drive): для этого вопроса не подключалась.",
-        ),
-    intent.needsFormgrid
-      ? buildFormgridContextForAi(userMessage)
-      : Promise.resolve({
-          text: "Formgrid: не запрашивался.",
-          rowCount: 0,
-        }),
     intent.needsKb
-      ? getKnowledgeBaseTextForAi(
-          userMessage,
-          {
-            full: intent.needsKbFullText,
-          },
-          locale,
-        )
+      ? (async () => {
+          const { getKnowledgeBaseTextForAi } = await import(
+            "@/lib/knowledge-base/knowledge-base-service"
+          );
+          return getKnowledgeBaseTextForAi(locale, userMessage);
+        })()
       : Promise.resolve(
           "База данных: для этого вопроса не подключалась (ускорение ответа).",
         ),
@@ -190,16 +116,13 @@ export async function buildWorkspaceContext(
 
   return {
     clientsText: clients.text,
+    intakeText: intake.text,
     emigrantDeskText: emigrantDesk.text,
-    emigrantDriveText,
-    formgridText: formgrid.text,
     knowledgeBaseText,
     meta: {
       clientsTotal: clients.count,
+      intakeTotal: intake.count,
       emigrantDeskTotal: emigrantDesk.count,
-      emigrantDriveConfigured:
-        intent.needsEmigrantDrive && isGoogleDriveEmigrantConfigured(),
-      formgridRows: formgrid.rowCount,
     },
   };
 }

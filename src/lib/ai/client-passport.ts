@@ -103,31 +103,16 @@ export function formatPassportPairDebug(
   left: ClientContext,
   right: ClientContext,
 ): string[] {
-  const crm =
-    left.source === "clients"
-      ? left
-      : right.source === "clients"
-        ? right
-        : null;
-  const formgrid =
-    left.source === "new_clients"
-      ? left
-      : right.source === "new_clients"
-        ? right
-        : null;
-
-  if (!crm || !formgrid) return [];
-
-  const crmPassport = extractPassportFromClientRecord(crm);
-  const formPassport = extractPassportFromClientRecord(formgrid);
-  const match = passportsMatch(crmPassport, formPassport);
+  const leftPassport = extractPassportFromClientRecord(left);
+  const rightPassport = extractPassportFromClientRecord(right);
+  const match = passportsMatch(leftPassport, rightPassport);
 
   return [
-    `**Passport cross-check: ${crm.name} (CRM) ↔ ${formgrid.name} (Formgrid)**`,
-    `- CRM passport raw: ${crmPassport.raw || "—"}`,
-    `- Formgrid passport raw: ${formPassport.raw || "—"}`,
-    `- CRM passport normalized: ${crmPassport.normalized || "—"}`,
-    `- Formgrid passport normalized: ${formPassport.normalized || "—"}`,
+    `**Passport cross-check: ${left.name} ↔ ${right.name}**`,
+    `- ${left.sourceLabel} passport raw: ${leftPassport.raw || "—"}`,
+    `- ${right.sourceLabel} passport raw: ${rightPassport.raw || "—"}`,
+    `- ${left.sourceLabel} passport normalized: ${leftPassport.normalized || "—"}`,
+    `- ${right.sourceLabel} passport normalized: ${rightPassport.normalized || "—"}`,
     `- Passport match: **${match ? "true" : "false"}**`,
   ];
 }

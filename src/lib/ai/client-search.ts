@@ -76,18 +76,6 @@ export const SEARCH_COLUMNS_CLIENTS = [
   "морфология (леммы + транслит)",
 ];
 
-export const SEARCH_COLUMNS_NEW_CLIENTS = [
-  "ФИО (кириллица)",
-  "ФИО (латиница)",
-  "normalized_full_name / normalized_surname / normalized_first_name",
-  "телефон",
-  "email",
-  "telegram",
-  "паспорт",
-  "все поля анкеты",
-  "морфология (леммы + транслит)",
-];
-
 function levenshtein(a: string, b: string): number {
   if (a === b) return 0;
   if (!a.length) return b.length;
@@ -206,8 +194,27 @@ const QUERY_STOP_WORDS = new Set([
   "клиентом",
   "анкет",
   "анкета",
+  "анкеты",
+  "анкету",
   "заявк",
   "заявка",
+  "заявки",
+  "заявку",
+  "заявок",
+  "новая",
+  "новые",
+  "новую",
+  "новых",
+  "неделя",
+  "недели",
+  "неделю",
+  "неделе",
+  "сегодня",
+  "вчера",
+  "завтра",
+  "суммируй",
+  "intake",
+  "questionnaire",
   "данные",
   "данных",
   "информация",

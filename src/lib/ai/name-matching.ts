@@ -17,6 +17,8 @@ const STOP_WORDS = new Set([
   "проверить",
   "покажи",
   "найди",
+  "суммируй",
+  "суммировать",
   "какой",
   "какая",
   "какие",
@@ -57,15 +59,36 @@ const STOP_WORDS = new Set([
   "этот",
   "эта",
   "эти",
+  "новая",
+  "новые",
+  "новую",
+  "новых",
+  "анкета",
+  "анкеты",
+  "анкету",
+  "анкет",
+  "заявка",
+  "заявки",
+  "заявку",
+  "заявок",
+  "неделя",
+  "недели",
+  "неделю",
+  "неделе",
+  "сегодня",
+  "вчера",
+  "завтра",
+  "intake",
+  "questionnaire",
 ]);
 
 /** Имя/фамилия из естественных фраз («клиентка Калашниковой», «по Ирине …»). */
 export function extractPersonNameTokens(query: string): string[] {
-  return extractSearchTokens(query);
+  return extractSearchTokens(query).filter((token) => !STOP_WORDS.has(token));
 }
 
 export function tokenizeSearchQuery(query: string): string[] {
-  return extractSearchTokens(query);
+  return extractSearchTokens(query).filter((token) => !STOP_WORDS.has(token));
 }
 
 function commonPrefixLength(a: string, b: string): number {

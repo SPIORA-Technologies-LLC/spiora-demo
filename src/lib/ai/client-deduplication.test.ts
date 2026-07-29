@@ -11,7 +11,7 @@ function ctx(
   partial: Partial<ClientContext> & Pick<ClientContext, "source" | "name">,
 ): ClientContext {
   return {
-    sourceLabel: partial.source === "clients" ? "Клиенты" : "Новые клиенты",
+    sourceLabel: "Клиенты",
     rowIndex: partial.rowIndex ?? 1,
     phone: "",
     email: "",
@@ -29,55 +29,60 @@ function ctx(
 }
 
 describe("areClientsDuplicates", () => {
-  it("strong merge on matching passport across CRM and Formgrid", () => {
-    const crm = ctx({
+  it("strong merge on matching passport across CRM rows", () => {
+    const left = ctx({
       source: "clients",
       name: "Давлятова Лола",
+      rowIndex: 1,
       debugRow: { passport: "762762123" },
     });
-    const fg = ctx({
-      source: "new_clients",
+    const right = ctx({
+      source: "clients",
       name: "Давлятова Лола Бахтиёровна",
       rowIndex: 5,
       debugRow: { "8. № заграничного паспорта": "762762123" },
     });
 
-    const check = areClientsDuplicates(crm, fg);
+    const check = areClientsDuplicates(left, right);
     assert.equal(check.isDuplicate, true);
     assert.ok(check.reasons.includes("passport"));
     assert.equal(check.isPossibleDuplicate, false);
   });
 
   it("does not strong-merge same name with different passports", () => {
-    const crm = ctx({
+    const left = ctx({
       source: "clients",
       name: "Смола Александра",
+      rowIndex: 1,
       debugRow: { passport: "111111111" },
     });
-    const fg = ctx({
-      source: "new_clients",
+    const right = ctx({
+      source: "clients",
       name: "Смола Александра Сергеевна",
+      rowIndex: 2,
       debugRow: { "8. № заграничного паспорта": "222222222" },
     });
 
-    const check = areClientsDuplicates(crm, fg);
+    const check = areClientsDuplicates(left, right);
     assert.equal(check.isDuplicate, false);
     assert.equal(check.isPossibleDuplicate, false);
   });
 
   it("marks FIO-only match as possible duplicate when passport missing", () => {
-    const crm = ctx({
+    const left = ctx({
       source: "clients",
       name: "Белкания Автандил",
+      rowIndex: 1,
       debugRow: {},
     });
-    const fg = ctx({
-      source: "new_clients",
+    const right = ctx({
+      source: "clients",
       name: "Белкания Автандил Яношевич",
+      rowIndex: 2,
       debugRow: {},
     });
 
-    const check = areClientsDuplicates(crm, fg);
+    const check = areClientsDuplicates(left, right);
     assert.equal(check.isDuplicate, false);
     assert.equal(check.isPossibleDuplicate, true);
     assert.ok(check.possibleReasons.length > 0);
@@ -89,10 +94,11 @@ describe("groupDuplicateClients", () => {
     const crmPassport = ctx({
       source: "clients",
       name: "Лысогорская Лейсан",
+      rowIndex: 1,
       debugRow: { passport: "555555555" },
     });
-    const fgPassport = ctx({
-      source: "new_clients",
+    const crmPassportDup = ctx({
+      source: "clients",
       name: "Лысогорская Лейсан Ильдусовна",
       rowIndex: 3,
       debugRow: { "8. № заграничного паспорта": "555555555" },
@@ -103,8 +109,8 @@ describe("groupDuplicateClients", () => {
       rowIndex: 10,
       debugRow: {},
     });
-    const fgFioOnly = ctx({
-      source: "new_clients",
+    const crmFioOnlyDup = ctx({
+      source: "clients",
       name: "Белкания Автандил Яношевич",
       rowIndex: 11,
       debugRow: {},
@@ -112,9 +118,9 @@ describe("groupDuplicateClients", () => {
 
     const groups = groupDuplicateClients([
       crmPassport,
-      fgPassport,
+      crmPassportDup,
       crmFioOnly,
-      fgFioOnly,
+      crmFioOnlyDup,
     ]);
     const mergedGroups = groups.filter((g) => g.parts.length > 1);
 
@@ -124,9 +130,9 @@ describe("groupDuplicateClients", () => {
 
     const resolved = deduplicateToResolved([
       crmPassport,
-      fgPassport,
+      crmPassportDup,
       crmFioOnly,
-      fgFioOnly,
+      crmFioOnlyDup,
     ]);
     assert.equal(resolved.length, 3);
   });

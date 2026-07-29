@@ -101,7 +101,6 @@ export function containsDiagnosticMetadata(value: unknown): boolean {
     "recentSearches",
     "searchColumns",
     "clientsTable",
-    "newClientsTable",
     "matchedFields",
   ];
 

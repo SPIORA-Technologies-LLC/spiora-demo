@@ -54,12 +54,10 @@ export type WorkspaceSourceKey =
   | "calendar"
   | "documents"
   | "clientContext"
-  | "formgrid"
-  | "formgridCount"
+  | "intake"
+  | "intakeCount"
   | "emigrantDesk"
-  | "emigrantDeskCount"
-  | "emigrantDrive"
-  | "newClients";
+  | "emigrantDeskCount";
 
 export function translateWorkspaceSource(
   locale: AppLocale,
@@ -69,8 +67,8 @@ export function translateWorkspaceSource(
   if (key === "crmCount" && typeof count === "number") {
     return translate(locale, "sources.crmCount").replace("{count}", String(count));
   }
-  if (key === "formgridCount" && typeof count === "number") {
-    return translate(locale, "sources.formgridCount").replace(
+  if (key === "intakeCount" && typeof count === "number") {
+    return translate(locale, "sources.intakeCount").replace(
       "{count}",
       String(count),
     );

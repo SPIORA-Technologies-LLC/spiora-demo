@@ -7,10 +7,6 @@ import {
   redactDebugRow,
   REDACTED_VALUE,
 } from "@/lib/ai/context-redaction";
-import {
-  formatFormgridRowDetailed,
-  getFormgridClientFields,
-} from "@/lib/google-sheets/formgrid-lookup";
 import { findPossibleDuplicatePairs } from "@/lib/ai/client-deduplication";
 import {
   buildCrmClientDebugRow,
@@ -21,11 +17,9 @@ import {
   formatMergedClientContextWithSources,
   formatSingleClientContextWithSources,
 } from "@/lib/ai/client-field-sources";
-import { formatPassportPairDebug } from "@/lib/ai/client-passport";
 
 export type { EmigrantDeskContextSlice, FormatClientContextOptions } from "@/lib/ai/client-field-sources";
 import {
-  FORMGRID_LEAD_STATUS,
   formatStatusForAiContext,
   logClientStatusDebug,
   sanitizeCrmClientStatus,
@@ -40,10 +34,10 @@ export type ClientDebugScanHit = {
   matchedToken: string;
 };
 
-export type ClientContextSource = "clients" | "new_clients" | "merged";
+export type ClientContextSource = "clients" | "merged";
 
 export type ClientContext = {
-  source: "clients" | "new_clients";
+  source: "clients";
   sourceLabel: string;
   rowIndex: number;
   name: string;
@@ -124,44 +118,6 @@ export function crmClientToContext(
     score,
     matchedFields,
     debugRow: buildCrmClientDebugRow(client),
-  };
-}
-
-export function formgridRowToContext(
-  headers: string[],
-  row: string[],
-  rowIndex: number,
-  score: number,
-  matchedFields: string[] = [],
-): ClientContext {
-  const fields = getFormgridClientFields(headers, row);
-  const debugRow: Record<string, string> = {};
-  headers.forEach((header, index) => {
-    const value = (row[index] ?? "").trim();
-    if (header && value && !isSensitiveFieldKey(header)) {
-      debugRow[header.slice(0, 80)] = value.slice(0, 200);
-    }
-  });
-  if (fields.passport) {
-    debugRow.passport = fields.passport;
-  }
-
-  return {
-    source: "new_clients",
-    sourceLabel: "Новые клиенты",
-    rowIndex: rowIndex + 2,
-    name: fields.name,
-    phone: fields.phone,
-    email: fields.email,
-    country: "",
-    direction: "Хорватия",
-    status: FORMGRID_LEAD_STATUS,
-    manager: "",
-    lastActivity: fields.submittedAt,
-    surveyData: formatFormgridRowDetailed(headers, row),
-    score,
-    matchedFields,
-    debugRow,
   };
 }
 
@@ -355,17 +311,6 @@ export function formatDebugClientReply(
       );
     }
     lines.push("");
-  }
-
-  const crmCandidates = clients.filter((c) => c.source === "clients");
-  const formgridCandidates = clients.filter((c) => c.source === "new_clients");
-  if (crmCandidates.length > 0 && formgridCandidates.length > 0) {
-    lines.push("**Passport cross-source debug:**");
-    for (const crm of crmCandidates) {
-      for (const fg of formgridCandidates) {
-        lines.push(...formatPassportPairDebug(crm, fg), "");
-      }
-    }
   }
 
   lines.push(

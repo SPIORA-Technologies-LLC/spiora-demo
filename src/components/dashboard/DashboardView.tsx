@@ -66,13 +66,7 @@ export async function DashboardView({
       value: String(dashboardStats.clientsTotal),
       hint: t("platformStats.clientsHint"),
       icon: "fa-solid fa-users",
-    },
-    {
-      id: "newForms",
-      label: t("platformStats.newForms"),
-      value: String(dashboardStats.newFormgridLeads7Days),
-      hint: t("platformStats.newFormsHint"),
-      icon: "fa-solid fa-clipboard-list",
+      href: "/clients",
     },
     {
       id: "consultations",

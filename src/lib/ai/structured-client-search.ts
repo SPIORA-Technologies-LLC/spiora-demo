@@ -2,7 +2,6 @@ import "server-only";
 
 import {
   crmClientToContext,
-  formgridRowToContext,
   type ClientContext,
   type ResolvedClientContext,
 } from "@/lib/ai/client-context";
@@ -24,8 +23,7 @@ import {
   SCORE_VIABLE,
   type SearchField,
 } from "@/lib/ai/client-search";
-import { getFormgridLeadsTable } from "@/lib/google-sheets/formgrid-leads";
-import { listAllClients } from "@/lib/google-sheets/service";
+import { listAllClients } from "@/lib/clients/store";
 import type { Client } from "@/lib/google-sheets/types";
 
 const STRUCTURED_MIN_SCORE = 35;
@@ -87,35 +85,6 @@ function crmClientToSearchFields(client: Client): SearchField[] {
   pushField(fields, "страна", client.country, "other");
   pushField(fields, "направление", client.direction, "other");
   pushField(fields, "статус", client.status, "other");
-  return fields;
-}
-
-function formgridRowToSearchFields(headers: string[], row: string[]): SearchField[] {
-  const fields: SearchField[] = [];
-  const nameValues: string[] = [];
-
-  headers.forEach((header, index) => {
-    const value = (row[index] ?? "").trim();
-    if (!header || !value) return;
-
-    let category: SearchField["category"] = "other";
-    if (/фио|name|имя|фамил|surname|first|last/i.test(header)) {
-      category = "name";
-      nameValues.push(value);
-    } else if (/телефон|phone|whatsapp|telegram|тел\./i.test(header)) {
-      category = "phone";
-    } else if (/email|почта|e-mail|электронн|mail/i.test(header)) {
-      category = "email";
-    } else if (/коммент|замет|note|comment/i.test(header)) {
-      category = "notes";
-    } else if (/дата|date|подач|одобр/i.test(header)) {
-      category = "date";
-    }
-
-    fields.push({ label: header, value, category });
-  });
-
-  appendNormalizedNameFields(fields, ...nameValues);
   return fields;
 }
 
@@ -406,20 +375,6 @@ export async function executeStructuredClientSearch(
       matches.push(crmClientToContext(client, score, matchedFields));
     }
   }
-
-  const formgrid = await getFormgridLeadsTable();
-  formgrid.rows.forEach((row, index) => {
-    const fields = formgridRowToSearchFields(formgrid.headers, row);
-    const { score, matchedFields, passed } = scoreRecordAgainstIntent(
-      fields,
-      effectiveIntent,
-    );
-    if (passed && score >= STRUCTURED_MIN_SCORE) {
-      matches.push(
-        formgridRowToContext(formgrid.headers, row, index, score, matchedFields),
-      );
-    }
-  });
 
   const sorted = matches.sort((a, b) => {
     if (effectiveIntent.recentActivity) {

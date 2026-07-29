@@ -11,7 +11,7 @@ function ctx(
   partial: Partial<ClientContext> & Pick<ClientContext, "source" | "name">,
 ): ClientContext {
   return {
-    sourceLabel: partial.source === "clients" ? "Клиенты" : "Новые клиенты",
+    sourceLabel: "Клиенты",
     rowIndex: 1,
     phone: "",
     email: "",
@@ -53,9 +53,9 @@ describe("extractPassportFromClientRecord", () => {
     assert.equal(extracted.normalized, "777063956");
   });
 
-  it("reads passport from Formgrid header key", () => {
+  it("reads passport from alternate passport header key", () => {
     const record = ctx({
-      source: "new_clients",
+      source: "clients",
       name: "Петров",
       debugRow: {
         "8. № заграничного паспорта": "№ 123456789",
@@ -82,7 +82,7 @@ describe("passportsMatch", () => {
       debugRow: { passport: "77 7063956" },
     });
     const right = ctx({
-      source: "new_clients",
+      source: "clients",
       name: "B",
       debugRow: { "8. № заграничного паспорта": "№777063956" },
     });
@@ -96,7 +96,7 @@ describe("passportsMatch", () => {
       debugRow: { passport: "1111111" },
     });
     const right = ctx({
-      source: "new_clients",
+      source: "clients",
       name: "B",
       debugRow: { passport: "2222222" },
     });

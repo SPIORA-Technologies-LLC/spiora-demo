@@ -11,21 +11,19 @@ describe("detectWorkspaceIntent — Emigrant Desk decoupled from CRM", () => {
     const intent = detectWorkspaceIntent(query);
     assert.equal(intent.needsClients, true);
     assert.equal(intent.needsEmigrantDesk, false);
-    assert.equal(intent.needsEmigrantDrive, false);
     assert.equal(intent.fastClientLookup, true);
     assert.equal(isPassportNumberLookupQuery(query), true);
   });
 
-  it("does not treat passport number question as Emigrant Drive lookup", () => {
+  it("does not treat passport number question as document scan lookup", () => {
     const query = "какой номер паспорта у Белоус Екатерина";
     assert.equal(isPassportNumberLookupQuery(query), true);
     const intent = detectWorkspaceIntent(query);
-    assert.equal(intent.needsEmigrantDrive, false);
+    assert.equal(intent.needsClients, true);
+    assert.equal(intent.fastClientLookup, true);
   });
 
-  it("still loads Drive for passport scan requests", () => {
-    const intent = detectWorkspaceIntent("найди скан паспорта у Белоус");
-    assert.equal(intent.needsEmigrantDrive, true);
+  it("does not treat passport scan request as CRM passport number lookup", () => {
     assert.equal(isPassportNumberLookupQuery("найди скан паспорта у Белоус"), false);
   });
 
@@ -41,10 +39,22 @@ describe("detectWorkspaceIntent — Emigrant Desk decoupled from CRM", () => {
     assert.equal(intent.needsEmigrantDesk, true);
   });
 
+  it("loads intake for questionnaire / new application queries", () => {
+    const intent = detectWorkspaceIntent("Покажи новые анкеты за неделю");
+    assert.equal(intent.needsIntake, true);
+    assert.equal(intent.needsClients, false);
+  });
+
+  it("loads intake detail intent for named questionnaire", () => {
+    const intent = detectWorkspaceIntent("Суммируй анкету Белоус Екатерина");
+    assert.equal(intent.needsIntake, true);
+  });
+
   it("loads clients for booking lookup without Desk", () => {
     const intent = detectWorkspaceIntent("адрес букинга у Белоус Екатерина");
     assert.equal(intent.needsClients, true);
     assert.equal(intent.fastClientLookup, true);
     assert.equal(intent.needsEmigrantDesk, false);
+    assert.equal(intent.needsIntake, false);
   });
 });

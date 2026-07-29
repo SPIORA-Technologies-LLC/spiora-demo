@@ -1,6 +1,5 @@
 export type RelocationResourceType =
   | "form"
-  | "formgrid"
   | "app"
   | "sheets"
   | "website"
@@ -24,14 +23,6 @@ export const CROATIA_DIGITAL_NOMAD_FORM_URL =
 
 export const EMIGRANT_CROATIA_APP_URL =
   "https://example.com/demo/relocation/desk-admin";
-
-export const CROATIA_FORMGRID_RESULTS_URL =
-  "https://example.com/demo/relocation/formgrid-results";
-
-export const CROATIA_FORMGRID_SHEET_URL =
-  "https://example.com/demo/relocation/formgrid-sheet";
-
-export const CROATIA_FORMGRID_SHEET_ID = "DEMO_FORMGRID_SHEET_ID";
 
 export const CROATIA_CLIENTS_SHEET_URL =
   "https://example.com/demo/relocation/clients-sheet";
@@ -58,22 +49,10 @@ const CROATIA_RESOURCES: RelocationResource[] = [
     icon: "fa-solid fa-clipboard-list",
   },
   {
-    id: "croatia-formgrid-results",
-    type: "formgrid",
-    url: CROATIA_FORMGRID_RESULTS_URL,
-    icon: "fa-solid fa-chart-column",
-  },
-  {
     id: "croatia-emigrant-app",
     type: "app",
     url: EMIGRANT_CROATIA_APP_URL,
     icon: "fa-solid fa-laptop",
-  },
-  {
-    id: "croatia-formgrid-sheet",
-    type: "sheets",
-    url: CROATIA_FORMGRID_SHEET_URL,
-    icon: "fa-solid fa-table",
   },
 ];
 

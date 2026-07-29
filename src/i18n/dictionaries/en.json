@@ -2422,6 +2422,23 @@
       "documents": "Documents",
       "status": "Status"
     },
+    "assistant": {
+      "title": "Ask Spiora",
+      "subtitle": "Answers come only from the shared client knowledge base — programs, requirements, and guides prepared for clients.",
+      "newChat": "New chat",
+      "history": "Chats",
+      "untitled": "New chat",
+      "deleteChat": "Delete chat",
+      "loading": "Loading assistant…",
+      "empty": "Ask about visas, documents, or program requirements.",
+      "thinking": "Looking up the knowledge base…",
+      "sources": "Sources",
+      "placeholder": "Ask a question…",
+      "send": "Send",
+      "errors": {
+        "generic": "Something went wrong. Please try again."
+      }
+    },
     "placeholders": {
       "questionnaire": "Questionnaire available",
       "documents": "Coming soon",

@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { ClientPortalAssistant } from "@/components/client-portal/ClientPortalAssistant";
 import { ClientPortalHome } from "@/components/client-portal/ClientPortalHome";
 import { getClientSession } from "@/lib/client-portal/session";
 import { getClientQuestionnaire } from "@/lib/client-portal/questionnaire";
@@ -67,6 +68,7 @@ export default async function ClientHomePage() {
           : t("placeholders.status"),
       }}
       logoutLabel={t("logout")}
+      assistantSlot={<ClientPortalAssistant />}
     />
   );
 }

@@ -76,7 +76,7 @@ const OFF_TOPIC_RULES: OffTopicRule[] = [
 ];
 
 const WORK_TOPIC_HINTS =
-  /\b(client|crm|task|calendar|document|meeting|booking|emigrant|intake|questionnaire|клиент|задач|календар|документ|встреч|букинг|анкет|эмигрант|заявк)\b/iu;
+  /\b(client|crm|task|calendar|document|meeting|booking|emigrant|intake|questionnaire|visa|immigration|nomad|passport|клиент|задач|календар|документ|встреч|букинг|анкет|эмигрант|заявк|виза|внж|паспорт|релокац|переезд|программ)\b/iu;
 
 export function detectOffTopicCategory(query: string): OffTopicCategory | null {
   const trimmed = query.trim();

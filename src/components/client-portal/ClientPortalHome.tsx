@@ -1,7 +1,13 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
 import {
@@ -29,6 +35,7 @@ type Props = {
     status: string;
   };
   logoutLabel: string;
+  assistantSlot?: ReactNode;
 };
 
 function formatHistoryDate(iso: string, locale: string) {
@@ -54,6 +61,7 @@ export function ClientPortalHome({
   initialCase,
   placeholders,
   logoutLabel,
+  assistantSlot,
 }: Props) {
   const t = useTranslations("clientPortal");
   const locale = useLocale() as "en" | "ru";
@@ -182,6 +190,8 @@ export function ClientPortalHome({
             </p>
           </article>
         </section>
+
+        {assistantSlot}
       </main>
     </div>
   );

@@ -371,6 +371,7 @@
     },
     "table": {
       "name": "Name",
+      "status": "Status",
       "citizenship": "Citizenship",
       "passport": "Passport number",
       "email": "Email",

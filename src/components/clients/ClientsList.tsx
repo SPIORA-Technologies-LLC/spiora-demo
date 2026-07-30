@@ -20,6 +20,7 @@ const PAGE_SIZE = 25;
 
 const TABLE_COLUMNS = [
   "name",
+  "status",
   "citizenship",
   "passport",
   "email",
@@ -296,6 +297,11 @@ export function ClientsList() {
                       >
                         {client.name}
                       </Link>
+                    </td>
+                    <td>
+                      <span className={styles.tableStatus}>
+                        {translateClientStatus(locale, client.status)}
+                      </span>
                     </td>
                     <td>{client.citizenship ?? "—"}</td>
                     <td>{client.passportNumber ?? client.id}</td>

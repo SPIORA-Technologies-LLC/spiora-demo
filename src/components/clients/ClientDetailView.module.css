@@ -5,6 +5,13 @@
   min-width: 0;
 }
 
+.overviewStack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  min-width: 0;
+}
+
 .back {
   display: inline-flex;
   align-items: center;

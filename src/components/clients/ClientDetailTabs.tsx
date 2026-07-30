@@ -67,7 +67,7 @@ function ClientDetailTabsInner({
         <i className="fa-solid fa-arrow-left" aria-hidden /> {t("backToList")}
       </Link>
 
-      <div hidden={!showOverview}>
+      <div className={styles.overviewStack} hidden={!showOverview}>
         {overviewContent}
         {editChrome?.active ? (
           <div className={editStyles.pageActions}>

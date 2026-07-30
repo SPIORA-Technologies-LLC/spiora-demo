@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import type { AppLocale } from "@/i18n/config";
 import { translateClientStatus } from "@/i18n/statuses";
 import type { Client } from "@/lib/google-sheets/types";
 import { Card } from "@/components/ui/Card";
+import { Toast, type ToastMessage } from "@/components/tasks/Toast";
 import { useOptionalClientUnsavedChanges } from "./ClientUnsavedChanges";
 import styles from "./ClientDetailView.module.css";
 import editStyles from "./ClientCrmProfile.module.css";
@@ -105,11 +106,13 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
   const [baseline, setBaseline] = useState<FormState>(() => toForm(client));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toast, setToast] = useState<ToastMessage | null>(null);
   const [viewClient, setViewClient] = useState(client);
   const formRef = useRef(form);
   formRef.current = form;
   const viewClientRef = useRef(viewClient);
   viewClientRef.current = viewClient;
+  const clearToast = useCallback(() => setToast(null), []);
 
   const statusLabel = useMemo(
     () => translateClientStatus(locale, viewClient.status),
@@ -189,6 +192,7 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
       setBaseline(toForm(data.client));
       setForm(toForm(data.client));
       setEditing(false);
+      setToast({ text: tEdit("saved"), type: "success" });
       router.refresh();
       return true;
     } catch {
@@ -604,6 +608,7 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
           </div>
         )}
       </Card>
+      <Toast message={toast} onClose={clearToast} />
     </>
   );
 }

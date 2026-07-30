@@ -101,10 +101,9 @@ export function ClientQuestionnaireSubmittedPage({
           <p className={styles.hint}>
             {t("thankYou.submittedAt")}: {formatDate(when, locale)}
           </p>
-          <p className={styles.hint}>{t("thankYou.next")}</p>
-          <p>
-            <a href="/client">{t("thankYou.backHome")}</a>
-          </p>
+          <a className={styles.primaryBtn} href="/client">
+            {t("thankYou.backHome")}
+          </a>
         </section>
       </main>
     </div>

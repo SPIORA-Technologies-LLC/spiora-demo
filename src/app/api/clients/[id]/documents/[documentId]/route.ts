@@ -4,6 +4,7 @@ import {
   archiveClientDocumentMetadata,
   ClientDocumentsAccessError,
   ClientDocumentsStorageError,
+  getClientDocumentFile,
   updateClientDocumentMetadata,
 } from "@/lib/clients/client-documents-store";
 import { ClientDataValidationError } from "@/lib/clients/client-data-validation";
@@ -12,7 +13,10 @@ import { getRequestLocale, translateApiMessage } from "@/i18n/api-messages";
 
 type RouteContext = { params: Promise<{ id: string; documentId: string }> };
 
-function handleError(error: unknown, locale: Awaited<ReturnType<typeof getRequestLocale>>) {
+function handleError(
+  error: unknown,
+  locale: Awaited<ReturnType<typeof getRequestLocale>>,
+) {
   if (error instanceof ClientDocumentsAccessError) {
     return NextResponse.json(
       { error: translateApiMessage(locale, "forbidden") },
@@ -41,6 +45,46 @@ function handleError(error: unknown, locale: Awaited<ReturnType<typeof getReques
     { error: translateApiMessage(locale, "updateClientFailed") },
     { status: 500 },
   );
+}
+
+export async function GET(request: Request, context: RouteContext) {
+  const session = await getSession();
+  const locale = await getRequestLocale();
+  if (!session) {
+    return NextResponse.json(
+      { error: translateApiMessage(locale, "unauthorized") },
+      { status: 401 },
+    );
+  }
+
+  const { id, documentId } = await context.params;
+
+  try {
+    const file = await getClientDocumentFile(id, documentId, session);
+    if (!file) {
+      return NextResponse.json(
+        { error: translateApiMessage(locale, "notFound") },
+        { status: 404 },
+      );
+    }
+
+    const inline = new URL(request.url).searchParams.get("inline") === "1";
+    const safeAsciiName = file.fileName
+      .replace(/[^\x20-\x7E]/g, "_")
+      .replace(/["\\]/g, "_");
+    const utf8Name = encodeURIComponent(file.fileName);
+
+    return new NextResponse(new Uint8Array(file.bytes), {
+      status: 200,
+      headers: {
+        "Content-Type": file.mimeType || "application/octet-stream",
+        "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${safeAsciiName}"; filename*=UTF-8''${utf8Name}`,
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (error) {
+    return handleError(error, locale);
+  }
 }
 
 export async function PATCH(request: Request, context: RouteContext) {

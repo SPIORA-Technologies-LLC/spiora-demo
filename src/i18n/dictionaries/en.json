@@ -457,7 +457,13 @@
     },
     "documents": {
       "empty": "No documents yet",
-      "uploadHint": "File upload will be enabled after Storage setup."
+      "upload": "Attach document",
+      "uploading": "Uploading…",
+      "uploadFailed": "Could not upload the document",
+      "uploadFormats": "PDF, Word, Excel, images, ZIP — up to 25 MB",
+      "open": "Open",
+      "download": "Download",
+      "fileUnavailable": "File is unavailable (demo metadata without a stored file)."
     },
     "documentTypes": {
       "passport_copy": "Passport Copy",

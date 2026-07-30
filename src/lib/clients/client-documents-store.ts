@@ -21,6 +21,14 @@ import {
 } from "./client-data-validation";
 import * as sbClients from "@/lib/supabase/clients-repo";
 import * as sbDocuments from "@/lib/supabase/client-documents-repo";
+import {
+  CLIENT_DOCUMENT_BUCKET,
+  deleteClientDocumentBytes,
+  newClientDocumentStoragePath,
+  readClientDocumentBytes,
+  uploadClientDocumentBytes,
+} from "@/lib/clients/client-document-storage";
+import { isAllowedCaseEmployeeDocument } from "@/lib/client-portal/case-employee-document-formats";
 
 const CREATE_ID_MAX_ATTEMPTS = 5;
 
@@ -196,6 +204,146 @@ export async function updateClientDocumentMetadata(
     console.error("[client-documents-store] update failed", error);
     throw new ClientDocumentsStorageError("Failed to update document metadata");
   }
+}
+
+export async function uploadClientDocumentFile(
+  clientExternalId: string,
+  user: SessionUser,
+  input: {
+    fileName: string;
+    mimeType: string;
+    sizeBytes: number;
+    bytes: Buffer;
+    documentType?: string;
+  },
+): Promise<ClientDocumentPublic> {
+  if (!canCreateClientDocument(user)) {
+    throw new ClientDocumentsAccessError("Forbidden");
+  }
+
+  if (!isCrmPostgresPrimary()) {
+    throw new ClientDocumentsStorageError("CRM PostgreSQL is not configured");
+  }
+
+  const allowed = isAllowedCaseEmployeeDocument(
+    input.fileName,
+    input.mimeType,
+    input.sizeBytes,
+  );
+  if (!allowed.ok) {
+    throw new ClientDataValidationError(
+      allowed.reason === "too_large" ? "File too large" : "Unsupported file type",
+    );
+  }
+
+  const ctx = await resolveClientContext(clientExternalId);
+  if (!ctx) {
+    throw new ClientDocumentsStorageError("Client not found");
+  }
+
+  const storagePath = newClientDocumentStoragePath(
+    ctx.clientExternalId,
+    input.fileName,
+  );
+
+  let storageProvider: "supabase" | "local";
+  try {
+    storageProvider = await uploadClientDocumentBytes(
+      storagePath,
+      input.bytes,
+      allowed.mimeType,
+    );
+  } catch (error) {
+    console.error("[client-documents-store] upload failed", error);
+    throw new ClientDocumentsStorageError(
+      error instanceof Error ? error.message : "Failed to upload document",
+    );
+  }
+
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= CREATE_ID_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      const externalId = await sbDocuments.sbNextDemoDocumentExternalId();
+      const record = await sbDocuments.sbInsertClientDocument({
+        clientUuid: ctx.clientUuid,
+        clientExternalId: ctx.clientExternalId,
+        externalId,
+        fileName: input.fileName,
+        originalFileName: input.fileName,
+        mimeType: allowed.mimeType,
+        sizeBytes: input.sizeBytes,
+        documentType: input.documentType || "other",
+        status: "uploaded",
+        storageProvider,
+        storageBucket: CLIENT_DOCUMENT_BUCKET,
+        storagePath,
+        uploadedByUserId: user.id,
+        uploadedByName: user.name,
+        isDemo: false,
+      });
+      return sbDocuments.toPublicDocument(record);
+    } catch (error) {
+      lastError = error;
+      if (
+        sbDocuments.isDuplicateDocumentExternalIdError(error) &&
+        attempt < CREATE_ID_MAX_ATTEMPTS
+      ) {
+        continue;
+      }
+      await deleteClientDocumentBytes(storagePath);
+      if (sbDocuments.isDuplicateDocumentExternalIdError(error)) {
+        throw new ClientDocumentsConflictError(
+          "Document identifier conflict after retries",
+        );
+      }
+      console.error("[client-documents-store] create after upload failed", error);
+      throw new ClientDocumentsStorageError("Failed to create document metadata");
+    }
+  }
+
+  await deleteClientDocumentBytes(storagePath);
+  console.error("[client-documents-store] create after upload failed", lastError);
+  throw new ClientDocumentsStorageError("Failed to create document metadata");
+}
+
+export async function getClientDocumentFile(
+  clientExternalId: string,
+  documentId: string,
+  user: SessionUser,
+): Promise<{
+  fileName: string;
+  mimeType: string;
+  bytes: Buffer;
+} | null> {
+  if (!canReadClientDocuments(user)) {
+    throw new ClientDocumentsAccessError("Forbidden");
+  }
+
+  if (!isCrmPostgresPrimary()) {
+    throw new ClientDocumentsStorageError("CRM PostgreSQL is not configured");
+  }
+
+  const ctx = await resolveClientContext(clientExternalId);
+  if (!ctx) return null;
+
+  const ref = await sbDocuments.sbGetClientDocumentStorageRef(
+    documentId,
+    ctx.clientUuid,
+  );
+  if (!ref || !ref.storagePath) return null;
+  if (ref.storageProvider === "demo") return null;
+
+  const bytes = await readClientDocumentBytes(
+    ref.storageBucket || CLIENT_DOCUMENT_BUCKET,
+    ref.storagePath,
+  );
+  if (!bytes) return null;
+
+  return {
+    fileName: ref.fileName,
+    mimeType: ref.mimeType || "application/octet-stream",
+    bytes,
+  };
 }
 
 export async function archiveClientDocumentMetadata(

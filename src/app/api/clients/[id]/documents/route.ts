@@ -6,6 +6,7 @@ import {
   ClientDocumentsStorageError,
   createClientDocumentMetadata,
   listClientDocuments,
+  uploadClientDocumentFile,
 } from "@/lib/clients/client-documents-store";
 import { ClientDataValidationError } from "@/lib/clients/client-data-validation";
 import { mapDocumentPublicToClientDocument } from "@/lib/clients/client-data-map";
@@ -40,6 +41,7 @@ function handleError(error: unknown, locale: Awaited<ReturnType<typeof getReques
           locale,
           status === 404 ? "notFound" : "crmStorageUnavailable",
         ),
+        message: error.message,
       },
       { status },
     );
@@ -84,9 +86,47 @@ export async function POST(request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const body = (await request.json()) as Record<string, unknown>;
+  const contentType = request.headers.get("content-type") ?? "";
 
   try {
+    if (contentType.includes("multipart/form-data")) {
+      const form = await request.formData();
+      const file = form.get("file");
+      const documentTypeRaw = form.get("documentType");
+      const documentType =
+        typeof documentTypeRaw === "string" && documentTypeRaw.trim()
+          ? documentTypeRaw.trim()
+          : "other";
+
+      if (!(file instanceof Blob) || typeof (file as File).arrayBuffer !== "function") {
+        return NextResponse.json({ error: "INVALID_BODY" }, { status: 400 });
+      }
+
+      const fileName =
+        "name" in file && typeof (file as File).name === "string"
+          ? (file as File).name
+          : "upload.bin";
+      const mimeType =
+        typeof file.type === "string" && file.type
+          ? file.type
+          : "application/octet-stream";
+      const bytes = Buffer.from(await file.arrayBuffer());
+
+      const document = await uploadClientDocumentFile(id, session, {
+        fileName,
+        mimeType,
+        sizeBytes: file.size,
+        bytes,
+        documentType,
+      });
+
+      return NextResponse.json(
+        { document: mapDocumentPublicToClientDocument(document) },
+        { status: 201 },
+      );
+    }
+
+    const body = (await request.json()) as Record<string, unknown>;
     const document = await createClientDocumentMetadata(id, session, {
       fileName: typeof body.fileName === "string" ? body.fileName : "",
       originalFileName:

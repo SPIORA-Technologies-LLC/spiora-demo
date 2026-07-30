@@ -457,7 +457,13 @@
     },
     "documents": {
       "empty": "Документов пока нет",
-      "uploadHint": "Загрузка файлов будет доступна после настройки Storage."
+      "upload": "Прикрепить документ",
+      "uploading": "Загрузка…",
+      "uploadFailed": "Не удалось загрузить документ",
+      "uploadFormats": "PDF, Word, Excel, изображения, ZIP — до 25 МБ",
+      "open": "Открыть",
+      "download": "Скачать",
+      "fileUnavailable": "Файл недоступен для открытия (демо-запись без файла)."
     },
     "documentTypes": {
       "passport_copy": "Копия паспорта",

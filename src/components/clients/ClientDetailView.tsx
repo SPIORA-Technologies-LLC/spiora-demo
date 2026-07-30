@@ -54,7 +54,11 @@ export async function ClientDetailView({
 
         <Card className={styles.panel}>
           <h2 className={styles.panelTitle}>{t("documents")}</h2>
-          <ClientDocuments documents={documents} source={detail.source} />
+          <ClientDocuments
+            clientId={client.id}
+            documents={documents}
+            source={detail.source}
+          />
         </Card>
       </div>
 

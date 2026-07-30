@@ -35,7 +35,7 @@ type DocumentRow = {
 };
 
 function storageState(provider: string): ClientDocumentPublic["storageState"] {
-  if (provider === "supabase") return "supabase";
+  if (provider === "supabase" || provider === "local") return "supabase";
   if (provider === "demo") return "demo";
   return "pending";
 }
@@ -109,6 +109,47 @@ export async function sbGetClientDocumentById(
 
   if (error) throw error;
   return data ? mapDocument(data as DocumentRow, clientExternalId) : null;
+}
+
+export type ClientDocumentStorageRef = {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  storageProvider: string;
+  storageBucket: string;
+  storagePath: string;
+};
+
+export async function sbGetClientDocumentStorageRef(
+  documentId: string,
+  clientUuid: string,
+): Promise<ClientDocumentStorageRef | null> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("client_documents")
+    .select("id, file_name, mime_type, storage_provider, storage_bucket, storage_path")
+    .eq("id", documentId)
+    .eq("client_uuid", clientUuid)
+    .is("archived_at", null)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+  const row = data as {
+    id: string;
+    file_name: string;
+    mime_type: string;
+    storage_provider: string;
+    storage_bucket: string;
+    storage_path: string;
+  };
+  return {
+    id: row.id,
+    fileName: row.file_name,
+    mimeType: row.mime_type,
+    storageProvider: row.storage_provider,
+    storageBucket: row.storage_bucket,
+    storagePath: row.storage_path,
+  };
 }
 
 export async function sbInsertClientDocument(input: {

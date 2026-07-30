@@ -50,23 +50,11 @@ export default async function ClientHomePage() {
       email={session.email}
       title={title}
       brand={t("brand")}
-      statusLabel={
-        questionnaireSubmitted
-          ? t("home.applicationReceived")
-          : t("home.inviteAccepted")
-      }
       questionnaireStatus={questionnaireStatus}
       questionnaireProgress={questionnaireProgress}
       questionnaireUnavailable={questionnaireUnavailable}
       questionnaireSubmitted={questionnaireSubmitted}
       initialCase={caseData}
-      placeholders={{
-        questionnaire: t("placeholders.questionnaire"),
-        documents: t("placeholders.documents"),
-        status: questionnaireSubmitted
-          ? t("home.applicationReceived")
-          : t("placeholders.status"),
-      }}
       logoutLabel={t("logout")}
       assistantSlot={<ClientPortalAssistant />}
     />

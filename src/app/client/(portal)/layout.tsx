@@ -1,5 +1,20 @@
+import { Cormorant_Garamond, Manrope } from "next/font/google";
 import { redirect } from "next/navigation";
 import { getClientSession } from "@/lib/client-portal/session";
+
+const portalDisplay = Cormorant_Garamond({
+  subsets: ["latin", "cyrillic"],
+  weight: ["500", "600", "700"],
+  variable: "--portal-font-display",
+  display: "swap",
+});
+
+const portalSans = Manrope({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--portal-font-sans",
+  display: "swap",
+});
 
 export default async function ClientPortalLayout({
   children,
@@ -11,5 +26,9 @@ export default async function ClientPortalLayout({
     redirect("/client/login");
   }
 
-  return <>{children}</>;
+  return (
+    <div className={`${portalDisplay.variable} ${portalSans.variable}`}>
+      {children}
+    </div>
+  );
 }

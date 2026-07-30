@@ -23,17 +23,11 @@ type Props = {
   email: string;
   title: string;
   brand: string;
-  statusLabel: string;
   questionnaireStatus: string;
   questionnaireProgress: string;
   questionnaireUnavailable?: boolean;
   questionnaireSubmitted?: boolean;
   initialCase: ClientCasePublic | null;
-  placeholders: {
-    questionnaire: string;
-    documents: string;
-    status: string;
-  };
   logoutLabel: string;
   assistantSlot?: ReactNode;
 };
@@ -53,13 +47,11 @@ export function ClientPortalHome({
   email,
   title,
   brand,
-  statusLabel,
   questionnaireStatus,
   questionnaireProgress,
   questionnaireUnavailable = false,
   questionnaireSubmitted = false,
   initialCase,
-  placeholders,
   logoutLabel,
   assistantSlot,
 }: Props) {
@@ -124,11 +116,6 @@ export function ClientPortalHome({
       <main className={styles.main}>
         <section className={styles.heroCard}>
           <h1 className={styles.title}>{title}</h1>
-          <p className={styles.status}>
-            {currentStatus
-              ? `${t("home.applicationStatus")}: ${caseStatusLabel(currentStatus, locale)}`
-              : statusLabel}
-          </p>
           <p className={styles.hint}>{t("home.hint")}</p>
         </section>
 
@@ -136,11 +123,13 @@ export function ClientPortalHome({
           <section className={styles.heroCard}>
             <h2 className={styles.processTitle}>{t("process.title")}</h2>
             <p className={styles.status}>
-              ✔ {caseStatusLabel(caseData.currentStatus, locale)}
+              <span className={styles.statusDot} aria-hidden />
+              {caseStatusLabel(caseData.currentStatus, locale)}
             </p>
             {nextStep ? (
-              <p className={styles.hint}>
-                {t("process.nextStep")}: {caseStatusLabel(nextStep, locale)}
+              <p className={styles.processNext}>
+                {t("process.nextStep")}:{" "}
+                <strong>{caseStatusLabel(nextStep, locale)}</strong>
               </p>
             ) : null}
             {caseData.history.length > 0 ? (
@@ -168,26 +157,14 @@ export function ClientPortalHome({
 
         <section className={styles.grid}>
           <article className={styles.placeholder}>
-            <h2>{t("nav.questionnaire")}</h2>
-            <p>{questionnaireStatus}</p>
+            <p className={styles.tileEyebrow}>{t("nav.questionnaire")}</p>
+            <h2>{questionnaireStatus}</h2>
             <p>{questionnaireProgress}</p>
             {questionnaireUnavailable ? null : questionnaireSubmitted ? (
               <a href="/client/questionnaire/submitted">{t("home.viewApplicationStatus")}</a>
             ) : (
               <a href="/client/questionnaire">{t("home.continueQuestionnaire")}</a>
             )}
-          </article>
-          <article className={styles.placeholder}>
-            <h2>{t("nav.documents")}</h2>
-            <p>{placeholders.documents}</p>
-          </article>
-          <article className={styles.placeholder}>
-            <h2>{t("nav.status")}</h2>
-            <p>
-              {currentStatus
-                ? caseStatusLabel(currentStatus, locale)
-                : placeholders.status}
-            </p>
           </article>
         </section>
 

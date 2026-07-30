@@ -372,8 +372,11 @@
       "appPassword": "App password",
       "partner": "Partner source",
       "contract": "Contract",
-      "notes": "Notes"
+      "notes": "Notes",
+      "actions": "Actions"
     },
+    "delete": "Delete",
+    "confirmDelete": "Remove client “{name}” from the client base? The card will disappear from the list.",
     "empty": {
       "loading": "Loading clients…",
       "notFound": "No clients found"
@@ -403,7 +406,8 @@
       }
     },
     "errors": {
-      "loadFailed": "Failed to load clients"
+      "loadFailed": "Failed to load clients",
+      "deleteFailed": "Failed to delete client"
     },
     "detail": {
       "sectionTitle": "Client base · {name}",

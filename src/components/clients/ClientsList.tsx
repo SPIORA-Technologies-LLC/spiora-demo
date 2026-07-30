@@ -10,6 +10,8 @@ import {
   type Client,
   type ClientsListResult,
 } from "@/lib/google-sheets/types";
+import { canArchiveClient } from "@/lib/clients/permissions";
+import { useSession } from "@/components/providers/SessionProvider";
 import { Card } from "@/components/ui/Card";
 import { CreateClientModal } from "./CreateClientModal";
 import styles from "./ClientsList.module.css";
@@ -36,17 +38,22 @@ const TABLE_COLUMNS = [
 
 export function ClientsList() {
   const router = useRouter();
+  const session = useSession();
   const locale = useLocale() as AppLocale;
   const t = useTranslations("clients");
+  const canDelete = canArchiveClient(session);
   const [clients, setClients] = useState<Client[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [source, setSource] = useState<ClientsListResult["source"]>("demo");
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const [search, setSearch] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
+
+  const columnCount = TABLE_COLUMNS.length + (canDelete ? 1 : 0);
 
   const queryString = useMemo(() => {
     const params = new URLSearchParams();
@@ -101,6 +108,29 @@ export function ClientsList() {
     },
     [router],
   );
+
+  async function onDeleteClient(client: Client) {
+    if (!canDelete) return;
+    if (!window.confirm(t("confirmDelete", { name: client.name }))) {
+      return;
+    }
+    setDeletingId(client.id);
+    setLoadError(false);
+    try {
+      const res = await fetch(`/api/clients/${encodeURIComponent(client.id)}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("delete failed");
+      setClients((prev) => prev.filter((row) => row.id !== client.id));
+      setTotal((prev) => Math.max(0, prev - 1));
+      void fetchClients();
+    } catch {
+      setLoadError(true);
+      window.alert(t("errors.deleteFailed"));
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   const renderMobileCards = () => {
     if (loading) {
@@ -159,6 +189,21 @@ export function ClientsList() {
                   </div>
                 ) : null}
               </dl>
+              {canDelete ? (
+                <div className={styles.clientCardActions}>
+                  <button
+                    type="button"
+                    className={styles.intakeDeleteBtn}
+                    disabled={deletingId === client.id}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      void onDeleteClient(client);
+                    }}
+                  >
+                    {deletingId === client.id ? "…" : t("delete")}
+                  </button>
+                </div>
+              ) : null}
             </article>
           </li>
         ))}
@@ -211,18 +256,19 @@ export function ClientsList() {
                 {TABLE_COLUMNS.map((column) => (
                   <th key={column}>{t(`table.${column}`)}</th>
                 ))}
+                {canDelete ? <th>{t("table.actions")}</th> : null}
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={TABLE_COLUMNS.length} className={styles.empty}>
+                  <td colSpan={columnCount} className={styles.empty}>
                     {t("empty.loading")}
                   </td>
                 </tr>
               ) : clients.length === 0 ? (
                 <tr>
-                  <td colSpan={TABLE_COLUMNS.length} className={styles.empty}>
+                  <td colSpan={columnCount} className={styles.empty}>
                     {loadError ? t("errors.loadFailed") : t("empty.notFound")}
                   </td>
                 </tr>
@@ -265,6 +311,21 @@ export function ClientsList() {
                     <td>{client.partnerName ?? "—"}</td>
                     <td>{client.contract ?? "—"}</td>
                     <td>{client.notes ?? "—"}</td>
+                    {canDelete ? (
+                      <td>
+                        <button
+                          type="button"
+                          className={styles.intakeDeleteBtn}
+                          disabled={deletingId === client.id}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            void onDeleteClient(client);
+                          }}
+                        >
+                          {deletingId === client.id ? "…" : t("delete")}
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                 ))
               )}

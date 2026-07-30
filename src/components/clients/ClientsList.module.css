@@ -289,6 +289,12 @@
   cursor: default;
 }
 
+.clientCardActions {
+  margin-top: 0.85rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 .pagination {
   display: flex;
   align-items: center;

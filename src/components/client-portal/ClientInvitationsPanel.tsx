@@ -350,9 +350,7 @@ export function ClientInvitationsPanel() {
                     maxLength={80}
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Ольга"
                   />
-                  <span className={styles.muted}>{t("fields.firstNameHint")}</span>
                 </label>
                 <label>
                   {t("fields.assignee")}

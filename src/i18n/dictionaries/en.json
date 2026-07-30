@@ -2368,7 +2368,6 @@
     "fields": {
       "email": "Email",
       "firstName": "Client first name",
-      "firstNameHint": "Used in the welcome greeting after sign-in (e.g. Welcome, Olga!)",
       "assignee": "Assigned employee",
       "assigneePlaceholder": "Select employee",
       "locale": "Questionnaire language",

@@ -22,6 +22,20 @@
   line-height: 1.45;
 }
 
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  max-width: 40rem;
+}
+
+.statusHint {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
 .primaryBtn {
   border: 0;
   border-radius: 12px;

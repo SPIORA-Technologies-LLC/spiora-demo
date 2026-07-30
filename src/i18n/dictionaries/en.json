@@ -317,7 +317,7 @@
   },
   "clients": {
     "title": "Client base",
-    "subtitle": "Client data is stored in PostgreSQL (CRM)",
+    "subtitle": "Client cards: all details, statuses, and process history",
     "search": {
       "placeholder": "Search: name, passport…"
     },
@@ -2339,6 +2339,7 @@
   "clientInvitations": {
     "title": "Client invitations",
     "subtitle": "Create a one-time link for the Spiora Client app. Copy the link and send it to the client.",
+    "statusHint": "Pending — the client has not opened the link yet. Accepted — the client has signed in to the portal.",
     "inviteClient": "Invite client",
     "loading": "Loading invitations…",
     "empty": "No invitations yet",

@@ -410,6 +410,14 @@
         "country": "Country of residence",
         "direction": "Destination"
       },
+      "unsaved": {
+        "title": "Save your changes?",
+        "body": "You have unsaved edits. Save them before leaving this page?",
+        "save": "Save",
+        "discard": "Don't save",
+        "stay": "Cancel",
+        "saving": "Saving…"
+      },
       "errors": {
         "nameRequired": "Enter full name",
         "saveFailed": "Could not save changes",

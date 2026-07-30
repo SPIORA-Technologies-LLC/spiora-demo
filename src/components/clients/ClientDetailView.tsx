@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import type { ClientDetail } from "@/lib/google-sheets/types";
 import { Card } from "@/components/ui/Card";
@@ -25,10 +24,6 @@ export async function ClientDetailView({
 
   const overviewContent = (
     <>
-      <Link href="/clients" className={styles.back}>
-        <i className="fa-solid fa-arrow-left" aria-hidden /> {t("backToList")}
-      </Link>
-
       <ClientCrmProfile
         client={client}
         source={detail.source}

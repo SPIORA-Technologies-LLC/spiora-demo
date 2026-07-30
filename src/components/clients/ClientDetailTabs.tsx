@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { type ReactNode, useState } from "react";
 import { ClientFinancePanel } from "@/components/finance/ClientFinancePanel";
+import { ClientUnsavedChangesProvider, useClientUnsavedChanges } from "./ClientUnsavedChanges";
 import styles from "./ClientDetailView.module.css";
 
 type Tab = "overview" | "finance";
@@ -14,47 +16,62 @@ type ClientDetailTabsProps = {
   overviewContent: ReactNode;
 };
 
-export function ClientDetailTabs({
+function ClientDetailTabsInner({
   clientId,
   canViewFinance,
   initialTab,
   overviewContent,
 }: ClientDetailTabsProps) {
   const t = useTranslations("clients.detail");
+  const { requestLeave } = useClientUnsavedChanges();
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
-  if (!canViewFinance) {
-    return <>{overviewContent}</>;
+  function switchTab(next: Tab) {
+    if (next === activeTab) return;
+    requestLeave(() => setActiveTab(next));
   }
 
   return (
     <>
-      <div className={styles.tabs} role="tablist">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "overview"}
-          className={`${styles.tab} ${activeTab === "overview" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("overview")}
-        >
-          {t("tabOverview")}
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === "finance"}
-          className={`${styles.tab} ${activeTab === "finance" ? styles.tabActive : ""}`}
-          onClick={() => setActiveTab("finance")}
-        >
-          {t("tabFinance")}
-        </button>
-      </div>
+      {canViewFinance ? (
+        <div className={styles.tabs} role="tablist">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "overview"}
+            className={`${styles.tab} ${activeTab === "overview" ? styles.tabActive : ""}`}
+            onClick={() => switchTab("overview")}
+          >
+            {t("tabOverview")}
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === "finance"}
+            className={`${styles.tab} ${activeTab === "finance" ? styles.tabActive : ""}`}
+            onClick={() => switchTab("finance")}
+          >
+            {t("tabFinance")}
+          </button>
+        </div>
+      ) : null}
 
-      {activeTab === "overview" ? (
-        overviewContent
-      ) : (
+      <Link href="/clients" className={styles.back}>
+        <i className="fa-solid fa-arrow-left" aria-hidden /> {t("backToList")}
+      </Link>
+
+      <div hidden={canViewFinance && activeTab !== "overview"}>{overviewContent}</div>
+      {canViewFinance && activeTab === "finance" ? (
         <ClientFinancePanel clientId={clientId} />
-      )}
+      ) : null}
     </>
+  );
+}
+
+export function ClientDetailTabs(props: ClientDetailTabsProps) {
+  return (
+    <ClientUnsavedChangesProvider>
+      <ClientDetailTabsInner {...props} />
+    </ClientUnsavedChangesProvider>
   );
 }

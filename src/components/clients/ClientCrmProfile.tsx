@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import type { AppLocale } from "@/i18n/config";
 import { translateClientStatus } from "@/i18n/statuses";
 import type { Client } from "@/lib/google-sheets/types";
 import { Card } from "@/components/ui/Card";
+import { useOptionalClientUnsavedChanges } from "./ClientUnsavedChanges";
 import styles from "./ClientDetailView.module.css";
 import editStyles from "./ClientCrmProfile.module.css";
 
@@ -79,6 +80,11 @@ function toForm(client: Client): FormState {
   };
 }
 
+function formsEqual(a: FormState, b: FormState): boolean {
+  const keys = Object.keys(a) as Array<keyof FormState>;
+  return keys.every((key) => a[key] === b[key]);
+}
+
 function display(value: string | undefined | null): string {
   const trimmed = value?.trim();
   return trimmed && trimmed !== "—" ? trimmed : "—";
@@ -91,88 +97,125 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
   const tCreate = useTranslations("clients.create");
   const locale = useLocale() as AppLocale;
   const router = useRouter();
+  const unsaved = useOptionalClientUnsavedChanges();
   const canEdit = source === "postgresql";
 
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState<FormState>(() => toForm(client));
+  const [baseline, setBaseline] = useState<FormState>(() => toForm(client));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [viewClient, setViewClient] = useState(client);
+  const formRef = useRef(form);
+  formRef.current = form;
+  const viewClientRef = useRef(viewClient);
+  viewClientRef.current = viewClient;
 
   const statusLabel = useMemo(
     () => translateClientStatus(locale, viewClient.status),
     [locale, viewClient.status],
   );
 
+  const isDirty = editing && !formsEqual(form, baseline);
+
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   function startEdit() {
-    setForm(toForm(viewClient));
+    const next = toForm(viewClient);
+    setForm(next);
+    setBaseline(next);
     setError(null);
     setEditing(true);
   }
 
   function cancelEdit() {
-    setForm(toForm(viewClient));
+    const next = toForm(viewClientRef.current);
+    setForm(next);
+    setBaseline(next);
     setError(null);
     setEditing(false);
   }
 
-  async function onSave(event: FormEvent) {
-    event.preventDefault();
+  async function saveCurrentForm(): Promise<boolean> {
+    const current = formRef.current;
     setError(null);
-    if (!form.name.trim()) {
+    if (!current.name.trim()) {
       setError(tEdit("errors.nameRequired"));
-      return;
+      return false;
     }
 
-    const referent = form.manager.trim();
+    const referent = current.manager.trim();
     setSaving(true);
     try {
-      const res = await fetch(`/api/clients/${encodeURIComponent(viewClient.id)}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name.trim(),
-          email: form.email.trim(),
-          phone: form.phone.trim(),
-          passportNumber: form.passportNumber.trim(),
-          citizenship: form.citizenship.trim(),
-          country: form.country.trim(),
-          direction: form.direction.trim(),
-          status: form.status.trim() || "New",
-          manager: referent,
-          referentName: referent,
-          submittedAt: form.submittedAt.trim(),
-          expectedApprovalAt: form.expectedApprovalAt.trim(),
-          bookingAddress: form.bookingAddress.trim(),
-          bookingRange: form.bookingRange.trim(),
-          approvalAt: form.approvalAt.trim(),
-          residenceCardIssuedAt: form.residenceCardIssuedAt.trim(),
-          appPassword: form.appPassword.trim(),
-          partnerName: form.partnerName.trim(),
-          contract: form.contract.trim(),
-          notesSummary: form.notesSummary.trim(),
-        }),
-      });
+      const res = await fetch(
+        `/api/clients/${encodeURIComponent(viewClientRef.current.id)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: current.name.trim(),
+            email: current.email.trim(),
+            phone: current.phone.trim(),
+            passportNumber: current.passportNumber.trim(),
+            citizenship: current.citizenship.trim(),
+            country: current.country.trim(),
+            direction: current.direction.trim(),
+            status: current.status.trim() || "New",
+            manager: referent,
+            referentName: referent,
+            submittedAt: current.submittedAt.trim(),
+            expectedApprovalAt: current.expectedApprovalAt.trim(),
+            bookingAddress: current.bookingAddress.trim(),
+            bookingRange: current.bookingRange.trim(),
+            approvalAt: current.approvalAt.trim(),
+            residenceCardIssuedAt: current.residenceCardIssuedAt.trim(),
+            appPassword: current.appPassword.trim(),
+            partnerName: current.partnerName.trim(),
+            contract: current.contract.trim(),
+            notesSummary: current.notesSummary.trim(),
+          }),
+        },
+      );
       const data = (await res.json()) as { client?: Client; error?: string };
       if (!res.ok || !data.client) {
         if (res.status === 503) setError(tEdit("errors.storageUnavailable"));
         else if (res.status === 403) setError(tEdit("errors.forbidden"));
         else setError(data.error || tEdit("errors.saveFailed"));
-        return;
+        return false;
       }
       setViewClient(data.client);
+      setBaseline(toForm(data.client));
+      setForm(toForm(data.client));
       setEditing(false);
       router.refresh();
+      return true;
     } catch {
       setError(tEdit("errors.saveFailed"));
+      return false;
     } finally {
       setSaving(false);
     }
   }
+
+  async function onSave(event: FormEvent) {
+    event.preventDefault();
+    await saveCurrentForm();
+  }
+
+  useEffect(() => {
+    unsaved?.setDirty(isDirty);
+  }, [isDirty, unsaved]);
+
+  useEffect(() => {
+    if (!unsaved) return;
+    unsaved.registerLeaveHandlers({
+      save: () => saveCurrentForm(),
+      discard: () => cancelEdit(),
+    });
+    return () => unsaved.registerLeaveHandlers(null);
+  }, [unsaved]);
 
   return (
     <>
@@ -227,26 +270,6 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
       <Card className={styles.panel}>
         <div className={editStyles.panelHead}>
           <h2 className={styles.panelTitle}>{t("sheetData")}</h2>
-          {editing ? (
-            <div className={editStyles.inlineActions}>
-              <button
-                type="button"
-                className={editStyles.secondary}
-                disabled={saving}
-                onClick={cancelEdit}
-              >
-                {tEdit("cancel")}
-              </button>
-              <button
-                type="submit"
-                form="client-crm-edit-form"
-                className={editStyles.primary}
-                disabled={saving}
-              >
-                {saving ? tEdit("saving") : tEdit("save")}
-              </button>
-            </div>
-          ) : null}
         </div>
 
         {editing ? (
@@ -465,6 +488,20 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
               />
             </label>
             {error ? <p className={editStyles.error}>{error}</p> : null}
+
+            <div className={editStyles.formActions}>
+              <button
+                type="button"
+                className={editStyles.secondary}
+                disabled={saving}
+                onClick={cancelEdit}
+              >
+                {tEdit("cancel")}
+              </button>
+              <button type="submit" className={editStyles.primary} disabled={saving}>
+                {saving ? tEdit("saving") : tEdit("save")}
+              </button>
+            </div>
           </form>
         ) : (
           <div className={styles.fieldGrid}>

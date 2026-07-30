@@ -339,6 +339,18 @@
         "directionPlaceholder": "например, Хорватия",
         "serviceType": "Услуга",
         "servicePlaceholder": "например, ВНЖ",
+        "submittedAt": "Дата подачи",
+        "expectedApproval": "Предполагаемое одобрение",
+        "referent": "Имя референта",
+        "bookingAddress": "Адрес букинга",
+        "bookingDate": "Дата букинга",
+        "bookingDatePlaceholder": "например, 10.06–12.06",
+        "approvalDate": "Дата одобрения ВНЖ",
+        "cardIssuedDate": "Дата выдачи карточки ВНЖ",
+        "appPassword": "Пароль приложения",
+        "partner": "Партнер от кого клиент",
+        "contract": "Договор",
+        "datePlaceholder": "ДД.ММ.ГГГГ",
         "notes": "Заметки"
       },
       "errors": {

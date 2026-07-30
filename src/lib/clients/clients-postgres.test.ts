@@ -152,6 +152,39 @@ describe("clients-repo helpers", () => {
     assert.equal(payload.is_demo, true);
     assert.equal(payload.source, "demo");
   });
+
+  it("buildInsertFromCreateInput сохраняет legacy_fields", () => {
+    const payload = buildInsertFromCreateInput(
+      {
+        name: "Test Client",
+        expectedApprovalAt: "20.06.2025",
+        referentName: "Olivia Bennett",
+        bookingAddress: "Zagreb",
+        bookingRange: "10.06–12.06",
+        approvalAt: "01.07.2025",
+        residenceCardIssuedAt: "05.07.2025",
+        appPassword: "secret",
+        partnerName: "Partner Co",
+        contract: "CTR-1",
+        submittedAt: "01.01.2025",
+        manager: "Olivia Bennett",
+      },
+      "DEMO-1100",
+    );
+    assert.deepEqual(payload.legacy_fields, {
+      submittedAt: "01.01.2025",
+      expectedApprovalAt: "20.06.2025",
+      referentName: "Olivia Bennett",
+      bookingAddress: "Zagreb",
+      bookingRange: "10.06–12.06",
+      approvalAt: "01.07.2025",
+      residenceCardIssuedAt: "05.07.2025",
+      appPassword: "secret",
+      partnerName: "Partner Co",
+      contract: "CTR-1",
+    });
+    assert.equal(payload.assigned_manager_name, "Olivia Bennett");
+  });
 });
 
 describe("migration 022_clients.sql", () => {

@@ -21,8 +21,23 @@ const INITIAL = {
   country: "",
   direction: "",
   serviceType: "",
+  submittedAt: "",
+  expectedApprovalAt: "",
+  referentName: "",
+  bookingAddress: "",
+  bookingRange: "",
+  approvalAt: "",
+  residenceCardIssuedAt: "",
+  appPassword: "",
+  partnerName: "",
+  contract: "",
   notesSummary: "",
 };
+
+function optional(value: string): string | undefined {
+  const trimmed = value.trim();
+  return trimmed || undefined;
+}
 
 export function CreateClientModal({ open, onClose, onCreated }: Props) {
   const t = useTranslations("clients.create");
@@ -52,14 +67,25 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: form.name.trim(),
-          email: form.email.trim() || undefined,
-          phone: form.phone.trim() || undefined,
-          passportNumber: form.passportNumber.trim() || undefined,
-          citizenship: form.citizenship.trim() || undefined,
-          country: form.country.trim() || undefined,
-          direction: form.direction.trim() || undefined,
-          serviceType: form.serviceType.trim() || undefined,
-          notesSummary: form.notesSummary.trim() || undefined,
+          email: optional(form.email),
+          phone: optional(form.phone),
+          passportNumber: optional(form.passportNumber),
+          citizenship: optional(form.citizenship),
+          country: optional(form.country),
+          direction: optional(form.direction),
+          serviceType: optional(form.serviceType),
+          submittedAt: optional(form.submittedAt),
+          expectedApprovalAt: optional(form.expectedApprovalAt),
+          referentName: optional(form.referentName),
+          manager: optional(form.referentName),
+          bookingAddress: optional(form.bookingAddress),
+          bookingRange: optional(form.bookingRange),
+          approvalAt: optional(form.approvalAt),
+          residenceCardIssuedAt: optional(form.residenceCardIssuedAt),
+          appPassword: optional(form.appPassword),
+          partnerName: optional(form.partnerName),
+          contract: optional(form.contract),
+          notesSummary: optional(form.notesSummary),
           status: "New",
           pipelineStage: "Intake",
         }),
@@ -198,6 +224,120 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
               />
             </label>
           </div>
+
+          <div className={styles.row}>
+            <label>
+              {t("fields.submittedAt")}
+              <input
+                maxLength={64}
+                value={form.submittedAt}
+                onChange={(e) => updateField("submittedAt", e.target.value)}
+                placeholder={t("fields.datePlaceholder")}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              {t("fields.expectedApproval")}
+              <input
+                maxLength={64}
+                value={form.expectedApprovalAt}
+                onChange={(e) =>
+                  updateField("expectedApprovalAt", e.target.value)
+                }
+                placeholder={t("fields.datePlaceholder")}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </label>
+          </div>
+
+          <label>
+            {t("fields.referent")}
+            <input
+              maxLength={200}
+              value={form.referentName}
+              onChange={(e) => updateField("referentName", e.target.value)}
+            />
+          </label>
+
+          <label>
+            {t("fields.bookingAddress")}
+            <input
+              maxLength={500}
+              value={form.bookingAddress}
+              onChange={(e) => updateField("bookingAddress", e.target.value)}
+            />
+          </label>
+
+          <div className={styles.row}>
+            <label>
+              {t("fields.bookingDate")}
+              <input
+                maxLength={120}
+                value={form.bookingRange}
+                onChange={(e) => updateField("bookingRange", e.target.value)}
+                placeholder={t("fields.bookingDatePlaceholder")}
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              {t("fields.approvalDate")}
+              <input
+                maxLength={64}
+                value={form.approvalAt}
+                onChange={(e) => updateField("approvalAt", e.target.value)}
+                placeholder={t("fields.datePlaceholder")}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </label>
+          </div>
+
+          <div className={styles.row}>
+            <label>
+              {t("fields.cardIssuedDate")}
+              <input
+                maxLength={64}
+                value={form.residenceCardIssuedAt}
+                onChange={(e) =>
+                  updateField("residenceCardIssuedAt", e.target.value)
+                }
+                placeholder={t("fields.datePlaceholder")}
+                inputMode="numeric"
+                autoComplete="off"
+              />
+            </label>
+            <label>
+              {t("fields.appPassword")}
+              <input
+                maxLength={200}
+                value={form.appPassword}
+                onChange={(e) => updateField("appPassword", e.target.value)}
+                autoComplete="off"
+              />
+            </label>
+          </div>
+
+          <div className={styles.row}>
+            <label>
+              {t("fields.partner")}
+              <input
+                maxLength={200}
+                value={form.partnerName}
+                onChange={(e) => updateField("partnerName", e.target.value)}
+              />
+            </label>
+            <label>
+              {t("fields.contract")}
+              <input
+                maxLength={200}
+                value={form.contract}
+                onChange={(e) => updateField("contract", e.target.value)}
+              />
+            </label>
+          </div>
+
           <label>
             {t("fields.notes")}
             <textarea

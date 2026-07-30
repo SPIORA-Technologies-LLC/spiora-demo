@@ -339,6 +339,18 @@
         "directionPlaceholder": "e.g. Croatia",
         "serviceType": "Service",
         "servicePlaceholder": "e.g. Residence permit",
+        "submittedAt": "Submission date",
+        "expectedApproval": "Expected approval",
+        "referent": "Referent name",
+        "bookingAddress": "Booking address",
+        "bookingDate": "Booking date",
+        "bookingDatePlaceholder": "e.g. 10.06–12.06",
+        "approvalDate": "Residence permit approval date",
+        "cardIssuedDate": "Residence card issue date",
+        "appPassword": "App password",
+        "partner": "Partner source",
+        "contract": "Contract",
+        "datePlaceholder": "DD.MM.YYYY",
         "notes": "Notes"
       },
       "errors": {

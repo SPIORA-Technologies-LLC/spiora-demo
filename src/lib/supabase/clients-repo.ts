@@ -4,6 +4,8 @@ import { getSupabaseAdmin } from "./server";
 import type { ClientFilters } from "@/lib/google-sheets/types";
 import {
   escapeIlikePattern,
+  buildLegacyFieldsRecord,
+  CLIENT_LEGACY_FIELD_KEYS,
   type CreateClientInput,
   type UpdateClientInput,
 } from "@/lib/clients/validation";
@@ -224,6 +226,41 @@ export async function sbUpdateClientByExternalId(
   }
   if (input.notesSummary !== undefined) patch.notes_summary = input.notesSummary;
 
+  const legacyPatchKeys = CLIENT_LEGACY_FIELD_KEYS.filter(
+    (key) => input[key] !== undefined,
+  );
+  if (legacyPatchKeys.length > 0) {
+    const { data: existing, error: existingError } = await getSupabaseAdmin()
+      .from("clients")
+      .select("legacy_fields")
+      .eq("external_id", externalId)
+      .is("archived_at", null)
+      .maybeSingle();
+    if (existingError) throw existingError;
+
+    const current = normalizeLegacyFields(
+      (existing as { legacy_fields?: unknown } | null)?.legacy_fields,
+    );
+    const next = { ...current };
+    for (const key of legacyPatchKeys) {
+      const value = input[key];
+      if (typeof value === "string" && value.trim()) {
+        next[key] = value.trim();
+      } else {
+        delete next[key];
+      }
+    }
+    patch.legacy_fields = next;
+
+    if (
+      input.manager === undefined &&
+      typeof input.referentName === "string" &&
+      input.referentName.trim()
+    ) {
+      patch.assigned_manager_name = input.referentName.trim();
+    }
+  }
+
   const { data, error } = await getSupabaseAdmin()
     .from("clients")
     .update(patch)
@@ -342,7 +379,7 @@ export function buildInsertFromCreateInput(
     passport_number: input.passportNumber ?? null,
     last_activity_at: new Date().toISOString(),
     is_demo: true,
-    legacy_fields: {},
+    legacy_fields: buildLegacyFieldsRecord(input),
   };
 }
 

@@ -1,5 +1,32 @@
 import type { ClientFilters } from "@/lib/google-sheets/types";
 
+/** Sheet-style CRM extras stored in `clients.legacy_fields`. */
+export type ClientLegacyFieldsInput = {
+  submittedAt?: string;
+  expectedApprovalAt?: string;
+  referentName?: string;
+  bookingAddress?: string;
+  bookingRange?: string;
+  approvalAt?: string;
+  residenceCardIssuedAt?: string;
+  appPassword?: string;
+  partnerName?: string;
+  contract?: string;
+};
+
+export const CLIENT_LEGACY_FIELD_KEYS = [
+  "submittedAt",
+  "expectedApprovalAt",
+  "referentName",
+  "bookingAddress",
+  "bookingRange",
+  "approvalAt",
+  "residenceCardIssuedAt",
+  "appPassword",
+  "partnerName",
+  "contract",
+] as const satisfies readonly (keyof ClientLegacyFieldsInput)[];
+
 export type CreateClientInput = {
   name: string;
   email?: string;
@@ -15,7 +42,7 @@ export type CreateClientInput = {
   passportNumber?: string;
   notesSummary?: string;
   externalId?: string;
-};
+} & ClientLegacyFieldsInput;
 
 export type UpdateClientInput = {
   name?: string;
@@ -31,7 +58,7 @@ export type UpdateClientInput = {
   serviceType?: string;
   passportNumber?: string;
   notesSummary?: string;
-};
+} & ClientLegacyFieldsInput;
 
 const MAX_FIELD_LENGTH = 500;
 const MAX_NAME_LENGTH = 200;
@@ -72,6 +99,12 @@ export function validateCreateClientInput(input: CreateClientInput): CreateClien
     throw new ClientValidationError("Invalid external ID format");
   }
 
+  const legacy = pickLegacyFields(input);
+  const manager =
+    trimOptional(input.manager, MAX_FIELD_LENGTH) ||
+    legacy.referentName ||
+    "";
+
   return {
     name,
     email,
@@ -81,13 +114,38 @@ export function validateCreateClientInput(input: CreateClientInput): CreateClien
     direction: trimOptional(input.direction, MAX_FIELD_LENGTH),
     status: trimOptional(input.status, 120) || "New",
     pipelineStage: trimOptional(input.pipelineStage, 120) || "Intake",
-    manager: trimOptional(input.manager, MAX_FIELD_LENGTH),
+    manager,
     assignedUserId: trimOptional(input.assignedUserId, 120) || undefined,
     serviceType: trimOptional(input.serviceType, MAX_FIELD_LENGTH),
     passportNumber: trimOptional(input.passportNumber, 64) || undefined,
     notesSummary: trimOptional(input.notesSummary, 2000) || undefined,
     externalId: externalId || undefined,
+    ...legacy,
   };
+}
+
+export function pickLegacyFields(
+  input: ClientLegacyFieldsInput,
+): ClientLegacyFieldsInput {
+  const result: ClientLegacyFieldsInput = {};
+  for (const key of CLIENT_LEGACY_FIELD_KEYS) {
+    if (input[key] === undefined) continue;
+    const value = trimOptional(input[key], MAX_FIELD_LENGTH);
+    if (value) result[key] = value;
+  }
+  return result;
+}
+
+export function buildLegacyFieldsRecord(
+  input: ClientLegacyFieldsInput,
+): Record<string, string> {
+  const picked = pickLegacyFields(input);
+  const record: Record<string, string> = {};
+  for (const key of CLIENT_LEGACY_FIELD_KEYS) {
+    const value = picked[key];
+    if (value) record[key] = value;
+  }
+  return record;
 }
 
 const UPDATE_ALLOWED_KEYS: (keyof UpdateClientInput)[] = [
@@ -104,6 +162,7 @@ const UPDATE_ALLOWED_KEYS: (keyof UpdateClientInput)[] = [
   "serviceType",
   "passportNumber",
   "notesSummary",
+  ...CLIENT_LEGACY_FIELD_KEYS,
 ];
 
 export function validateUpdateClientInput(
@@ -161,6 +220,19 @@ export function validateUpdateClientInput(
   }
   if (input.notesSummary !== undefined) {
     result.notesSummary = trimOptional(input.notesSummary, 2000);
+  }
+
+  for (const key of CLIENT_LEGACY_FIELD_KEYS) {
+    if (input[key] === undefined) continue;
+    result[key] = trimOptional(input[key], MAX_FIELD_LENGTH);
+  }
+
+  if (
+    result.manager === undefined &&
+    typeof result.referentName === "string" &&
+    result.referentName
+  ) {
+    result.manager = result.referentName;
   }
 
   return result;

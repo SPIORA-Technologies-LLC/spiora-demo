@@ -10,8 +10,8 @@
 }
 
 .modal {
-  width: min(36rem, 100%);
-  max-height: min(90vh, 44rem);
+  width: min(44rem, 100%);
+  max-height: min(92vh, 52rem);
   overflow: auto;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.12);

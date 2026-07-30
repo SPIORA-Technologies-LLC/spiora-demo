@@ -58,36 +58,34 @@ export async function POST(request: Request) {
 
   try {
     const body = (await request.json()) as Record<string, unknown>;
+    const str = (key: string): string | undefined =>
+      typeof body[key] === "string" ? (body[key] as string) : undefined;
     const client = await createClient(
       {
         name: typeof body.name === "string" ? body.name : "",
-        email: typeof body.email === "string" ? body.email : undefined,
-        phone: typeof body.phone === "string" ? body.phone : undefined,
-        country: typeof body.country === "string" ? body.country : undefined,
-        citizenship:
-          typeof body.citizenship === "string" ? body.citizenship : undefined,
-        direction:
-          typeof body.direction === "string" ? body.direction : undefined,
-        status: typeof body.status === "string" ? body.status : undefined,
-        pipelineStage:
-          typeof body.pipelineStage === "string"
-            ? body.pipelineStage
-            : undefined,
-        manager: typeof body.manager === "string" ? body.manager : undefined,
-        assignedUserId:
-          typeof body.assignedUserId === "string"
-            ? body.assignedUserId
-            : undefined,
-        serviceType:
-          typeof body.serviceType === "string" ? body.serviceType : undefined,
-        passportNumber:
-          typeof body.passportNumber === "string"
-            ? body.passportNumber
-            : undefined,
-        notesSummary:
-          typeof body.notesSummary === "string" ? body.notesSummary : undefined,
-        externalId:
-          typeof body.externalId === "string" ? body.externalId : undefined,
+        email: str("email"),
+        phone: str("phone"),
+        country: str("country"),
+        citizenship: str("citizenship"),
+        direction: str("direction"),
+        status: str("status"),
+        pipelineStage: str("pipelineStage"),
+        manager: str("manager"),
+        assignedUserId: str("assignedUserId"),
+        serviceType: str("serviceType"),
+        passportNumber: str("passportNumber"),
+        notesSummary: str("notesSummary"),
+        externalId: str("externalId"),
+        submittedAt: str("submittedAt"),
+        expectedApprovalAt: str("expectedApprovalAt"),
+        referentName: str("referentName"),
+        bookingAddress: str("bookingAddress"),
+        bookingRange: str("bookingRange"),
+        approvalAt: str("approvalAt"),
+        residenceCardIssuedAt: str("residenceCardIssuedAt"),
+        appPassword: str("appPassword"),
+        partnerName: str("partnerName"),
+        contract: str("contract"),
       },
       session,
     );

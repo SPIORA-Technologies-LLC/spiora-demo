@@ -4,7 +4,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import type { AppLocale } from "@/i18n/config";
 import {
-  buildDateKey,
   formatDateKeyRu,
   parseFlexibleDateKey,
 } from "@/lib/calendar/datetime-input";
@@ -21,15 +20,6 @@ type ModalKind =
   | { type: "changeDate" }
   | { type: "addPayment" }
   | { type: "void"; paymentId: string };
-
-function todayDateKey(): string {
-  const now = new Date();
-  return buildDateKey({
-    year: now.getFullYear(),
-    month: now.getMonth() + 1,
-    day: now.getDate(),
-  });
-}
 
 export function ClientFinancePanel({ clientId }: Props) {
   const locale = useLocale() as AppLocale;
@@ -362,7 +352,7 @@ export function ClientFinancePanel({ clientId }: Props) {
             <Button
               type="button"
               onClick={() => {
-                setModalDate(formatDateKeyRu(todayDateKey()));
+                setModalDate("");
                 setModal({ type: "addPayment" });
               }}
               disabled={submitting}

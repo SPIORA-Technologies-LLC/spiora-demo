@@ -2398,7 +2398,7 @@
       "inviteAccepted": "Приглашение принято",
       "applicationReceived": "Заявка получена",
       "applicationStatus": "Статус заявки",
-      "hint": "Ваш защищённый кабинет. Заполняйте анкету и продолжайте позже в любое время.",
+      "hint": "Это ваш личный кабинет.",
       "continueQuestionnaire": "Продолжить анкету",
       "viewApplicationStatus": "Смотреть статус заявки"
     },

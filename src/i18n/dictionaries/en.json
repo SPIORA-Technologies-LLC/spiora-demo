@@ -2400,7 +2400,7 @@
       "inviteAccepted": "Invitation accepted",
       "applicationReceived": "Application received",
       "applicationStatus": "Application status",
-      "hint": "Your secure client area. Complete your questionnaire and continue later at any time.",
+      "hint": "This is your personal account.",
       "continueQuestionnaire": "Continue questionnaire",
       "viewApplicationStatus": "View application status"
     },

@@ -19,11 +19,20 @@ type LeaveHandlers = {
   discard: () => void;
 };
 
+export type ClientEditChrome = {
+  active: boolean;
+  saving: boolean;
+  formId: string;
+};
+
 type UnsavedChangesContextValue = {
   isDirty: boolean;
   setDirty: (dirty: boolean) => void;
   registerLeaveHandlers: (handlers: LeaveHandlers | null) => void;
   requestLeave: (proceed: () => void) => void;
+  editChrome: ClientEditChrome | null;
+  setEditChrome: (chrome: ClientEditChrome | null) => void;
+  discardEdits: () => void;
 };
 
 const UnsavedChangesContext = createContext<UnsavedChangesContextValue | null>(
@@ -52,10 +61,16 @@ export function ClientUnsavedChangesProvider({ children }: ProviderProps) {
   const [isDirty, setDirty] = useState(false);
   const [pendingLeave, setPendingLeave] = useState<(() => void) | null>(null);
   const [saving, setSaving] = useState(false);
+  const [editChrome, setEditChrome] = useState<ClientEditChrome | null>(null);
   const handlersRef = useRef<LeaveHandlers | null>(null);
 
   const registerLeaveHandlers = useCallback((handlers: LeaveHandlers | null) => {
     handlersRef.current = handlers;
+  }, []);
+
+  const discardEdits = useCallback(() => {
+    handlersRef.current?.discard();
+    setDirty(false);
   }, []);
 
   const requestLeave = useCallback(
@@ -151,8 +166,17 @@ export function ClientUnsavedChangesProvider({ children }: ProviderProps) {
       setDirty,
       registerLeaveHandlers,
       requestLeave,
+      editChrome,
+      setEditChrome,
+      discardEdits,
     }),
-    [isDirty, registerLeaveHandlers, requestLeave],
+    [
+      isDirty,
+      registerLeaveHandlers,
+      requestLeave,
+      editChrome,
+      discardEdits,
+    ],
   );
 
   return (

@@ -49,7 +49,6 @@ type FormState = {
   appPassword: string;
   partnerName: string;
   contract: string;
-  notesSummary: string;
 };
 
 function clean(value: string | undefined | null): string {
@@ -77,7 +76,6 @@ function toForm(client: Client): FormState {
     appPassword: clean(client.appPassword),
     partnerName: clean(client.partnerName),
     contract: clean(client.contract),
-    notesSummary: clean(client.notes),
   };
 }
 
@@ -177,7 +175,6 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
             appPassword: current.appPassword.trim(),
             partnerName: current.partnerName.trim(),
             contract: current.contract.trim(),
-            notesSummary: current.notesSummary.trim(),
           }),
         },
       );
@@ -210,16 +207,32 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
 
   useEffect(() => {
     unsaved?.setDirty(isDirty);
-  }, [isDirty, unsaved]);
+  }, [isDirty, unsaved?.setDirty]);
 
   useEffect(() => {
-    if (!unsaved) return;
-    unsaved.registerLeaveHandlers({
+    const setEditChrome = unsaved?.setEditChrome;
+    if (!setEditChrome) return;
+    if (editing) {
+      setEditChrome({
+        active: true,
+        saving,
+        formId: "client-crm-edit-form",
+      });
+    } else {
+      setEditChrome(null);
+    }
+    return () => setEditChrome(null);
+  }, [editing, saving, unsaved?.setEditChrome]);
+
+  useEffect(() => {
+    const register = unsaved?.registerLeaveHandlers;
+    if (!register) return;
+    register({
       save: () => saveCurrentForm(),
       discard: () => cancelEdit(),
     });
-    return () => unsaved.registerLeaveHandlers(null);
-  }, [unsaved]);
+    return () => register(null);
+  }, [unsaved?.registerLeaveHandlers]);
 
   return (
     <>
@@ -482,30 +495,7 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
               </label>
             </div>
 
-            <label>
-              {tFields("notes")}
-              <textarea
-                maxLength={2000}
-                rows={3}
-                value={form.notesSummary}
-                onChange={(e) => updateField("notesSummary", e.target.value)}
-              />
-            </label>
             {error ? <p className={editStyles.error}>{error}</p> : null}
-
-            <div className={editStyles.formActions}>
-              <button
-                type="button"
-                className={editStyles.secondary}
-                disabled={saving}
-                onClick={cancelEdit}
-              >
-                {tEdit("cancel")}
-              </button>
-              <button type="submit" className={editStyles.primary} disabled={saving}>
-                {saving ? tEdit("saving") : tEdit("save")}
-              </button>
-            </div>
           </form>
         ) : (
           <div className={styles.fieldGrid}>
@@ -600,10 +590,6 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
               <span className={styles.fieldValue}>
                 {display(viewClient.contract)}
               </span>
-            </div>
-            <div className={styles.fieldRow}>
-              <span className={styles.fieldLabel}>{tFields("notes")}</span>
-              <span className={styles.fieldValue}>{display(viewClient.notes)}</span>
             </div>
           </div>
         )}

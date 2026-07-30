@@ -74,8 +74,8 @@
 .uploadRow {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  padding-bottom: 0.75rem;
+  gap: 0.65rem;
+  padding: 0.85rem 0 1rem;
   border-bottom: 1px solid var(--border-soft);
 }
 
@@ -85,6 +85,7 @@
   justify-content: center;
   align-self: flex-start;
   min-height: 2.4rem;
+  margin: 0.35rem 0 0.25rem;
   padding: 0.45rem 1rem;
   border-radius: 999px;
   background: linear-gradient(135deg, #f4981a 0%, #e82916 72%);

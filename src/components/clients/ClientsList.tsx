@@ -34,7 +34,6 @@ const TABLE_COLUMNS = [
   "appPassword",
   "partner",
   "contract",
-  "notes",
 ] as const;
 
 export function ClientsList() {
@@ -316,7 +315,6 @@ export function ClientsList() {
                     <td>{client.appPassword ?? "—"}</td>
                     <td>{client.partnerName ?? "—"}</td>
                     <td>{client.contract ?? "—"}</td>
-                    <td>{client.notes ?? "—"}</td>
                     {canDelete ? (
                       <td>
                         <button

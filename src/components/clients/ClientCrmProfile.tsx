@@ -38,21 +38,44 @@ type FormState = {
   direction: string;
   status: string;
   manager: string;
+  submittedAt: string;
+  expectedApprovalAt: string;
+  bookingAddress: string;
+  bookingRange: string;
+  approvalAt: string;
+  residenceCardIssuedAt: string;
+  appPassword: string;
+  partnerName: string;
+  contract: string;
   notesSummary: string;
 };
 
+function clean(value: string | undefined | null): string {
+  const trimmed = value?.trim() ?? "";
+  return trimmed === "—" ? "" : trimmed;
+}
+
 function toForm(client: Client): FormState {
   return {
-    name: client.name ?? "",
-    email: client.email ?? "",
-    phone: client.phone ?? "",
-    passportNumber: client.passportNumber ?? "",
-    citizenship: client.citizenship ?? "",
-    country: client.country ?? "",
-    direction: client.direction ?? "",
-    status: client.status || "New",
-    manager: client.referentName ?? client.manager ?? "",
-    notesSummary: client.notes ?? "",
+    name: clean(client.name),
+    email: clean(client.email),
+    phone: clean(client.phone),
+    passportNumber: clean(client.passportNumber),
+    citizenship: clean(client.citizenship),
+    country: clean(client.country),
+    direction: clean(client.direction),
+    status: clean(client.status) || "New",
+    manager: clean(client.referentName ?? client.manager),
+    submittedAt: clean(client.submittedAt),
+    expectedApprovalAt: clean(client.expectedApprovalAt),
+    bookingAddress: clean(client.bookingAddress),
+    bookingRange: clean(client.bookingRange),
+    approvalAt: clean(client.approvalAt),
+    residenceCardIssuedAt: clean(client.residenceCardIssuedAt),
+    appPassword: clean(client.appPassword),
+    partnerName: clean(client.partnerName),
+    contract: clean(client.contract),
+    notesSummary: clean(client.notes),
   };
 }
 
@@ -65,6 +88,7 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
   const t = useTranslations("clients.detail");
   const tFields = useTranslations("clients.fields");
   const tEdit = useTranslations("clients.edit");
+  const tCreate = useTranslations("clients.create");
   const locale = useLocale() as AppLocale;
   const router = useRouter();
   const canEdit = source === "postgresql";
@@ -104,6 +128,7 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
       return;
     }
 
+    const referent = form.manager.trim();
     setSaving(true);
     try {
       const res = await fetch(`/api/clients/${encodeURIComponent(viewClient.id)}`, {
@@ -118,7 +143,17 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
           country: form.country.trim(),
           direction: form.direction.trim(),
           status: form.status.trim() || "New",
-          manager: form.manager.trim(),
+          manager: referent,
+          referentName: referent,
+          submittedAt: form.submittedAt.trim(),
+          expectedApprovalAt: form.expectedApprovalAt.trim(),
+          bookingAddress: form.bookingAddress.trim(),
+          bookingRange: form.bookingRange.trim(),
+          approvalAt: form.approvalAt.trim(),
+          residenceCardIssuedAt: form.residenceCardIssuedAt.trim(),
+          appPassword: form.appPassword.trim(),
+          partnerName: form.partnerName.trim(),
+          contract: form.contract.trim(),
           notesSummary: form.notesSummary.trim(),
         }),
       });
@@ -294,7 +329,8 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
                   }
                   onChange={(e) => updateField("status", e.target.value)}
                 >
-                  {!STATUS_OPTIONS.some((o) => o.value === form.status) && form.status ? (
+                  {!STATUS_OPTIONS.some((o) => o.value === form.status) &&
+                  form.status ? (
                     <option value={form.status}>{form.status}</option>
                   ) : null}
                   {STATUS_OPTIONS.map((option) => (
@@ -305,6 +341,34 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
                 </select>
               </label>
             </div>
+
+            <div className={editStyles.row}>
+              <label>
+                {tFields("submittedAt")}
+                <input
+                  maxLength={64}
+                  value={form.submittedAt}
+                  onChange={(e) => updateField("submittedAt", e.target.value)}
+                  placeholder={tCreate("fields.datePlaceholder")}
+                  inputMode="numeric"
+                  autoComplete="off"
+                />
+              </label>
+              <label>
+                {tFields("expectedApproval")}
+                <input
+                  maxLength={64}
+                  value={form.expectedApprovalAt}
+                  onChange={(e) =>
+                    updateField("expectedApprovalAt", e.target.value)
+                  }
+                  placeholder={tCreate("fields.datePlaceholder")}
+                  inputMode="numeric"
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+
             <label>
               {tFields("referent")}
               <input
@@ -313,6 +377,84 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
                 onChange={(e) => updateField("manager", e.target.value)}
               />
             </label>
+
+            <label>
+              {tFields("bookingAddress")}
+              <input
+                maxLength={500}
+                value={form.bookingAddress}
+                onChange={(e) => updateField("bookingAddress", e.target.value)}
+              />
+            </label>
+
+            <div className={editStyles.row}>
+              <label>
+                {tFields("bookingRange")}
+                <input
+                  maxLength={120}
+                  value={form.bookingRange}
+                  onChange={(e) => updateField("bookingRange", e.target.value)}
+                  placeholder={tCreate("fields.bookingDatePlaceholder")}
+                  autoComplete="off"
+                />
+              </label>
+              <label>
+                {tFields("approvalDate")}
+                <input
+                  maxLength={64}
+                  value={form.approvalAt}
+                  onChange={(e) => updateField("approvalAt", e.target.value)}
+                  placeholder={tCreate("fields.datePlaceholder")}
+                  inputMode="numeric"
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+
+            <div className={editStyles.row}>
+              <label>
+                {tFields("cardIssuedDate")}
+                <input
+                  maxLength={64}
+                  value={form.residenceCardIssuedAt}
+                  onChange={(e) =>
+                    updateField("residenceCardIssuedAt", e.target.value)
+                  }
+                  placeholder={tCreate("fields.datePlaceholder")}
+                  inputMode="numeric"
+                  autoComplete="off"
+                />
+              </label>
+              <label>
+                {tFields("appPassword")}
+                <input
+                  maxLength={200}
+                  value={form.appPassword}
+                  onChange={(e) => updateField("appPassword", e.target.value)}
+                  autoComplete="off"
+                />
+              </label>
+            </div>
+
+            <div className={editStyles.row}>
+              <label>
+                {tFields("partner")}
+                <input
+                  maxLength={200}
+                  value={form.partnerName}
+                  onChange={(e) => updateField("partnerName", e.target.value)}
+                />
+              </label>
+              <label>
+                {tFields("contract")}
+                <input
+                  maxLength={200}
+                  value={form.contract}
+                  onChange={(e) => updateField("contract", e.target.value)}
+                />
+              </label>
+            </div>
+
             <label>
               {tFields("notes")}
               <textarea
@@ -365,9 +507,57 @@ export function ClientCrmProfile({ client, source, rowIndex }: Props) {
               </span>
             </div>
             <div className={styles.fieldRow}>
+              <span className={styles.fieldLabel}>{tFields("expectedApproval")}</span>
+              <span className={styles.fieldValue}>
+                {display(viewClient.expectedApprovalAt)}
+              </span>
+            </div>
+            <div className={styles.fieldRow}>
               <span className={styles.fieldLabel}>{tFields("referent")}</span>
               <span className={styles.fieldValue}>
                 {display(viewClient.referentName ?? viewClient.manager)}
+              </span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className={styles.fieldLabel}>{tFields("bookingAddress")}</span>
+              <span className={styles.fieldValue}>
+                {display(viewClient.bookingAddress)}
+              </span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className={styles.fieldLabel}>{tFields("bookingRange")}</span>
+              <span className={styles.fieldValue}>
+                {display(viewClient.bookingRange)}
+              </span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className={styles.fieldLabel}>{tFields("approvalDate")}</span>
+              <span className={styles.fieldValue}>
+                {display(viewClient.approvalAt)}
+              </span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className={styles.fieldLabel}>{tFields("cardIssuedDate")}</span>
+              <span className={styles.fieldValue}>
+                {display(viewClient.residenceCardIssuedAt)}
+              </span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className={styles.fieldLabel}>{tFields("appPassword")}</span>
+              <span className={styles.fieldValue}>
+                {display(viewClient.appPassword)}
+              </span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className={styles.fieldLabel}>{tFields("partner")}</span>
+              <span className={styles.fieldValue}>
+                {display(viewClient.partnerName)}
+              </span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className={styles.fieldLabel}>{tFields("contract")}</span>
+              <span className={styles.fieldValue}>
+                {display(viewClient.contract)}
               </span>
             </div>
             <div className={styles.fieldRow}>

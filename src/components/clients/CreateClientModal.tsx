@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { Client } from "@/lib/google-sheets/types";
@@ -45,8 +46,22 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
   const [form, setForm] = useState(INITIAL);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  if (!open) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
+  if (!open || !mounted) return null;
 
   function updateField(key: keyof typeof INITIAL, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -117,7 +132,7 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
     }
   }
 
-  return (
+  return createPortal(
     <div
       className={styles.backdrop}
       role="presentation"
@@ -146,6 +161,7 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
         </div>
 
         <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
+          <div className={styles.formBody}>
           <label>
             {t("fields.name")}
             <input
@@ -349,6 +365,7 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
           </label>
 
           {error ? <p className={styles.error}>{error}</p> : null}
+          </div>
 
           <div className={styles.actions}>
             <button
@@ -365,6 +382,7 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
           </div>
         </form>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -371,7 +371,7 @@
     },
     "table": {
       "name": "Name",
-      "latin": "Latin spelling",
+      "citizenship": "Citizenship",
       "passport": "Passport number",
       "email": "Email",
       "submittedAt": "Submission date",

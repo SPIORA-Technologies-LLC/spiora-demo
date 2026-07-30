@@ -20,7 +20,7 @@ const PAGE_SIZE = 25;
 
 const TABLE_COLUMNS = [
   "name",
-  "latin",
+  "citizenship",
   "passport",
   "email",
   "submittedAt",

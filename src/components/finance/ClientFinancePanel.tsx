@@ -3,6 +3,11 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import type { AppLocale } from "@/i18n/config";
+import {
+  buildDateKey,
+  formatDateKeyRu,
+  parseFlexibleDateKey,
+} from "@/lib/calendar/datetime-input";
 import type { FinanceClientDetail } from "@/lib/finance/types";
 import { formatEuroFromCents } from "@/lib/finance/money";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +21,15 @@ type ModalKind =
   | { type: "changeDate" }
   | { type: "addPayment" }
   | { type: "void"; paymentId: string };
+
+function todayDateKey(): string {
+  const now = new Date();
+  return buildDateKey({
+    year: now.getFullYear(),
+    month: now.getMonth() + 1,
+    day: now.getDate(),
+  });
+}
 
 export function ClientFinancePanel({ clientId }: Props) {
   const locale = useLocale() as AppLocale;
@@ -80,13 +94,18 @@ export function ClientFinancePanel({ clientId }: Props) {
 
   const handleCreateContract = async () => {
     if (!newAmount.trim() || !newDate.trim()) return;
+    const contractDate = parseFlexibleDateKey(newDate);
+    if (!contractDate) {
+      setError(t("invalidDate"));
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
       const res = await fetch(`${basePath}/contract`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: newAmount, contractDate: newDate }),
+        body: JSON.stringify({ amount: newAmount, contractDate }),
       });
       const json = (await res.json()) as {
         finance?: FinanceClientDetail;
@@ -115,7 +134,12 @@ export function ClientFinancePanel({ clientId }: Props) {
       body.amount = modalAmount;
     } else if (modal.type === "changeDate") {
       if (!modalDate.trim()) return;
-      body.contractDate = modalDate;
+      const contractDate = parseFlexibleDateKey(modalDate);
+      if (!contractDate) {
+        setError(t("invalidDate"));
+        return;
+      }
+      body.contractDate = contractDate;
     } else {
       return;
     }
@@ -144,6 +168,11 @@ export function ClientFinancePanel({ clientId }: Props) {
 
   const handleAddPayment = async () => {
     if (!modalAmount.trim() || !modalDate.trim()) return;
+    const paymentDate = parseFlexibleDateKey(modalDate);
+    if (!paymentDate) {
+      setError(t("invalidDate"));
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -155,7 +184,7 @@ export function ClientFinancePanel({ clientId }: Props) {
         },
         body: JSON.stringify({
           amount: modalAmount,
-          paymentDate: modalDate,
+          paymentDate,
           comment: modalComment.trim() || undefined,
         }),
       });
@@ -238,7 +267,9 @@ export function ClientFinancePanel({ clientId }: Props) {
               <div className={styles.fieldRow}>
                 <span className={styles.fieldLabel}>{t("contractDate")}</span>
                 <span className={styles.fieldValue}>
-                  {profile.contractDate ?? "—"}
+                  {profile.contractDate
+                    ? formatDateKeyRu(profile.contractDate)
+                    : "—"}
                 </span>
               </div>
               <div className={styles.fieldRow}>
@@ -274,7 +305,14 @@ export function ClientFinancePanel({ clientId }: Props) {
               <Button
                 type="button"
                 variant="secondary"
-                onClick={() => setModal({ type: "changeDate" })}
+                onClick={() => {
+                  setModalDate(
+                    profile.contractDate
+                      ? formatDateKeyRu(profile.contractDate)
+                      : "",
+                  );
+                  setModal({ type: "changeDate" });
+                }}
               >
                 {t("changeDate")}
               </Button>
@@ -288,7 +326,6 @@ export function ClientFinancePanel({ clientId }: Props) {
                 className={styles.input}
                 value={newAmount}
                 onChange={(e) => setNewAmount(e.target.value)}
-                placeholder="3800"
                 disabled={submitting}
               />
             </label>
@@ -296,9 +333,11 @@ export function ClientFinancePanel({ clientId }: Props) {
               <span>{t("contractDate")}</span>
               <input
                 className={styles.input}
-                type="date"
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
+                placeholder={t("datePlaceholder")}
+                inputMode="numeric"
+                autoComplete="off"
                 disabled={submitting}
               />
             </label>
@@ -322,7 +361,10 @@ export function ClientFinancePanel({ clientId }: Props) {
           {hasContract ? (
             <Button
               type="button"
-              onClick={() => setModal({ type: "addPayment" })}
+              onClick={() => {
+                setModalDate(formatDateKeyRu(todayDateKey()));
+                setModal({ type: "addPayment" });
+              }}
               disabled={submitting}
             >
               {t("addPayment")}
@@ -340,7 +382,7 @@ export function ClientFinancePanel({ clientId }: Props) {
                   <strong>{fmt(p.amountCents)}</strong>
                   <span className={styles.paymentMeta}>
                     {" · "}
-                    {p.paymentDate}
+                    {formatDateKeyRu(p.paymentDate)}
                     {p.comment ? ` · ${p.comment}` : ""}
                     {" · "}
                     {p.createdByName}
@@ -365,7 +407,7 @@ export function ClientFinancePanel({ clientId }: Props) {
               {voidedPayments.map((p) => (
                 <li key={p.id} className={styles.paymentItemVoided}>
                   <span>
-                    {fmt(p.amountCents)} · {p.paymentDate}
+                    {fmt(p.amountCents)} · {formatDateKeyRu(p.paymentDate)}
                     {p.voidReason
                       ? ` · ${t("voidReason")}: ${p.voidReason}`
                       : ""}
@@ -405,9 +447,11 @@ export function ClientFinancePanel({ clientId }: Props) {
                 <span>{t("newDate")}</span>
                 <input
                   className={styles.input}
-                  type="date"
                   value={modalDate}
                   onChange={(e) => setModalDate(e.target.value)}
+                  placeholder={t("datePlaceholder")}
+                  inputMode="numeric"
+                  autoComplete="off"
                   disabled={submitting}
                 />
               </label>
@@ -428,9 +472,11 @@ export function ClientFinancePanel({ clientId }: Props) {
                   <span>{t("paymentDate")}</span>
                   <input
                     className={styles.input}
-                    type="date"
                     value={modalDate}
                     onChange={(e) => setModalDate(e.target.value)}
+                    placeholder={t("datePlaceholder")}
+                    inputMode="numeric"
+                    autoComplete="off"
                     disabled={submitting}
                   />
                 </label>

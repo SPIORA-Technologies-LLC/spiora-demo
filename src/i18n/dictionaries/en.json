@@ -2779,6 +2779,8 @@
       "amount": "Amount",
       "newDate": "New date",
       "paymentDate": "Payment date",
+      "datePlaceholder": "DD.MM.YYYY",
+      "invalidDate": "Enter a date as DD.MM.YYYY",
       "comment": "Comment",
       "reason": "Reason for change",
       "cancel": "Cancel",

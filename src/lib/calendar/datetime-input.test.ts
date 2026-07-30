@@ -6,6 +6,7 @@ import {
   formatDateKeyRu,
   formatTimeValueRu,
   parseDateKey,
+  parseFlexibleDateKey,
   parseTimeParts,
   snapMinuteToStep,
 } from "./datetime-input";
@@ -22,6 +23,13 @@ describe("datetime-input", () => {
       buildDateKey({ year: 2026, month: 6, day: 22 }),
       "2026-06-22",
     );
+  });
+
+  it("parses flexible day-first date input", () => {
+    assert.equal(parseFlexibleDateKey("30.01.2026"), "2026-01-30");
+    assert.equal(parseFlexibleDateKey("30/01/2026"), "2026-01-30");
+    assert.equal(parseFlexibleDateKey("2026-01-30"), "2026-01-30");
+    assert.equal(parseFlexibleDateKey("31.02.2026"), null);
   });
 
   it("parses and formats 24-hour time values", () => {

@@ -94,7 +94,7 @@ export function ClientQuestionnaireSubmittedPage({
       <main className={styles.main}>
         <section className={styles.heroCard}>
           <h1 className={styles.title}>{t("thankYou.title")}</h1>
-          <p className={styles.hint}>{t("thankYou.body")}</p>
+          <p className={styles.hintBreak}>{t("thankYou.body")}</p>
           <p className={styles.status}>
             {t("thankYou.currentStatus")}: {caseStatusLabel(status, locale)}
           </p>

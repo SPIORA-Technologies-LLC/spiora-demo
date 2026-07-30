@@ -193,6 +193,15 @@
   line-height: 1.5;
 }
 
+.hintBreak {
+  margin: 0.85rem 0 0;
+  max-width: 28rem;
+  color: var(--portal-muted);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  white-space: pre-line;
+}
+
 .primaryBtn {
   display: inline-flex;
   align-items: center;

@@ -2405,13 +2405,13 @@
       "viewApplicationStatus": "View application status"
     },
     "process": {
-      "title": "Process status",
+      "title": "Your process status",
       "nextStep": "Next step",
       "history": "History"
     },
     "thankYou": {
       "title": "Thank you!",
-      "body": "Your application and questionnaire were received successfully. Our specialist will start reviewing your case. Please wait for a reply.",
+      "body": "Your application and questionnaire were received successfully.\nOur specialist will start reviewing your case. Please wait for a reply.",
       "currentStatus": "Current status",
       "submittedAt": "Submitted on",
       "backHome": "Back to portal"

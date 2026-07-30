@@ -12,6 +12,10 @@
   min-width: 0;
 }
 
+.overviewStackHidden {
+  display: none;
+}
+
 .back {
   display: inline-flex;
   align-items: center;

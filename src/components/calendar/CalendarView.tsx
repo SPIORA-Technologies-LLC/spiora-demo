@@ -411,6 +411,16 @@ function CalendarViewContent({ user, teamMembers }: CalendarViewProps) {
 
   return (
     <div className={styles.wrap}>
+      <aside className={styles.videoHighlight} aria-label={t("videoCallsHighlight.title")}>
+        <span className={styles.videoHighlightIcon} aria-hidden>
+          <i className="fa-solid fa-video" />
+        </span>
+        <div className={styles.videoHighlightCopy}>
+          <p className={styles.videoHighlightTitle}>{t("videoCallsHighlight.title")}</p>
+          <p className={styles.videoHighlightText}>{t("videoCallsHighlight.text")}</p>
+        </div>
+      </aside>
+
       <CalendarToolbar
         label={toolbarLabel}
         timeZoneLabel={timeZoneLabel}

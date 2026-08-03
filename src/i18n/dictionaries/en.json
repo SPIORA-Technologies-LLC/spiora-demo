@@ -8,7 +8,7 @@
     "clientInvitations": "Client invitations",
     "clientIntake": "Questionnaire intake",
     "tasks": "Tasks",
-    "calendar": "Calendar",
+    "calendar": "Calendar & video calls",
     "teamChat": "Team Chat",
     "aiWorkspace": "AI Workspace",
     "knowledgeBase": "Corporate Database",
@@ -536,6 +536,10 @@
   },
   "calendar": {
     "pageTitle": "Calendar",
+    "videoCallsHighlight": {
+      "title": "Video calls right from the calendar",
+      "text": "When creating an event, choose the Video call format — a guest link appears in the meeting card, no registration required."
+    },
     "loading": "Loading…",
     "loadingEvents": "Loading events…",
     "selectLayerToLoad": "Select at least one event layer to load the calendar.",

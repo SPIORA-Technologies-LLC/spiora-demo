@@ -110,6 +110,9 @@
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
+  --lk-bg: #0b1220;
+  --lk-bg2: #111827;
+  --lk-fg: #f8fafc;
 }
 
 .topBar {

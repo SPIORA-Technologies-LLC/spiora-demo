@@ -2,8 +2,8 @@ import type { TrackReferenceOrPlaceholder } from "@livekit/components-core";
 import type { Participant } from "livekit-client";
 import { Track } from "livekit-client";
 
-/** Always use speaker + filmstrip (0 disables equal grid for any size). */
-export const MEETING_GRID_MAX_PARTICIPANTS = 0;
+/** Equal grid for small rooms; larger rooms use speaker + filmstrip. */
+export const MEETING_GRID_MAX_PARTICIPANTS = 4;
 
 export function pickCameraTracks(
   tracks: TrackReferenceOrPlaceholder[],

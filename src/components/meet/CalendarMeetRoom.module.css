@@ -22,6 +22,9 @@
   flex-direction: column;
   min-height: 100vh;
   min-height: 100dvh;
+  --lk-bg: #0b1220;
+  --lk-bg2: #111827;
+  --lk-fg: #f8fafc;
 }
 
 .room {
@@ -125,28 +128,32 @@
 .participantGridStage {
   flex: 1;
   min-height: 0;
+  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
 .participantGrid {
   width: 100%;
   height: 100%;
   max-height: 100%;
+  min-height: 0;
 }
 
 .participantGrid :global(.lk-grid-layout) {
   width: 100%;
   height: 100%;
   padding: 0;
-  align-content: center;
+  gap: 0.5rem;
+  align-content: stretch;
   justify-items: stretch;
 }
 
 .gridTile {
   width: 100%;
   height: 100%;
+  min-height: 0;
   border-radius: var(--radius-sm);
   overflow: hidden;
   background: #111827;
@@ -159,16 +166,16 @@
 }
 
 .participantGridStage[data-participant-count="1"] :global(.lk-grid-layout) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
 }
 
 .participantGridStage[data-participant-count="1"] :global(.lk-participant-tile) {
-  width: min(100%, 52rem);
-  aspect-ratio: 16 / 9;
-  height: auto !important;
-  max-height: min(62vh, 520px);
+  width: 100%;
+  height: 100% !important;
+  max-height: none;
+  aspect-ratio: auto;
 }
 
 .participantGridStage[data-participant-count="2"] :global(.lk-grid-layout) {
@@ -185,10 +192,10 @@
 .participantGridStage[data-participant-count="2"] :global(.lk-participant-tile),
 .participantGridStage[data-participant-count="3"] :global(.lk-participant-tile),
 .participantGridStage[data-participant-count="4"] :global(.lk-participant-tile) {
-  aspect-ratio: 16 / 9;
   width: 100%;
-  height: auto !important;
-  max-height: min(42vh, 360px);
+  height: 100% !important;
+  max-height: none;
+  aspect-ratio: auto;
 }
 
 .speakerLayout {
@@ -196,6 +203,7 @@
   flex: 1;
   flex-direction: column;
   min-height: 0;
+  width: 100%;
   gap: 0.75rem;
 }
 
@@ -205,11 +213,13 @@
 
 .filmstrip {
   flex: 0 0 auto;
-  min-height: 5.75rem;
-  max-height: 7.5rem;
+  height: 6.25rem;
+  min-height: 6.25rem;
+  max-height: 6.25rem;
   order: -1;
   padding-bottom: 0.15rem;
   border-bottom: 1px solid var(--border-soft);
+  overflow: hidden;
 }
 
 .filmstripCarousel {
@@ -223,22 +233,31 @@
 }
 
 .filmstrip :global(.lk-carousel) :global(.lk-participant-tile) {
-  flex: 0 0 8.5rem;
-  width: 8.5rem;
-  min-width: 8.5rem;
-  max-width: 8.5rem;
-  aspect-ratio: 16 / 10;
-  height: auto;
+  flex: 0 0 9rem;
+  width: 9rem;
+  min-width: 9rem;
+  max-width: 9rem;
+  height: 5.5rem !important;
+  aspect-ratio: auto;
 }
 
 .speakerMain {
   flex: 1;
   min-height: 0;
+  width: 100%;
   display: flex;
+}
+
+.speakerMain :global(.lk-focus-layout),
+.speakerMain :global(.lk-participant-tile) {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .speakerMainTile {
   flex: 1;
+  width: 100%;
   min-height: 0;
   border-radius: var(--radius-sm);
   overflow: hidden;
@@ -246,9 +265,19 @@
 }
 
 .speakerMainTile :global(video),
+.speakerMainTile :global(video.lk-participant-media-video),
+.speakerMainTile :global(video[data-orientation="portrait"]),
 .gridTile :global(video),
-.filmstripTile :global(video) {
-  object-fit: cover;
+.gridTile :global(video.lk-participant-media-video),
+.gridTile :global(video[data-orientation="portrait"]),
+.filmstripTile :global(video),
+.filmstripTile :global(video.lk-participant-media-video),
+.filmstripTile :global(video[data-orientation="portrait"]) {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center;
+  background: #111827;
 }
 
 .filmstripTile {
@@ -305,8 +334,9 @@
   border-radius: 0;
 }
 
-.speakerMainTileScreenShare :global(video) {
-  object-fit: contain;
+.speakerMainTileScreenShare :global(video),
+.speakerMainTileScreenShare :global(video.lk-participant-media-video) {
+  object-fit: contain !important;
   background: #0b1220;
 }
 
@@ -412,26 +442,28 @@
     --lk-row-count: 2;
   }
 
-  .participantGridStage[data-participant-count="1"] :global(.lk-participant-tile) {
-    max-height: min(48vh, 360px);
-  }
-
+  .participantGridStage[data-participant-count="1"] :global(.lk-participant-tile),
   .participantGridStage[data-participant-count="2"] :global(.lk-participant-tile),
   .participantGridStage[data-participant-count="3"] :global(.lk-participant-tile),
   .participantGridStage[data-participant-count="4"] :global(.lk-participant-tile) {
-    max-height: min(32vh, 240px);
+    width: 100%;
+    height: 100% !important;
+    max-height: none;
+    aspect-ratio: auto;
   }
 
   .filmstrip {
-    min-height: 5rem;
-    max-height: 6.25rem;
+    height: 5.5rem;
+    min-height: 5.5rem;
+    max-height: 5.5rem;
   }
 
   .filmstrip :global(.lk-carousel) :global(.lk-participant-tile) {
-    flex-basis: 6.5rem;
-    width: 6.5rem;
-    min-width: 6.5rem;
-    max-width: 6.5rem;
+    flex-basis: 7rem;
+    width: 7rem;
+    min-width: 7rem;
+    max-width: 7rem;
+    height: 4.75rem !important;
   }
 
   .filmstripScreenShare .filmstripCarousel {

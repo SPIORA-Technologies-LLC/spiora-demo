@@ -1,0 +1,80 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(ellipse 50% 40% at 50% 42%, rgba(232, 41, 22, 0.22), transparent 65%),
+    radial-gradient(ellipse 40% 30% at 70% 20%, rgba(244, 152, 26, 0.12), transparent 55%),
+    #050506;
+  animation: splashFadeOut 0.55s ease 1.65s both;
+}
+
+.glow {
+  position: absolute;
+  width: min(22rem, 70vw);
+  height: min(22rem, 70vw);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(232, 41, 22, 0.18) 0%,
+    transparent 68%
+  );
+  filter: blur(8px);
+  animation: glowPulse 2.2s ease-in-out both;
+}
+
+.mark {
+  position: relative;
+  z-index: 1;
+  animation: logoIn 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes logoIn {
+  from {
+    opacity: 0;
+    transform: scale(0.88) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    opacity: 0.35;
+    transform: scale(0.92);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.55;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes splashFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .splash,
+  .glow,
+  .mark {
+    animation: none;
+  }
+
+  .splash {
+    animation: splashFadeOut 0.2s ease 0.25s both;
+  }
+}

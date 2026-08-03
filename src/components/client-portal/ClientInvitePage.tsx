@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
 import { normalizeName } from "@/lib/client-portal/display-name";
+import { withClientPortalEntrySplash } from "@/lib/client-portal/entry-splash";
 import {
   createSupabaseBrowserClient,
   isSupabaseBrowserConfigured,
@@ -134,7 +135,9 @@ export function ClientInvitePage({ token }: Props) {
       }
       return;
     }
-    window.location.href = data.redirectTo || "/client";
+    window.location.href = withClientPortalEntrySplash(
+      data.redirectTo || "/client",
+    );
   }
 
   async function onSubmit(event: React.FormEvent) {

@@ -15,6 +15,7 @@ import {
 } from "@/lib/client-portal/case-status-labels";
 import type { ClientCasePublic, ClientCaseStatus } from "@/lib/client-portal/case-types";
 import { nextCaseStatus } from "@/lib/client-portal/case-types";
+import { ClientPortalEntrySplash } from "./ClientPortalEntrySplash";
 import styles from "./ClientPortalShell.module.css";
 
 const POLL_MS = 45_000;
@@ -29,6 +30,7 @@ type Props = {
   questionnaireSubmitted?: boolean;
   initialCase: ClientCasePublic | null;
   logoutLabel: string;
+  showEntrySplash?: boolean;
   assistantSlot?: ReactNode;
 };
 
@@ -53,12 +55,15 @@ export function ClientPortalHome({
   questionnaireSubmitted = false,
   initialCase,
   logoutLabel,
+  showEntrySplash = false,
   assistantSlot,
 }: Props) {
   const t = useTranslations("clientPortal");
   const locale = useLocale() as "en" | "ru";
   const [caseData, setCaseData] = useState<ClientCasePublic | null>(initialCase);
+  const [entrySplash, setEntrySplash] = useState(showEntrySplash);
   const inflightRef = useRef(false);
+  const dismissSplash = useCallback(() => setEntrySplash(false), []);
 
   const refreshCase = useCallback(async () => {
     if (inflightRef.current) return;
@@ -96,7 +101,18 @@ export function ClientPortalHome({
   const nextStep = currentStatus ? nextCaseStatus(currentStatus) : null;
 
   return (
-    <div className={styles.page} lang={locale}>
+    <>
+      {entrySplash ? <ClientPortalEntrySplash onDone={dismissSplash} /> : null}
+      <div
+        className={
+          entrySplash
+            ? `${styles.page} ${styles.pageUnderSplash}`
+            : showEntrySplash
+              ? `${styles.page} ${styles.pageAfterSplash}`
+              : styles.page
+        }
+        lang={locale}
+      >
       <header className={styles.header}>
         <div className={styles.brandRow}>
           <Logo size="sm" />
@@ -171,5 +187,6 @@ export function ClientPortalHome({
         {assistantSlot}
       </main>
     </div>
+    </>
   );
 }

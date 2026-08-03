@@ -7,9 +7,15 @@ import { getPortalCaseForUser } from "@/lib/client-portal/case-service";
 import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 import { redirect } from "next/navigation";
 
-export default async function ClientHomePage() {
+type Props = {
+  searchParams: Promise<{ enter?: string }>;
+};
+
+export default async function ClientHomePage({ searchParams }: Props) {
   const session = await getClientSession();
   if (!session) redirect("/client/login");
+  const params = await searchParams;
+  const showEntrySplash = params.enter === "1";
   const t = await getTranslations("clientPortal");
   const [questionnaire, caseData] = await Promise.all([
     getClientQuestionnaire({
@@ -56,6 +62,7 @@ export default async function ClientHomePage() {
       questionnaireSubmitted={questionnaireSubmitted}
       initialCase={caseData}
       logoutLabel={t("logout")}
+      showEntrySplash={showEntrySplash}
       assistantSlot={<ClientPortalAssistant />}
     />
   );

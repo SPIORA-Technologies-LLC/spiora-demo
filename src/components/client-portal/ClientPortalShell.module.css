@@ -34,6 +34,16 @@
   }
 }
 
+.pageUnderSplash {
+  animation: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pageAfterSplash {
+  animation: portalEnter 0.65s ease both;
+}
+
 .header {
   position: sticky;
   top: 0;

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
+import { withClientPortalEntrySplash } from "@/lib/client-portal/entry-splash";
 import {
   createSupabaseBrowserClient,
   isSupabaseBrowserConfigured,
@@ -42,7 +43,7 @@ export function ClientPortalLogin() {
         setError(t("notClient"));
         return;
       }
-      window.location.href = "/client";
+      window.location.href = withClientPortalEntrySplash("/client");
     } catch {
       setError(t("authFailed"));
     } finally {

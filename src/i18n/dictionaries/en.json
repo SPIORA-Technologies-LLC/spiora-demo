@@ -2446,6 +2446,9 @@
   "clientPortal": {
     "brand": "Spiora Client",
     "logout": "Log out",
+    "splash": {
+      "label": "Spiora"
+    },
     "home": {
       "title": "Welcome!",
       "titleNamed": "Welcome, {name}!",

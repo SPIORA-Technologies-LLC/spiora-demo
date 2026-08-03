@@ -147,7 +147,7 @@
     "openFile": "Открыть файл",
     "deleteFile": "Удалить файл",
     "removeFile": "Убрать файл",
-    "hint": "PDF, Word, Excel, PowerPoint, изображения (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — до 25 МБ каждый",
+    "hint": "PDF, Word, Excel, PowerPoint, изображения (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — до 10 МБ каждый",
     "pickerLabel": "Файлы"
   },
   "progressReports": {

@@ -175,7 +175,7 @@ describe("KB attachment validation Phase 1", () => {
     const result = validateKbAttachmentFile({
       fileName: "big.mp4",
       contentType: "video/mp4",
-      size: 101 * 1024 * 1024,
+      size: 51 * 1024 * 1024,
       buffer: mp4,
     });
     assert.equal(result.ok, false);

@@ -147,7 +147,7 @@
     "openFile": "Open file",
     "deleteFile": "Delete file",
     "removeFile": "Remove file",
-    "hint": "PDF, Word, Excel, PowerPoint, images (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — up to 25 MB each",
+    "hint": "PDF, Word, Excel, PowerPoint, images (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — up to 10 MB each",
     "pickerLabel": "Files"
   },
   "progressReports": {

@@ -482,7 +482,7 @@
       "upload": "Прикрепить документ",
       "uploading": "Загрузка…",
       "uploadFailed": "Не удалось загрузить документ",
-      "uploadFormats": "PDF, Word, Excel, изображения, ZIP — до 25 МБ",
+      "uploadFormats": "PDF, Word, Excel, изображения, ZIP — до 10 МБ",
       "open": "Открыть",
       "download": "Скачать",
       "fileUnavailable": "Файл недоступен для открытия (демо-запись без файла)."
@@ -995,7 +995,7 @@
     "composer": {
       "placeholder": "Сообщение… Ctrl+V — скриншот, скрепка — файл",
       "captionPlaceholder": "Подпись к вложению (необязательно)…",
-      "hint": "Прикрепите файл или скриншот, добавьте подпись и нажмите «Отправить» — всё уйдёт одним сообщением. Ctrl+V — вставить скриншот. Скрепка — документы до 25 МБ.",
+      "hint": "Прикрепите файл или скриншот, добавьте подпись и нажмите «Отправить» — всё уйдёт одним сообщением. Ctrl+V — вставить скриншот. Скрепка — документы до 10 МБ.",
       "recording": "Запись {duration}",
       "attachmentFallback": "Вложение",
       "imageKind": "Изображение",
@@ -1841,7 +1841,7 @@
       "linkSaveFailed": "Не удалось сохранить ссылку.",
       "confirmArchiveLink": "Архивировать ссылку? Она скрывается из списка команды.",
       "dropHint": "Или перетащите файлы сюда",
-      "limitsHint": "Видео: MP4/WebM до 100 МБ. Аудио: WebM/OGG/MP3/M4A до 25 МБ. Запись до 10 минут.",
+      "limitsHint": "Видео: MP4/WebM до 50 МБ. Аудио: WebM/OGG/MP3/M4A до 10 МБ. Запись до 10 минут.",
       "uploading": "Загрузка…",
       "preview": "Просмотр",
       "download": "Скачать",
@@ -2256,7 +2256,7 @@
       "openFile": "Открыть файл",
       "deleteFile": "Удалить файл",
       "removeFile": "Убрать файл",
-      "hint": "PDF, Word, Excel, PowerPoint, изображения (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — до 25 МБ каждый",
+      "hint": "PDF, Word, Excel, PowerPoint, изображения (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — до 10 МБ каждый",
       "pickerLabel": "Файлы"
     },
     "progressReports": {

@@ -482,7 +482,7 @@
       "upload": "Attach document",
       "uploading": "Uploading…",
       "uploadFailed": "Could not upload the document",
-      "uploadFormats": "PDF, Word, Excel, images, ZIP — up to 25 MB",
+      "uploadFormats": "PDF, Word, Excel, images, ZIP — up to 10 MB",
       "open": "Open",
       "download": "Download",
       "fileUnavailable": "File is unavailable (demo metadata without a stored file)."
@@ -995,7 +995,7 @@
     "composer": {
       "placeholder": "Message… Ctrl+V — screenshot, paperclip — file",
       "captionPlaceholder": "Attachment caption (optional)…",
-      "hint": "Attach a file or screenshot, add a caption, and press Send — everything goes as one message. Ctrl+V — paste screenshot. Paperclip — documents up to 25 MB.",
+      "hint": "Attach a file or screenshot, add a caption, and press Send — everything goes as one message. Ctrl+V — paste screenshot. Paperclip — documents up to 10 MB.",
       "recording": "Recording {duration}",
       "attachmentFallback": "Attachment",
       "imageKind": "Image",
@@ -1841,7 +1841,7 @@
       "linkSaveFailed": "Could not save the link.",
       "confirmArchiveLink": "Archive this link? It will be hidden from the team.",
       "dropHint": "Or drag and drop files here",
-      "limitsHint": "Video: MP4/WebM up to 100 MB. Audio: WebM/OGG/MP3/M4A up to 25 MB. Recording up to 10 minutes.",
+      "limitsHint": "Video: MP4/WebM up to 50 MB. Audio: WebM/OGG/MP3/M4A up to 10 MB. Recording up to 10 minutes.",
       "uploading": "Uploading…",
       "preview": "Preview",
       "download": "Download",
@@ -2256,7 +2256,7 @@
       "openFile": "Open file",
       "deleteFile": "Delete file",
       "removeFile": "Remove file",
-      "hint": "PDF, Word, Excel, PowerPoint, images (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — up to 25 MB each",
+      "hint": "PDF, Word, Excel, PowerPoint, images (JPG, PNG, GIF, WebP), TXT, CSV, ZIP — up to 10 MB each",
       "pickerLabel": "Files"
     },
     "progressReports": {

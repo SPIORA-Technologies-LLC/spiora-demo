@@ -13,7 +13,7 @@ import { getSupabaseAdmin } from "@/lib/supabase/server";
 const BUCKET = "team-chat-files";
 const LOCAL_DIR = path.join(process.cwd(), ".data", "team-chat-files");
 
-export const MAX_TEAM_CHAT_FILE_BYTES = 25 * 1024 * 1024;
+export const MAX_TEAM_CHAT_FILE_BYTES = 10 * 1024 * 1024;
 
 function storageFileName(messageId: string, ext: string): string {
   return `${messageId}.${ext || "bin"}`;

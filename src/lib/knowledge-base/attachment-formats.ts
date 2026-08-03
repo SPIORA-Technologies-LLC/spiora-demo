@@ -2,10 +2,10 @@
 
 export const KB_ATTACHMENT_BUCKET = "knowledge-base";
 
-export const MAX_KB_PDF_BYTES = 25 * 1024 * 1024;
+export const MAX_KB_PDF_BYTES = 10 * 1024 * 1024;
 export const MAX_KB_IMAGE_BYTES = 10 * 1024 * 1024;
-export const MAX_KB_AUDIO_BYTES = 25 * 1024 * 1024;
-export const MAX_KB_VIDEO_BYTES = 100 * 1024 * 1024;
+export const MAX_KB_AUDIO_BYTES = 10 * 1024 * 1024;
+export const MAX_KB_VIDEO_BYTES = 50 * 1024 * 1024;
 export const MAX_KB_ATTACHMENTS_PER_ARTICLE = 10;
 /** In-browser audio recording hard stop (10 minutes). */
 export const MAX_KB_AUDIO_RECORD_MS = 10 * 60 * 1000;

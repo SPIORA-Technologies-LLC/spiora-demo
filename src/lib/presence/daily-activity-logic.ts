@@ -32,12 +32,6 @@ export type MemberActivityStats = {
 /** Keep about three months of per-day history. */
 export const DAILY_ACTIVITY_RETENTION_DAYS = 90;
 
-const PERIOD_DAY_COUNTS: Record<ActivityPeriod, number> = {
-  day: 1,
-  week: 7,
-  month: 30,
-};
-
 /** Calendar day key in Europe/Moscow (company default). */
 export function getActivityDayKey(now = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -55,17 +49,71 @@ export function shiftActivityDayKey(dayKey: string, deltaDays: number): string {
   return getActivityDayKey(date);
 }
 
+/** Monday=0 … Sunday=6 for a Moscow YYYY-MM-DD key. */
+export function getActivityWeekdayMon0(dayKey: string): number {
+  const utcDay = new Date(`${dayKey}T12:00:00+03:00`).getUTCDay();
+  return utcDay === 0 ? 6 : utcDay - 1;
+}
+
+export function getMondayOfActivityWeek(dayKey: string): string {
+  return shiftActivityDayKey(dayKey, -getActivityWeekdayMon0(dayKey));
+}
+
+export function listActivityMonthDayKeys(dayKey: string): string[] {
+  const [yearRaw, monthRaw] = dayKey.split("-");
+  const year = Number(yearRaw);
+  const month = Number(monthRaw);
+  const first = `${yearRaw}-${monthRaw}-01`;
+  const nextMonth =
+    month === 12
+      ? `${year + 1}-01-01`
+      : `${year}-${String(month + 1).padStart(2, "0")}-01`;
+  const last = shiftActivityDayKey(nextMonth, -1);
+  const keys: string[] = [];
+  for (
+    let cursor = first;
+    cursor <= last;
+    cursor = shiftActivityDayKey(cursor, 1)
+  ) {
+    keys.push(cursor);
+  }
+  return keys;
+}
+
+/** Calendar-aligned ranges: today / Mon–Sun week / current month. */
 export function listActivityDayKeys(
   period: ActivityPeriod,
   now = new Date(),
 ): string[] {
   const today = getActivityDayKey(now);
-  const count = PERIOD_DAY_COUNTS[period];
-  const keys: string[] = [];
-  for (let offset = 0; offset < count; offset += 1) {
-    keys.push(shiftActivityDayKey(today, -offset));
+  if (period === "day") return [today];
+  if (period === "week") {
+    const monday = getMondayOfActivityWeek(today);
+    return Array.from({ length: 7 }, (_, index) =>
+      shiftActivityDayKey(monday, index),
+    );
   }
-  return keys;
+  return listActivityMonthDayKeys(today);
+}
+
+/** Pad month days into a Mon–Sun grid (null = outside month). */
+export function buildActivityCalendarCells(
+  days: ActivityDayStat[],
+  period: ActivityPeriod,
+): Array<ActivityDayStat | null> {
+  if (period === "day") return days;
+  if (period === "week") return days;
+
+  if (days.length === 0) return [];
+  const lead = getActivityWeekdayMon0(days[0]!.date);
+  const cells: Array<ActivityDayStat | null> = [
+    ...Array.from({ length: lead }, () => null),
+    ...days,
+  ];
+  while (cells.length % 7 !== 0) {
+    cells.push(null);
+  }
+  return cells;
 }
 
 export function applyHeartbeatToDailyActivity(

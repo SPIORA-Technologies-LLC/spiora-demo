@@ -8,6 +8,7 @@ import {
 } from "@/lib/team/permissions.ts";
 import {
   applyHeartbeatToDailyActivity,
+  buildActivityCalendarCells,
   buildMemberActivityStats,
   getActivityDayKey,
   normalizeDailyActivityStore,
@@ -169,7 +170,7 @@ describe("daily presence activity", () => {
     assert.match(getActivityDayKey(new Date("2026-07-25T12:00:00.000Z")), /^\d{4}-\d{2}-\d{2}$/);
   });
 
-  it("aggregates week and month online hours from day history", () => {
+  it("aggregates calendar week and month online hours from day history", () => {
     const now = new Date("2026-07-30T12:00:00+03:00");
     const byDate = {
       "2026-07-30": {
@@ -194,16 +195,28 @@ describe("daily presence activity", () => {
 
     const day = buildMemberActivityStats(byDate, "day", now);
     assert.equal(day.days.length, 1);
+    assert.equal(day.days[0]?.date, "2026-07-30");
     assert.equal(day.onlineMs, 3_600_000);
 
     const week = buildMemberActivityStats(byDate, "week", now);
     assert.equal(week.days.length, 7);
+    assert.equal(week.days[0]?.date, "2026-07-27");
+    assert.equal(week.days[6]?.date, "2026-08-02");
     assert.equal(week.onlineMs, 10_800_000);
 
     const month = buildMemberActivityStats(byDate, "month", now);
-    assert.equal(month.days.length, 30);
+    assert.equal(month.days.length, 31);
+    assert.equal(month.days[0]?.date, "2026-07-01");
+    assert.equal(month.days[30]?.date, "2026-07-31");
     assert.equal(month.onlineMs, 12_600_000);
+
+    const monthCells = buildActivityCalendarCells(month.days, "month");
+    assert.equal(monthCells[0], null);
+    assert.equal(monthCells[1], null);
+    assert.equal(monthCells[2]?.date, "2026-07-01");
+    assert.equal(monthCells.length % 7, 0);
   });
+
 
   it("prunes activity older than retention window", () => {
     const now = new Date("2026-07-30T12:00:00+03:00");

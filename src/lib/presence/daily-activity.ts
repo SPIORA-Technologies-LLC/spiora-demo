@@ -25,6 +25,7 @@ export type {
 } from "@/lib/presence/daily-activity-logic";
 export {
   applyHeartbeatToDailyActivity,
+  buildActivityCalendarCells,
   buildMemberActivityStats,
   getActivityDayKey,
   listActivityDayKeys,

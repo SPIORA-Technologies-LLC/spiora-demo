@@ -9,8 +9,13 @@ import { translateTeamMemberName } from "@/i18n/team-members";
 import type { SessionUser } from "@/lib/auth/types";
 import { PRESENCE_POLL_INTERVAL_MS } from "@/lib/presence/constants";
 import type {
+  ActivityDayStat,
   ActivityPeriod,
   MemberActivityStats,
+} from "@/lib/presence/daily-activity-logic";
+import {
+  buildActivityCalendarCells,
+  getActivityDayKey,
 } from "@/lib/presence/daily-activity-logic";
 import type { TeamMember } from "@/lib/team/types";
 import { Button } from "@/components/ui/Button";
@@ -24,6 +29,11 @@ type TeamViewProps = {
 };
 
 const ACTIVITY_PERIODS: ActivityPeriod[] = ["day", "week", "month"];
+
+const WEEKDAY_LABELS: Record<AppLocale, string[]> = {
+  ru: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
+  en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+};
 
 function formatClock(iso: string | null | undefined, locale: AppLocale): string {
   if (!iso) return "—";
@@ -50,6 +60,14 @@ function formatOnlineDuration(
   return t("hoursShort", { hours, minutes });
 }
 
+function formatOnlineDurationCompact(
+  onlineMs: number,
+  t: ReturnType<typeof useTranslations<"team">>,
+): string {
+  if (onlineMs <= 0) return "—";
+  return formatOnlineDuration(onlineMs, t);
+}
+
 function formatActivityDay(dayKey: string, locale: AppLocale): string {
   const ts = Date.parse(`${dayKey}T12:00:00+03:00`);
   if (Number.isNaN(ts)) return dayKey;
@@ -59,6 +77,43 @@ function formatActivityDay(dayKey: string, locale: AppLocale): string {
     month: "short",
     timeZone: "Europe/Moscow",
   }).format(new Date(ts));
+}
+
+function formatActivityMonthTitle(dayKey: string, locale: AppLocale): string {
+  const ts = Date.parse(`${dayKey}T12:00:00+03:00`);
+  if (Number.isNaN(ts)) return dayKey;
+  return new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-GB", {
+    month: "long",
+    year: "numeric",
+    timeZone: "Europe/Moscow",
+  }).format(new Date(ts));
+}
+
+function formatActivityWeekTitle(
+  days: ActivityDayStat[],
+  locale: AppLocale,
+): string {
+  if (days.length === 0) return "";
+  const first = days[0]!.date;
+  const last = days[days.length - 1]!.date;
+  const fmt = new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "Europe/Moscow",
+  });
+  return `${fmt.format(new Date(`${first}T12:00:00+03:00`))} – ${fmt.format(new Date(`${last}T12:00:00+03:00`))}`;
+}
+
+function dayNumber(dayKey: string): string {
+  return dayKey.slice(-2).replace(/^0/, "");
+}
+
+function activityHeatClass(onlineMs: number): string {
+  if (onlineMs <= 0) return "";
+  const hours = onlineMs / 3_600_000;
+  if (hours >= 4) return styles.calCellHot;
+  if (hours >= 1) return styles.calCellWarm;
+  return styles.calCellMild;
 }
 
 export function TeamView({ user }: TeamViewProps) {
@@ -83,6 +138,7 @@ export function TeamView({ user }: TeamViewProps) {
   const [stats, setStats] = useState<MemberActivityStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState(false);
+  const [selectedDay, setSelectedDay] = useState<ActivityDayStat | null>(null);
 
   const fetchMembers = useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
@@ -125,9 +181,22 @@ export function TeamView({ user }: TeamViewProps) {
         );
         if (!res.ok) throw new Error("fetch failed");
         const data = (await res.json()) as { stats?: MemberActivityStats };
-        setStats(data.stats ?? null);
+        const next = data.stats ?? null;
+        setStats(next);
+        if (next?.period === "day") {
+          setSelectedDay(next.days[0] ?? null);
+        } else {
+          const todayKey = getActivityDayKey();
+          setSelectedDay(
+            next?.days.find((day) => day.date === todayKey) ??
+              next?.days.find((day) => day.onlineMs > 0) ??
+              next?.days[0] ??
+              null,
+          );
+        }
       } catch {
         setStats(null);
+        setSelectedDay(null);
         setStatsError(true);
       } finally {
         setStatsLoading(false);
@@ -139,6 +208,7 @@ export function TeamView({ user }: TeamViewProps) {
   useEffect(() => {
     if (!statsTarget) {
       setStats(null);
+      setSelectedDay(null);
       setStatsError(false);
       return;
     }
@@ -146,13 +216,14 @@ export function TeamView({ user }: TeamViewProps) {
   }, [statsTarget, statsPeriod, fetchMemberStats]);
 
   const openMemberStats = (member: TeamMember) => {
-    setStatsPeriod("day");
+    setStatsPeriod("week");
     setStatsTarget(member);
   };
 
   const closeMemberStats = () => {
     setStatsTarget(null);
     setStats(null);
+    setSelectedDay(null);
     setStatsError(false);
   };
 
@@ -423,37 +494,115 @@ export function TeamView({ user }: TeamViewProps) {
               <p className={styles.confirmText}>{t("stats.loadFailed")}</p>
             ) : (
               <>
+                <p className={styles.statsRange}>
+                  {stats.period === "month"
+                    ? formatActivityMonthTitle(
+                        stats.days[0]?.date ?? getActivityDayKey(),
+                        locale,
+                      )
+                    : stats.period === "week"
+                      ? formatActivityWeekTitle(stats.days, locale)
+                      : formatActivityDay(
+                          stats.days[0]?.date ?? getActivityDayKey(),
+                          locale,
+                        )}
+                </p>
                 <p className={styles.statsTotal}>
                   {t("stats.total")}:{" "}
                   <span className={styles.statValue}>
                     {formatOnlineDuration(stats.onlineMs, t)}
                   </span>
                 </p>
-                <ul className={styles.dayList}>
-                  {stats.days.map((day) => (
-                    <li key={day.date} className={styles.dayRow}>
-                      <div className={styles.dayMain}>
-                        <span className={styles.dayDate}>
-                          {formatActivityDay(day.date, locale)}
-                        </span>
-                        {day.onlineMs > 0 ? (
-                          <span className={styles.dayMeta}>
-                            {t("workStart")}: {formatClock(day.startedAt, locale)}
+                {stats.period === "day" ? (
+                  <div className={styles.dayDetail}>
+                    {stats.days[0] && stats.days[0].onlineMs > 0 ? (
+                      <p className={styles.dayMeta}>
+                        {t("workStart")}:{" "}
+                        {formatClock(stats.days[0].startedAt, locale)}
+                        {" · "}
+                        {t("workEnd")}:{" "}
+                        {formatClock(stats.days[0].endedAt, locale)}
+                      </p>
+                    ) : (
+                      <p className={styles.dayMeta}>{t("stats.emptyDay")}</p>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <div
+                      className={`${styles.calGrid}${stats.period === "week" ? ` ${styles.calGridWeek}` : ""}`}
+                    >
+                      {WEEKDAY_LABELS[locale].map((label) => (
+                        <div key={label} className={styles.calWeekday}>
+                          {label}
+                        </div>
+                      ))}
+                      {buildActivityCalendarCells(stats.days, stats.period).map(
+                        (day, index) => {
+                          if (!day) {
+                            return (
+                              <div
+                                key={`empty-${index}`}
+                                className={`${styles.calCell} ${styles.calCellEmpty}`}
+                                aria-hidden
+                              />
+                            );
+                          }
+                          const isToday = day.date === getActivityDayKey();
+                          const isSelected = selectedDay?.date === day.date;
+                          const heat = activityHeatClass(day.onlineMs);
+                          return (
+                            <button
+                              key={day.date}
+                              type="button"
+                              className={[
+                                styles.calCell,
+                                heat,
+                                isToday ? styles.calCellToday : "",
+                                isSelected ? styles.calCellSelected : "",
+                              ]
+                                .filter(Boolean)
+                                .join(" ")}
+                              onClick={() => setSelectedDay(day)}
+                              title={`${formatActivityDay(day.date, locale)}: ${formatOnlineDuration(day.onlineMs, t)}`}
+                            >
+                              <span className={styles.calDayNum}>
+                                {dayNumber(day.date)}
+                              </span>
+                              <span className={styles.calDayDur}>
+                                {formatOnlineDurationCompact(day.onlineMs, t)}
+                              </span>
+                            </button>
+                          );
+                        },
+                      )}
+                    </div>
+                    {selectedDay ? (
+                      <div className={styles.dayDetail}>
+                        <p className={styles.dayDate}>
+                          {formatActivityDay(selectedDay.date, locale)}
+                        </p>
+                        <p className={styles.stats}>
+                          {t("stats.total")}:{" "}
+                          <span className={styles.statValue}>
+                            {formatOnlineDuration(selectedDay.onlineMs, t)}
+                          </span>
+                        </p>
+                        {selectedDay.onlineMs > 0 ? (
+                          <p className={styles.dayMeta}>
+                            {t("workStart")}:{" "}
+                            {formatClock(selectedDay.startedAt, locale)}
                             {" · "}
-                            {t("workEnd")}: {formatClock(day.endedAt, locale)}
-                          </span>
+                            {t("workEnd")}:{" "}
+                            {formatClock(selectedDay.endedAt, locale)}
+                          </p>
                         ) : (
-                          <span className={styles.dayMeta}>
-                            {t("stats.emptyDay")}
-                          </span>
+                          <p className={styles.dayMeta}>{t("stats.emptyDay")}</p>
                         )}
                       </div>
-                      <span className={styles.dayDuration}>
-                        {formatOnlineDuration(day.onlineMs, t)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                    ) : null}
+                  </>
+                )}
               </>
             )}
             <div className={styles.confirmActions}>

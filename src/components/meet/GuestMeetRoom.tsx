@@ -14,6 +14,7 @@ import type { CalendarEvent } from "@/lib/calendar/types";
 import { GuestMeetingGate } from "./GuestMeetingGate";
 import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
+import { MeetingRecordingNotice } from "./MeetingRecordingNotice";
 import { MeetingSpeakerLayout } from "./MeetingSpeakerLayout";
 import meetStyles from "./CalendarMeetRoom.module.css";
 import styles from "./GuestMeetRoom.module.css";
@@ -119,6 +120,8 @@ function GuestMeetingStage({
         </div>
         <span className={styles.guestName}>{displayName}</span>
       </header>
+
+      <MeetingRecordingNotice inviteToken={inviteToken} />
 
       <div className={meetStyles.stage}>
         <MeetingSpeakerLayout />

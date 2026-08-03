@@ -83,8 +83,8 @@ export function MeetingRecordingButton({ eventId }: MeetingRecordingButtonProps)
         aria-label={isRecording ? "Остановить запись" : "Начать запись"}
         title={
           isRecording
-            ? "Остановить запись встречи"
-            : "Записать встречу (только для команды)"
+            ? "Остановить запись — все участники видят, что идёт запись"
+            : "Записать встречу (только для команды). Участники будут уведомлены."
         }
       >
         <i

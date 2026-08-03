@@ -6,6 +6,7 @@ import {
   EncodedFileOutput,
   EncodedFileType,
   EgressStatus,
+  RoomServiceClient,
   S3Upload,
 } from "livekit-server-sdk";
 import type { SessionUser } from "@/lib/auth/types";
@@ -19,6 +20,7 @@ import {
 import { getMeetingRoomName } from "./meeting";
 import { MeetingAccessError } from "./meeting-access";
 import { assertCanManageMeetingRecording, canViewMeetingRecording } from "./meeting-recording-access";
+import { buildMeetingRecordingRoomMetadata } from "./meeting-recording-notice";
 import {
   buildMeetingRecordingStoragePath,
   createMeetingRecordingPlaybackUrl,
@@ -66,6 +68,32 @@ function createEgressClient(env: NonNullable<ReturnType<typeof getLiveKitEnv>>) 
     env.apiKey,
     env.apiSecret,
   );
+}
+
+function createRoomServiceClient(
+  env: NonNullable<ReturnType<typeof getLiveKitEnv>>,
+) {
+  return new RoomServiceClient(
+    getLiveKitApiHost(env.url),
+    env.apiKey,
+    env.apiSecret,
+  );
+}
+
+async function publishRecordingRoomNotice(
+  eventId: string,
+  env: NonNullable<ReturnType<typeof getLiveKitEnv>>,
+  notice: { recording: boolean; startedByName?: string },
+): Promise<void> {
+  try {
+    const rooms = createRoomServiceClient(env);
+    await rooms.updateRoomMetadata(
+      getMeetingRoomName(eventId),
+      buildMeetingRecordingRoomMetadata(notice),
+    );
+  } catch (error) {
+    console.error("[meeting-recording] room notice metadata failed", error);
+  }
 }
 
 function buildEncodedFileOutput(storagePath: string): EncodedFileOutput {
@@ -159,6 +187,11 @@ export async function handleStartMeetingRecording(
     const updated = await deps.updateRecording(recording.id, {
       egressId: egressInfo.egressId,
       status: "active",
+    });
+
+    await publishRecordingRoomNotice(eventId, liveKitEnv, {
+      recording: true,
+      startedByName: session.name,
     });
 
     return { recording: updated ?? recording };
@@ -304,6 +337,8 @@ export async function handleStopMeetingRecording(
   await deps.updateRecording(active.id, {
     status: "processing",
   });
+
+  await publishRecordingRoomNotice(eventId, liveKitEnv, { recording: false });
 
   // Finalize in background so leave / Stop stay responsive (webhooks optional).
   void finalizeRecordingAfterStop(active, liveKitEnv, deps).catch((error) => {

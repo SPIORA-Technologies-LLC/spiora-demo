@@ -30,6 +30,7 @@ import { MeetingAccessGate, type MeetingAccessGateVariant } from "./MeetingAcces
 import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingDockGate } from "./MeetingDockGate";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
+import { MeetingRecordingNotice } from "./MeetingRecordingNotice";
 import { MeetingSpeakerLayout } from "./MeetingSpeakerLayout";
 import {
   MeetingGuestWaitingBanner,
@@ -127,6 +128,8 @@ function MeetingStage({
         count={pendingGuestAdmissions.length}
         onOpenParticipants={() => setParticipantsOpen(true)}
       />
+
+      <MeetingRecordingNotice eventId={event.id} />
 
       <div className={styles.stage}>
         <MeetingSpeakerLayout compact={isDockMode} />

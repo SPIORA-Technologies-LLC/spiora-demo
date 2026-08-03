@@ -1,14 +1,10 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import type {
-  PortalChatSession,
-  PortalChatSummary,
-  PortalChatTurn,
-} from "@/lib/ai/client-portal-chat-types";
+import type { PortalChatTurn } from "@/lib/ai/client-portal-chat-types";
 import styles from "./ClientPortalAssistant.module.css";
 
 type ChatEntry = PortalChatTurn;
@@ -16,80 +12,12 @@ type ChatEntry = PortalChatTurn;
 export function ClientPortalAssistant() {
   const t = useTranslations("clientPortal.assistant");
   const locale = useLocale();
-  const [chats, setChats] = useState<PortalChatSummary[]>([]);
-  const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [history, setHistory] = useState<ChatEntry[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [sources, setSources] = useState<string[]>([]);
-  const [bootstrapping, setBootstrapping] = useState(true);
   const listRef = useRef<HTMLDivElement>(null);
   const inflightRef = useRef(false);
-
-  const persistChat = useCallback(
-    async (chatId: string, messages: ChatEntry[]) => {
-      await fetch(`/api/client/assistant/chats/${encodeURIComponent(chatId)}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages }),
-      });
-    },
-    [],
-  );
-
-  const refreshChatList = useCallback(async () => {
-    const res = await fetch("/api/client/assistant/chats");
-    if (res.status === 401 || res.status === 403) {
-      window.location.href = "/client/login";
-      return [];
-    }
-    if (!res.ok) return [];
-    const json = (await res.json()) as { chats: PortalChatSummary[] };
-    setChats(json.chats);
-    return json.chats;
-  }, []);
-
-  const openChat = useCallback(async (chatId: string) => {
-    const res = await fetch(
-      `/api/client/assistant/chats/${encodeURIComponent(chatId)}`,
-    );
-    if (!res.ok) return;
-    const json = (await res.json()) as { chat: PortalChatSession };
-    setActiveChatId(json.chat.id);
-    setHistory(json.chat.messages);
-    setSources([]);
-  }, []);
-
-  const createChat = useCallback(async () => {
-    const res = await fetch("/api/client/assistant/chats", { method: "POST" });
-    if (!res.ok) return null;
-    const json = (await res.json()) as { chat: PortalChatSession };
-    setActiveChatId(json.chat.id);
-    setHistory([]);
-    setSources([]);
-    await refreshChatList();
-    return json.chat.id;
-  }, [refreshChatList]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const list = await refreshChatList();
-        if (cancelled) return;
-        if (list.length > 0) {
-          await openChat(list[0].id);
-        } else {
-          await createChat();
-        }
-      } finally {
-        if (!cancelled) setBootstrapping(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [createChat, openChat, refreshChatList]);
 
   useEffect(() => {
     const el = listRef.current;
@@ -97,26 +25,9 @@ export function ClientPortalAssistant() {
     el.scrollTop = el.scrollHeight;
   }, [history, loading]);
 
-  async function deleteChat(chatId: string) {
-    await fetch(`/api/client/assistant/chats/${encodeURIComponent(chatId)}`, {
-      method: "DELETE",
-    });
-    const list = await refreshChatList();
-    if (activeChatId === chatId) {
-      if (list.length > 0) await openChat(list[0].id);
-      else await createChat();
-    }
-  }
-
   async function sendMessage(raw: string) {
     const message = raw.trim();
     if (!message || loading || inflightRef.current) return;
-
-    let chatId = activeChatId;
-    if (!chatId) {
-      chatId = await createChat();
-      if (!chatId) return;
-    }
 
     const nextHistory: ChatEntry[] = [
       ...history,
@@ -208,20 +119,11 @@ export function ClientPortalAssistant() {
         reply = t("errors.generic");
         setHistory([...nextHistory, { role: "assistant", content: reply }]);
       }
-
-      const finalHistory: ChatEntry[] = [
-        ...nextHistory,
-        { role: "assistant", content: reply },
-      ];
-      await persistChat(chatId, finalHistory);
-      await refreshChatList();
     } catch {
-      const fallback = [
+      setHistory([
         ...nextHistory,
-        { role: "assistant" as const, content: t("errors.generic") },
-      ];
-      setHistory(fallback);
-      await persistChat(chatId, fallback);
+        { role: "assistant", content: t("errors.generic") },
+      ]);
     } finally {
       setLoading(false);
       inflightRef.current = false;
@@ -235,55 +137,20 @@ export function ClientPortalAssistant() {
           <h2 className={styles.title}>{t("title")}</h2>
           <p className={styles.subtitle}>{t("subtitle")}</p>
         </div>
-        <button
-          type="button"
-          className={styles.newChatBtn}
-          onClick={() => void createChat()}
-          disabled={loading || bootstrapping}
-        >
-          {t("newChat")}
-        </button>
       </div>
 
-      <div className={styles.body}>
-        <aside className={styles.sidebar}>
-          <p className={styles.sidebarLabel}>{t("history")}</p>
-          <ul className={styles.chatList}>
-            {chats.map((chat) => (
-              <li key={chat.id}>
-                <button
-                  type="button"
-                  className={
-                    chat.id === activeChatId
-                      ? styles.chatItemActive
-                      : styles.chatItem
-                  }
-                  onClick={() => void openChat(chat.id)}
-                >
-                  <span className={styles.chatTitle}>
-                    {chat.title === "New chat" || chat.title === "Новый чат"
-                      ? t("untitled")
-                      : chat.title}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className={styles.deleteBtn}
-                  aria-label={t("deleteChat")}
-                  onClick={() => void deleteChat(chat.id)}
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
-        </aside>
+      <aside className={styles.aiNotice} role="note" aria-label={t("aiNotice.title")}>
+        <span className={styles.aiNoticeBadge}>{t("aiNotice.badge")}</span>
+        <div className={styles.aiNoticeCopy}>
+          <p className={styles.aiNoticeTitle}>{t("aiNotice.title")}</p>
+          <p className={styles.aiNoticeText}>{t("aiNotice.text")}</p>
+        </div>
+      </aside>
 
+      <div className={styles.body}>
         <div className={styles.chatPane}>
           <div className={styles.messages} ref={listRef}>
-            {bootstrapping ? (
-              <p className={styles.empty}>{t("loading")}</p>
-            ) : history.length === 0 ? (
+            {history.length === 0 ? (
               <p className={styles.empty}>{t("empty")}</p>
             ) : (
               history.map((msg, index) => (
@@ -327,7 +194,7 @@ export function ClientPortalAssistant() {
               onChange={(event) => setInput(event.target.value)}
               placeholder={t("placeholder")}
               rows={2}
-              disabled={loading || bootstrapping}
+              disabled={loading}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {
                   event.preventDefault();
@@ -338,7 +205,7 @@ export function ClientPortalAssistant() {
             <button
               type="submit"
               className={styles.sendBtn}
-              disabled={loading || bootstrapping || !input.trim()}
+              disabled={loading || !input.trim()}
             >
               {t("send")}
             </button>

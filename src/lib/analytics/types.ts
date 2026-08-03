@@ -3,8 +3,7 @@ import type { DateRange, PeriodPreset } from "./period";
 export type AnalyticsSection =
   | "overview"
   | "croatia"
-  | "spain"
-  | "checkups";
+  | "spain";
 
 export type MonthlyPoint = {
   key: string;
@@ -103,7 +102,7 @@ export type AnalyticsQuery = {
 };
 
 export type PlaceholderSection = {
-  section: "spain" | "checkups";
+  section: "spain";
   title: string;
   message: string;
   plannedBlocks: string[];

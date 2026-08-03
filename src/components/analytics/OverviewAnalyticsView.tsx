@@ -8,6 +8,7 @@ import { AnalyticsBlock } from "./AnalyticsBlock";
 import { AnalyticsTable } from "./AnalyticsTable";
 import { KpiGrid } from "./KpiGrid";
 import { SimpleBarChart } from "./SimpleBarChart";
+import { SimpleDonutChart } from "./SimpleDonutChart";
 import styles from "./OverviewAnalyticsView.module.css";
 
 type OverviewAnalyticsViewProps = {
@@ -22,11 +23,7 @@ type TeamWorkloadRow = {
   activeClients: number;
 };
 
-type ClientDistributionRow = {
-  direction: string;
-  count: number;
-  share: number;
-};
+const DISTRIBUTION_COLORS = ["#c084fc", "#34d399", "#60a5fa", "#f59e0b"];
 
 function formatDelta(value: number): string {
   const prefix = value > 0 ? "+" : "";
@@ -87,13 +84,13 @@ export function OverviewAnalyticsView({ data }: OverviewAnalyticsViewProps) {
     activeClients: row.activeClients,
   }));
 
-  const distributionRows: ClientDistributionRow[] = data.clientDistribution.map(
-    (row) => ({
-      direction: row.direction,
-      count: row.count,
-      share: row.share,
-    }),
-  );
+  const distributionSlices = data.clientDistribution.map((row, index) => ({
+    key: row.direction,
+    label: row.direction,
+    value: row.count,
+    share: row.share,
+    color: DISTRIBUTION_COLORS[index % DISTRIBUTION_COLORS.length]!,
+  }));
 
   return (
     <div className={styles.page}>
@@ -174,29 +171,7 @@ export function OverviewAnalyticsView({ data }: OverviewAnalyticsViewProps) {
         </AnalyticsBlock>
 
         <AnalyticsBlock title={t("overview.charts.clientDistribution")}>
-          <AnalyticsTable
-            rows={distributionRows}
-            getRowKey={(row) => row.direction}
-            columns={[
-              {
-                key: "direction",
-                header: t("overview.tables.direction"),
-                render: (row) => row.direction,
-              },
-              {
-                key: "count",
-                header: t("overview.tables.count"),
-                align: "right",
-                render: (row) => row.count,
-              },
-              {
-                key: "share",
-                header: t("overview.tables.share"),
-                align: "right",
-                render: (row) => `${row.share}%`,
-              },
-            ]}
-          />
+          <SimpleDonutChart slices={distributionSlices} />
         </AnalyticsBlock>
       </div>
     </div>

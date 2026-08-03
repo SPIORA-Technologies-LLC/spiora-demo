@@ -1132,14 +1132,13 @@
     "consultant": "Консультант"
   },
   "analytics": {
-    "title": "Analytics",
+    "title": "Аналитика",
     "subtitle": "KPI, тренды и операционная аналитика по направлениям",
     "demoBadge": "Демонстрационные данные",
     "sections": {
       "overview": "Обзор",
       "croatia": "Хорватия",
-      "spain": "Испания",
-      "checkups": "Мед. чекапы"
+      "spain": "Испания"
     },
     "states": {
       "loading": "Загрузка аналитики…",

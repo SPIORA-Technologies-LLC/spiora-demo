@@ -23,27 +23,15 @@ const SECTIONS: Array<{ id: AnalyticsSection; icon: string }> = [
   { id: "overview", icon: "fa-chart-pie" },
   { id: "croatia", icon: "fa-flag" },
   { id: "spain", icon: "fa-flag" },
-  { id: "checkups", icon: "fa-heart-pulse" },
 ];
 
-const PLACEHOLDER_BLOCK_KEYS: Record<"spain" | "checkups", string[]> = {
+const PLACEHOLDER_BLOCK_KEYS: Record<"spain", string[]> = {
   spain: [
     "generalStats",
     "applicantTypeStats",
     "monthlyQuarterlyDynamics",
     "processingTimes",
     "familyApplications",
-  ],
-  checkups: [
-    "generalStats",
-    "demographics",
-    "programPopularity",
-    "medicalStats",
-    "topIssues",
-    "genderAnalytics",
-    "healthIndex",
-    "recommendations",
-    "repeatVisits",
   ],
 };
 

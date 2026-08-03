@@ -1138,8 +1138,7 @@
     "sections": {
       "overview": "Overview",
       "croatia": "Croatia",
-      "spain": "Spain",
-      "checkups": "Medical checkups"
+      "spain": "Spain"
     },
     "states": {
       "loading": "Loading analytics…",

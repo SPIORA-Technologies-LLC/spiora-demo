@@ -46,6 +46,7 @@ describe("roles localization", () => {
 
   it("RU: localized roles", () => {
     assert.equal(translateUserRole("ru", "owner"), "Администратор");
+    assert.equal(translateUserRole("ru", "finance_manager"), "Бухгалтер");
     assert.match(translateUserRole("ru", "manager"), /[А-Яа-яЁё]/);
   });
 });

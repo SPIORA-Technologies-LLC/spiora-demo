@@ -431,7 +431,9 @@ export function TeamView({ user }: TeamViewProps) {
               member.name,
             );
             const showDelete =
-              canManage && !isSelf && member.role === "manager";
+              canManage &&
+              !isSelf &&
+              (member.role === "manager" || member.role === "finance_manager");
             const canOpenStats =
               canManage && !isSelf && member.role !== "owner";
             const activity = member.activityToday;

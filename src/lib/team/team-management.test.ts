@@ -41,9 +41,16 @@ describe("team owner management permissions", () => {
     assert.equal(findUserByEmail("olivia@spiora.demo")?.id, "olivia-bennett");
   });
 
-  it("owner can delete managers but not self or other owners", () => {
+  it("owner can delete managers and accountant but not self or other owners", () => {
     assert.equal(
       canDeleteTeamMember(owner, { id: "emma-wilson", role: "manager" }),
+      true,
+    );
+    assert.equal(
+      canDeleteTeamMember(owner, {
+        id: "sofia-reyes",
+        role: "finance_manager",
+      }),
       true,
     );
     assert.equal(

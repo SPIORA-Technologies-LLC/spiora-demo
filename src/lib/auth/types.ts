@@ -23,13 +23,13 @@ export type SessionUser = {
 export const ROLE_LABELS: Record<UserRole, string> = {
   owner: "Администратор",
   manager: "Менеджер",
-  finance_manager: "Финансовый менеджер",
+  finance_manager: "Бухгалтер",
 };
 
 export const PLANNED_ROLE_LABELS: Record<PlannedUserRole, string> = {
   owner: "Администратор",
   manager: "Менеджер",
-  finance_manager: "Финансовый менеджер",
+  finance_manager: "Бухгалтер",
   consultant: "Консультант",
   viewer: "Наблюдатель",
 };

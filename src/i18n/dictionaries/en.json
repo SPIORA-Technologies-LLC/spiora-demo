@@ -1375,6 +1375,18 @@
     "minutesShort": "{minutes}m",
     "delete": "Delete",
     "demoPreviewDelete": "User deletion is preview-only in demo mode.",
+    "stats": {
+      "title": "Online stats",
+      "hint": "Click a teammate to open their online-hours stats.",
+      "loading": "Loading stats…",
+      "loadFailed": "Could not load stats.",
+      "total": "Total online",
+      "emptyDay": "Not online this day",
+      "periodDay": "Day",
+      "periodWeek": "Week",
+      "periodMonth": "Month",
+      "close": "Close"
+    },
     "modal": {
       "title": "Delete manager?",
       "body": "The manager will lose access to the platform and will not be able to sign in.",
@@ -1407,6 +1419,7 @@
     "errors": {
       "deleteFailed": "Could not delete user.",
       "deleteForbidden": "Insufficient permissions to delete this user.",
+      "activityForbidden": "Online stats are available to the owner only.",
       "notFound": "User not found.",
       "alreadyDeleted": "User is already deleted.",
       "saveFailed": "Failed to save changes.",

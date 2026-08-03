@@ -8,6 +8,10 @@ import { translateRole } from "@/i18n/roles";
 import { translateTeamMemberName } from "@/i18n/team-members";
 import type { SessionUser } from "@/lib/auth/types";
 import { PRESENCE_POLL_INTERVAL_MS } from "@/lib/presence/constants";
+import type {
+  ActivityPeriod,
+  MemberActivityStats,
+} from "@/lib/presence/daily-activity-logic";
 import type { TeamMember } from "@/lib/team/types";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -18,6 +22,8 @@ import styles from "./TeamView.module.css";
 type TeamViewProps = {
   user: SessionUser;
 };
+
+const ACTIVITY_PERIODS: ActivityPeriod[] = ["day", "week", "month"];
 
 function formatClock(iso: string | null | undefined, locale: AppLocale): string {
   if (!iso) return "—";
@@ -44,6 +50,17 @@ function formatOnlineDuration(
   return t("hoursShort", { hours, minutes });
 }
 
+function formatActivityDay(dayKey: string, locale: AppLocale): string {
+  const ts = Date.parse(`${dayKey}T12:00:00+03:00`);
+  if (Number.isNaN(ts)) return dayKey;
+  return new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-GB", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    timeZone: "Europe/Moscow",
+  }).format(new Date(ts));
+}
+
 export function TeamView({ user }: TeamViewProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("team");
@@ -61,6 +78,11 @@ export function TeamView({ user }: TeamViewProps) {
   const [createdPassword, setCreatedPassword] = useState<string | null>(null);
   const [createdName, setCreatedName] = useState("");
   const [toast, setToast] = useState<ToastMessage | null>(null);
+  const [statsTarget, setStatsTarget] = useState<TeamMember | null>(null);
+  const [statsPeriod, setStatsPeriod] = useState<ActivityPeriod>("day");
+  const [stats, setStats] = useState<MemberActivityStats | null>(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState(false);
 
   const fetchMembers = useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
@@ -92,6 +114,47 @@ export function TeamView({ user }: TeamViewProps) {
     }, PRESENCE_POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [fetchMembers]);
+
+  const fetchMemberStats = useCallback(
+    async (memberId: string, period: ActivityPeriod) => {
+      setStatsLoading(true);
+      setStatsError(false);
+      try {
+        const res = await fetch(
+          `/api/team/${encodeURIComponent(memberId)}/activity?period=${period}`,
+        );
+        if (!res.ok) throw new Error("fetch failed");
+        const data = (await res.json()) as { stats?: MemberActivityStats };
+        setStats(data.stats ?? null);
+      } catch {
+        setStats(null);
+        setStatsError(true);
+      } finally {
+        setStatsLoading(false);
+      }
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!statsTarget) {
+      setStats(null);
+      setStatsError(false);
+      return;
+    }
+    void fetchMemberStats(statsTarget.id, statsPeriod);
+  }, [statsTarget, statsPeriod, fetchMemberStats]);
+
+  const openMemberStats = (member: TeamMember) => {
+    setStatsPeriod("day");
+    setStatsTarget(member);
+  };
+
+  const closeMemberStats = () => {
+    setStatsTarget(null);
+    setStats(null);
+    setStatsError(false);
+  };
 
   const resetAddForm = () => {
     setAddName("");
@@ -209,7 +272,12 @@ export function TeamView({ user }: TeamViewProps) {
         action={headerAction}
       />
 
-      {canManage ? <p className={styles.hint}>{t("deleteHint")}</p> : null}
+      {canManage ? (
+        <>
+          <p className={styles.hint}>{t("deleteHint")}</p>
+          <p className={styles.hint}>{t("stats.hint")}</p>
+        </>
+      ) : null}
 
       {loading ? (
         <Card className={styles.empty}>{t("loading")}</Card>
@@ -228,11 +296,30 @@ export function TeamView({ user }: TeamViewProps) {
             );
             const showDelete =
               canManage && !isSelf && member.role === "manager";
+            const canOpenStats =
+              canManage && !isSelf && member.role !== "owner";
             const activity = member.activityToday;
 
             return (
               <li key={member.id}>
-                <Card className={styles.row}>
+                <Card
+                  className={`${styles.row}${canOpenStats ? ` ${styles.rowClickable}` : ""}`}
+                  role={canOpenStats ? "button" : undefined}
+                  tabIndex={canOpenStats ? 0 : undefined}
+                  onClick={
+                    canOpenStats ? () => openMemberStats(member) : undefined
+                  }
+                  onKeyDown={
+                    canOpenStats
+                      ? (event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            openMemberStats(member);
+                          }
+                        }
+                      : undefined
+                  }
+                >
                   <div className={styles.main}>
                     <p className={styles.name}>
                       <span className={styles.nameRow}>
@@ -280,7 +367,10 @@ export function TeamView({ user }: TeamViewProps) {
                       <Button
                         type="button"
                         variant="danger"
-                        onClick={() => setDeleteTarget(member)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          setDeleteTarget(member);
+                        }}
                       >
                         {t("delete")}
                       </Button>
@@ -292,6 +382,88 @@ export function TeamView({ user }: TeamViewProps) {
           })}
         </ul>
       )}
+
+      {statsTarget ? (
+        <div className={styles.overlay} role="dialog" aria-modal="true">
+          <div
+            className={styles.backdrop}
+            onClick={closeMemberStats}
+            aria-hidden
+          />
+          <Card className={styles.statsModal}>
+            <h2 className={styles.modalTitle}>{t("stats.title")}</h2>
+            <p className={styles.confirmName}>
+              {translateTeamMemberName(
+                locale,
+                statsTarget.id,
+                statsTarget.name,
+              )}
+            </p>
+            <div className={styles.periodTabs} role="tablist">
+              {ACTIVITY_PERIODS.map((period) => (
+                <button
+                  key={period}
+                  type="button"
+                  role="tab"
+                  aria-selected={statsPeriod === period}
+                  className={`${styles.periodTab}${statsPeriod === period ? ` ${styles.periodTabActive}` : ""}`}
+                  onClick={() => setStatsPeriod(period)}
+                >
+                  {period === "day"
+                    ? t("stats.periodDay")
+                    : period === "week"
+                      ? t("stats.periodWeek")
+                      : t("stats.periodMonth")}
+                </button>
+              ))}
+            </div>
+            {statsLoading ? (
+              <p className={styles.confirmText}>{t("stats.loading")}</p>
+            ) : statsError || !stats ? (
+              <p className={styles.confirmText}>{t("stats.loadFailed")}</p>
+            ) : (
+              <>
+                <p className={styles.statsTotal}>
+                  {t("stats.total")}:{" "}
+                  <span className={styles.statValue}>
+                    {formatOnlineDuration(stats.onlineMs, t)}
+                  </span>
+                </p>
+                <ul className={styles.dayList}>
+                  {stats.days.map((day) => (
+                    <li key={day.date} className={styles.dayRow}>
+                      <div className={styles.dayMain}>
+                        <span className={styles.dayDate}>
+                          {formatActivityDay(day.date, locale)}
+                        </span>
+                        {day.onlineMs > 0 ? (
+                          <span className={styles.dayMeta}>
+                            {t("workStart")}: {formatClock(day.startedAt, locale)}
+                            {" · "}
+                            {t("workEnd")}: {formatClock(day.endedAt, locale)}
+                          </span>
+                        ) : (
+                          <span className={styles.dayMeta}>
+                            {t("stats.emptyDay")}
+                          </span>
+                        )}
+                      </div>
+                      <span className={styles.dayDuration}>
+                        {formatOnlineDuration(day.onlineMs, t)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            <div className={styles.confirmActions}>
+              <Button type="button" variant="secondary" onClick={closeMemberStats}>
+                {t("stats.close")}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      ) : null}
 
       {deleteTarget ? (
         <div className={styles.overlay} role="dialog" aria-modal="true">

@@ -18,3 +18,14 @@ export function canDeleteTeamMember(
   if (target.role !== "manager") return false;
   return true;
 }
+
+/** Owner-only online-hours stats for non-owner teammates. */
+export function canViewTeamMemberActivity(
+  actor: SessionUser,
+  target: { id: string; role: string },
+): boolean {
+  if (!canManageTeam(actor)) return false;
+  if (actor.id === target.id) return false;
+  if (target.role === "owner") return false;
+  return true;
+}

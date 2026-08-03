@@ -1349,7 +1349,7 @@
     "title": "Team",
     "subtitle": "Platform user list",
     "subtitleOnline": "Platform user list · {count} online",
-    "deleteHint": "Only the owner can add or remove managers. A removed manager can no longer sign in.",
+    "deleteHint": "Only the administrator can add or remove managers. A removed manager can no longer sign in.",
     "addManager": "Add manager",
     "onlineBar": {
       "loading": "Checking who is online…",
@@ -1377,7 +1377,7 @@
     "demoPreviewDelete": "User deletion is preview-only in demo mode.",
     "stats": {
       "title": "Online stats",
-      "hint": "Click a teammate to open their online-hours stats.",
+      "hint": "Click the employee's name to open their working online-hours stats.",
       "loading": "Loading stats…",
       "loadFailed": "Could not load stats.",
       "total": "Total online",
@@ -1423,11 +1423,11 @@
     "errors": {
       "deleteFailed": "Could not delete user.",
       "deleteForbidden": "Insufficient permissions to delete this user.",
-      "activityForbidden": "Online stats are available to the owner only.",
+      "activityForbidden": "Online stats are available to the administrator only.",
       "notFound": "User not found.",
       "alreadyDeleted": "User is already deleted.",
       "saveFailed": "Failed to save changes.",
-      "createForbidden": "Only the owner can add managers.",
+      "createForbidden": "Only the administrator can add managers.",
       "invalidName": "Enter a valid full name.",
       "invalidEmail": "Enter a valid email address.",
       "invalidPassword": "Enter a password of at least 8 characters.",

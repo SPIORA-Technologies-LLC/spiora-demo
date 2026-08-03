@@ -9,10 +9,43 @@ import { FINANCE_DIRECTIONS } from "@/lib/finance/directions";
 import { formatEuroFromCents } from "@/lib/finance/money";
 import { Card } from "@/components/ui/Card";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { SimpleBarChart, type BarChartPoint, type BarSeries } from "@/components/analytics/SimpleBarChart";
+import {
+  SimpleDonutChart,
+  type DonutSlice,
+} from "@/components/analytics/SimpleDonutChart";
 import styles from "./FinanceAnalyticsView.module.css";
 
 const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1);
+
+const MONTH_COLORS = [
+  "#22c55e",
+  "#34d399",
+  "#4ade80",
+  "#86efac",
+  "#f59e0b",
+  "#fbbf24",
+  "#60a5fa",
+  "#38bdf8",
+  "#c084fc",
+  "#f472b6",
+  "#fb7185",
+  "#2dd4bf",
+];
+
+const CONTRACT_COLORS = [
+  "#f59e0b",
+  "#fbbf24",
+  "#fb923c",
+  "#fdba74",
+  "#22c55e",
+  "#34d399",
+  "#60a5fa",
+  "#38bdf8",
+  "#c084fc",
+  "#f472b6",
+  "#fb7185",
+  "#2dd4bf",
+];
 
 export function FinanceAnalyticsView() {
   const locale = useLocale() as AppLocale;
@@ -63,30 +96,34 @@ export function FinanceAnalyticsView() {
     [currentYear],
   );
 
-  // Build chart data
-  const receivedPoints: BarChartPoint[] = useMemo(() => {
+  const receivedSlices: DonutSlice[] = useMemo(() => {
     if (!data?.monthly) return [];
-    return data.monthly.map((m) => ({
+    return data.monthly.map((m, index) => ({
+      key: m.labelKey,
       label: t(`months.${m.labelKey}`),
-      values: { received: Math.round(m.receivedCents / 100) },
+      value: Math.round(m.receivedCents / 100),
+      color: MONTH_COLORS[index % MONTH_COLORS.length]!,
     }));
   }, [data, t]);
 
-  const contractsPoints: BarChartPoint[] = useMemo(() => {
+  const contractsSlices: DonutSlice[] = useMemo(() => {
     if (!data?.monthly) return [];
-    return data.monthly.map((m) => ({
+    return data.monthly.map((m, index) => ({
+      key: m.labelKey,
       label: t(`months.${m.labelKey}`),
-      values: { contracts: Math.round(m.contractsSignedCents / 100) },
+      value: Math.round(m.contractsSignedCents / 100),
+      color: CONTRACT_COLORS[index % CONTRACT_COLORS.length]!,
     }));
   }, [data, t]);
 
-  const receivedSeries: BarSeries[] = [
-    { key: "received", label: t("chartReceived"), color: "#22c55e" },
-  ];
-
-  const contractsSeries: BarSeries[] = [
-    { key: "contracts", label: t("chartContracts"), color: "#f59e0b" },
-  ];
+  const receivedTotal = useMemo(
+    () => receivedSlices.reduce((sum, slice) => sum + slice.value, 0),
+    [receivedSlices],
+  );
+  const contractsTotal = useMemo(
+    () => contractsSlices.reduce((sum, slice) => sum + slice.value, 0),
+    [contractsSlices],
+  );
 
   return (
     <div className={styles.wrap} aria-busy={loading}>
@@ -169,11 +206,25 @@ export function FinanceAnalyticsView() {
         <div className={styles.charts}>
           <Card className={styles.chartPanel}>
             <h2 className={styles.chartTitle}>{t("chartReceivedTitle")}</h2>
-            <SimpleBarChart points={receivedPoints} series={receivedSeries} height={220} />
+            <SimpleDonutChart
+              slices={receivedSlices}
+              ariaLabel={t("chartReceivedTitle")}
+              centerLabel={t("chartReceived")}
+              centerValue={fmt(receivedTotal * 100)}
+              emptyText={t("noData")}
+              formatValue={(value) => fmt(value * 100)}
+            />
           </Card>
           <Card className={styles.chartPanel}>
             <h2 className={styles.chartTitle}>{t("chartContractsTitle")}</h2>
-            <SimpleBarChart points={contractsPoints} series={contractsSeries} height={220} />
+            <SimpleDonutChart
+              slices={contractsSlices}
+              ariaLabel={t("chartContractsTitle")}
+              centerLabel={t("chartContracts")}
+              centerValue={fmt(contractsTotal * 100)}
+              emptyText={t("noData")}
+              formatValue={(value) => fmt(value * 100)}
+            />
           </Card>
         </div>
       ) : null}

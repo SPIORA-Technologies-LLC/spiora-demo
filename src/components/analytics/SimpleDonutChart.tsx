@@ -8,16 +8,34 @@ export type DonutSlice = {
   key: string;
   label: string;
   value: number;
-  share: number;
+  share?: number;
   color: string;
 };
 
 type SimpleDonutChartProps = {
   slices: DonutSlice[];
   size?: number;
+  ariaLabel?: string;
+  centerLabel?: string;
+  centerValue?: string;
+  emptyText?: string;
+  formatValue?: (value: number) => string;
 };
 
-const DEFAULT_COLORS = ["#c084fc", "#34d399", "#60a5fa", "#f59e0b", "#f472b6"];
+const DEFAULT_COLORS = [
+  "#c084fc",
+  "#34d399",
+  "#60a5fa",
+  "#f59e0b",
+  "#f472b6",
+  "#22c55e",
+  "#38bdf8",
+  "#fb7185",
+  "#a3e635",
+  "#818cf8",
+  "#fbbf24",
+  "#2dd4bf",
+];
 
 function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
@@ -55,25 +73,34 @@ function describeArc(
 export function SimpleDonutChart({
   slices,
   size = 220,
+  ariaLabel,
+  centerLabel,
+  centerValue = "100%",
+  emptyText,
+  formatValue = (value) => String(value),
 }: SimpleDonutChartProps) {
   const t = useTranslations("analytics");
 
   const arcs = useMemo(() => {
-    const totalShare = slices.reduce((sum, slice) => sum + slice.share, 0);
-    const totalValue = slices.reduce((sum, slice) => sum + slice.value, 0);
-    if (slices.length === 0 || (totalShare <= 0 && totalValue <= 0)) {
+    const active = slices.filter((slice) => slice.value > 0 || (slice.share ?? 0) > 0);
+    const totalShare = active.reduce((sum, slice) => sum + (slice.share ?? 0), 0);
+    const totalValue = active.reduce((sum, slice) => sum + slice.value, 0);
+    if (active.length === 0 || (totalShare <= 0 && totalValue <= 0)) {
       return [];
     }
 
     let cursor = 0;
-    return slices.map((slice, index) => {
+    return active.map((slice, index) => {
       const portion =
         totalShare > 0
-          ? slice.share / totalShare
+          ? (slice.share ?? 0) / totalShare
           : totalValue > 0
             ? slice.value / totalValue
             : 0;
-      const sweep = Math.max(portion * 360, slice.value > 0 || slice.share > 0 ? 0.8 : 0);
+      const sweep = Math.max(
+        portion * 360,
+        slice.value > 0 || (slice.share ?? 0) > 0 ? 0.8 : 0,
+      );
       const startAngle = cursor;
       const endAngle = Math.min(cursor + sweep, 359.999);
       cursor = endAngle;
@@ -88,13 +115,18 @@ export function SimpleDonutChart({
   }, [slices]);
 
   if (arcs.length === 0) {
-    return <p className={styles.empty}>{t("charts.noData")}</p>;
+    return (
+      <p className={styles.empty}>{emptyText ?? t("charts.noData")}</p>
+    );
   }
 
   const cx = size / 2;
   const cy = size / 2;
   const radius = size * 0.36;
   const stroke = size * 0.14;
+  const resolvedCenterLabel = centerLabel ?? t("overview.tables.share");
+  const resolvedAriaLabel =
+    ariaLabel ?? t("overview.charts.clientDistribution");
 
   return (
     <div className={styles.wrap}>
@@ -104,7 +136,7 @@ export function SimpleDonutChart({
           height={size}
           viewBox={`0 0 ${size} ${size}`}
           role="img"
-          aria-label={t("overview.charts.clientDistribution")}
+          aria-label={resolvedAriaLabel}
         >
           <circle
             cx={cx}
@@ -152,7 +184,7 @@ export function SimpleDonutChart({
             textAnchor="middle"
             className={styles.centerLabel}
           >
-            {t("overview.tables.share")}
+            {resolvedCenterLabel}
           </text>
           <text
             x={cx}
@@ -160,7 +192,7 @@ export function SimpleDonutChart({
             textAnchor="middle"
             className={styles.centerValue}
           >
-            100%
+            {centerValue}
           </text>
         </svg>
       </div>
@@ -171,7 +203,7 @@ export function SimpleDonutChart({
             <span className={styles.dot} style={{ background: arc.color }} />
             <span className={styles.legendLabel}>{arc.label}</span>
             <span className={styles.legendMeta}>
-              {arc.value} · {arc.percent}%
+              {formatValue(arc.value)} · {arc.percent}%
             </span>
           </li>
         ))}

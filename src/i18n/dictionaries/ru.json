@@ -67,7 +67,7 @@
     "userFallback": "Пользователь",
     "teamFallback": "Команда",
     "mainNavAria": "Основная навигация",
-    "roleOwner": "Владелец",
+    "roleOwner": "Администратор",
     "roleManager": "Менеджер",
     "demoCompanySite": "Сайт Northstar Mobility",
     "roleFinanceManager": "Финансовый менеджер"
@@ -1115,7 +1115,7 @@
     }
   },
   "roles": {
-    "owner": "Владелец",
+    "owner": "Администратор",
     "manager": "Менеджер",
     "viewer": "Наблюдатель",
     "status": {

@@ -39,13 +39,13 @@ describe("admin modules demo analytics", () => {
 
 describe("roles localization", () => {
   it("EN: owner and manager without Cyrillic", () => {
-    assert.equal(translateRole("en", "owner"), "Owner");
+    assert.equal(translateRole("en", "owner"), "Administrator");
     assert.equal(translateRole("en", "manager"), "Manager");
     assert.doesNotMatch(translateUserRole("en", "owner"), /[А-Яа-яЁё]/);
   });
 
   it("RU: localized roles", () => {
-    assert.equal(translateUserRole("ru", "owner"), "Владелец");
+    assert.equal(translateUserRole("ru", "owner"), "Администратор");
     assert.match(translateUserRole("ru", "manager"), /[А-Яа-яЁё]/);
   });
 });

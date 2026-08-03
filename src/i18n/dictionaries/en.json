@@ -67,7 +67,7 @@
     "userFallback": "User",
     "teamFallback": "Team",
     "mainNavAria": "Main navigation",
-    "roleOwner": "Owner",
+    "roleOwner": "Administrator",
     "roleManager": "Manager",
     "demoCompanySite": "Northstar Mobility website",
     "roleFinanceManager": "Finance manager"
@@ -1115,7 +1115,7 @@
     }
   },
   "roles": {
-    "owner": "Owner",
+    "owner": "Administrator",
     "manager": "Manager",
     "viewer": "Viewer",
     "status": {

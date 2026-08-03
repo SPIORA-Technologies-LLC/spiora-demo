@@ -14,7 +14,7 @@ export type TeamMemberDailyActivity = {
   endedAt: string | null;
 };
 
-export type ActivityPeriod = "day" | "week" | "month";
+export type ActivityPeriod = "day" | "week" | "month" | "year";
 
 export type ActivityDayStat = {
   date: string;
@@ -23,14 +23,23 @@ export type ActivityDayStat = {
   endedAt: string | null;
 };
 
+export type ActivityMonthStat = {
+  monthKey: string;
+  onlineMs: number;
+};
+
 export type MemberActivityStats = {
   period: ActivityPeriod;
   onlineMs: number;
   days: ActivityDayStat[];
+  months: ActivityMonthStat[];
+  anchor: string;
 };
 
-/** Keep about three months of per-day history. */
-export const DAILY_ACTIVITY_RETENTION_DAYS = 90;
+/** Keep one year of per-day history. */
+export const DAILY_ACTIVITY_RETENTION_DAYS = 365;
+
+const DAY_KEY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 /** Calendar day key in Europe/Moscow (company default). */
 export function getActivityDayKey(now = new Date()): string {
@@ -42,11 +51,33 @@ export function getActivityDayKey(now = new Date()): string {
   }).format(now);
 }
 
+export function isValidActivityDayKey(value: string): boolean {
+  if (!DAY_KEY_RE.test(value)) return false;
+  const parsed = Date.parse(`${value}T12:00:00+03:00`);
+  return !Number.isNaN(parsed) && getActivityDayKey(new Date(parsed)) === value;
+}
+
 /** Shift a Moscow YYYY-MM-DD key by whole days (MSK has no DST). */
 export function shiftActivityDayKey(dayKey: string, deltaDays: number): string {
   const date = new Date(`${dayKey}T12:00:00+03:00`);
   date.setTime(date.getTime() + deltaDays * 86_400_000);
   return getActivityDayKey(date);
+}
+
+export function getActivityRetentionCutoff(now = new Date()): string {
+  return shiftActivityDayKey(
+    getActivityDayKey(now),
+    -(DAILY_ACTIVITY_RETENTION_DAYS - 1),
+  );
+}
+
+export function clampActivityAnchor(anchor: string, now = new Date()): string {
+  const today = getActivityDayKey(now);
+  const cutoff = getActivityRetentionCutoff(now);
+  if (!isValidActivityDayKey(anchor)) return today;
+  if (anchor > today) return today;
+  if (anchor < cutoff) return cutoff;
+  return anchor;
 }
 
 /** Monday=0 … Sunday=6 for a Moscow YYYY-MM-DD key. */
@@ -80,20 +111,70 @@ export function listActivityMonthDayKeys(dayKey: string): string[] {
   return keys;
 }
 
-/** Calendar-aligned ranges: today / Mon–Sun week / current month. */
+export function shiftActivityPeriodAnchor(
+  period: ActivityPeriod,
+  anchor: string,
+  delta: number,
+): string {
+  if (period === "day") return shiftActivityDayKey(anchor, delta);
+  if (period === "week") return shiftActivityDayKey(anchor, delta * 7);
+  if (period === "year") {
+    const year = Number(anchor.slice(0, 4)) + delta;
+    return `${year}${anchor.slice(4)}`;
+  }
+  const year = Number(anchor.slice(0, 4));
+  const month = Number(anchor.slice(5, 7));
+  const day = Number(anchor.slice(8, 10));
+  let nextYear = year;
+  let nextMonth = month + delta;
+  while (nextMonth < 1) {
+    nextMonth += 12;
+    nextYear -= 1;
+  }
+  while (nextMonth > 12) {
+    nextMonth -= 12;
+    nextYear += 1;
+  }
+  const monthKey = `${nextYear}-${String(nextMonth).padStart(2, "0")}`;
+  const daysInMonth = listActivityMonthDayKeys(`${monthKey}-01`).length;
+  const safeDay = Math.min(day, daysInMonth);
+  return `${monthKey}-${String(safeDay).padStart(2, "0")}`;
+}
+
+/** Calendar-aligned ranges for the given anchor day. */
 export function listActivityDayKeys(
   period: ActivityPeriod,
   now = new Date(),
+  anchorDayKey?: string,
 ): string[] {
-  const today = getActivityDayKey(now);
-  if (period === "day") return [today];
+  const anchor = clampActivityAnchor(
+    anchorDayKey ?? getActivityDayKey(now),
+    now,
+  );
+  if (period === "day") return [anchor];
   if (period === "week") {
-    const monday = getMondayOfActivityWeek(today);
+    const monday = getMondayOfActivityWeek(anchor);
     return Array.from({ length: 7 }, (_, index) =>
       shiftActivityDayKey(monday, index),
     );
   }
-  return listActivityMonthDayKeys(today);
+  if (period === "month") return listActivityMonthDayKeys(anchor);
+  return [];
+}
+
+export function buildActivityYearMonths(
+  byDate: Record<string, DailyActivityRecord>,
+  year: number,
+): ActivityMonthStat[] {
+  return Array.from({ length: 12 }, (_, index) => {
+    const monthKey = `${year}-${String(index + 1).padStart(2, "0")}`;
+    const days = listActivityMonthDayKeys(`${monthKey}-01`);
+    const onlineMs = days.reduce(
+      (sum, date) => sum + (byDate[date]?.onlineMs ?? 0),
+      0,
+    );
+    return { monthKey, onlineMs };
+  });
 }
 
 /** Pad month days into a Mon–Sun grid (null = outside month). */
@@ -101,9 +182,7 @@ export function buildActivityCalendarCells(
   days: ActivityDayStat[],
   period: ActivityPeriod,
 ): Array<ActivityDayStat | null> {
-  if (period === "day") return days;
-  if (period === "week") return days;
-
+  if (period !== "month") return days;
   if (days.length === 0) return [];
   const lead = getActivityWeekdayMon0(days[0]!.date);
   const cells: Array<ActivityDayStat | null> = [
@@ -194,8 +273,26 @@ export function buildMemberActivityStats(
   byDate: Record<string, DailyActivityRecord>,
   period: ActivityPeriod,
   now = new Date(),
+  anchorDayKey?: string,
 ): MemberActivityStats {
-  const keys = listActivityDayKeys(period, now);
+  const anchor = clampActivityAnchor(
+    anchorDayKey ?? getActivityDayKey(now),
+    now,
+  );
+
+  if (period === "year") {
+    const year = Number(anchor.slice(0, 4));
+    const months = buildActivityYearMonths(byDate, year);
+    return {
+      period,
+      onlineMs: months.reduce((sum, month) => sum + month.onlineMs, 0),
+      days: [],
+      months,
+      anchor,
+    };
+  }
+
+  const keys = listActivityDayKeys(period, now, anchor);
   const days: ActivityDayStat[] = keys.map((date) => {
     const record = byDate[date];
     if (!record) {
@@ -218,6 +315,8 @@ export function buildMemberActivityStats(
     period,
     onlineMs: days.reduce((sum, day) => sum + day.onlineMs, 0),
     days,
+    months: [],
+    anchor,
   };
 }
 

@@ -18,6 +18,7 @@ import { getAppState, setAppState } from "@/lib/supabase/app-state";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 
 export type {
+  ActivityMonthStat,
   ActivityPeriod,
   DailyActivityRecord,
   MemberActivityStats,
@@ -27,9 +28,13 @@ export {
   applyHeartbeatToDailyActivity,
   buildActivityCalendarCells,
   buildMemberActivityStats,
+  clampActivityAnchor,
   getActivityDayKey,
+  getActivityRetentionCutoff,
+  isValidActivityDayKey,
   listActivityDayKeys,
   normalizeDailyActivityStore,
+  shiftActivityPeriodAnchor,
   toTeamMemberDailyActivity,
 } from "@/lib/presence/daily-activity-logic";
 
@@ -118,7 +123,13 @@ export async function getDailyActivityMap(
 export async function getMemberActivityStats(
   userId: string,
   period: ActivityPeriod,
+  anchorDayKey?: string,
 ): Promise<MemberActivityStats> {
   const store = await readStore();
-  return buildMemberActivityStats(store.byUser[userId] ?? {}, period);
+  return buildMemberActivityStats(
+    store.byUser[userId] ?? {},
+    period,
+    new Date(),
+    anchorDayKey,
+  );
 }

@@ -10,12 +10,15 @@ import type { SessionUser } from "@/lib/auth/types";
 import { PRESENCE_POLL_INTERVAL_MS } from "@/lib/presence/constants";
 import type {
   ActivityDayStat,
+  ActivityMonthStat,
   ActivityPeriod,
   MemberActivityStats,
 } from "@/lib/presence/daily-activity-logic";
 import {
   buildActivityCalendarCells,
+  clampActivityAnchor,
   getActivityDayKey,
+  shiftActivityPeriodAnchor,
 } from "@/lib/presence/daily-activity-logic";
 import type { TeamMember } from "@/lib/team/types";
 import { Button } from "@/components/ui/Button";
@@ -28,7 +31,7 @@ type TeamViewProps = {
   user: SessionUser;
 };
 
-const ACTIVITY_PERIODS: ActivityPeriod[] = ["day", "week", "month"];
+const ACTIVITY_PERIODS: ActivityPeriod[] = ["day", "week", "month", "year"];
 
 const WEEKDAY_LABELS: Record<AppLocale, string[]> = {
   ru: ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"],
@@ -89,6 +92,19 @@ function formatActivityMonthTitle(dayKey: string, locale: AppLocale): string {
   }).format(new Date(ts));
 }
 
+function formatActivityMonthShort(monthKey: string, locale: AppLocale): string {
+  const ts = Date.parse(`${monthKey}-15T12:00:00+03:00`);
+  if (Number.isNaN(ts)) return monthKey;
+  return new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-GB", {
+    month: "short",
+    timeZone: "Europe/Moscow",
+  }).format(new Date(ts));
+}
+
+function formatActivityYearTitle(anchor: string): string {
+  return anchor.slice(0, 4);
+}
+
 function formatActivityWeekTitle(
   days: ActivityDayStat[],
   locale: AppLocale,
@@ -116,6 +132,28 @@ function activityHeatClass(onlineMs: number): string {
   return styles.calCellMild;
 }
 
+function canNavigatePeriod(
+  period: ActivityPeriod,
+  anchor: string,
+  delta: number,
+): boolean {
+  const next = clampActivityAnchor(shiftActivityPeriodAnchor(period, anchor, delta));
+  if (delta < 0) {
+    return next < clampActivityAnchor(anchor);
+  }
+  return next > clampActivityAnchor(anchor);
+}
+
+function periodLabel(
+  period: ActivityPeriod,
+  t: ReturnType<typeof useTranslations<"team">>,
+): string {
+  if (period === "day") return t("stats.periodDay");
+  if (period === "week") return t("stats.periodWeek");
+  if (period === "month") return t("stats.periodMonth");
+  return t("stats.periodYear");
+}
+
 export function TeamView({ user }: TeamViewProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("team");
@@ -134,7 +172,8 @@ export function TeamView({ user }: TeamViewProps) {
   const [createdName, setCreatedName] = useState("");
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [statsTarget, setStatsTarget] = useState<TeamMember | null>(null);
-  const [statsPeriod, setStatsPeriod] = useState<ActivityPeriod>("day");
+  const [statsPeriod, setStatsPeriod] = useState<ActivityPeriod>("week");
+  const [statsAnchor, setStatsAnchor] = useState(getActivityDayKey());
   const [stats, setStats] = useState<MemberActivityStats | null>(null);
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState(false);
@@ -172,19 +211,28 @@ export function TeamView({ user }: TeamViewProps) {
   }, [fetchMembers]);
 
   const fetchMemberStats = useCallback(
-    async (memberId: string, period: ActivityPeriod) => {
+    async (memberId: string, period: ActivityPeriod, anchor: string) => {
       setStatsLoading(true);
       setStatsError(false);
       try {
+        const params = new URLSearchParams({
+          period,
+          anchor,
+        });
         const res = await fetch(
-          `/api/team/${encodeURIComponent(memberId)}/activity?period=${period}`,
+          `/api/team/${encodeURIComponent(memberId)}/activity?${params}`,
         );
         if (!res.ok) throw new Error("fetch failed");
         const data = (await res.json()) as { stats?: MemberActivityStats };
         const next = data.stats ?? null;
         setStats(next);
+        if (next?.anchor && next.anchor !== anchor) {
+          setStatsAnchor(next.anchor);
+        }
         if (next?.period === "day") {
           setSelectedDay(next.days[0] ?? null);
+        } else if (next?.period === "year") {
+          setSelectedDay(null);
         } else {
           const todayKey = getActivityDayKey();
           setSelectedDay(
@@ -212,11 +260,12 @@ export function TeamView({ user }: TeamViewProps) {
       setStatsError(false);
       return;
     }
-    void fetchMemberStats(statsTarget.id, statsPeriod);
-  }, [statsTarget, statsPeriod, fetchMemberStats]);
+    void fetchMemberStats(statsTarget.id, statsPeriod, statsAnchor);
+  }, [statsTarget, statsPeriod, statsAnchor, fetchMemberStats]);
 
   const openMemberStats = (member: TeamMember) => {
     setStatsPeriod("week");
+    setStatsAnchor(getActivityDayKey());
     setStatsTarget(member);
   };
 
@@ -225,6 +274,22 @@ export function TeamView({ user }: TeamViewProps) {
     setStats(null);
     setSelectedDay(null);
     setStatsError(false);
+  };
+
+  const changeStatsPeriod = (period: ActivityPeriod) => {
+    setStatsPeriod(period);
+    setStatsAnchor(getActivityDayKey());
+  };
+
+  const shiftStatsAnchor = (delta: number) => {
+    setStatsAnchor((current) =>
+      clampActivityAnchor(shiftActivityPeriodAnchor(statsPeriod, current, delta)),
+    );
+  };
+
+  const openMonthFromYear = (month: ActivityMonthStat) => {
+    setStatsPeriod("month");
+    setStatsAnchor(`${month.monthKey}-15`);
   };
 
   const resetAddForm = () => {
@@ -478,13 +543,9 @@ export function TeamView({ user }: TeamViewProps) {
                   role="tab"
                   aria-selected={statsPeriod === period}
                   className={`${styles.periodTab}${statsPeriod === period ? ` ${styles.periodTabActive}` : ""}`}
-                  onClick={() => setStatsPeriod(period)}
+                  onClick={() => changeStatsPeriod(period)}
                 >
-                  {period === "day"
-                    ? t("stats.periodDay")
-                    : period === "week"
-                      ? t("stats.periodWeek")
-                      : t("stats.periodMonth")}
+                  {periodLabel(period, t)}
                 </button>
               ))}
             </div>
@@ -494,25 +555,48 @@ export function TeamView({ user }: TeamViewProps) {
               <p className={styles.confirmText}>{t("stats.loadFailed")}</p>
             ) : (
               <>
-                <p className={styles.statsRange}>
-                  {stats.period === "month"
-                    ? formatActivityMonthTitle(
-                        stats.days[0]?.date ?? getActivityDayKey(),
-                        locale,
-                      )
-                    : stats.period === "week"
-                      ? formatActivityWeekTitle(stats.days, locale)
-                      : formatActivityDay(
-                          stats.days[0]?.date ?? getActivityDayKey(),
-                          locale,
-                        )}
-                </p>
+                <div className={styles.statsNav}>
+                  <button
+                    type="button"
+                    className={styles.navBtn}
+                    onClick={() => shiftStatsAnchor(-1)}
+                    disabled={!canNavigatePeriod(stats.period, stats.anchor, -1)}
+                    aria-label={t("stats.prev")}
+                  >
+                    ‹
+                  </button>
+                  <p className={styles.statsRange}>
+                    {stats.period === "year"
+                      ? formatActivityYearTitle(stats.anchor)
+                      : stats.period === "month"
+                        ? formatActivityMonthTitle(
+                            stats.days[0]?.date ?? stats.anchor,
+                            locale,
+                          )
+                        : stats.period === "week"
+                          ? formatActivityWeekTitle(stats.days, locale)
+                          : formatActivityDay(
+                              stats.days[0]?.date ?? stats.anchor,
+                              locale,
+                            )}
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.navBtn}
+                    onClick={() => shiftStatsAnchor(1)}
+                    disabled={!canNavigatePeriod(stats.period, stats.anchor, 1)}
+                    aria-label={t("stats.next")}
+                  >
+                    ›
+                  </button>
+                </div>
                 <p className={styles.statsTotal}>
                   {t("stats.total")}:{" "}
                   <span className={styles.statValue}>
                     {formatOnlineDuration(stats.onlineMs, t)}
                   </span>
                 </p>
+                <p className={styles.statsRetention}>{t("stats.retentionHint")}</p>
                 {stats.period === "day" ? (
                   <div className={styles.dayDetail}>
                     {stats.days[0] && stats.days[0].onlineMs > 0 ? (
@@ -526,6 +610,33 @@ export function TeamView({ user }: TeamViewProps) {
                     ) : (
                       <p className={styles.dayMeta}>{t("stats.emptyDay")}</p>
                     )}
+                  </div>
+                ) : stats.period === "year" ? (
+                  <div className={styles.yearGrid}>
+                    {stats.months.map((month) => {
+                      const heat = activityHeatClass(month.onlineMs);
+                      const isFutureMonth =
+                        month.monthKey > getActivityDayKey().slice(0, 7);
+                      return (
+                        <button
+                          key={month.monthKey}
+                          type="button"
+                          className={[styles.yearCell, heat]
+                            .filter(Boolean)
+                            .join(" ")}
+                          onClick={() => openMonthFromYear(month)}
+                          disabled={isFutureMonth}
+                          title={`${formatActivityMonthTitle(`${month.monthKey}-15`, locale)}: ${formatOnlineDuration(month.onlineMs, t)}`}
+                        >
+                          <span className={styles.calDayNum}>
+                            {formatActivityMonthShort(month.monthKey, locale)}
+                          </span>
+                          <span className={styles.calDayDur}>
+                            {formatOnlineDurationCompact(month.onlineMs, t)}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 ) : (
                   <>

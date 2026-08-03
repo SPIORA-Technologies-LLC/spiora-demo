@@ -173,12 +173,83 @@
 }
 
 .statsRange {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-family: Inter, sans-serif;
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--white);
   text-transform: capitalize;
+  text-align: center;
+  flex: 1;
+}
+
+.statsNav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.35rem;
+}
+
+.navBtn {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: transparent;
+  color: var(--white);
+  font-size: 1.25rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.navBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.navBtn:not(:disabled):hover {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.statsRetention {
+  margin: -0.35rem 0 0.85rem;
+  font-family: Inter, sans-serif;
+  font-size: 0.75rem;
+  color: var(--gray-400);
+}
+
+.yearGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 0 0 0.85rem;
+}
+
+.yearCell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.35rem;
+  min-height: 4.25rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 0.55rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--white);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.yearCell:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.yearCell:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .calGrid {

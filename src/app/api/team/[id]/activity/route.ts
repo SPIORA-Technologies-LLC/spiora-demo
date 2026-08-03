@@ -4,6 +4,7 @@ import { translateAdminMessage } from "@/i18n/admin-messages";
 import { getSession } from "@/lib/auth/session";
 import {
   getMemberActivityStats,
+  isValidActivityDayKey,
   type ActivityPeriod,
 } from "@/lib/presence/daily-activity";
 import { canViewTeamMemberActivity } from "@/lib/team/permissions";
@@ -13,7 +14,7 @@ type RouteContext = {
   params: Promise<{ id: string }>;
 };
 
-const PERIODS = new Set<ActivityPeriod>(["day", "week", "month"]);
+const PERIODS = new Set<ActivityPeriod>(["day", "week", "month", "year"]);
 
 function parsePeriod(value: string | null): ActivityPeriod {
   if (value && PERIODS.has(value as ActivityPeriod)) {
@@ -51,8 +52,12 @@ export async function GET(request: Request, context: RouteContext) {
     );
   }
 
-  const period = parsePeriod(new URL(request.url).searchParams.get("period"));
-  const stats = await getMemberActivityStats(id, period);
+  const url = new URL(request.url);
+  const period = parsePeriod(url.searchParams.get("period"));
+  const anchorRaw = url.searchParams.get("anchor");
+  const anchor =
+    anchorRaw && isValidActivityDayKey(anchorRaw) ? anchorRaw : undefined;
+  const stats = await getMemberActivityStats(id, period, anchor);
 
   return NextResponse.json({
     member: {

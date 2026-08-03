@@ -191,12 +191,19 @@ describe("daily presence activity", () => {
         lastActiveAt: "2026-07-01T10:00:00.000Z",
         onlineMs: 1_800_000,
       },
+      "2026-01-15": {
+        date: "2026-01-15",
+        firstActiveAt: "2026-01-15T09:00:00.000Z",
+        lastActiveAt: "2026-01-15T10:00:00.000Z",
+        onlineMs: 900_000,
+      },
     };
 
     const day = buildMemberActivityStats(byDate, "day", now);
     assert.equal(day.days.length, 1);
     assert.equal(day.days[0]?.date, "2026-07-30");
     assert.equal(day.onlineMs, 3_600_000);
+    assert.equal(day.anchor, "2026-07-30");
 
     const week = buildMemberActivityStats(byDate, "week", now);
     assert.equal(week.days.length, 7);
@@ -210,6 +217,12 @@ describe("daily presence activity", () => {
     assert.equal(month.days[30]?.date, "2026-07-31");
     assert.equal(month.onlineMs, 12_600_000);
 
+    const year = buildMemberActivityStats(byDate, "year", now);
+    assert.equal(year.months.length, 12);
+    assert.equal(year.months[0]?.onlineMs, 900_000);
+    assert.equal(year.months[6]?.onlineMs, 12_600_000);
+    assert.equal(year.onlineMs, 13_500_000);
+
     const monthCells = buildActivityCalendarCells(month.days, "month");
     assert.equal(monthCells[0], null);
     assert.equal(monthCells[1], null);
@@ -217,8 +230,7 @@ describe("daily presence activity", () => {
     assert.equal(monthCells.length % 7, 0);
   });
 
-
-  it("prunes activity older than retention window", () => {
+  it("prunes activity older than one year retention window", () => {
     const now = new Date("2026-07-30T12:00:00+03:00");
     const pruned = pruneActivityDays(
       {
@@ -228,18 +240,25 @@ describe("daily presence activity", () => {
           lastActiveAt: "2026-07-30T10:00:00.000Z",
           onlineMs: 1_000,
         },
-        "2026-04-01": {
-          date: "2026-04-01",
-          firstActiveAt: "2026-04-01T09:00:00.000Z",
-          lastActiveAt: "2026-04-01T10:00:00.000Z",
+        "2025-07-31": {
+          date: "2025-07-31",
+          firstActiveAt: "2025-07-31T09:00:00.000Z",
+          lastActiveAt: "2025-07-31T10:00:00.000Z",
           onlineMs: 2_000,
         },
+        "2025-07-30": {
+          date: "2025-07-30",
+          firstActiveAt: "2025-07-30T09:00:00.000Z",
+          lastActiveAt: "2025-07-30T10:00:00.000Z",
+          onlineMs: 3_000,
+        },
       },
-      90,
+      365,
       now,
     );
     assert.ok(pruned["2026-07-30"]);
-    assert.equal(pruned["2026-04-01"], undefined);
+    assert.ok(pruned["2025-07-31"]);
+    assert.equal(pruned["2025-07-30"], undefined);
   });
 });
 

@@ -1385,6 +1385,10 @@
       "periodDay": "Day",
       "periodWeek": "Week",
       "periodMonth": "Month",
+      "periodYear": "Year",
+      "prev": "Previous period",
+      "next": "Next period",
+      "retentionHint": "History is kept for 365 days.",
       "close": "Close"
     },
     "modal": {

@@ -13,9 +13,10 @@ const REDUCED_MOTION_MS = 400;
 type Props = {
   /** When true, show every mount (no sessionStorage gate). Default: once per tab session. */
   force?: boolean;
+  onDone?: () => void;
 };
 
-export function SpioraSplashV50({ force = false }: Props) {
+export function SpioraSplashV50({ force = false, onDone }: Props) {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
 
@@ -32,13 +33,14 @@ export function SpioraSplashV50({ force = false }: Props) {
     const hideTimer = window.setTimeout(() => {
       setVisible(false);
       if (!force) sessionStorage.setItem(STORAGE_KEY, "1");
+      onDone?.();
     }, holdMs + FADE_MS);
 
     return () => {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(hideTimer);
     };
-  }, [force]);
+  }, [force, onDone]);
 
   if (!visible) return null;
 

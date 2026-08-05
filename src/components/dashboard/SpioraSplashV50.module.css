@@ -1,0 +1,235 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  width: 100vw;
+  height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+  background: #000;
+  color-scheme: dark;
+}
+
+.splash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 48%,
+    rgba(0, 0, 0, 0.42) 100%
+  );
+}
+
+.splashOut {
+  animation: splashFadeOut 0.5s ease-in forwards;
+  pointer-events: none;
+}
+
+.brandStage {
+  --power-grow: 1.38;
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 42%;
+  width: clamp(340px, 72vw, 900px);
+  aspect-ratio: 4.39 / 1;
+  overflow: visible;
+  transform: translate(-50%, -50%);
+}
+
+.brandStage img {
+  position: absolute;
+  width: 125.3%;
+  max-width: none;
+  height: auto;
+  left: -12.66%;
+  top: -144.5%;
+}
+
+.brandFull {
+  opacity: 0;
+  animation: wordmark-sequence 3.35s 0.25s ease-in-out forwards;
+}
+
+.brandPower {
+  width: 14.35% !important;
+  left: 46% !important;
+  top: 3.33% !important;
+  opacity: 0;
+  transform-origin: 50% 50%;
+  animation: power-transform 4.8s 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.waveCrop {
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: 4vh;
+  height: min(14vw, 198px);
+  overflow: hidden;
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  animation: wave-reveal 3.6s 0.1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.waveCrop > img {
+  position: absolute;
+  width: 150vw;
+  max-width: none;
+  height: auto;
+  left: -25vw;
+  top: -31.24vw;
+  display: block;
+  filter: hue-rotate(17deg) saturate(1.12) brightness(1.06);
+}
+
+.waveGlint {
+  position: absolute;
+  z-index: 2;
+  width: 24vw;
+  height: 16vw;
+  top: 22%;
+  left: -28vw;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 73, 0, 0.3),
+    rgba(255, 30, 0, 0) 68%
+  );
+  filter: blur(9px);
+  animation: glint 3.3s 0.1s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+}
+
+@keyframes splashFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes wave-reveal {
+  0% {
+    opacity: 0;
+    clip-path: inset(0 100% 0 0);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes wordmark-sequence {
+  0% {
+    opacity: 0;
+  }
+  34%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes power-transform {
+  0%,
+  42% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(var(--power-grow));
+  }
+}
+
+@keyframes glint {
+  to {
+    left: 104vw;
+  }
+}
+
+/* Tablet */
+@media (max-width: 1000px) and (min-width: 641px) {
+  .brandStage {
+    --power-grow: 1.72;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .brandStage {
+    --power-grow: 2.78;
+    width: 90vw;
+    top: 40%;
+  }
+
+  .waveCrop {
+    bottom: 5vh;
+    height: 23vw;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .waveCrop > img {
+    width: 260vw;
+    left: -80vw;
+    top: -54.2vw;
+  }
+
+  .waveGlint {
+    top: 8%;
+    width: 42vw;
+    height: 28vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandFull,
+  .brandPower,
+  .waveCrop,
+  .waveGlint {
+    animation-delay: 0s;
+    animation-duration: 0.01ms;
+  }
+
+  .brandFull,
+  .brandPower {
+    opacity: 1;
+  }
+
+  .brandPower {
+    transform: scale(var(--power-grow));
+  }
+
+  .waveCrop {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+
+  .splashOut {
+    animation-duration: 0.2s;
+  }
+}

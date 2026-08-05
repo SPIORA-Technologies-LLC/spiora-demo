@@ -1,10 +1,7 @@
 import "server-only";
 
 import { isClientPortalDemoAuthEnabledFromEnv } from "@/lib/client-portal/demo-auth-policy";
-import { getSupabaseAdmin } from "@/lib/supabase/server";
-import { normalizeInviteEmail } from "./invite-token";
-
-const MIN_PASSWORD_LEN = 8;
+import { provisionClientPortalAuthUser } from "@/lib/client-portal/client-auth-provision";
 
 /**
  * Demo-only: skip email confirmation for client portal registration.
@@ -24,64 +21,12 @@ export async function demoRegisterConfirmedClientUser(input: {
     return { ok: false, code: "DEMO_AUTH_DISABLED" };
   }
 
-  const email = normalizeInviteEmail(input.email);
-  if (!email) return { ok: false, code: "INVALID_CREDENTIALS" };
-  if (input.password.length < MIN_PASSWORD_LEN) {
-    return { ok: false, code: "INVALID_CREDENTIALS" };
-  }
-
-  const firstName =
-    typeof input.firstName === "string" ? input.firstName.trim().slice(0, 80) : "";
-  const userMetadata = firstName ? { first_name: firstName } : undefined;
-
-  const admin = getSupabaseAdmin();
-
-  const { error: createError } = await admin.auth.admin.createUser({
-    email,
-    password: input.password,
-    email_confirm: true,
-    user_metadata: userMetadata,
-  });
-
-  if (!createError) {
-    return { ok: true };
-  }
-
-  const message = createError.message.toLowerCase();
-  const alreadyExists =
-    message.includes("already") ||
-    message.includes("registered") ||
-    message.includes("exists");
-
-  if (!alreadyExists) {
+  const result = await provisionClientPortalAuthUser(input);
+  if (!result.ok) {
+    if (result.code === "INVALID_EMAIL" || result.code === "INVALID_CREDENTIALS") {
+      return { ok: false, code: "INVALID_CREDENTIALS" };
+    }
     return { ok: false, code: "REGISTRATION_FAILED" };
   }
-
-  const { data: listed, error: listError } =
-    await admin.auth.admin.listUsers({ page: 1, perPage: 200 });
-  if (listError) {
-    return { ok: false, code: "REGISTRATION_FAILED" };
-  }
-
-  const existing = listed.users.find(
-    (u) => u.email?.trim().toLowerCase() === email,
-  );
-  if (!existing?.id) {
-    return { ok: false, code: "REGISTRATION_FAILED" };
-  }
-
-  const { error: updateError } = await admin.auth.admin.updateUserById(
-    existing.id,
-    {
-      email_confirm: true,
-      password: input.password,
-      ...(userMetadata ? { user_metadata: userMetadata } : {}),
-    },
-  );
-
-  if (updateError) {
-    return { ok: false, code: "REGISTRATION_FAILED" };
-  }
-
   return { ok: true };
 }

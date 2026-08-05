@@ -28,6 +28,13 @@ type Assignee = {
 
 type StateFilter = "all" | "pending" | "accepted";
 
+type IssuedCredentials = {
+  email: string;
+  inviteUrl: string;
+  temporaryPassword: string;
+  titleKey: "createdTitle" | "resetTitle";
+};
+
 function newRequestId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
@@ -53,11 +60,11 @@ export function ClientInvitationsPanel() {
   const [serviceType, setServiceType] = useState("residence_permit");
   const [expiresInDays, setExpiresInDays] = useState(7);
   const [saving, setSaving] = useState(false);
-  const [createdUrl, setCreatedUrl] = useState<string | null>(null);
+  const [issued, setIssued] = useState<IssuedCredentials | null>(null);
   const [copyDone, setCopyDone] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resettingId, setResettingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -110,6 +117,25 @@ export function ClientInvitationsPanel() {
     return value;
   }
 
+  function buildSharePackage(creds: IssuedCredentials, nameHint?: string) {
+    const cleanedName = nameHint?.trim();
+    let url = creds.inviteUrl;
+    if (cleanedName) {
+      try {
+        const parsed = new URL(creds.inviteUrl, window.location.origin);
+        parsed.searchParams.set("firstName", cleanedName);
+        url = parsed.toString();
+      } catch {
+        // keep original
+      }
+    }
+    return t("sharePackage", {
+      url,
+      email: creds.email,
+      password: creds.temporaryPassword,
+    });
+  }
+
   async function onCreate(event: React.FormEvent) {
     event.preventDefault();
     setFormError(null);
@@ -118,7 +144,7 @@ export function ClientInvitationsPanel() {
       return;
     }
     setSaving(true);
-    setCreatedUrl(null);
+    setIssued(null);
     setCopyDone(false);
     const requestId = newRequestId();
     try {
@@ -130,6 +156,7 @@ export function ClientInvitationsPanel() {
         },
         body: JSON.stringify({
           email,
+          firstName: firstName.trim() || null,
           preferredLocale,
           serviceType,
           assignedTo,
@@ -139,32 +166,43 @@ export function ClientInvitationsPanel() {
       });
       const data = (await res.json()) as {
         inviteUrl?: string;
+        temporaryPassword?: string;
+        invitation?: { email: string };
         reused?: boolean;
         error?: { message: string; code?: string };
       };
       if (!res.ok) {
         if (data.error?.code === "ASSIGNEE_REQUIRED") {
           setFormError(t("errors.assigneeRequired"));
+        } else if (data.error?.code === "AUTH_PROVISION_FAILED") {
+          setFormError(t("errors.authProvisionFailed"));
         } else {
           setFormError(data.error?.message || t("errors.createFailed"));
         }
         return;
       }
-      if (data.inviteUrl) {
+      if (data.inviteUrl && data.temporaryPassword) {
+        let inviteUrl = data.inviteUrl;
         const cleanedName = firstName.trim();
         if (cleanedName) {
           try {
             const url = new URL(data.inviteUrl, window.location.origin);
             url.searchParams.set("firstName", cleanedName);
-            setCreatedUrl(url.toString());
+            inviteUrl = url.toString();
           } catch {
-            setCreatedUrl(data.inviteUrl);
+            // keep original
           }
-        } else {
-          setCreatedUrl(data.inviteUrl);
         }
+        setIssued({
+          email: data.invitation?.email ?? email.trim(),
+          inviteUrl,
+          temporaryPassword: data.temporaryPassword,
+          titleKey: "createdTitle",
+        });
       } else if (data.reused) {
         setFormError(t("errors.reusedNoUrl"));
+      } else {
+        setFormError(t("errors.createFailed"));
       }
       await load();
     } catch {
@@ -187,10 +225,56 @@ export function ClientInvitationsPanel() {
     }
   }
 
-  async function copyUrl() {
-    if (!createdUrl) return;
+  async function onResetPassword(row: Invitation) {
+    if (!window.confirm(t("confirmResetPassword"))) return;
+    setResettingId(row.id);
+    setFormError(null);
     try {
-      await navigator.clipboard.writeText(createdUrl);
+      const res = await fetch(
+        `/api/client-invitations/${encodeURIComponent(row.id)}/reset-password`,
+        { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
+      );
+      const data = (await res.json()) as {
+        email?: string;
+        inviteUrl?: string;
+        temporaryPassword?: string;
+        error?: { message: string; code?: string };
+      };
+      if (!res.ok || !data.temporaryPassword || !data.inviteUrl || !data.email) {
+        setModalOpen(true);
+        setIssued(null);
+        setFormError(
+          data.error?.code === "AUTH_PROVISION_FAILED"
+            ? t("errors.authProvisionFailed")
+            : t("errors.resetFailed"),
+        );
+        return;
+      }
+      setModalOpen(true);
+      setCopyDone(false);
+      setFormError(null);
+      setIssued({
+        email: data.email,
+        inviteUrl: data.inviteUrl,
+        temporaryPassword: data.temporaryPassword,
+        titleKey: "resetTitle",
+      });
+      await load();
+    } catch {
+      setModalOpen(true);
+      setIssued(null);
+      setFormError(t("errors.resetFailed"));
+    } finally {
+      setResettingId(null);
+    }
+  }
+
+  async function copySharePackage() {
+    if (!issued) return;
+    try {
+      await navigator.clipboard.writeText(
+        buildSharePackage(issued, firstName),
+      );
       setCopyDone(true);
     } catch {
       setCopyDone(false);
@@ -199,7 +283,7 @@ export function ClientInvitationsPanel() {
 
   async function openModal(prefillEmail?: string) {
     setModalOpen(true);
-    setCreatedUrl(null);
+    setIssued(null);
     setCopyDone(false);
     setFormError(null);
     setEmail(prefillEmail ?? "");
@@ -277,6 +361,14 @@ export function ClientInvitationsPanel() {
                       <button
                         type="button"
                         className={styles.actionBtn}
+                        disabled={resettingId === row.id}
+                        onClick={() => void onResetPassword(row)}
+                      >
+                        {resettingId === row.id ? "…" : t("resendPassword")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.actionBtn}
                         onClick={() => void openModal(row.email)}
                       >
                         {t("inviteAgain")}
@@ -323,17 +415,33 @@ export function ClientInvitationsPanel() {
               </button>
             </div>
 
-            {createdUrl ? (
+            {issued ? (
               <div className={styles.success}>
-                <p className={styles.successTitle}>{t("createdTitle")}</p>
-                <code className={styles.url}>{createdUrl}</code>
-                <button type="button" className={styles.primaryBtn} onClick={() => void copyUrl()}>
-                  {copyDone ? t("copied") : t("copyLink")}
+                <p className={styles.successTitle}>{t(issued.titleKey)}</p>
+                <label className={styles.credLabel}>
+                  {t("fields.email")}
+                  <code className={styles.url}>{issued.email}</code>
+                </label>
+                <label className={styles.credLabel}>
+                  {t("passwordLabel")}
+                  <code className={styles.url}>{issued.temporaryPassword}</code>
+                </label>
+                <label className={styles.credLabel}>
+                  {t("linkLabel")}
+                  <code className={styles.url}>{issued.inviteUrl}</code>
+                </label>
+                <button
+                  type="button"
+                  className={styles.primaryBtn}
+                  onClick={() => void copySharePackage()}
+                >
+                  {copyDone ? t("copied") : t("copyMessage")}
                 </button>
                 <p className={styles.muted}>{t("copyOnceHint")}</p>
               </div>
             ) : (
               <form className={styles.form} onSubmit={(e) => void onCreate(e)}>
+                {formError ? <p className={styles.error}>{formError}</p> : null}
                 <label>
                   {t("fields.email")}
                   <input
@@ -405,7 +513,6 @@ export function ClientInvitationsPanel() {
                     onChange={(e) => setExpiresInDays(Number(e.target.value))}
                   />
                 </label>
-                {formError ? <p className={styles.error}>{formError}</p> : null}
                 <button
                   type="submit"
                   className={styles.primaryBtn}

@@ -20,6 +20,7 @@ export type ClientApiErrorCode =
   | "PORTAL_USER_EXISTS"
   | "ACCEPT_FAILED"
   | "ALREADY_ACCEPTED"
+  | "AUTH_PROVISION_FAILED"
   | "AUTH_REQUIRED"
   | "AUTH_UNAVAILABLE"
   | "RATE_LIMITED"
@@ -59,6 +60,7 @@ const MESSAGES: Record<ClientApiErrorCode, string> = {
   PORTAL_USER_EXISTS: "This account is already linked to another invitation",
   ACCEPT_FAILED: "Could not accept invitation",
   ALREADY_ACCEPTED: "Invitation already accepted",
+  AUTH_PROVISION_FAILED: "Could not create client login credentials",
   AUTH_REQUIRED: "Sign in required",
   AUTH_UNAVAILABLE: "Authentication is unavailable",
   RATE_LIMITED: "Too many requests",

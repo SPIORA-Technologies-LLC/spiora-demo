@@ -42,7 +42,7 @@ export function ClientInvitePage({ token }: Props) {
   const locale = useLocale();
   const [preview, setPreview] = useState<Preview | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<"login" | "register">("register");
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -246,15 +246,9 @@ export function ClientInvitePage({ token }: Props) {
               {t("expiresLabel")}:{" "}
               {new Date(preview.expiresAt).toLocaleString(locale)}
             </p>
+            <p className={styles.hint}>{t("passwordFromInvite")}</p>
 
             <div className={styles.modeRow}>
-              <button
-                type="button"
-                className={mode === "register" ? styles.modeActive : styles.mode}
-                onClick={() => setMode("register")}
-              >
-                {t("register")}
-              </button>
               <button
                 type="button"
                 className={mode === "login" ? styles.modeActive : styles.mode}
@@ -262,23 +256,28 @@ export function ClientInvitePage({ token }: Props) {
               >
                 {t("signIn")}
               </button>
+              <button
+                type="button"
+                className={mode === "register" ? styles.modeActive : styles.mode}
+                onClick={() => setMode("register")}
+              >
+                {t("register")}
+              </button>
             </div>
 
             <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
-              {mode === "register" ? (
-                <label className={styles.label}>
-                  {t("firstNameField")}
-                  <input
-                    type="text"
-                    required
-                    autoComplete="given-name"
-                    maxLength={80}
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    className={styles.input}
-                  />
-                </label>
-              ) : null}
+              <label className={styles.label}>
+                {t("firstNameField")}
+                <input
+                  type="text"
+                  required={mode === "register"}
+                  autoComplete="given-name"
+                  maxLength={80}
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  className={styles.input}
+                />
+              </label>
               <label className={styles.label}>
                 {t("emailField")}
                 <input

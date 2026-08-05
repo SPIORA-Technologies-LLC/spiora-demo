@@ -144,6 +144,31 @@ export async function sbInsertClientInvitation(input: {
   return mapRow(data as DbRow);
 }
 
+export async function sbRotateInvitationToken(
+  id: string,
+  tokenHash: string,
+): Promise<ClientInvitationRow | null> {
+  const existing = await sbGetInvitationById(id);
+  if (!existing) return null;
+  if (existing.acceptedAt || existing.revokedAt) return null;
+  if (new Date(existing.expiresAt).getTime() <= Date.now()) return null;
+
+  const sb = getSupabaseAdmin();
+  const { data, error } = await sb
+    .from("client_invitations")
+    .update({
+      token_hash: tokenHash,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .is("accepted_at", null)
+    .is("revoked_at", null)
+    .select(SELECT)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapRow(data as DbRow) : null;
+}
+
 export async function sbRevokeClientInvitation(
   id: string,
 ): Promise<ClientInvitationRow | null> {

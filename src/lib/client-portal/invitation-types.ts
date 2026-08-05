@@ -43,6 +43,7 @@ export type CreateInvitationInput = {
   expiresInDays?: number;
   requestId?: string | null;
   questionnaireTemplateKey?: string | null;
+  firstName?: string | null;
   createdBy: string;
   employeeRole: "owner" | "manager";
   origin: string;
@@ -54,6 +55,17 @@ export type CreateInvitationResult =
       invitation: InvitationPublicDto;
       inviteUrl: string;
       reused: boolean;
+      temporaryPassword?: string;
+    }
+  | { ok: false; code: string };
+
+export type ResetInvitationCredentialsResult =
+  | {
+      ok: true;
+      email: string;
+      temporaryPassword: string;
+      inviteUrl: string;
+      state: "pending" | "accepted";
     }
   | { ok: false; code: string };
 

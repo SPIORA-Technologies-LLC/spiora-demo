@@ -119,6 +119,26 @@ export async function localInsertInvitation(
   return row;
 }
 
+export async function localRotateInvitationToken(
+  id: string,
+  tokenHash: string,
+): Promise<LocalInvitationRow | null> {
+  const rows = await localListInvitations();
+  const idx = rows.findIndex((r) => r.id === id);
+  if (idx < 0) return null;
+  const row = rows[idx]!;
+  const state = computeInvitationState(row);
+  if (state !== "pending") return null;
+  const updated: LocalInvitationRow = {
+    ...row,
+    tokenHash,
+    updatedAt: new Date().toISOString(),
+  };
+  rows[idx] = updated;
+  await writeJson(INVITES_FILE, rows);
+  return updated;
+}
+
 export async function localRevokeInvitation(
   id: string,
 ): Promise<LocalInvitationRow | null> {

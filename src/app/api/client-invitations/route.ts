@@ -77,6 +77,8 @@ export async function POST(request: Request) {
             : undefined,
       expiresInDays:
         typeof body.expiresInDays === "number" ? body.expiresInDays : undefined,
+      firstName:
+        typeof body.firstName === "string" ? body.firstName : null,
       requestId,
       createdBy: session.id,
       employeeRole: session.role,
@@ -91,23 +93,27 @@ export async function POST(request: Request) {
         result.code === "INVALID_ASSIGNEE" ||
         result.code === "ASSIGNEE_REQUIRED"
           ? 400
-          : 400;
+          : result.code === "AUTH_PROVISION_FAILED"
+            ? 502
+            : 400;
       return clientApiError(
         result.code as
           | "INVALID_EMAIL"
           | "INVALID_LOCALE"
           | "INVALID_EXPIRY"
           | "INVALID_ASSIGNEE"
-          | "ASSIGNEE_REQUIRED",
+          | "ASSIGNEE_REQUIRED"
+          | "AUTH_PROVISION_FAILED",
         status,
       );
     }
 
-    // Never log inviteUrl / token
+    // Never log inviteUrl / token / temporaryPassword
     return clientApiOk(
       {
         invitation: result.invitation,
         inviteUrl: result.inviteUrl,
+        temporaryPassword: result.temporaryPassword,
         reused: result.reused,
       },
       { status: result.reused ? 200 : 201 },

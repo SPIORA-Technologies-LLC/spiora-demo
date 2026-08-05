@@ -161,7 +161,9 @@
 }
 
 .modal {
-  width: min(28rem, 100%);
+  width: min(32rem, 100%);
+  max-height: min(90vh, 40rem);
+  overflow: auto;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: #161014;
@@ -238,4 +240,12 @@
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.35);
   font-size: 0.8rem;
+}
+
+.credLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.72);
 }

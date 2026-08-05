@@ -103,6 +103,31 @@ describe("meeting speaker focus", () => {
     assert.equal(focus?.participant.identity, "c");
   });
 
+  it("keeps the last active speaker when the room goes quiet", () => {
+    const cameras = [track("a"), track("b"), track("c")];
+    const focus = resolveSpeakerFocusTrack({
+      cameraTracks: cameras,
+      activeSpeakers: [],
+      lastActiveSpeakerIdentity: "c",
+      localParticipantIdentity: "a",
+    });
+
+    assert.equal(focus?.participant.identity, "c");
+  });
+
+  it("prefers pin over last active speaker when nobody is talking", () => {
+    const cameras = [track("a"), track("b"), track("c")];
+    const focus = resolveSpeakerFocusTrack({
+      cameraTracks: cameras,
+      pinnedTrack: track("b"),
+      activeSpeakers: [],
+      lastActiveSpeakerIdentity: "c",
+      localParticipantIdentity: "a",
+    });
+
+    assert.equal(focus?.participant.identity, "b");
+  });
+
   it("keeps all cameras in the filmstrip during screen share", () => {
     const cameras = [track("a"), track("b")];
     const carousel = resolveSpeakerCarouselTracks(

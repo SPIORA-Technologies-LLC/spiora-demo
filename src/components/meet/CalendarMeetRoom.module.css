@@ -1,27 +1,32 @@
 .page {
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background: var(--surface-hero);
   color: var(--white);
 }
 
 .pageDock {
   min-height: 100%;
+  height: 100%;
 }
 
 .pageDock .livekitRoom,
 .pageDock .room {
   min-height: 100%;
+  height: 100%;
 }
 
 .livekitRoom {
   display: flex;
   flex: 1;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
   --lk-bg: #0b1220;
   --lk-bg2: #111827;
   --lk-fg: #f8fafc;
@@ -31,8 +36,9 @@
   display: flex;
   flex: 1;
   flex-direction: column;
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .topBar {
@@ -132,6 +138,7 @@
   display: flex;
   align-items: stretch;
   justify-content: stretch;
+  overflow: hidden;
 }
 
 .participantGrid {
@@ -139,6 +146,7 @@
   height: 100%;
   max-height: 100%;
   min-height: 0;
+  overflow: hidden;
 }
 
 .participantGrid :global(.lk-grid-layout) {
@@ -148,6 +156,7 @@
   gap: 0.5rem;
   align-content: stretch;
   justify-items: stretch;
+  overflow: hidden;
 }
 
 .gridTile {
@@ -183,15 +192,13 @@
   --lk-row-count: 1;
 }
 
-.participantGridStage[data-participant-count="3"] :global(.lk-grid-layout),
-.participantGridStage[data-participant-count="4"] :global(.lk-grid-layout) {
+.participantGridStage[data-participant-count="3"] :global(.lk-grid-layout) {
   --lk-col-count: 2;
   --lk-row-count: 2;
 }
 
 .participantGridStage[data-participant-count="2"] :global(.lk-participant-tile),
-.participantGridStage[data-participant-count="3"] :global(.lk-participant-tile),
-.participantGridStage[data-participant-count="4"] :global(.lk-participant-tile) {
+.participantGridStage[data-participant-count="3"] :global(.lk-participant-tile) {
   width: 100%;
   height: 100% !important;
   max-height: none;
@@ -229,15 +236,20 @@
 
 .filmstripCarousel:global(.lk-carousel) {
   height: 100%;
-  --lk-max-visible-tiles: 5;
+  --lk-max-visible-tiles: 8;
+}
+
+.filmstrip :global(.lk-carousel) {
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .filmstrip :global(.lk-carousel) :global(.lk-participant-tile) {
-  flex: 0 0 9rem;
-  width: 9rem;
-  min-width: 9rem;
-  max-width: 9rem;
-  height: 5.5rem !important;
+  flex: 0 0 7.5rem;
+  width: 7.5rem;
+  min-width: 7.5rem;
+  max-width: 7.5rem;
+  height: 5.25rem !important;
   aspect-ratio: auto;
 }
 
@@ -290,6 +302,20 @@
 .filmstripTile:hover {
   outline: 2px solid rgba(99, 102, 241, 0.55);
   outline-offset: 1px;
+}
+
+.filmstrip :global(.lk-participant-tile[data-lk-speaking="true"]),
+.filmstripTile:global([data-lk-speaking="true"]),
+.gridTile:global([data-lk-speaking="true"]),
+.participantGrid :global(.lk-participant-tile[data-lk-speaking="true"]) {
+  outline: 2px solid #22c55e;
+  outline-offset: 1px;
+}
+
+.speakerMainTile:global([data-lk-speaking="true"]),
+.speakerMain :global(.lk-participant-tile[data-lk-speaking="true"]) {
+  outline: 2px solid rgba(34, 197, 94, 0.85);
+  outline-offset: 2px;
 }
 
 .speakerLayoutScreenShare {
@@ -444,8 +470,7 @@
 
   .participantGridStage[data-participant-count="1"] :global(.lk-participant-tile),
   .participantGridStage[data-participant-count="2"] :global(.lk-participant-tile),
-  .participantGridStage[data-participant-count="3"] :global(.lk-participant-tile),
-  .participantGridStage[data-participant-count="4"] :global(.lk-participant-tile) {
+  .participantGridStage[data-participant-count="3"] :global(.lk-participant-tile) {
     width: 100%;
     height: 100% !important;
     max-height: none;

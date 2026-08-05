@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ParticipantClickEvent } from "@livekit/components-core";
 import { isTrackReference } from "@livekit/components-core";
 import {
@@ -27,6 +27,10 @@ import styles from "./CalendarMeetRoom.module.css";
 export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean }) {
   const { localParticipant } = useLocalParticipant();
   const activeSpeakers = useSpeakingParticipants();
+  const lastActiveSpeakerIdentityRef = useRef<string | null>(null);
+  const [lastActiveSpeakerIdentity, setLastActiveSpeakerIdentity] = useState<
+    string | null
+  >(null);
   const [pinnedTrack, setPinnedTrack] = useState<
     ReturnType<typeof useTracks>[number] | null
   >(null);
@@ -61,6 +65,15 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
     localParticipant.identity,
   );
 
+  useEffect(() => {
+    const next = activeSpeakers[0]?.identity;
+    if (!next || next === lastActiveSpeakerIdentityRef.current) {
+      return;
+    }
+    lastActiveSpeakerIdentityRef.current = next;
+    setLastActiveSpeakerIdentity(next);
+  }, [activeSpeakers]);
+
   const useGridLayout =
     !screenShareTrack &&
     !localIsSharing &&
@@ -76,11 +89,13 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
             screenShareTrack,
             pinnedTrack: screenShareTrack ? null : pinnedTrack,
             activeSpeakers,
+            lastActiveSpeakerIdentity,
             localParticipantIdentity: localParticipant.identity,
           }),
     [
       activeSpeakers,
       cameraTracks,
+      lastActiveSpeakerIdentity,
       localParticipant.identity,
       pinnedTrack,
       screenShareTrack,

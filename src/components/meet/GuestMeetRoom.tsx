@@ -16,6 +16,7 @@ import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
 import { MeetingRecordingNotice } from "./MeetingRecordingNotice";
 import { MeetingSpeakerLayout } from "./MeetingSpeakerLayout";
+import { MEETING_ROOM_OPTIONS } from "@/lib/calendar/meeting-room-options";
 import meetStyles from "./CalendarMeetRoom.module.css";
 import styles from "./GuestMeetRoom.module.css";
 
@@ -446,6 +447,7 @@ export function GuestMeetRoom({
         connect
         audio
         video
+        options={MEETING_ROOM_OPTIONS}
         onDisconnected={handleDisconnected}
         className={styles.livekitRoom}
       >

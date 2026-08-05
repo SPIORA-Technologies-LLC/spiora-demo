@@ -2,8 +2,11 @@ import type { TrackReferenceOrPlaceholder } from "@livekit/components-core";
 import type { Participant } from "livekit-client";
 import { Track } from "livekit-client";
 
-/** Equal grid for small rooms; larger rooms use speaker + filmstrip. */
-export const MEETING_GRID_MAX_PARTICIPANTS = 4;
+/**
+ * Equal grid for 1–3 people. From 4 onward use Zoom/Teams-style
+ * active-speaker stage + filmstrip so everyone fits without scrolling.
+ */
+export const MEETING_GRID_MAX_PARTICIPANTS = 3;
 
 export function pickCameraTracks(
   tracks: TrackReferenceOrPlaceholder[],
@@ -45,6 +48,8 @@ export function resolveSpeakerFocusTrack(params: {
   screenShareTrack?: TrackReferenceOrPlaceholder;
   pinnedTrack?: TrackReferenceOrPlaceholder | null;
   activeSpeakers: Participant[];
+  /** Keep the last talker large when the room goes quiet (Zoom-like). */
+  lastActiveSpeakerIdentity?: string | null;
   localParticipantIdentity: string;
 }): TrackReferenceOrPlaceholder | null {
   // Only remote screen share takes over the main stage.
@@ -73,6 +78,16 @@ export function resolveSpeakerFocusTrack(params: {
     );
     if (stillPresent) {
       return params.pinnedTrack;
+    }
+  }
+
+  if (params.lastActiveSpeakerIdentity) {
+    const last = params.cameraTracks.find(
+      (track) =>
+        track.participant.identity === params.lastActiveSpeakerIdentity,
+    );
+    if (last) {
+      return last;
     }
   }
 

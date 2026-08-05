@@ -36,6 +36,7 @@ import {
   MeetingGuestWaitingBanner,
   usePendingGuestAdmissions,
 } from "./MeetingGuestWaitingBanner";
+import { MEETING_ROOM_OPTIONS } from "@/lib/calendar/meeting-room-options";
 import styles from "./CalendarMeetRoom.module.css";
 
 type MeetingTokenPayload = {
@@ -355,6 +356,7 @@ export function CalendarMeetRoom({ event }: CalendarMeetRoomProps) {
         connect
         audio
         video
+        options={MEETING_ROOM_OPTIONS}
         onConnected={handleConnected}
         onDisconnected={handleDisconnected}
         className={styles.livekitRoom}

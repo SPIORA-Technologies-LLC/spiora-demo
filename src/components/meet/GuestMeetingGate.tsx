@@ -29,8 +29,8 @@ function getCopy(
       return {
         title: "Встреча ещё не открыта",
         body: event
-          ? `Подключение станет доступно за 15 минут до начала. Откроется в ${formatMeetingOpensAtLabel(event, CALENDAR_TIMEZONE)}.`
-          : "Подключение станет доступно за 15 минут до начала.",
+          ? `Вход на встречу пока недоступен. Откроется в ${formatMeetingOpensAtLabel(event, CALENDAR_TIMEZONE)}.`
+          : "Вход на встречу пока недоступен.",
       };
     case "closed":
       return {

@@ -8,7 +8,6 @@ import {
   getMeetingAccessPhase,
   getMeetingAccessWindow,
   isWithinMeetingWindow,
-  MEETING_EARLY_MINUTES,
   MEETING_LATE_MINUTES,
   MeetingAccessError,
 } from "./meeting-access";
@@ -60,14 +59,11 @@ function videoEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
 }
 
 describe("getMeetingAccessWindow", () => {
-  it("opens 15 minutes before start and closes 15 minutes after end", () => {
+  it("opens immediately and closes 15 minutes after end", () => {
     const event = videoEvent();
     const { opensAt, closesAt } = getMeetingAccessWindow(event);
 
-    assert.equal(
-      opensAt.toISOString(),
-      new Date(Date.parse(event.startAt) - MEETING_EARLY_MINUTES * 60_000).toISOString(),
-    );
+    assert.equal(opensAt.toISOString(), new Date(0).toISOString());
     assert.equal(
       closesAt.toISOString(),
       new Date(Date.parse(event.endAt) + MEETING_LATE_MINUTES * 60_000).toISOString(),
@@ -84,11 +80,11 @@ describe("isWithinMeetingWindow", () => {
     );
   });
 
-  it("returns false before the window opens", () => {
+  it("returns true well before the scheduled start", () => {
     const event = videoEvent();
     assert.equal(
       isWithinMeetingWindow(event, new Date("2026-06-25T07:30:00.000Z")),
-      false,
+      true,
     );
   });
 
@@ -102,11 +98,11 @@ describe("isWithinMeetingWindow", () => {
 });
 
 describe("getMeetingAccessPhase", () => {
-  it("reports waiting, open, and closed phases", () => {
+  it("reports open before start and closed after the late window", () => {
     const event = videoEvent();
     assert.equal(
       getMeetingAccessPhase(event, new Date("2026-06-25T07:30:00.000Z")),
-      "waiting",
+      "open",
     );
     assert.equal(
       getMeetingAccessPhase(event, new Date("2026-06-25T08:10:00.000Z")),
@@ -182,7 +178,7 @@ describe("assertCanJoinMeeting", () => {
         assertCanJoinMeeting(
           managerA,
           videoEvent(),
-          new Date("2026-06-25T07:30:00.000Z"),
+          new Date("2026-06-25T09:00:00.000Z"),
         ),
       (error: unknown) => {
         assert.ok(error instanceof MeetingAccessError);
@@ -201,7 +197,7 @@ describe("assertCanRecordMeetingAudit", () => {
           managerA,
           videoEvent(),
           "joined",
-          new Date("2026-06-25T07:30:00.000Z"),
+          new Date("2026-06-25T09:00:00.000Z"),
         ),
       (error: unknown) => {
         assert.ok(error instanceof MeetingAccessError);

@@ -154,7 +154,7 @@ describe("handleRecordMeetingAudit", () => {
       "joined",
       deps,
       createAuditDeps(),
-      new Date("2026-06-25T07:30:00.000Z"),
+      new Date("2026-06-25T09:00:00.000Z"),
     );
 
     assert.equal("status" in result && result.status, 403);

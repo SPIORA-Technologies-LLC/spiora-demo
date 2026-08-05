@@ -1,7 +1,11 @@
 import type { AppLocale } from "@/i18n/config";
 import type { CalendarEvent } from "./types";
 
-export const MEETING_EARLY_MINUTES = 15;
+/**
+ * Legacy export: early join buffer is disabled — meetings open as soon as
+ * the invite/link is available (see getMeetingAccessWindow).
+ */
+export const MEETING_EARLY_MINUTES = 0;
 export const MEETING_LATE_MINUTES = 15;
 
 export type MeetingAccessPhase = "waiting" | "open" | "closed";
@@ -9,10 +13,10 @@ export type MeetingAccessPhase = "waiting" | "open" | "closed";
 export function getMeetingAccessWindow(
   event: Pick<CalendarEvent, "startAt" | "endAt">,
 ): { opensAt: Date; closesAt: Date } {
-  const startMs = Date.parse(event.startAt);
   const endMs = Date.parse(event.endAt);
   return {
-    opensAt: new Date(startMs - MEETING_EARLY_MINUTES * 60_000),
+    // Open immediately — no "N minutes before start" gate for staff or guests.
+    opensAt: new Date(0),
     closesAt: new Date(endMs + MEETING_LATE_MINUTES * 60_000),
   };
 }

@@ -118,20 +118,9 @@ export function ClientInvitationsPanel() {
     return value;
   }
 
-  function buildSharePackage(creds: IssuedCredentials, nameHint?: string) {
-    const cleanedName = nameHint?.trim();
-    let url = creds.inviteUrl;
-    if (cleanedName) {
-      try {
-        const parsed = new URL(creds.inviteUrl, window.location.origin);
-        parsed.searchParams.set("firstName", cleanedName);
-        url = parsed.toString();
-      } catch {
-        // keep original
-      }
-    }
+  function buildSharePackage(creds: IssuedCredentials) {
     return t("sharePackage", {
-      url,
+      url: creds.inviteUrl,
       email: creds.email,
       password: creds.temporaryPassword,
     });
@@ -183,20 +172,9 @@ export function ClientInvitationsPanel() {
         return;
       }
       if (data.inviteUrl && data.temporaryPassword) {
-        let inviteUrl = data.inviteUrl;
-        const cleanedName = firstName.trim();
-        if (cleanedName) {
-          try {
-            const url = new URL(data.inviteUrl, window.location.origin);
-            url.searchParams.set("firstName", cleanedName);
-            inviteUrl = url.toString();
-          } catch {
-            // keep original
-          }
-        }
         setIssued({
           email: data.invitation?.email ?? email.trim(),
-          inviteUrl,
+          inviteUrl: data.inviteUrl,
           temporaryPassword: data.temporaryPassword,
           titleKey: "createdTitle",
         });
@@ -273,9 +251,7 @@ export function ClientInvitationsPanel() {
   async function copySharePackage() {
     if (!issued) return;
     try {
-      await navigator.clipboard.writeText(
-        buildSharePackage(issued, firstName),
-      );
+      await navigator.clipboard.writeText(buildSharePackage(issued));
       setCopyDone(true);
     } catch {
       setCopyDone(false);

@@ -6,7 +6,7 @@ import {
   hashClientInviteToken,
   normalizeInviteEmail,
 } from "./invite-token";
-import { normalizeName } from "./display-name";
+import { toGivenName } from "./display-name";
 import type {
   AssigneeNameResolver,
   AssigneeResolver,
@@ -110,7 +110,7 @@ export async function createClientInvitationCore(
       ? input.questionnaireTemplateKey.trim().slice(0, 120)
       : null;
 
-  const firstName = normalizeName(input.firstName);
+  const firstName = toGivenName(input.firstName);
 
   const row = await store.insert({
     email,

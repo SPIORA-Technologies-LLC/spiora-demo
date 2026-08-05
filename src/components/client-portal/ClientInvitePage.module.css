@@ -86,6 +86,46 @@
   padding: 0.55rem 0.7rem;
 }
 
+.passwordField {
+  position: relative;
+  display: block;
+}
+
+.passwordField .input {
+  width: 100%;
+  padding-right: 2.75rem;
+  box-sizing: border-box;
+}
+
+.passwordToggle {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.55);
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+.passwordToggle:hover:not(:disabled) {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.passwordToggle:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
 .hint {
   margin: 0;
   font-size: 0.78rem;

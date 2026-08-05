@@ -268,6 +268,7 @@ export type InvitePreview =
   | {
       status: "valid";
       maskedEmail: string;
+      firstName: string | null;
       preferredLocale: ClientPortalLocale;
       expiresAt: string;
       serviceType: string | null;
@@ -297,9 +298,11 @@ export async function previewInvitationByToken(
   if (state === "expired") return { status: "expired" };
 
   const { maskEmail } = await import("./invite-token");
+  const { toGivenName } = await import("./display-name");
   return {
     status: "valid",
     maskedEmail: maskEmail(row.email),
+    firstName: toGivenName(row.firstName) ?? null,
     preferredLocale: row.preferredLocale,
     expiresAt: row.expiresAt,
     serviceType: row.serviceType,

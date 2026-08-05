@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
-import { normalizeName } from "@/lib/client-portal/display-name";
+import { normalizeName, toGivenName } from "@/lib/client-portal/display-name";
 import { withClientPortalEntrySplash } from "@/lib/client-portal/entry-splash";
 import {
   createSupabaseBrowserClient,
@@ -16,6 +16,7 @@ type Preview =
   | {
       status: "valid";
       maskedEmail: string;
+      firstName?: string | null;
       preferredLocale: string;
       expiresAt: string;
       serviceType: string | null;
@@ -27,14 +28,16 @@ type Preview =
 
 type Props = { token: string };
 
-function firstNameFromLocation(): string {
+/** Query fallback only — ignore corrupted messenger encodings like «Ивамот�%B». */
+function firstNameFromQuery(): string {
   if (typeof window === "undefined") return "";
   const params = new URLSearchParams(window.location.search);
-  return (
-    normalizeName(params.get("firstName")) ??
-    normalizeName(params.get("name")) ??
-    ""
-  );
+  const raw = params.get("firstName") ?? params.get("name");
+  if (!raw) return "";
+  if (raw.includes("\uFFFD") || /%(?:$|[^0-9A-Fa-f]|[0-9A-Fa-f](?:$|[^0-9A-Fa-f]))/.test(raw)) {
+    return "";
+  }
+  return toGivenName(raw) ?? "";
 }
 
 export function ClientInvitePage({ token }: Props) {
@@ -46,15 +49,11 @@ export function ClientInvitePage({ token }: Props) {
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [demoSkipEmailConfirm, setDemoSkipEmailConfirm] = useState(false);
-
-  useEffect(() => {
-    const fromQuery = firstNameFromLocation();
-    if (fromQuery) setFirstName(fromQuery);
-  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,6 +71,11 @@ export function ClientInvitePage({ token }: Props) {
         setPreview({ status: "invalid" });
       } else {
         setPreview(data.preview);
+        if (data.preview.status === "valid") {
+          const fromServer = toGivenName(data.preview.firstName);
+          const fromQuery = firstNameFromQuery();
+          setFirstName(fromServer || fromQuery || "");
+        }
       }
     } catch {
       setPreview({ status: "invalid" });
@@ -291,17 +295,49 @@ export function ClientInvitePage({ token }: Props) {
               </label>
               <label className={styles.label}>
                 {t("passwordField")}
-                <input
-                  type="password"
-                  required
-                  minLength={8}
-                  autoComplete={
-                    mode === "register" ? "new-password" : "current-password"
-                  }
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={styles.input}
-                />
+                <span className={styles.passwordField}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    minLength={8}
+                    autoComplete={
+                      mode === "register" ? "new-password" : "current-password"
+                    }
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={styles.input}
+                  />
+                  <button
+                    type="button"
+                    className={styles.passwordToggle}
+                    onClick={() => setShowPassword((v) => !v)}
+                    aria-label={
+                      showPassword ? t("hidePassword") : t("showPassword")
+                    }
+                    aria-pressed={showPassword}
+                    disabled={busy}
+                  >
+                    {showPassword ? (
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                        />
+                        <path
+                          fill="currentColor"
+                          d="M3.3 3.3 20.7 20.7l-1.4 1.4L1.9 4.7z"
+                        />
+                      </svg>
+                    ) : (
+                      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path
+                          fill="currentColor"
+                          d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                </span>
               </label>
               <p className={styles.hint}>{t("emailMustMatch")}</p>
               {demoSkipEmailConfirm ? (

@@ -59,10 +59,18 @@ async function writeJson(file: string, data: unknown) {
 }
 
 export async function localListInvitations(): Promise<LocalInvitationRow[]> {
-  const rows = await readJson<LocalInvitationRow[]>(INVITES_FILE, []);
-  return [...rows].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  const rows = await readJson<Array<Partial<LocalInvitationRow> & { id: string }>>(
+    INVITES_FILE,
+    [],
   );
+  return rows
+    .map((r) => ({
+      ...(r as LocalInvitationRow),
+      firstName: r.firstName ?? null,
+    }))
+    .sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
 }
 
 export async function localFindInvitationByRequestId(

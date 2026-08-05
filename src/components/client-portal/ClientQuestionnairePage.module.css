@@ -28,9 +28,9 @@
 }
 
 .sectionTitle {
-  margin: 0 0 1.45rem;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin: 0 0 2rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sectionTitle:focus {
@@ -40,7 +40,13 @@
 }
 
 .sectionTitle + .displayDescription {
-  margin: -0.7rem 0 1.35rem;
+  margin: 0 0 1.5rem;
+}
+
+.sectionTitle + .displayHeading,
+.sectionTitle + .displayInfo,
+.sectionTitle + .field {
+  margin-top: 0.35rem;
 }
 
 .sectionsCompleted {

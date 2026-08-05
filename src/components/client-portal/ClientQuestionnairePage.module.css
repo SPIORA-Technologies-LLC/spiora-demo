@@ -50,9 +50,10 @@
 }
 
 .sectionsCompleted {
-  margin: 0 0 0.85rem;
-  color: rgba(255,255,255,0.72);
-  font-size: 0.9rem;
+  margin: 0 0 0.95rem;
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
 }
 
 .sectionList {

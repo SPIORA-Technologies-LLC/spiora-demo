@@ -2518,7 +2518,7 @@
       "welcomeNamed": "Добро пожаловать, {name}!",
       "progress": "Прогресс: {percent}%",
       "progressSummary": "Прогресс: {percent}%",
-      "sectionsCompleted": "{completed} из {total} разделов заполнено",
+      "sectionsCompleted": "Заполнено {completed} из {total}",
       "selectPlaceholder": "Выберите…",
       "countryHint": "Выберите страну из списка",
       "datePlaceholder": "месяц/день/год",

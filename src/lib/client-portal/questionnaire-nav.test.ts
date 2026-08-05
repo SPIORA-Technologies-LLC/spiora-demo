@@ -4,6 +4,7 @@ import {
   countCompletedSections,
   computeLiveSectionProgress,
   getAdjacentSectionIds,
+  getProgressSectionIds,
   getSectionNavState,
   isSectionComplete,
   listIncompleteRequiredFields,
@@ -77,6 +78,37 @@ describe("questionnaire-nav", () => {
     const filled = computeLiveSectionProgress(sections, { first_name: "Ivan" });
     assert.equal(filled.sectionProgress.personal?.percent, 100);
     assert.equal(countCompletedSections(["welcome", "personal"], filled.sectionProgress), 1);
+  });
+
+  it("excludes display-only intros from progress section ids", () => {
+    const sections = [
+      {
+        id: "welcome",
+        questions: [{ id: "h", type: "information" }],
+      },
+      {
+        id: "personal",
+        questions: [
+          {
+            id: "first_name",
+            type: "text",
+            required: true,
+            label: { en: "First name", ru: "Имя" },
+          },
+        ],
+      },
+      {
+        id: "family",
+        questions: [
+          {
+            id: "notes",
+            type: "textarea",
+            label: { en: "Notes", ru: "Заметки" },
+          },
+        ],
+      },
+    ];
+    assert.deepEqual(getProgressSectionIds(sections), ["personal", "family"]);
   });
 
   it("excludes derived and read-only fields from progress", () => {

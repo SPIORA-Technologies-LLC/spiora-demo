@@ -2518,7 +2518,7 @@
       "welcomeNamed": "Welcome, {name}!",
       "progress": "Progress: {percent}%",
       "progressSummary": "Progress: {percent}%",
-      "sectionsCompleted": "{completed} of {total} sections completed",
+      "sectionsCompleted": "{completed} of {total} completed",
       "selectPlaceholder": "Select…",
       "countryHint": "Choose a country from the list",
       "datePlaceholder": "month/day/year",

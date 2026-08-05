@@ -57,6 +57,15 @@ export function countCompletedSections(
   return sectionIds.filter((id) => isSectionComplete(sectionProgress, id)).length;
 }
 
+/** Sections that count toward progress (excludes welcome / display-only intros). */
+export function getProgressSectionIds(sections: NavSection[]): string[] {
+  return sections
+    .filter((section) =>
+      section.questions.some((q) => !DISPLAY_ONLY_TYPES.has(q.type as QuestionType)),
+    )
+    .map((section) => section.id);
+}
+
 export function getAdjacentSectionIds(
   orderedSectionIds: string[],
   currentSectionId: string | null,

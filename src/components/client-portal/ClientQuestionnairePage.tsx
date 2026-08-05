@@ -15,6 +15,7 @@ import {
   countCompletedSections,
   computeLiveSectionProgress,
   getAdjacentSectionIds,
+  getProgressSectionIds,
   getSectionNavState,
   listIncompleteRequiredFields,
   validateSectionRequiredFields,
@@ -267,6 +268,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     [orderedSectionIds, currentSectionId],
   );
 
+  const progressSectionIds = useMemo(
+    () => getProgressSectionIds(orderedSections),
+    [orderedSections],
+  );
+
   const liveProgress = useMemo(() => {
     if (!data) return null;
     return computeLiveSectionProgress(orderedSections, localAnswers);
@@ -274,8 +280,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
 
   const completedSections = useMemo(() => {
     if (!liveProgress) return 0;
-    return countCompletedSections(orderedSectionIds, liveProgress.sectionProgress);
-  }, [liveProgress, orderedSectionIds]);
+    return countCompletedSections(progressSectionIds, liveProgress.sectionProgress);
+  }, [liveProgress, progressSectionIds]);
 
   useEffect(() => {
     if (reviewMode || !currentSection || loading) return;
@@ -789,7 +795,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
         <p className={styles.sectionsCompleted}>
           {t("sectionsCompleted", {
             completed: completedSections,
-            total: orderedSections.length,
+            total: progressSectionIds.length,
           })}
         </p>
         <ul className={styles.sectionList}>

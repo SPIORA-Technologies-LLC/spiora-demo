@@ -105,6 +105,115 @@
   font-weight: 560;
 }
 
+.booleanRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(12, 12, 12, 0.42);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.booleanRow:hover {
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(18, 18, 18, 0.58);
+}
+
+.booleanRowChecked {
+  border-color: rgba(var(--brand-orange-rgb), 0.55);
+  background: linear-gradient(
+    135deg,
+    rgba(244, 152, 26, 0.12),
+    rgba(232, 41, 22, 0.08)
+  );
+}
+
+.booleanRowDisabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* Visually hidden native control — keeps a11y, avoids OS checkbox chrome */
+.booleanInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+.booleanBox {
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 0.35rem;
+  border: 1.5px solid rgba(246, 239, 233, 0.55);
+  background: rgba(0, 0, 0, 0.55);
+  display: grid;
+  place-content: center;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.booleanBox::after {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  transform: scale(0);
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  background: #fff8f2;
+  transition: transform 0.12s ease;
+}
+
+.booleanInput:checked + .booleanBox {
+  border-color: transparent;
+  background: linear-gradient(145deg, #f4981a 0%, #e82916 85%);
+  box-shadow: 0 0 0 1px rgba(244, 152, 26, 0.25);
+}
+
+.booleanInput:checked + .booleanBox::after {
+  transform: scale(1);
+}
+
+.booleanInput:focus-visible + .booleanBox {
+  outline: 2px solid rgba(var(--brand-orange-rgb), 0.65);
+  outline-offset: 2px;
+}
+
+.booleanCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.booleanLabel {
+  line-height: 1.35;
+  font-weight: 560;
+  color: #f6efe9;
+}
+
+.booleanHint {
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: rgba(246, 239, 233, 0.62);
+}
+
 .displayHeading,
 .displayInfo {
   margin-bottom: 0.9rem;
@@ -123,7 +232,7 @@
   line-height: 1.45;
 }
 
-.field input,
+.field input:not([type="checkbox"]),
 .field textarea,
 .field select {
   border-radius: 12px;
@@ -135,13 +244,13 @@
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.field input:hover:not(:disabled):not([readonly]),
+.field input:not([type="checkbox"]):hover:not(:disabled):not([readonly]),
 .field textarea:hover:not(:disabled):not([readonly]),
 .field select:hover:not(:disabled) {
   border-color: rgba(255,255,255,0.28);
 }
 
-.field input:focus-visible,
+.field input:not([type="checkbox"]):focus-visible,
 .field textarea:focus-visible,
 .field select:focus-visible {
   outline: none;
@@ -224,10 +333,10 @@
   line-height: 1.25;
 }
 
-.field input.readOnlyControl,
+.field input:not([type="checkbox"]).readOnlyControl,
 .field textarea.readOnlyControl,
 .field select.readOnlyControl,
-.field input:disabled,
+.field input:not([type="checkbox"]):disabled,
 .field textarea:disabled,
 .field select:disabled {
   opacity: 1;
@@ -337,7 +446,8 @@
 .fieldInvalid textarea,
 .fieldInvalid select,
 .fieldInvalid .currencyChoices,
-.fieldInvalid .fileDropzone {
+.fieldInvalid .fileDropzone,
+.fieldInvalid .booleanRow {
   border-color: rgba(255, 120, 100, 0.85) !important;
   box-shadow: 0 0 0 1px rgba(255, 120, 100, 0.35);
 }

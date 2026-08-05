@@ -1040,12 +1040,12 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                   <span className={styles.fieldLabel}>
                     {q.label[locale]}{q.required ? " *" : ""}
                   </span>
-                ) : (
+                ) : q.type === "boolean" ? null : (
                   <label htmlFor={`question-${q.id}`} className={styles.fieldLabel}>
                     {q.label[locale]}{q.required ? " *" : ""}
                   </label>
                 )}
-                {q.description && q.type !== "file" ? (
+                {q.description && q.type !== "file" && q.type !== "boolean" ? (
                   <p className={styles.displayDescription}>{q.description[locale]}</p>
                 ) : null}
                 {q.type === "textarea" ? (
@@ -1303,15 +1303,48 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     }
                   />
                 ) : q.type === "boolean" ? (
-                  <input
-                    id={`question-${q.id}`}
-                    type="checkbox"
-                    checked={Boolean(localAnswers[q.id])}
-                    onChange={(e) => onAnswer(q.id, q.type, e.target.checked)}
-                    disabled={Boolean(q.readOnly)}
-                    aria-invalid={errors.some((err) => err.questionId === q.id)}
-                    aria-describedby={errors.some((err) => err.questionId === q.id) ? `error-${q.id}` : undefined}
-                  />
+                  <label
+                    htmlFor={`question-${q.id}`}
+                    className={[
+                      styles.booleanRow,
+                      Boolean(localAnswers[q.id]) ? styles.booleanRowChecked : "",
+                      q.readOnly ? styles.booleanRowDisabled : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    <input
+                      id={`question-${q.id}`}
+                      type="checkbox"
+                      className={styles.booleanInput}
+                      checked={Boolean(localAnswers[q.id])}
+                      onChange={(e) => onAnswer(q.id, q.type, e.target.checked)}
+                      disabled={Boolean(q.readOnly)}
+                      aria-invalid={errors.some((err) => err.questionId === q.id)}
+                      aria-describedby={
+                        [
+                          q.description ? `desc-${q.id}` : null,
+                          errors.some((err) => err.questionId === q.id)
+                            ? `error-${q.id}`
+                            : null,
+                        ]
+                          .filter(Boolean)
+                          .join(" ") || undefined
+                      }
+                    />
+                    <span className={styles.booleanBox} aria-hidden="true" />
+                    <span className={styles.booleanCopy}>
+                      <span className={styles.booleanLabel}>
+                        {q.label[locale]}
+                        {q.required ? " *" : ""}
+                      </span>
+                      {q.description ? (
+                        <span id={`desc-${q.id}`} className={styles.booleanHint}>
+                          {q.description[locale]}
+                        </span>
+                      ) : null}
+                    </span>
+                  </label>
                 ) : (
                   <input
                     id={`question-${q.id}`}

@@ -297,7 +297,26 @@ export async function createClient(
     if (!payload.assigned_manager_name) {
       payload.assigned_manager_name = user.name;
     }
-    return await sbClients.sbInsertClient(payload);
+    // Staff-created CRM clients (not intake bridge) — visible in База and Finance.
+    payload.source = "crm";
+    payload.is_demo = false;
+
+    const created = await sbClients.sbInsertClient(payload);
+
+    // Finance lists all CRM clients; also seed an empty profile for a clear no_contract row.
+    try {
+      const uuid = await sbClients.sbGetClientUuidByExternalId(created.id);
+      if (uuid) {
+        const { sbEnsureEmptyFinanceProfile } = await import(
+          "@/lib/finance/supabase-finance-repo"
+        );
+        await sbEnsureEmptyFinanceProfile(uuid, user.id);
+      }
+    } catch (financeError) {
+      console.error("[crm-store] finance profile ensure failed", financeError);
+    }
+
+    return created;
   } catch (error) {
     if (sbClients.isDuplicateExternalIdError(error)) {
       throw new ClientValidationError("Client with this ID already exists");

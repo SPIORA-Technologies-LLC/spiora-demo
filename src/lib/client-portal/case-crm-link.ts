@@ -43,21 +43,21 @@ function buildDisplayName(
   return "Intake client";
 }
 
-/**
- * Lazy CRM bridge for Finance on intake cases (variant A):
- * on first Finance open, ensure a CRM client exists and link crm_client_id.
- */
-export async function ensureCrmClientForCase(
-  caseId: string,
-  actor: SessionUser,
-): Promise<EnsureCrmClientResult> {
-  if (!canViewFinance(actor)) {
-    throw new CaseCrmLinkError(
-      "FINANCE_ACCESS_DENIED",
-      "Finance access denied",
-    );
-  }
+type LinkActor = {
+  id: string | null;
+  name: string;
+  role: "employee" | "system";
+};
 
+/**
+ * Create/link CRM client for an intake case (no permission checks).
+ * Used on questionnaire submit and by the staff Finance tab.
+ * Rows are tagged source=client_intake and excluded from «База клиентов».
+ */
+async function linkCrmClientForCaseCore(
+  caseId: string,
+  actor: LinkActor,
+): Promise<EnsureCrmClientResult> {
   if (!isCrmPostgresPrimary()) {
     throw new CaseCrmLinkError(
       "CRM_UNAVAILABLE",
@@ -133,13 +133,6 @@ export async function ensureCrmClientForCase(
     }
   }
 
-  if (!canCreateClient(actor)) {
-    throw new CaseCrmLinkError(
-      "CRM_CREATE_FORBIDDEN",
-      "Not allowed to create CRM client",
-    );
-  }
-
   const externalId = await sbClients.sbNextDemoExternalId();
   const direction = record.serviceType?.trim() || "";
   const payload = sbClients.buildInsertFromCreateInput(
@@ -170,6 +163,15 @@ export async function ensureCrmClientForCase(
   }
 
   try {
+    const { sbEnsureEmptyFinanceProfile } = await import(
+      "@/lib/finance/supabase-finance-repo"
+    );
+    await sbEnsureEmptyFinanceProfile(uuid, actor.id);
+  } catch {
+    // non-fatal — Finance still lists the CRM client without a profile
+  }
+
+  try {
     await store.linkCrmClient(caseId, uuid);
   } catch (error) {
     // Another request may have linked first — prefer that link if present.
@@ -195,7 +197,7 @@ export async function ensureCrmClientForCase(
     caseId,
     eventType: "crm_client_linked",
     actorUserId: actor.id,
-    actorRole: "employee",
+    actorRole: actor.role,
     payload: { crmClientId: uuid, externalId: created.id },
   });
 
@@ -205,4 +207,67 @@ export async function ensureCrmClientForCase(
     created: true,
     linked: true,
   };
+}
+
+/**
+ * Staff Finance tab: permission-gated ensure + link.
+ */
+export async function ensureCrmClientForCase(
+  caseId: string,
+  actor: SessionUser,
+): Promise<EnsureCrmClientResult> {
+  if (!canViewFinance(actor)) {
+    throw new CaseCrmLinkError(
+      "FINANCE_ACCESS_DENIED",
+      "Finance access denied",
+    );
+  }
+
+  if (!canCreateClient(actor)) {
+    // Still allow if already linked or email match — check after core would create.
+    // Gate create only: re-check inside by attempting email match first via core,
+    // but core creates without check. So enforce create permission before core
+    // when no link exists.
+    const store = await getCaseStore();
+    const record = await store.getById(caseId);
+    if (!record) {
+      throw new CaseCrmLinkError("CASE_NOT_FOUND", "Case not found");
+    }
+    if (!record.crmClientId) {
+      const email = record.email?.trim() || "";
+      const byEmail = email ? await sbClients.sbFindClientByEmail(email) : null;
+      if (!byEmail) {
+        throw new CaseCrmLinkError(
+          "CRM_CREATE_FORBIDDEN",
+          "Not allowed to create CRM client",
+        );
+      }
+    }
+  }
+
+  return linkCrmClientForCaseCore(caseId, {
+    id: actor.id,
+    name: actor.name,
+    role: "employee",
+  });
+}
+
+/**
+ * Questionnaire submit path: system ensure + link (best-effort caller).
+ * Makes the client visible in Finance without opening the case Finance tab.
+ */
+export async function ensureCrmClientForIntakeCase(
+  caseId: string,
+  options?: { actorUserId?: string | null; actorName?: string | null },
+): Promise<EnsureCrmClientResult | null> {
+  if (!isCrmPostgresPrimary()) return null;
+  try {
+    return await linkCrmClientForCaseCore(caseId, {
+      id: options?.actorUserId ?? null,
+      name: options?.actorName?.trim() || "System",
+      role: "system",
+    });
+  } catch {
+    return null;
+  }
 }

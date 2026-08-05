@@ -52,6 +52,10 @@ function applyFiltersQuery(
     q = q.is("archived_at", null);
   }
 
+  // Intake-bridged rows stay in «Новые клиенты из анкеты» until promoted in CRM.
+  // Lazy Finance link creates them with source=client_intake — hide from База клиентов.
+  q = q.neq("source", "client_intake");
+
   if (filters.direction) q = q.eq("direction", filters.direction);
   if (filters.status) q = q.eq("status", filters.status);
   if (filters.manager) q = q.eq("assigned_manager_name", filters.manager);

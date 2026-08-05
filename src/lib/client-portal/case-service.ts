@@ -159,6 +159,12 @@ export async function submitQuestionnaireAndCreateCase(
       if (prepared.alreadySubmitted) {
         const existing = await caseStore.getByQuestionnaireId(prepared.record.id);
         if (existing) {
+          void import("./case-crm-link").then(({ ensureCrmClientForIntakeCase }) =>
+            ensureCrmClientForIntakeCase(existing.id, {
+              actorUserId: existing.assignedTo,
+              actorName: existing.assignedName,
+            }),
+          );
           return {
             ok: true as const,
             record: prepared.record,
@@ -179,6 +185,12 @@ export async function submitQuestionnaireAndCreateCase(
         prepared.record.invitationId,
         snapshot.firstName,
       ),
+    );
+    void import("./case-crm-link").then(({ ensureCrmClientForIntakeCase }) =>
+      ensureCrmClientForIntakeCase(atomic.case.id, {
+        actorUserId: assignedTo,
+        actorName: atomic.case.assignedName,
+      }),
     );
     return {
       ok: true as const,
@@ -220,6 +232,12 @@ export async function submitQuestionnaireAndCreateCase(
 
   void import("./invitation-case-names").then(({ syncInvitationFirstNameFromCase }) =>
     syncInvitationFirstNameFromCase(record.invitationId, snapshot.firstName),
+  );
+  void import("./case-crm-link").then(({ ensureCrmClientForIntakeCase }) =>
+    ensureCrmClientForIntakeCase(atomic.case.id, {
+      actorUserId: assignedTo,
+      actorName: atomic.case.assignedName,
+    }),
   );
 
   return {

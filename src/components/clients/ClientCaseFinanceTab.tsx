@@ -8,8 +8,7 @@ import styles from "./ClientCaseDetail.module.css";
 type Props = { caseId: string };
 
 /**
- * Lazy CRM link (variant A): first Finance open ensures CRM client, then
- * reuses the standard ClientFinancePanel by external_id.
+ * Finance tab still calls ensure; link is usually already done on questionnaire submit.
  */
 export function ClientCaseFinanceTab({ caseId }: Props) {
   const t = useTranslations("clientIntake.detail.finance");

@@ -255,6 +255,36 @@ export async function sbFinanceDashboardSummary(): Promise<FinanceDashboardKpis>
   };
 }
 
+/** Idempotent stub profile so CRM-created clients are ready in Finance. */
+export async function sbEnsureEmptyFinanceProfile(
+  clientUuid: string,
+  actorId: string | null,
+): Promise<void> {
+  const admin = getSupabaseAdmin();
+  const { data: existing, error: findError } = await admin
+    .from("client_finance_profiles")
+    .select("id")
+    .eq("client_id", clientUuid)
+    .is("archived_at", null)
+    .maybeSingle();
+  if (findError) throw findError;
+  if (existing) return;
+
+  const { error } = await admin.from("client_finance_profiles").insert({
+    client_id: clientUuid,
+    currency_code: "EUR",
+    contract_amount_cents: null,
+    contract_date: null,
+    created_by: actorId,
+    updated_by: actorId,
+  });
+  if (error) {
+    // Concurrent create of the same active profile
+    if ((error as { code?: string }).code === "23505") return;
+    throw error;
+  }
+}
+
 export async function sbFinanceGetAnalytics(input: {
   year: number;
   month: number | null;

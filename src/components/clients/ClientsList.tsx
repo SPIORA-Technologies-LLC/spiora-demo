@@ -172,7 +172,7 @@ export function ClientsList() {
               <dl className={styles.clientCardMeta}>
                 <div className={styles.clientCardRow}>
                   <dt>{t("table.passport")}</dt>
-                  <dd>{client.passportNumber ?? client.id}</dd>
+                  <dd>{client.passportNumber || "—"}</dd>
                 </div>
                 <div className={styles.clientCardRow}>
                   <dt>{t("table.email")}</dt>
@@ -303,7 +303,7 @@ export function ClientsList() {
                       </span>
                     </td>
                     <td>{client.citizenship ?? "—"}</td>
-                    <td>{client.passportNumber ?? client.id}</td>
+                    <td>{client.passportNumber || "—"}</td>
                     <td>{client.email ?? "—"}</td>
                     <td>{client.submittedAt ?? "—"}</td>
                     <td>{client.expectedApprovalAt ?? "—"}</td>

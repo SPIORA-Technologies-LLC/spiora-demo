@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ParticipantClickEvent } from "@livekit/components-core";
-import { isTrackReference } from "@livekit/components-core";
 import {
-  CarouselLayout,
-  FocusLayout,
+  getTrackReferenceId,
+  isTrackReference,
+} from "@livekit/components-core";
+import {
   GridLayout,
   ParticipantTile,
   useLocalParticipant,
@@ -126,21 +127,21 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
         .filter(Boolean)
         .join(" ")}
     >
-      <CarouselLayout
-        tracks={carouselTracks}
-        orientation="horizontal"
-        className={styles.filmstripCarousel}
-      >
-        <ParticipantTile
-          className={[
-            styles.filmstripTile,
-            screenShareTrack ? styles.filmstripTileScreenShare : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
-          onParticipantClick={handleParticipantClick}
-        />
-      </CarouselLayout>
+      <div className={styles.filmstripRow} role="list">
+        {carouselTracks.map((track) => (
+          <ParticipantTile
+            key={getTrackReferenceId(track)}
+            trackRef={track}
+            className={[
+              styles.filmstripTile,
+              screenShareTrack ? styles.filmstripTileScreenShare : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onParticipantClick={handleParticipantClick}
+          />
+        ))}
+      </div>
     </div>
   ) : null;
 
@@ -178,7 +179,7 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
         </div>
 
         <div className={styles.speakerMainScreenShare}>
-          <FocusLayout
+          <ParticipantTile
             trackRef={screenShareTrack}
             className={[styles.speakerMainTile, styles.speakerMainTileScreenShare]
               .filter(Boolean)
@@ -213,7 +214,7 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
 
       <div className={styles.speakerMain}>
         {focusTrack ? (
-          <FocusLayout
+          <ParticipantTile
             trackRef={focusTrack}
             className={styles.speakerMainTile}
           />

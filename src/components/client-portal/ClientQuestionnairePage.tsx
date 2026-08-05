@@ -40,6 +40,7 @@ import {
   resolveCountryToIso,
 } from "@/lib/client-portal/questionnaire-countries";
 import { resolveClientFirstName } from "@/lib/client-portal/display-name";
+import { CountryCombobox } from "./CountryCombobox";
 
 type SchemaSection = {
   id: string;
@@ -1095,11 +1096,15 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     })}
                   </div>
                 ) : q.type === "country" ? (
-                  <select
+                  <CountryCombobox
                     id={`question-${q.id}`}
                     value={resolveCountryToIso(localAnswers[q.id]) ?? ""}
-                    onChange={(e) => onAnswer(q.id, q.type, e.target.value)}
+                    options={countryOptions}
+                    onChange={(next) => onAnswer(q.id, q.type, next)}
                     disabled={Boolean(q.readOnly)}
+                    placeholder={t("selectPlaceholder")}
+                    searchPlaceholder={t("countrySearchPlaceholder")}
+                    noResultsLabel={t("countryNoResults")}
                     className={q.readOnly ? styles.readOnlyControl : undefined}
                     aria-invalid={errors.some((err) => err.questionId === q.id)}
                     aria-describedby={
@@ -1111,14 +1116,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                         .filter(Boolean)
                         .join(" ") || undefined
                     }
-                  >
-                    <option value="">{t("selectPlaceholder")}</option>
-                    {countryOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 ) : q.type === "select" ? (
                   <select
                     id={`question-${q.id}`}

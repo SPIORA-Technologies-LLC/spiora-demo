@@ -1,0 +1,112 @@
+.wrap {
+  position: relative;
+  width: 100%;
+}
+
+.wrap .input {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(12, 12, 12, 0.5);
+  color: inherit;
+  padding: 0.75rem 2.4rem 0.75rem 0.9rem;
+  font: inherit;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.wrap .input::placeholder {
+  color: rgba(246, 239, 233, 0.45);
+}
+
+.wrap .input:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.wrap .input:focus-visible,
+.wrap .inputOpen {
+  outline: none;
+  border-color: rgba(var(--brand-orange-rgb), 0.7);
+  background: rgba(12, 12, 12, 0.72);
+}
+
+.wrap .inputDisabled {
+  opacity: 1;
+  color: #f6efe9;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+  cursor: not-allowed;
+  -webkit-text-fill-color: #f6efe9;
+}
+
+.chevron {
+  position: absolute;
+  right: 0.95rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: rgba(246, 239, 233, 0.55);
+  font-size: 0.9rem;
+  line-height: 1;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
+}
+
+.chevronOpen {
+  transform: translateY(-50%) rotate(180deg);
+  color: rgba(var(--brand-orange-rgb), 0.9);
+}
+
+.menu {
+  position: fixed;
+  z-index: 80;
+  margin: 0;
+  padding: 0.4rem;
+  list-style: none;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #161210;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.empty {
+  padding: 0.75rem 0.85rem;
+  color: rgba(246, 239, 233, 0.55);
+  font-size: 0.9rem;
+}
+
+.option {
+  width: 100%;
+  display: block;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #f6efe9;
+  padding: 0.65rem 0.8rem;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.option:hover,
+.optionActive {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.optionSelected {
+  background: rgba(var(--brand-orange-rgb), 0.18);
+  font-weight: 600;
+}
+
+.optionSelected.optionActive,
+.optionSelected:hover {
+  background: rgba(var(--brand-orange-rgb), 0.28);
+}

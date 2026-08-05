@@ -4,6 +4,7 @@ import type { ClientInvitationState } from "./invite-token";
 export type InvitationRecord = {
   id: string;
   email: string;
+  firstName: string | null;
   tokenHash: string;
   preferredLocale: ClientPortalLocale;
   serviceType: string | null;
@@ -22,6 +23,7 @@ export type InvitationRecord = {
 export type InvitationPublicDto = {
   id: string;
   email: string;
+  firstName: string | null;
   preferredLocale: ClientPortalLocale;
   serviceType: string | null;
   assignedTo: string | null;
@@ -71,6 +73,7 @@ export type ResetInvitationCredentialsResult =
 
 export type InvitationInsertInput = {
   email: string;
+  firstName: string | null;
   tokenHash: string;
   preferredLocale: ClientPortalLocale;
   serviceType: string | null;

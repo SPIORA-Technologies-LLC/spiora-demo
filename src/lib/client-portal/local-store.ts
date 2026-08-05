@@ -14,6 +14,7 @@ const PORTAL_USERS_FILE = path.join(DATA_DIR, "client-portal-users.json");
 export type LocalInvitationRow = {
   id: string;
   email: string;
+  firstName: string | null;
   tokenHash: string;
   preferredLocale: ClientPortalLocale;
   serviceType: string | null;
@@ -100,6 +101,7 @@ export async function localInsertInvitation(
   const row: LocalInvitationRow = {
     id: input.id ?? randomUUID(),
     email: input.email,
+    firstName: input.firstName ?? null,
     tokenHash: input.tokenHash,
     preferredLocale: input.preferredLocale,
     serviceType: input.serviceType,

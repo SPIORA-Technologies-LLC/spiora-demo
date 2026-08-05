@@ -2418,6 +2418,7 @@
     "copyOnceHint": "The password and link are shown only now. After you close this window they cannot be recovered from the database — only reissued.",
     "sharePackage": "Hello!\n\nYou are invited to the Spiora Client portal.\n\nLink: {url}\nEmail: {email}\nPassword: {password}\n\nOpen the link, sign in with these credentials, and accept the invitation.\nIf you lose the password, contact your manager — we can send a new one.",
     "columns": {
+      "name": "Name",
       "email": "Email",
       "program": "Program",
       "assignee": "Assignee",

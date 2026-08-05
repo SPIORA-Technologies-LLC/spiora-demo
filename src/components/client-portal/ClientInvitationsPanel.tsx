@@ -9,6 +9,7 @@ import styles from "./ClientInvitationsPanel.module.css";
 type Invitation = {
   id: string;
   email: string;
+  firstName: string | null;
   preferredLocale: string;
   serviceType: string | null;
   assignedTo: string | null;
@@ -281,13 +282,13 @@ export function ClientInvitationsPanel() {
     }
   }
 
-  async function openModal(prefillEmail?: string) {
+  async function openModal(prefillEmail?: string, prefillFirstName?: string | null) {
     setModalOpen(true);
     setIssued(null);
     setCopyDone(false);
     setFormError(null);
     setEmail(prefillEmail ?? "");
-    setFirstName("");
+    setFirstName(prefillFirstName?.trim() ?? "");
     setPreferredLocale(locale === "en" ? "en" : "ru");
     setServiceType("residence_permit");
     setExpiresInDays(7);
@@ -336,6 +337,7 @@ export function ClientInvitationsPanel() {
           <table className={styles.table}>
             <thead>
               <tr>
+                <th>{t("columns.name")}</th>
                 <th>{t("columns.email")}</th>
                 <th>{t("columns.program")}</th>
                 <th>{t("columns.assignee")}</th>
@@ -348,6 +350,7 @@ export function ClientInvitationsPanel() {
             <tbody>
               {filtered.map((row) => (
                 <tr key={row.id}>
+                  <td>{row.firstName || "—"}</td>
                   <td>{row.email}</td>
                   <td>{serviceLabel(row.serviceType)}</td>
                   <td>{row.assignedToName || "—"}</td>
@@ -369,7 +372,7 @@ export function ClientInvitationsPanel() {
                       <button
                         type="button"
                         className={styles.actionBtn}
-                        onClick={() => void openModal(row.email)}
+                        onClick={() => void openModal(row.email, row.firstName)}
                       >
                         {t("inviteAgain")}
                       </button>
@@ -455,6 +458,7 @@ export function ClientInvitationsPanel() {
                   {t("fields.firstName")}
                   <input
                     type="text"
+                    required
                     maxLength={80}
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}

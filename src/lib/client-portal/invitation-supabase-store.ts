@@ -5,6 +5,7 @@ import type { InvitationRecord, InvitationStore } from "./invitation-types";
 type DbRow = {
   id: string;
   email: string;
+  first_name: string | null;
   token_hash: string;
   preferred_locale: string;
   service_type: string | null;
@@ -21,12 +22,13 @@ type DbRow = {
 };
 
 const SELECT =
-  "id, email, token_hash, preferred_locale, service_type, assigned_to, questionnaire_template_key, expires_at, accepted_at, revoked_at, accepted_by_user_id, created_by, create_request_id, created_at, updated_at";
+  "id, email, first_name, token_hash, preferred_locale, service_type, assigned_to, questionnaire_template_key, expires_at, accepted_at, revoked_at, accepted_by_user_id, created_by, create_request_id, created_at, updated_at";
 
 function mapRow(row: DbRow): InvitationRecord {
   return {
     id: row.id,
     email: row.email,
+    firstName: row.first_name?.trim() || null,
     tokenHash: row.token_hash,
     preferredLocale: row.preferred_locale === "en" ? "en" : "ru",
     serviceType: row.service_type,
@@ -63,6 +65,7 @@ export function createSupabaseInvitationStore(
         .from("client_invitations")
         .insert({
           email: input.email,
+          first_name: input.firstName,
           token_hash: input.tokenHash,
           preferred_locale: input.preferredLocale,
           service_type: input.serviceType,

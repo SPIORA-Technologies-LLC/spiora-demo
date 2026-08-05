@@ -6,6 +6,7 @@ import type { ClientPortalLocale } from "@/lib/client-portal/types";
 export type ClientInvitationRow = {
   id: string;
   email: string;
+  firstName: string | null;
   tokenHash: string;
   preferredLocale: ClientPortalLocale;
   serviceType: string | null;
@@ -24,6 +25,7 @@ export type ClientInvitationRow = {
 type DbRow = {
   id: string;
   email: string;
+  first_name: string | null;
   token_hash: string;
   preferred_locale: string;
   service_type: string | null;
@@ -43,6 +45,7 @@ function mapRow(row: DbRow): ClientInvitationRow {
   return {
     id: row.id,
     email: row.email,
+    firstName: row.first_name?.trim() || null,
     tokenHash: row.token_hash,
     preferredLocale: row.preferred_locale === "en" ? "en" : "ru",
     serviceType: row.service_type,
@@ -60,7 +63,7 @@ function mapRow(row: DbRow): ClientInvitationRow {
 }
 
 const SELECT =
-  "id, email, token_hash, preferred_locale, service_type, assigned_to, questionnaire_template_key, expires_at, accepted_at, revoked_at, accepted_by_user_id, created_by, create_request_id, created_at, updated_at";
+  "id, email, first_name, token_hash, preferred_locale, service_type, assigned_to, questionnaire_template_key, expires_at, accepted_at, revoked_at, accepted_by_user_id, created_by, create_request_id, created_at, updated_at";
 
 export async function sbListClientInvitations(): Promise<ClientInvitationRow[]> {
   const sb = getSupabaseAdmin();
@@ -115,6 +118,7 @@ export async function sbGetInvitationByRequestId(
 
 export async function sbInsertClientInvitation(input: {
   email: string;
+  firstName?: string | null;
   tokenHash: string;
   preferredLocale: ClientPortalLocale;
   serviceType: string | null;
@@ -129,6 +133,7 @@ export async function sbInsertClientInvitation(input: {
     .from("client_invitations")
     .insert({
       email: input.email,
+      first_name: input.firstName ?? null,
       token_hash: input.tokenHash,
       preferred_locale: input.preferredLocale,
       service_type: input.serviceType,

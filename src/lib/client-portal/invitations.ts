@@ -68,6 +68,7 @@ function toRecord(row: ClientInvitationRow | LocalInvitationRow): InvitationReco
   return {
     id: row.id,
     email: row.email,
+    firstName: row.firstName ?? null,
     tokenHash: row.tokenHash,
     preferredLocale: row.preferredLocale,
     serviceType: row.serviceType,
@@ -98,6 +99,7 @@ function getInvitationStore(): InvitationStore {
     async insert(input) {
       const row = await localInsertInvitation({
         email: input.email,
+        firstName: input.firstName,
         tokenHash: input.tokenHash,
         preferredLocale: input.preferredLocale,
         serviceType: input.serviceType,

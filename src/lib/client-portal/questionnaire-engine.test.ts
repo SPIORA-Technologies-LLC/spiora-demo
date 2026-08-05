@@ -19,10 +19,7 @@ describe("questionnaire schema", () => {
     const b = hashQuestionnaireSchema(GENERAL_CLIENT_ONBOARDING_SCHEMA);
     assert.equal(a, b);
     assert.equal(a.length, 64);
-    assert.equal(
-      a,
-      "db01cd23fa948b1c98615b3a23db971ccfaabc19bd03c43df3bcb9ddc0d923e7",
-    );
+    assert.equal(a, GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH);
   });
 });
 

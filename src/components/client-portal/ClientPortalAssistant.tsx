@@ -141,6 +141,7 @@ export function ClientPortalAssistant() {
         <div className={styles.aiNoticeCopy}>
           <p className={styles.aiNoticeTitle}>{t("aiNotice.title")}</p>
           <p className={styles.aiNoticeText}>{t("aiNotice.text")}</p>
+          <p className={styles.aiNoticeLegal}>{t("aiNotice.legalRef")}</p>
         </div>
       </aside>
 

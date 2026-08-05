@@ -35,8 +35,9 @@ export function isSectionComplete(
   sectionId: string,
 ): boolean {
   const sp = sectionProgress[sectionId];
-  // Sections with no required fields must not count as filled (e.g. optional Family).
-  if (!sp || sp.total <= 0) return false;
+  if (!sp) return false;
+  // No required fields → nothing left to fill; do not mark as incomplete.
+  if (sp.total <= 0) return true;
   return sp.completed >= sp.total;
 }
 
@@ -57,11 +58,15 @@ export function countCompletedSections(
   return sectionIds.filter((id) => isSectionComplete(sectionProgress, id)).length;
 }
 
-/** Sections that count toward progress (excludes welcome / display-only intros). */
+/** Sections that count toward progress (have at least one required editable field). */
 export function getProgressSectionIds(sections: NavSection[]): string[] {
   return sections
     .filter((section) =>
-      section.questions.some((q) => !DISPLAY_ONLY_TYPES.has(q.type as QuestionType)),
+      section.questions.some((q) => {
+        if (DISPLAY_ONLY_TYPES.has(q.type as QuestionType)) return false;
+        if (q.readOnly || q.derivedFrom) return false;
+        return Boolean(q.required);
+      }),
     )
     .map((section) => section.id);
 }

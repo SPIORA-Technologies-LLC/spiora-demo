@@ -18,13 +18,13 @@ const progress = {
 };
 
 describe("questionnaire-nav", () => {
-  it("does not treat sections with no required fields as complete", () => {
-    assert.equal(isSectionComplete(progress, "welcome"), false);
+  it("treats sections with no required fields as complete for nav", () => {
+    assert.equal(isSectionComplete(progress, "welcome"), true);
   });
 
   it("marks current over completed for nav state", () => {
     assert.equal(getSectionNavState("personal", "personal", progress), "current");
-    assert.equal(getSectionNavState("welcome", "personal", progress), "incomplete");
+    assert.equal(getSectionNavState("welcome", "personal", progress), "completed");
     assert.equal(getSectionNavState("contact", "personal", progress), "incomplete");
     assert.equal(getSectionNavState("personal", "welcome", progress), "completed");
   });
@@ -32,7 +32,7 @@ describe("questionnaire-nav", () => {
   it("counts completed sections without using question totals", () => {
     assert.equal(
       countCompletedSections(["welcome", "personal", "contact"], progress),
-      1,
+      2,
     );
   });
 
@@ -73,14 +73,14 @@ describe("questionnaire-nav", () => {
     const empty = computeLiveSectionProgress(sections, {});
     assert.equal(empty.sectionProgress.welcome?.percent, 100);
     assert.equal(empty.sectionProgress.personal?.percent, 0);
-    assert.equal(countCompletedSections(["welcome", "personal"], empty.sectionProgress), 0);
+    assert.equal(countCompletedSections(["welcome", "personal"], empty.sectionProgress), 1);
 
     const filled = computeLiveSectionProgress(sections, { first_name: "Ivan" });
     assert.equal(filled.sectionProgress.personal?.percent, 100);
-    assert.equal(countCompletedSections(["welcome", "personal"], filled.sectionProgress), 1);
+    assert.equal(countCompletedSections(["welcome", "personal"], filled.sectionProgress), 2);
   });
 
-  it("excludes display-only intros from progress section ids", () => {
+  it("excludes optional-only and display-only sections from progress section ids", () => {
     const sections = [
       {
         id: "welcome",
@@ -108,7 +108,7 @@ describe("questionnaire-nav", () => {
         ],
       },
     ];
-    assert.deepEqual(getProgressSectionIds(sections), ["personal", "family"]);
+    assert.deepEqual(getProgressSectionIds(sections), ["personal"]);
   });
 
   it("excludes derived and read-only fields from progress", () => {

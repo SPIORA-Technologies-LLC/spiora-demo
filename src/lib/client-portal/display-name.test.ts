@@ -4,6 +4,7 @@ import {
   firstNameFromAuthMetadata,
   normalizeName,
   resolveClientFirstName,
+  toGivenName,
 } from "./display-name.ts";
 
 describe("client display name", () => {
@@ -28,6 +29,25 @@ describe("client display name", () => {
       }),
       "Anna",
     );
+  });
+
+  it("uses only the given name when a full name was stored", () => {
+    assert.equal(toGivenName("Хана Ивамото"), "Хана");
+    assert.equal(
+      resolveClientFirstName({
+        authFirstName: "Хана Ивамото",
+        questionnaireFirstName: null,
+      }),
+      "Хана",
+    );
+    assert.equal(
+      resolveClientFirstName({
+        authFirstName: null,
+        questionnaireFirstName: "Hana Iwamoto",
+      }),
+      "Hana",
+    );
+    assert.equal(toGivenName("Jean-Pierre"), "Jean-Pierre");
   });
 
   it("reads first_name from auth metadata", () => {

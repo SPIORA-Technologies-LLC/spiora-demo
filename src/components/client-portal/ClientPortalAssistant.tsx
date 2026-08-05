@@ -190,7 +190,7 @@ export function ClientPortalAssistant() {
               value={input}
               onChange={(event) => setInput(event.target.value)}
               placeholder={t("placeholder")}
-              rows={2}
+              rows={1}
               disabled={loading}
               onKeyDown={(event) => {
                 if (event.key === "Enter" && !event.shiftKey) {

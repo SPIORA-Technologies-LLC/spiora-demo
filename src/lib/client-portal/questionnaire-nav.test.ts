@@ -17,20 +17,21 @@ const progress = {
 };
 
 describe("questionnaire-nav", () => {
-  it("treats sections with no required fields as complete", () => {
-    assert.equal(isSectionComplete(progress, "welcome"), true);
+  it("does not treat sections with no required fields as complete", () => {
+    assert.equal(isSectionComplete(progress, "welcome"), false);
   });
 
   it("marks current over completed for nav state", () => {
     assert.equal(getSectionNavState("personal", "personal", progress), "current");
-    assert.equal(getSectionNavState("welcome", "personal", progress), "completed");
+    assert.equal(getSectionNavState("welcome", "personal", progress), "incomplete");
     assert.equal(getSectionNavState("contact", "personal", progress), "incomplete");
+    assert.equal(getSectionNavState("personal", "welcome", progress), "completed");
   });
 
   it("counts completed sections without using question totals", () => {
     assert.equal(
       countCompletedSections(["welcome", "personal", "contact"], progress),
-      2,
+      1,
     );
   });
 
@@ -71,11 +72,11 @@ describe("questionnaire-nav", () => {
     const empty = computeLiveSectionProgress(sections, {});
     assert.equal(empty.sectionProgress.welcome?.percent, 100);
     assert.equal(empty.sectionProgress.personal?.percent, 0);
-    assert.equal(countCompletedSections(["welcome", "personal"], empty.sectionProgress), 1);
+    assert.equal(countCompletedSections(["welcome", "personal"], empty.sectionProgress), 0);
 
     const filled = computeLiveSectionProgress(sections, { first_name: "Ivan" });
     assert.equal(filled.sectionProgress.personal?.percent, 100);
-    assert.equal(countCompletedSections(["welcome", "personal"], filled.sectionProgress), 2);
+    assert.equal(countCompletedSections(["welcome", "personal"], filled.sectionProgress), 1);
   });
 
   it("excludes derived and read-only fields from progress", () => {

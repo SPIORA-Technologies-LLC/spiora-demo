@@ -35,8 +35,9 @@ export function isSectionComplete(
   sectionId: string,
 ): boolean {
   const sp = sectionProgress[sectionId];
-  if (!sp) return false;
-  return sp.total === 0 || sp.completed >= sp.total;
+  // Sections with no required fields must not count as filled (e.g. optional Family).
+  if (!sp || sp.total <= 0) return false;
+  return sp.completed >= sp.total;
 }
 
 export function getSectionNavState(

@@ -2521,6 +2521,7 @@
       "sectionsCompleted": "{completed} of {total} sections completed",
       "selectPlaceholder": "Select…",
       "countryHint": "Choose a country from the list",
+      "datePlaceholder": "month/day/year",
       "back": "← Back",
       "backHome": "Back to home",
       "next": "Next →",

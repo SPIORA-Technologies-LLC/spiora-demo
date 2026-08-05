@@ -40,7 +40,7 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
       questions: [
         { id: "first_name", type: "text", order: 10, label: { en: "First name", ru: "Имя" }, required: true, validation: { minLength: 1, maxLength: 100 } },
         { id: "last_name", type: "text", order: 20, label: { en: "Last name", ru: "Фамилия" }, required: true, validation: { minLength: 1, maxLength: 100 } },
-        { id: "previous_names", type: "text", order: 30, label: { en: "Previous names", ru: "Прежние имена" }, validation: { maxLength: 200 } },
+        { id: "previous_names", type: "text", order: 30, label: { en: "Previous surname", ru: "Прежняя фамилия" }, validation: { maxLength: 200 } },
         { id: "date_of_birth", type: "date", order: 40, label: { en: "Date of birth", ru: "Дата рождения" }, required: true },
         { id: "place_of_birth", type: "text", order: 50, label: { en: "Place of birth", ru: "Место рождения" }, validation: { maxLength: 200 } },
         { id: "citizenship", type: "country", order: 60, label: { en: "Citizenship", ru: "Гражданство" }, required: true },

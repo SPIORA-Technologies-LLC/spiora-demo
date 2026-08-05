@@ -1267,6 +1267,35 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                       <span className={styles.errorText}>{uploadErrorById[q.id]}</span>
                     ) : null}
                   </div>
+                ) : q.type === "date" ? (
+                  <input
+                    id={`question-${q.id}`}
+                    type={localAnswers[q.id] ? "date" : "text"}
+                    placeholder={t("datePlaceholder")}
+                    value={String(localAnswers[q.id] ?? "")}
+                    onFocus={(e) => {
+                      e.currentTarget.type = "date";
+                    }}
+                    onBlur={(e) => {
+                      if (!e.currentTarget.value) {
+                        e.currentTarget.type = "text";
+                      }
+                    }}
+                    onChange={(e) => onAnswer(q.id, q.type, e.target.value)}
+                    readOnly={Boolean(q.readOnly)}
+                    className={q.readOnly ? styles.readOnlyControl : undefined}
+                    aria-invalid={errors.some((err) => err.questionId === q.id)}
+                    aria-describedby={
+                      [
+                        errors.some((err) => err.questionId === q.id)
+                          ? `error-${q.id}`
+                          : null,
+                        q.readOnly ? `hint-${q.id}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
+                    }
+                  />
                 ) : q.type === "boolean" ? (
                   <input
                     id={`question-${q.id}`}
@@ -1281,13 +1310,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                   <input
                     id={`question-${q.id}`}
                     type={
-                      q.type === "date"
-                        ? "date"
-                        : q.type === "number"
-                          ? "number"
-                          : q.type === "email"
-                            ? "email"
-                            : "text"
+                      q.type === "number"
+                        ? "number"
+                        : q.type === "email"
+                          ? "email"
+                          : "text"
                     }
                     value={String(localAnswers[q.id] ?? "")}
                     onChange={(e) =>

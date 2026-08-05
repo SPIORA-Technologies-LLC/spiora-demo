@@ -2521,6 +2521,7 @@
       "sectionsCompleted": "{completed} из {total} разделов заполнено",
       "selectPlaceholder": "Выберите…",
       "countryHint": "Выберите страну из списка",
+      "datePlaceholder": "месяц/день/год",
       "back": "← Назад",
       "backHome": "На главную",
       "next": "Далее →",

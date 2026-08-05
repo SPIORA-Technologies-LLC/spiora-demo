@@ -23,15 +23,24 @@
 }
 
 .header h1,
-.card h2,
-.sectionTitle {
+.card h2 {
   margin: 0 0 0.75rem;
+}
+
+.sectionTitle {
+  margin: 0 0 1.45rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sectionTitle:focus {
   outline: 2px solid rgba(var(--brand-orange-rgb), 0.45);
   outline-offset: 4px;
   border-radius: 6px;
+}
+
+.sectionTitle + .displayDescription {
+  margin: -0.7rem 0 1.35rem;
 }
 
 .sectionsCompleted {

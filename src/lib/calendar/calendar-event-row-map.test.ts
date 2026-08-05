@@ -21,6 +21,7 @@ const sampleEvent: CalendarEvent = {
   guestAccessPasswordSet: false,
   linkedClientId: null,
   linkedClientName: null,
+  externalInvitees: [],
   participantUserIds: [],
   startAt: "2026-06-25T08:00:00.000Z",
   endAt: "2026-06-25T09:00:00.000Z",
@@ -84,19 +85,25 @@ describe("mapCalendarEventToRow / mapCalendarEventRowToEvent", () => {
     assert.equal(restored.guestAccessPasswordSet, true);
   });
 
-  it("round-trips linked client fields for video meetings", () => {
+  it("round-trips external invitees for video meetings", () => {
     const row = mapCalendarEventToRow({
       ...sampleEvent,
       eventType: "video_meeting",
       videoInviteMode: "all_team",
-      linkedClientId: "CL-1001",
-      linkedClientName: "Anna Client",
+      externalInvitees: [
+        { name: "Partner Alex", email: "alex@example.com" },
+        { name: "Guest No Email", email: null },
+      ],
     });
-    assert.equal(row.linked_client_id, "CL-1001");
-    assert.equal(row.linked_client_name, "Anna Client");
+    assert.deepEqual(row.external_invitees, [
+      { name: "Partner Alex", email: "alex@example.com" },
+      { name: "Guest No Email", email: null },
+    ]);
 
     const restored = mapCalendarEventRowToEvent(row);
-    assert.equal(restored.linkedClientId, "CL-1001");
-    assert.equal(restored.linkedClientName, "Anna Client");
+    assert.deepEqual(restored.externalInvitees, [
+      { name: "Partner Alex", email: "alex@example.com" },
+      { name: "Guest No Email", email: null },
+    ]);
   });
 });

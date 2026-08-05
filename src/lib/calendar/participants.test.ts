@@ -20,6 +20,7 @@ function videoEvent(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     description: "",
     eventType: "video_meeting",
     videoInviteMode: "selected",
+    externalInvitees: [],
     participantUserIds: ["emma-wilson"],
     startAt: "2026-06-25T08:00:00.000Z",
     endAt: "2026-06-25T09:00:00.000Z",
@@ -66,6 +67,7 @@ describe("isUserInvitedToVideoMeeting", () => {
   it("allows all team for company all_team mode", () => {
     const event = videoEvent({
       videoInviteMode: "all_team",
+      externalInvitees: [],
       participantUserIds: [],
     });
     assert.equal(isUserInvitedToVideoMeeting("lucas-martin", event), true);

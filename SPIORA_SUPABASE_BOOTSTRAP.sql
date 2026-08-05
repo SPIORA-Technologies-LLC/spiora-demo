@@ -403,6 +403,14 @@ alter table calendar_events
   add column if not exists linked_client_name text;
 
 -- -----------------------------------------------------------------------------
+-- 040_calendar_external_invitees.sql
+-- -----------------------------------------------------------------------------
+-- Named non-CRM invitees for video meetings (join via shared guest link)
+
+alter table calendar_events
+  add column if not exists external_invitees jsonb not null default '[]'::jsonb;
+
+-- -----------------------------------------------------------------------------
 -- 019_calendar_meeting_recordings.sql
 -- -----------------------------------------------------------------------------
 -- Video meeting recordings (LiveKit egress → storage)
@@ -683,6 +691,7 @@ WHERE table_schema = 'public'
     'guest_access_password_hash',
     'linked_client_id',
     'linked_client_name',
+    'external_invitees',
     'event_type'
   )
 ORDER BY column_name;

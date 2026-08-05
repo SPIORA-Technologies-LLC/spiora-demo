@@ -22,6 +22,10 @@ import { CALENDAR_EVENT_TYPES, CALENDAR_SCOPES, VIDEO_INVITE_MODES } from "./typ
 import type { CalendarEventType, VideoInviteMode } from "./types";
 import { normalizeGuestAccessPasswordInput, sanitizeCalendarEventForClient } from "./meeting-guest-access";
 import {
+  normalizeExternalInvitees,
+  parseExternalInviteesField,
+} from "./external-invitees";
+import {
   CalendarValidationError,
   parseIsoRange,
   validateCreateInput,
@@ -185,6 +189,7 @@ function parseCreateBody(body: unknown): Omit<
     ),
     linkedClientId: parseOptionalStringField(record.linkedClientId),
     linkedClientName: parseOptionalStringField(record.linkedClientName),
+    externalInvitees: parseExternalInviteesField(record.externalInvitees),
     participantUserIds: parseParticipantUserIds(record.participantUserIds),
   };
 }
@@ -203,6 +208,7 @@ const UPDATE_FIELDS = new Set([
   "guestAccessPassword",
   "linkedClientId",
   "linkedClientName",
+  "externalInvitees",
   "participantUserIds",
 ]);
 
@@ -292,6 +298,9 @@ function parseUpdateBody(body: unknown): UpdateCalendarEventInput {
   }
   if ("linkedClientName" in record) {
     input.linkedClientName = parseOptionalStringField(record.linkedClientName);
+  }
+  if ("externalInvitees" in record) {
+    input.externalInvitees = normalizeExternalInvitees(record.externalInvitees);
   }
   if ("participantUserIds" in record) {
     input.participantUserIds = parseParticipantUserIds(record.participantUserIds);

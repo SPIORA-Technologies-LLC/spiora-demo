@@ -18,6 +18,15 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
     title: "Meeting",
     description: "Notes",
     eventType: "general",
+    videoInviteMode: null,
+    guestWaitingRoom: true,
+    guestMaxCount: null,
+    guestAccessPasswordHash: null,
+    guestAccessPasswordSet: false,
+    linkedClientId: null,
+    linkedClientName: null,
+    externalInvitees: [],
+    participantUserIds: [],
     startAt: "2026-06-20T08:00:00.000Z",
     endAt: "2026-06-20T09:00:00.000Z",
     allDay: false,
@@ -42,6 +51,8 @@ describe("defaultFormValues", () => {
     assert.equal(values.startTime, "10:00");
     assert.equal(values.endTime, "11:00");
     assert.equal(values.sendReminders, true);
+    assert.equal(values.guestWaitingRoom, false);
+    assert.deepEqual(values.externalInvitees, []);
   });
 });
 

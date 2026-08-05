@@ -29,6 +29,7 @@ import {
   hashGuestAccessPassword,
   normalizeGuestAccessPasswordInput,
 } from "./meeting-guest-access";
+import { normalizeExternalInvitees } from "./external-invitees";
 import {
   listParticipantUserIdsByEventIds,
   replaceEventParticipants,
@@ -174,6 +175,7 @@ function normalizeEvent(event: CalendarEvent): CalendarEvent {
       event.guestAccessPasswordSet ?? Boolean(event.guestAccessPasswordHash),
     linkedClientId: event.linkedClientId ?? null,
     linkedClientName: event.linkedClientName ?? null,
+    externalInvitees: event.externalInvitees ?? [],
     participantUserIds: event.participantUserIds ?? [],
     sendReminders: event.sendReminders ?? CALENDAR_DEFAULT_SEND_REMINDERS,
   };
@@ -346,6 +348,11 @@ export async function createEvent(
     input.linkedClientId,
     input.linkedClientName,
   );
+  const eventType = input.eventType ?? CALENDAR_DEFAULT_EVENT_TYPE;
+  const externalInvitees =
+    eventType === "video_meeting"
+      ? normalizeExternalInvitees(input.externalInvitees ?? [])
+      : [];
   const event: CalendarEvent = {
     id: randomUUID(),
     companyId: CALENDAR_COMPANY_ID,
@@ -353,20 +360,21 @@ export async function createEvent(
     ownerUserId: input.scope === "personal" ? input.ownerUserId : null,
     title: input.title.trim(),
     description: input.description?.trim() ?? "",
-    eventType: input.eventType ?? CALENDAR_DEFAULT_EVENT_TYPE,
+    eventType,
     videoInviteMode,
     guestWaitingRoom:
-      input.eventType === "video_meeting"
-        ? input.guestWaitingRoom ?? true
+      eventType === "video_meeting"
+        ? input.guestWaitingRoom ?? false
         : true,
     guestMaxCount:
-      input.eventType === "video_meeting"
+      eventType === "video_meeting"
         ? input.guestMaxCount ?? DEFAULT_GUEST_MAX_COUNT
         : null,
     guestAccessPasswordHash,
     guestAccessPasswordSet: Boolean(guestAccessPasswordHash),
     linkedClientId,
     linkedClientName,
+    externalInvitees,
     participantUserIds,
     startAt: input.startAt,
     endAt: input.endAt,
@@ -486,6 +494,12 @@ export async function updateEvent(
     guestAccessPasswordSet: Boolean(guestAccessPasswordHash),
     linkedClientId,
     linkedClientName,
+    externalInvitees:
+      nextEventType === "video_meeting"
+        ? input.externalInvitees !== undefined
+          ? normalizeExternalInvitees(input.externalInvitees)
+          : (rawExisting.externalInvitees ?? [])
+        : [],
     participantUserIds: nextParticipantUserIds,
     updatedByUserId:
       input.updatedByUserId !== undefined

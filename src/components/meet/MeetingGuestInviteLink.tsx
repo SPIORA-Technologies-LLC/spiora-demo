@@ -35,6 +35,14 @@ export function MeetingGuestInviteLink({
   const [linkedClientPhone, setLinkedClientPhone] = useState<string | null>(null);
 
   const displayTitle = resolveCalendarEventTitle(event.title, locale);
+  const externalInvitees = event.externalInvitees ?? [];
+
+  const recipientName = useMemo(() => {
+    if (externalInvitees[0]?.name) {
+      return externalInvitees[0].name;
+    }
+    return event.linkedClientName;
+  }, [event.linkedClientName, externalInvitees]);
 
   const inviteText = useMemo(() => {
     if (!guestJoinUrl) {
@@ -42,11 +50,11 @@ export function MeetingGuestInviteLink({
     }
 
     return buildGuestMeetingInviteText(event, guestJoinUrl, {
-      recipientName: event.linkedClientName,
+      recipientName,
       timeZone,
       locale,
     });
-  }, [event, guestJoinUrl, locale, timeZone]);
+  }, [event, guestJoinUrl, locale, recipientName, timeZone]);
 
   const loadInvite = useCallback(async () => {
     setLoading(true);
@@ -103,6 +111,17 @@ export function MeetingGuestInviteLink({
       });
   }, [event.linkedClientId]);
 
+  const mailtoRecipient = useMemo(() => {
+    const emails = [
+      ...externalInvitees
+        .map((invitee) => invitee.email)
+        .filter((email): email is string => Boolean(email)),
+      linkedClientEmail,
+    ].filter((email): email is string => Boolean(email));
+
+    return [...new Set(emails)].join(",") || null;
+  }, [externalInvitees, linkedClientEmail]);
+
   const mailtoUrl = useMemo(() => {
     if (!inviteText) {
       return null;
@@ -110,9 +129,9 @@ export function MeetingGuestInviteLink({
 
     return buildMailtoShareUrl(inviteText, {
       subject: t("emailSubject", { title: displayTitle }),
-      recipientEmail: linkedClientEmail,
+      recipientEmail: mailtoRecipient,
     });
-  }, [displayTitle, inviteText, linkedClientEmail, t]);
+  }, [displayTitle, inviteText, mailtoRecipient, t]);
 
   const whatsAppUrl = useMemo(() => {
     if (!inviteText) {
@@ -185,6 +204,22 @@ export function MeetingGuestInviteLink({
       <div className={styles.header}>
         <h3 className={styles.title}>{t("title")}</h3>
         <p className={styles.hint}>{t("hint")}</p>
+      </div>
+
+      <div className={styles.namedList}>
+        <p className={styles.namedListTitle}>{t("namedListTitle")}</p>
+        {externalInvitees.length > 0 ? (
+          <ul className={styles.namedListItems}>
+            {externalInvitees.map((invitee, index) => (
+              <li key={`${invitee.name}-${invitee.email ?? ""}-${index}`}>
+                {invitee.name}
+                {invitee.email ? ` · ${invitee.email}` : ""}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.namedListEmpty}>{t("namedListEmpty")}</p>
+        )}
       </div>
 
       {loading ? (

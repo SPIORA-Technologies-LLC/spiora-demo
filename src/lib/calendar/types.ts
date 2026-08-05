@@ -1,6 +1,8 @@
 import type { ReminderOffsetMinutes } from "./constants";
+import type { CalendarExternalInvitee } from "./external-invitees";
 
 export type { ReminderOffsetMinutes };
+export type { CalendarExternalInvitee } from "./external-invitees";
 
 export const CALENDAR_SCOPES = ["personal", "company"] as const;
 
@@ -29,6 +31,8 @@ export type CalendarEvent = {
   guestAccessPasswordSet: boolean;
   linkedClientId: string | null;
   linkedClientName: string | null;
+  /** Non-CRM people invited via the shared guest join link. */
+  externalInvitees: CalendarExternalInvitee[];
   participantUserIds: string[];
   startAt: string;
   endAt: string;
@@ -54,6 +58,7 @@ export type CreateCalendarEventInput = {
   guestAccessPassword?: string | null;
   linkedClientId?: string | null;
   linkedClientName?: string | null;
+  externalInvitees?: CalendarExternalInvitee[];
   participantUserIds?: string[];
   startAt: string;
   endAt: string;
@@ -78,6 +83,7 @@ export type UpdateCalendarEventInput = {
   guestAccessPassword?: string | null;
   linkedClientId?: string | null;
   linkedClientName?: string | null;
+  externalInvitees?: CalendarExternalInvitee[];
   participantUserIds?: string[];
   updatedByUserId?: string | null;
 };

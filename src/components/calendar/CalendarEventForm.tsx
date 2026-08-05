@@ -12,6 +12,11 @@ import {
 } from "@/i18n/calendar-enums";
 import type { CalendarFormValues } from "@/lib/calendar/form";
 import { validateFormValues } from "@/lib/calendar/form";
+import {
+  MAX_EXTERNAL_INVITEES,
+  normalizeExternalInviteeEmail,
+  normalizeExternalInviteeName,
+} from "@/lib/calendar/external-invitees";
 import type { CalendarEventType, CalendarScope, VideoInviteMode } from "@/lib/calendar/types";
 import { CalendarDateSelect } from "./CalendarDateSelect";
 import { CalendarTimeSelect } from "./CalendarTimeSelect";
@@ -52,6 +57,56 @@ export function CalendarEventForm({
   const [values, setValues] = useState<CalendarFormValues>(initial);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [externalNameDraft, setExternalNameDraft] = useState("");
+  const [externalEmailDraft, setExternalEmailDraft] = useState("");
+  const [externalAddError, setExternalAddError] = useState("");
+
+  function addExternalInvitee() {
+    const name = normalizeExternalInviteeName(externalNameDraft);
+    if (!name) {
+      setExternalAddError(t("externalInviteesNameInvalid"));
+      return;
+    }
+
+    const emailRaw = externalEmailDraft.trim();
+    const email = emailRaw
+      ? normalizeExternalInviteeEmail(emailRaw)
+      : null;
+    if (emailRaw && !email) {
+      setExternalAddError(t("externalInviteesEmailInvalid"));
+      return;
+    }
+
+    if (values.externalInvitees.length >= MAX_EXTERNAL_INVITEES) {
+      setExternalAddError(t("externalInviteesLimit"));
+      return;
+    }
+
+    const duplicate = values.externalInvitees.some(
+      (item) =>
+        item.name.toLowerCase() === name.toLowerCase() &&
+        (item.email ?? "") === (email ?? ""),
+    );
+    if (duplicate) {
+      setExternalAddError(t("externalInviteesDuplicate"));
+      return;
+    }
+
+    setValues((current) => ({
+      ...current,
+      externalInvitees: [...current.externalInvitees, { name, email }],
+    }));
+    setExternalNameDraft("");
+    setExternalEmailDraft("");
+    setExternalAddError("");
+  }
+
+  function removeExternalInvitee(index: number) {
+    setValues((current) => ({
+      ...current,
+      externalInvitees: current.externalInvitees.filter((_, i) => i !== index),
+    }));
+  }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -103,6 +158,8 @@ export function CalendarEventForm({
           : "all_team",
       participantUserIds:
         eventType === "video_meeting" ? current.participantUserIds : [],
+      externalInvitees:
+        eventType === "video_meeting" ? current.externalInvitees : [],
     }));
   }
 
@@ -278,6 +335,75 @@ export function CalendarEventForm({
               );
             })}
           </div>
+        </fieldset>
+      ) : null}
+
+      {values.eventType === "video_meeting" ? (
+        <fieldset className={styles.inviteFieldset}>
+          <legend className={styles.label}>{t("externalInviteesLegend")}</legend>
+          <p className={styles.fieldHintInline}>{t("externalInviteesHint")}</p>
+          {values.externalInvitees.length > 0 ? (
+            <ul className={styles.externalInviteeList}>
+              {values.externalInvitees.map((invitee, index) => (
+                <li key={`${invitee.name}-${invitee.email ?? ""}-${index}`} className={styles.externalInviteeItem}>
+                  <span className={styles.externalInviteeText}>
+                    {invitee.name}
+                    {invitee.email ? (
+                      <span className={styles.externalInviteeEmail}>
+                        {invitee.email}
+                      </span>
+                    ) : null}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.externalInviteeRemove}
+                    onClick={() => removeExternalInvitee(index)}
+                    aria-label={t("externalInviteesRemoveAria", {
+                      name: invitee.name,
+                    })}
+                  >
+                    ×
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <div className={styles.externalInviteeAdd}>
+            <input
+              className={styles.input}
+              type="text"
+              value={externalNameDraft}
+              onChange={(changeEvent) => {
+                setExternalNameDraft(changeEvent.target.value);
+                setExternalAddError("");
+              }}
+              placeholder={t("externalInviteesNamePlaceholder")}
+              aria-label={t("externalInviteesNamePlaceholder")}
+              maxLength={80}
+            />
+            <input
+              className={styles.input}
+              type="email"
+              value={externalEmailDraft}
+              onChange={(changeEvent) => {
+                setExternalEmailDraft(changeEvent.target.value);
+                setExternalAddError("");
+              }}
+              placeholder={t("externalInviteesEmailPlaceholder")}
+              aria-label={t("externalInviteesEmailPlaceholder")}
+              maxLength={254}
+            />
+            <button
+              type="button"
+              className={styles.externalInviteeAddButton}
+              onClick={addExternalInvitee}
+            >
+              {t("externalInviteesAdd")}
+            </button>
+          </div>
+          {externalAddError ? (
+            <p className={styles.error}>{externalAddError}</p>
+          ) : null}
         </fieldset>
       ) : null}
 

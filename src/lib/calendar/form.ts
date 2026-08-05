@@ -3,6 +3,7 @@ import {
   CALENDAR_DEFAULT_SEND_REMINDERS,
   CALENDAR_TIMEZONE,
 } from "./constants";
+import type { CalendarExternalInvitee } from "./external-invitees";
 import { formatDateKey } from "./range";
 import type {
   CalendarEvent,
@@ -21,6 +22,7 @@ export type CalendarFormValues = {
   guestAccessPassword: string;
   linkedClientId: string | null;
   linkedClientName: string | null;
+  externalInvitees: CalendarExternalInvitee[];
   participantUserIds: string[];
   title: string;
   description: string;
@@ -57,11 +59,12 @@ export function defaultFormValues(
     scope: "personal",
     eventType: CALENDAR_DEFAULT_EVENT_TYPE,
     videoInviteMode: "all_team",
-    guestWaitingRoom: true,
+    guestWaitingRoom: false,
     guestMaxCount: 10,
     guestAccessPassword: "",
     linkedClientId: null,
     linkedClientName: null,
+    externalInvitees: [],
     participantUserIds: [],
     title: "",
     description: "",
@@ -89,11 +92,12 @@ export function eventToFormValues(
       event.videoInviteMode ??
       (event.scope === "company" ? "all_team" : "selected"),
     participantUserIds: [...(event.participantUserIds ?? [])],
-    guestWaitingRoom: event.guestWaitingRoom ?? true,
+    guestWaitingRoom: event.guestWaitingRoom ?? false,
     guestMaxCount: event.guestMaxCount ?? 10,
     guestAccessPassword: "",
     linkedClientId: event.linkedClientId,
     linkedClientName: event.linkedClientName,
+    externalInvitees: [...(event.externalInvitees ?? [])],
     title: event.title,
     description: event.description,
     startDate: formatDateKey(start, timeZone),
@@ -226,6 +230,8 @@ export function formValuesToCreatePayload(
       values.eventType === "video_meeting" ? values.linkedClientId : undefined,
     linkedClientName:
       values.eventType === "video_meeting" ? values.linkedClientName : undefined,
+    externalInvitees:
+      values.eventType === "video_meeting" ? values.externalInvitees : undefined,
   };
 }
 
@@ -268,5 +274,7 @@ export function formValuesToUpdatePayload(
       values.eventType === "video_meeting" ? values.linkedClientId : undefined,
     linkedClientName:
       values.eventType === "video_meeting" ? values.linkedClientName : undefined,
+    externalInvitees:
+      values.eventType === "video_meeting" ? values.externalInvitees : undefined,
   };
 }

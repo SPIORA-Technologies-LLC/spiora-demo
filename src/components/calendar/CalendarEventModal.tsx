@@ -135,6 +135,20 @@ export function CalendarEventModal({
                 </div>
               ) : null}
               <div>
+                <dt>{t("externalInvitees")}</dt>
+                <dd>
+                  {(event.externalInvitees ?? []).length > 0
+                    ? event.externalInvitees
+                        .map((invitee) =>
+                          invitee.email
+                            ? `${invitee.name} (${invitee.email})`
+                            : invitee.name,
+                        )
+                        .join(", ")
+                    : t("externalInviteesEmpty")}
+                </dd>
+              </div>
+              <div>
                 <dt>{t("status")}</dt>
                 <dd>
                   <span

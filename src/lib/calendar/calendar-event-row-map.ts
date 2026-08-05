@@ -1,4 +1,6 @@
 import type { CalendarEvent, VideoInviteMode } from "./types";
+import type { CalendarExternalInvitee } from "./external-invitees";
+import { normalizeExternalInvitees } from "./external-invitees";
 
 export type CalendarEventRow = {
   id: string;
@@ -14,6 +16,7 @@ export type CalendarEventRow = {
   guest_access_password_hash: string | null;
   linked_client_id: string | null;
   linked_client_name: string | null;
+  external_invitees?: CalendarExternalInvitee[] | unknown;
   start_at: string;
   end_at: string;
   all_day: boolean;
@@ -45,6 +48,7 @@ export function mapCalendarEventRowToEvent(
     guestAccessPasswordSet: Boolean(row.guest_access_password_hash),
     linkedClientId: row.linked_client_id ?? null,
     linkedClientName: row.linked_client_name ?? null,
+    externalInvitees: normalizeExternalInvitees(row.external_invitees),
     participantUserIds,
     startAt: row.start_at,
     endAt: row.end_at,
@@ -74,6 +78,7 @@ export function mapCalendarEventToRow(event: CalendarEvent): CalendarEventRow {
     guest_access_password_hash: event.guestAccessPasswordHash,
     linked_client_id: event.linkedClientId,
     linked_client_name: event.linkedClientName,
+    external_invitees: normalizeExternalInvitees(event.externalInvitees),
     start_at: event.startAt,
     end_at: event.endAt,
     all_day: event.allDay,

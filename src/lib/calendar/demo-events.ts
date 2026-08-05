@@ -149,6 +149,7 @@ export function buildDemoCalendarEvents(
         ? `demo-client-${template.titleKey}`
         : null,
       linkedClientName: template.linkedClientName ?? null,
+      externalInvitees: [],
       participantUserIds: [],
       startAt,
       endAt,

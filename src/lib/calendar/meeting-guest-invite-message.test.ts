@@ -18,6 +18,7 @@ const event: CalendarEvent = {
   guestAccessPasswordSet: false,
   linkedClientId: null,
   linkedClientName: null,
+  externalInvitees: [],
   participantUserIds: [],
   startAt: "2026-07-08T13:00:00.000Z",
   endAt: "2026-07-08T14:00:00.000Z",

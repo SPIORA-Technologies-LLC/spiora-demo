@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { signInAction, type SignInState } from "@/app/login/actions";
 import { resetMobileNavIntro } from "@/lib/layout/mobile-nav-intro";
@@ -17,6 +17,7 @@ type LoginFormProps = {
 export function LoginForm({ nextPath }: LoginFormProps) {
   const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState(signInAction, initialState);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     resetMobileNavIntro();
@@ -51,15 +52,45 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       </label>
       <label className={styles.label}>
         {t("password")}
-        <input
-          type="password"
-          name="password"
-          className={styles.input}
-          placeholder="••••••••"
-          autoComplete="current-password"
-          required
-          disabled={pending}
-        />
+        <span className={styles.passwordField}>
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            className={styles.input}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
+            disabled={pending}
+          />
+          <button
+            type="button"
+            className={styles.passwordToggle}
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+            aria-pressed={showPassword}
+            disabled={pending}
+          >
+            {showPassword ? (
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                />
+                <path
+                  fill="currentColor"
+                  d="M3.3 3.3 20.7 20.7l-1.4 1.4L1.9 4.7z"
+                />
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                />
+              </svg>
+            )}
+          </button>
+        </span>
       </label>
       <button type="submit" className={styles.submit} disabled={pending}>
         {pending ? t("signingIn") : t("signIn")}

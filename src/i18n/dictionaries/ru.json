@@ -48,6 +48,8 @@
   "auth": {
     "email": "Email",
     "password": "Пароль",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть пароль",
     "signIn": "Войти",
     "signOut": "Выйти",
     "signingIn": "Вход…",

@@ -38,3 +38,16 @@ export function firstNameFromAuthMetadata(
     null
   );
 }
+
+/**
+ * Prefer questionnaire/case given name over the invite-time label.
+ * Staff often put a surname into the invite "name" field; after submit the case is authoritative.
+ */
+export function resolveInvitationDisplayFirstName(input: {
+  invitationFirstName: string | null | undefined;
+  caseFirstName?: string | null | undefined;
+}): string | null {
+  return (
+    toGivenName(input.caseFirstName) ?? toGivenName(input.invitationFirstName)
+  );
+}

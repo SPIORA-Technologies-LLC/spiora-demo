@@ -174,6 +174,12 @@ export async function submitQuestionnaireAndCreateCase(
     }
 
     const refreshed = await qStore.getById(prepared.record.id);
+    void import("./invitation-case-names").then(({ syncInvitationFirstNameFromCase }) =>
+      syncInvitationFirstNameFromCase(
+        prepared.record.invitationId,
+        snapshot.firstName,
+      ),
+    );
     return {
       ok: true as const,
       record: refreshed ?? prepared.record,
@@ -211,6 +217,10 @@ export async function submitQuestionnaireAndCreateCase(
   if (!atomic.ok) {
     return { ok: false as const, code: atomic.code };
   }
+
+  void import("./invitation-case-names").then(({ syncInvitationFirstNameFromCase }) =>
+    syncInvitationFirstNameFromCase(record.invitationId, snapshot.firstName),
+  );
 
   return {
     ok: true as const,

@@ -4,6 +4,7 @@ import {
   firstNameFromAuthMetadata,
   normalizeName,
   resolveClientFirstName,
+  resolveInvitationDisplayFirstName,
   toGivenName,
 } from "./display-name.ts";
 
@@ -54,5 +55,29 @@ describe("client display name", () => {
     assert.equal(firstNameFromAuthMetadata({ first_name: "Olga" }), "Olga");
     assert.equal(firstNameFromAuthMetadata({ firstName: "Ivan" }), "Ivan");
     assert.equal(firstNameFromAuthMetadata({}), null);
+  });
+
+  it("prefers case given name over invite-time surname label", () => {
+    assert.equal(
+      resolveInvitationDisplayFirstName({
+        invitationFirstName: "Новак",
+        caseFirstName: "Матео",
+      }),
+      "Матео",
+    );
+    assert.equal(
+      resolveInvitationDisplayFirstName({
+        invitationFirstName: "Новак",
+        caseFirstName: null,
+      }),
+      "Новак",
+    );
+    assert.equal(
+      resolveInvitationDisplayFirstName({
+        invitationFirstName: null,
+        caseFirstName: null,
+      }),
+      null,
+    );
   });
 });

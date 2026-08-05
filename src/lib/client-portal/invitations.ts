@@ -215,7 +215,19 @@ export async function listClientInvitations(): Promise<InvitationPublicDto[]> {
     const state = computeInvitationState(row);
     return state === "pending" || state === "accepted";
   });
-  return mapInvitationRecordsToPublic(visible, assigneeNameResolver);
+  const mapped = await mapInvitationRecordsToPublic(visible, assigneeNameResolver);
+  const { getCaseFirstNamesByInvitationIds, resolveInvitationDisplayFirstName } =
+    await import("./invitation-case-names");
+  const caseNames = await getCaseFirstNamesByInvitationIds(
+    visible.map((row) => row.id),
+  );
+  return mapped.map((dto) => ({
+    ...dto,
+    firstName: resolveInvitationDisplayFirstName({
+      invitationFirstName: dto.firstName,
+      caseFirstName: caseNames.get(dto.id) ?? null,
+    }),
+  }));
 }
 
 export async function revokeClientInvitation(

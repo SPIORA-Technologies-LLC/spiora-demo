@@ -35,14 +35,6 @@
   line-height: 1.2;
 }
 
-.subtitle {
-  margin: 0.5rem 0 0;
-  color: var(--portal-muted);
-  font-size: 0.9rem;
-  line-height: 1.45;
-  max-width: 36rem;
-}
-
 .aiNotice {
   display: flex;
   align-items: flex-start;

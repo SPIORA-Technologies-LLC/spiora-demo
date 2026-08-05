@@ -133,10 +133,7 @@ export function ClientPortalAssistant() {
   return (
     <section className={styles.panel} lang={locale}>
       <div className={styles.header}>
-        <div>
-          <h2 className={styles.title}>{t("title")}</h2>
-          <p className={styles.subtitle}>{t("subtitle")}</p>
-        </div>
+        <h2 className={styles.title}>{t("title")}</h2>
       </div>
 
       <aside className={styles.aiNotice} role="note" aria-label={t("aiNotice.title")}>

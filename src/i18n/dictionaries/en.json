@@ -2456,6 +2456,8 @@
       "applicationReceived": "Application received",
       "applicationStatus": "Application status",
       "hint": "This is your personal account.",
+      "questionnaireExplainer": "To start the residence permit process, fill out and submit the questionnaire — this is the first required step.",
+      "fillQuestionnaire": "Fill out questionnaire",
       "continueQuestionnaire": "Continue questionnaire",
       "viewApplicationStatus": "View application status"
     },

@@ -2456,6 +2456,8 @@
       "applicationReceived": "Заявка получена",
       "applicationStatus": "Статус заявки",
       "hint": "Это ваш личный кабинет.",
+      "questionnaireExplainer": "Чтобы начать процесс получения ВНЖ, заполните и отправьте анкету — это первый обязательный шаг.",
+      "fillQuestionnaire": "Заполнить анкету",
       "continueQuestionnaire": "Продолжить анкету",
       "viewApplicationStatus": "Смотреть статус заявки"
     },

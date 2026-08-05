@@ -40,6 +40,10 @@ export default async function ClientHomePage({ searchParams }: Props) {
     (questionnaire.ok &&
       (questionnaire.data.questionnaire.status === "submitted" ||
         questionnaire.data.questionnaire.status === "locked"));
+  const questionnaireStarted =
+    questionnaire.ok &&
+    questionnaire.data.questionnaire.status !== "not_started" &&
+    !questionnaireSubmitted;
 
   const firstName = resolveClientFirstName({
     authFirstName: session.firstName,
@@ -60,6 +64,7 @@ export default async function ClientHomePage({ searchParams }: Props) {
       questionnaireProgress={questionnaireProgress}
       questionnaireUnavailable={questionnaireUnavailable}
       questionnaireSubmitted={questionnaireSubmitted}
+      questionnaireStarted={questionnaireStarted}
       initialCase={caseData}
       logoutLabel={t("logout")}
       showEntrySplash={showEntrySplash}

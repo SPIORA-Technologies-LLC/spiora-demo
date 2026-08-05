@@ -32,6 +32,7 @@ const INITIAL = {
   appPassword: "",
   partnerName: "",
   contract: "",
+  notesSummary: "",
 };
 
 function optional(value: string): string | undefined {
@@ -99,6 +100,7 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
           appPassword: optional(form.appPassword),
           partnerName: optional(form.partnerName),
           contract: optional(form.contract),
+          notesSummary: optional(form.notesSummary),
           status: "New",
           pipelineStage: "Intake",
         }),
@@ -349,10 +351,20 @@ export function CreateClientModal({ open, onClose, onCreated }: Props) {
                 value={form.contract}
                 onChange={(e) => updateField("contract", e.target.value)}
               />
-              </label>
-            </div>
+            </label>
+          </div>
 
-            {error ? <p className={styles.error}>{error}</p> : null}
+          <label>
+            {t("fields.notes")}
+            <textarea
+              maxLength={2000}
+              rows={3}
+              value={form.notesSummary}
+              onChange={(e) => updateField("notesSummary", e.target.value)}
+            />
+          </label>
+
+          {error ? <p className={styles.error}>{error}</p> : null}
           </div>
 
           <div className={styles.actions}>

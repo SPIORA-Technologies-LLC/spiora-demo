@@ -296,6 +296,14 @@
   line-height: 1.4;
 }
 
+.tileExplainer {
+  margin: 0.7rem 0 0;
+  color: rgba(245, 238, 230, 0.78);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  max-width: 34ch;
+}
+
 .placeholder a {
   margin-top: auto;
   padding-top: 1rem;

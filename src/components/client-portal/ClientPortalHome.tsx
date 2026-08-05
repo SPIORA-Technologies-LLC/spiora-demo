@@ -28,6 +28,7 @@ type Props = {
   questionnaireProgress: string;
   questionnaireUnavailable?: boolean;
   questionnaireSubmitted?: boolean;
+  questionnaireStarted?: boolean;
   initialCase: ClientCasePublic | null;
   logoutLabel: string;
   showEntrySplash?: boolean;
@@ -53,6 +54,7 @@ export function ClientPortalHome({
   questionnaireProgress,
   questionnaireUnavailable = false,
   questionnaireSubmitted = false,
+  questionnaireStarted = false,
   initialCase,
   logoutLabel,
   showEntrySplash = false,
@@ -176,10 +178,17 @@ export function ClientPortalHome({
             <p className={styles.tileEyebrow}>{t("nav.questionnaire")}</p>
             <h2>{questionnaireStatus}</h2>
             <p>{questionnaireProgress}</p>
+            {!questionnaireUnavailable && !questionnaireSubmitted ? (
+              <p className={styles.tileExplainer}>{t("home.questionnaireExplainer")}</p>
+            ) : null}
             {questionnaireUnavailable ? null : questionnaireSubmitted ? (
               <a href="/client/questionnaire/submitted">{t("home.viewApplicationStatus")}</a>
             ) : (
-              <a href="/client/questionnaire">{t("home.continueQuestionnaire")}</a>
+              <a href="/client/questionnaire">
+                {questionnaireStarted
+                  ? t("home.continueQuestionnaire")
+                  : t("home.fillQuestionnaire")}
+              </a>
             )}
           </article>
         </section>

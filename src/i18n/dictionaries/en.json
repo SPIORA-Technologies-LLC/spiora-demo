@@ -2562,6 +2562,7 @@
       },
       "navCurrent": "Current section",
       "navCompleted": "Completed section",
+      "navOptional": "Optional section",
       "navIncomplete": "Incomplete section",
       "readOnlyFromAccount": "Taken from your account and cannot be edited",
       "fileHint": "PDF, photo (JPG/PNG/WebP), or Word/Excel — up to 15 MB",

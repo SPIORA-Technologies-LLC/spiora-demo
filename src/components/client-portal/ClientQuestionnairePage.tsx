@@ -92,9 +92,12 @@ type Props = {
   reviewMode?: boolean;
 };
 
-function sectionNavMarker(state: "current" | "completed" | "incomplete"): string {
+function sectionNavMarker(
+  state: "current" | "completed" | "incomplete" | "optional",
+): string {
   if (state === "current") return "●";
   if (state === "completed") return "✓";
+  if (state === "optional") return "·";
   return "○";
 }
 
@@ -793,12 +796,14 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       <aside className={styles.sidebar}>
         <h2>{t("sidebarTitle")}</h2>
         <p>{t("progress", { percent: liveProgress?.percent ?? data.progress.percent })}</p>
-        <p className={styles.sectionsCompleted}>
-          {t("sectionsCompleted", {
-            completed: completedSections,
-            total: progressSectionIds.length,
-          })}
-        </p>
+        {data.questionnaire.status !== "not_started" ? (
+          <p className={styles.sectionsCompleted}>
+            {t("sectionsCompleted", {
+              completed: completedSections,
+              total: progressSectionIds.length,
+            })}
+          </p>
+        ) : null}
         <ul className={styles.sectionList}>
           {orderedSections.map((section) => {
             const navState = getSectionNavState(
@@ -812,7 +817,9 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 ? t("navCurrent")
                 : navState === "completed"
                   ? t("navCompleted")
-                  : t("navIncomplete");
+                  : navState === "optional"
+                    ? t("navOptional")
+                    : t("navIncomplete");
             return (
               <li key={section.id}>
                 <a
@@ -822,7 +829,9 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                       ? styles.navLinkCurrent
                       : navState === "completed"
                         ? styles.navLinkCompleted
-                        : styles.navLinkIncomplete
+                        : navState === "optional"
+                          ? styles.navLinkOptional
+                          : styles.navLinkIncomplete
                   }
                   aria-current={navState === "current" ? "page" : undefined}
                   aria-label={`${stateLabel}: ${section.title[locale]}`}

@@ -2562,6 +2562,7 @@
       },
       "navCurrent": "Текущий раздел",
       "navCompleted": "Заполненный раздел",
+      "navOptional": "Необязательный раздел",
       "navIncomplete": "Незаполненный раздел",
       "readOnlyFromAccount": "Взято из аккаунта, изменить нельзя",
       "fileHint": "PDF, фото (JPG/PNG/WebP) или Word/Excel — до 15 МБ",

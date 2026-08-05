@@ -18,13 +18,13 @@ const progress = {
 };
 
 describe("questionnaire-nav", () => {
-  it("treats sections with no required fields as complete for nav", () => {
-    assert.equal(isSectionComplete(progress, "welcome"), true);
+  it("does not count optional-only sections as complete", () => {
+    assert.equal(isSectionComplete(progress, "welcome"), false);
   });
 
-  it("marks current over completed for nav state", () => {
+  it("marks optional-only sections as optional, not incomplete", () => {
     assert.equal(getSectionNavState("personal", "personal", progress), "current");
-    assert.equal(getSectionNavState("welcome", "personal", progress), "completed");
+    assert.equal(getSectionNavState("welcome", "personal", progress), "optional");
     assert.equal(getSectionNavState("contact", "personal", progress), "incomplete");
     assert.equal(getSectionNavState("personal", "welcome", progress), "completed");
   });
@@ -32,7 +32,7 @@ describe("questionnaire-nav", () => {
   it("counts completed sections without using question totals", () => {
     assert.equal(
       countCompletedSections(["welcome", "personal", "contact"], progress),
-      2,
+      1,
     );
   });
 
@@ -73,11 +73,11 @@ describe("questionnaire-nav", () => {
     const empty = computeLiveSectionProgress(sections, {});
     assert.equal(empty.sectionProgress.welcome?.percent, 100);
     assert.equal(empty.sectionProgress.personal?.percent, 0);
-    assert.equal(countCompletedSections(["welcome", "personal"], empty.sectionProgress), 1);
+    assert.equal(countCompletedSections(["welcome", "personal"], empty.sectionProgress), 0);
 
     const filled = computeLiveSectionProgress(sections, { first_name: "Ivan" });
     assert.equal(filled.sectionProgress.personal?.percent, 100);
-    assert.equal(countCompletedSections(["welcome", "personal"], filled.sectionProgress), 2);
+    assert.equal(countCompletedSections(["welcome", "personal"], filled.sectionProgress), 1);
   });
 
   it("excludes optional-only and display-only sections from progress section ids", () => {

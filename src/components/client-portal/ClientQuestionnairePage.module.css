@@ -90,6 +90,10 @@
   color: #f8d8cc;
 }
 
+.navLinkOptional {
+  color: rgba(246, 239, 233, 0.78);
+}
+
 .navLinkIncomplete {
   color: rgba(246, 239, 233, 0.72);
 }

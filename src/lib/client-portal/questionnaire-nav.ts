@@ -13,7 +13,7 @@ export type SectionProgressMap = Record<
   { completed: number; total: number; percent: number }
 >;
 
-export type SectionNavState = "current" | "completed" | "incomplete";
+export type SectionNavState = "current" | "completed" | "incomplete" | "optional";
 
 type NavQuestion = {
   id: string;
@@ -30,14 +30,21 @@ type NavSection = {
   questions: NavQuestion[];
 };
 
+/** Section has no required editable fields (optional-only / welcome). */
+export function isSectionOptionalOnly(
+  sectionProgress: SectionProgressMap,
+  sectionId: string,
+): boolean {
+  const sp = sectionProgress[sectionId];
+  return Boolean(sp && sp.total <= 0);
+}
+
 export function isSectionComplete(
   sectionProgress: SectionProgressMap,
   sectionId: string,
 ): boolean {
   const sp = sectionProgress[sectionId];
-  if (!sp) return false;
-  // No required fields → nothing left to fill; do not mark as incomplete.
-  if (sp.total <= 0) return true;
+  if (!sp || sp.total <= 0) return false;
   return sp.completed >= sp.total;
 }
 
@@ -47,6 +54,7 @@ export function getSectionNavState(
   sectionProgress: SectionProgressMap,
 ): SectionNavState {
   if (currentSectionId && sectionId === currentSectionId) return "current";
+  if (isSectionOptionalOnly(sectionProgress, sectionId)) return "optional";
   if (isSectionComplete(sectionProgress, sectionId)) return "completed";
   return "incomplete";
 }

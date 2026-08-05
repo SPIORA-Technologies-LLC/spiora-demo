@@ -143,7 +143,7 @@ async function linkCrmClientForCaseCore(
       direction: direction || undefined,
       serviceType: direction || undefined,
       manager: record.assignedName ?? actor.name,
-      assignedUserId: record.assignedTo ?? actor.id,
+      assignedUserId: record.assignedTo ?? actor.id ?? undefined,
       status: "New",
       pipelineStage: "Intake",
       notesSummary: `Linked from client intake case ${caseId}`,

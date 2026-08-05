@@ -41,10 +41,52 @@ function mapRow(row: ClientRow): Client {
   });
 }
 
+const INTAKE_NOTES_PREFIX = "Linked from client intake";
+
+/**
+ * Older intake→CRM bridges may have left source=demo. Retag so База клиентов
+ * can exclude them; Finance still lists all clients.
+ */
+async function repairIntakeClientSources(): Promise<void> {
+  try {
+    await getSupabaseAdmin()
+      .from("clients")
+      .update({ source: "client_intake" })
+      .like("notes_summary", `${INTAKE_NOTES_PREFIX}%`)
+      .not("source", "eq", "client_intake");
+  } catch {
+    // non-fatal — list still applies other exclusions
+  }
+}
+
+/** CRM client UUIDs linked from active intake cases — keep them out of База клиентов. */
+async function listIntakeLinkedClientUuids(): Promise<string[]> {
+  try {
+    const { data, error } = await getSupabaseAdmin()
+      .from("client_cases")
+      .select("crm_client_id")
+      .not("crm_client_id", "is", null)
+      .is("archived_at", null);
+    if (error) throw error;
+    return [
+      ...new Set(
+        (data ?? [])
+          .map((row) =>
+            typeof row.crm_client_id === "string" ? row.crm_client_id : null,
+          )
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+  } catch {
+    return [];
+  }
+}
+
 function applyFiltersQuery(
   query: ReturnType<ReturnType<typeof getSupabaseAdmin>["from"]>,
   filters: ClientFilters,
   includeArchived: boolean,
+  excludeClientUuids: string[] = [],
 ) {
   let q = query.select("*", { count: "exact" });
 
@@ -52,9 +94,12 @@ function applyFiltersQuery(
     q = q.is("archived_at", null);
   }
 
-  // Intake-bridged rows stay in «Новые клиенты из анкеты» until promoted in CRM.
-  // Lazy Finance link creates them with source=client_intake — hide from База клиентов.
-  q = q.neq("source", "client_intake");
+  // Intake-bridged rows stay in «Новые клиенты из анкеты».
+  q = q.not("source", "eq", "client_intake");
+
+  if (excludeClientUuids.length > 0) {
+    q = q.not("id", "in", `(${excludeClientUuids.join(",")})`);
+  }
 
   if (filters.direction) q = q.eq("direction", filters.direction);
   if (filters.status) q = q.eq("status", filters.status);
@@ -87,11 +132,15 @@ export async function sbListClients(
   const { page, pageSize, filters, includeArchived = false } = query;
   const start = (page - 1) * pageSize;
 
+  await repairIntakeClientSources();
+  const excludeClientUuids = await listIntakeLinkedClientUuids();
+
   const base = getSupabaseAdmin().from("clients");
   const { data, error, count } = await applyFiltersQuery(
     base,
     filters,
     includeArchived,
+    excludeClientUuids,
   )
     .order("updated_at", { ascending: false })
     .range(start, start + pageSize - 1);

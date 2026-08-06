@@ -2698,7 +2698,10 @@
       "title": "Set a new password",
       "hint": "Choose a new password for your account.",
       "submit": "Save password",
-      "saving": "Saving…"
+      "saving": "Saving…",
+      "successTitle": "Password saved",
+      "successBody": "Your new Spiora password has been saved successfully. You can sign in with it now.",
+      "successContinue": "Continue to sign in"
     },
     "change": {
       "title": "Change password",

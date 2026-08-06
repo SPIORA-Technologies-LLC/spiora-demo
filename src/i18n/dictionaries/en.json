@@ -62,7 +62,11 @@
     "demoPasswordHint": "Password is set in AUTH_PASSWORD_* variables in .env.local (not stored in source code). Other emails will not work.",
     "forgotPasswordHint": "Forgot your password? Contact your platform administrator — they can reset it in Settings.",
     "forgotPasswordLink": "Forgot password?",
-    "rateLimitExceeded": "Too many sign-in attempts. Please wait a minute and try again."
+    "rateLimitExceeded": "Too many sign-in attempts. Please wait a minute and try again.",
+    "continueWithGoogle": "Continue with Google",
+    "googleAccessDenied": "Google sign-in is not available for this account. Contact your administrator.",
+    "unsupportedCallback": "This sign-in link is no longer supported. Please try again from the login page.",
+    "orDivider": "or"
   },
   "shell": {
     "search": "Search…",
@@ -2670,7 +2674,10 @@
       "authUnavailable": "Client authentication is not configured.",
       "authFailed": "Invalid email or password.",
       "notClient": "This account is not a Spiora Client portal user.",
-      "forgotPassword": "Forgot password?"
+      "forgotPassword": "Forgot password?",
+      "continueWithGoogle": "Continue with Google",
+      "googleAccessDenied": "Google sign-in is not available for this account. Contact your administrator.",
+      "orDivider": "or"
     }
   },
   "authPassword": {

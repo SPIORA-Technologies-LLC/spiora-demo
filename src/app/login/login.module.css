@@ -202,6 +202,51 @@
   text-decoration: underline;
 }
 
+.authStack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.orDivider {
+  margin: 0;
+  font-family: Inter, sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  text-align: center;
+}
+
+.googleButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--white);
+  font-family: Inter, sans-serif;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.googleButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.googleButton:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
 .successOverlay {
   position: fixed;
   inset: 0;

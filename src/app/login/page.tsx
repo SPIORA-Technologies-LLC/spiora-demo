@@ -11,7 +11,7 @@ import { getClientSession } from "@/lib/client-portal/session";
 import styles from "./login.module.css";
 
 type LoginPageProps = {
-  searchParams: Promise<{ next?: string }>;
+  searchParams: Promise<{ next?: string; error?: string }>;
 };
 
 const pageFallback = {
@@ -51,6 +51,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const nextPath =
     params.next && params.next.startsWith("/") ? params.next : undefined;
+  const authError =
+    params.error === "google_access_denied" ||
+    params.error === "unsupported_callback"
+      ? params.error
+      : null;
 
   return (
     <div className={styles.page} style={pageFallback}>
@@ -62,7 +67,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <Logo priority size="lg" />
         </div>
         <p className={styles.positioning}>{getProductDescription(locale)}</p>
-        <LoginForm nextPath={nextPath} />
+        <LoginForm nextPath={nextPath} authError={authError} />
         {process.env.NODE_ENV !== "production" ? <DemoCredentials /> : null}
       </div>
     </div>

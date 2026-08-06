@@ -46,13 +46,14 @@ describe("password phase A invariants", () => {
     assert.doesNotMatch(SPIORA_RECOVERY_EMAIL_TEMPLATE_HTML, /next=/);
   });
 
-  it("auth/callback source never mints recovery gate", () => {
+  it("auth/callback source never mints recovery gate and is deprecated deny", () => {
     const file = readFileSync(
       path.join(process.cwd(), "src/app/auth/callback/route.ts"),
       "utf8",
     );
     assert.doesNotMatch(file, /applyRecoveryGateCookie|spiora_.*_pw_recovery/);
-    assert.match(file, /exchangeCodeForSession/);
+    assert.doesNotMatch(file, /exchangeCodeForSession/);
+    assert.match(file, /unsupported_callback/);
   });
 
   it("confirm routes are plane-specific and only recovery", () => {

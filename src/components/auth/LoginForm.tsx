@@ -12,12 +12,22 @@ const isDev = process.env.NODE_ENV === "development";
 
 type LoginFormProps = {
   nextPath?: string;
+  authError?: string | null;
 };
 
-export function LoginForm({ nextPath }: LoginFormProps) {
+export function LoginForm({ nextPath, authError }: LoginFormProps) {
   const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState(signInAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+
+  const queryMessage =
+    authError === "google_access_denied"
+      ? t("googleAccessDenied")
+      : authError === "unsupported_callback"
+        ? t("unsupportedCallback")
+        : null;
 
   useEffect(() => {
     resetMobileNavIntro();
@@ -29,75 +39,126 @@ export function LoginForm({ nextPath }: LoginFormProps) {
     window.location.assign(state.redirectTo);
   }, [state.redirectTo]);
 
+  async function continueWithGoogle() {
+    if (pending || googleBusy) return;
+    setGoogleBusy(true);
+    setGoogleError(null);
+    try {
+      const res = await fetch("/api/auth/oauth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: "{}",
+      });
+      const data = (await res.json()) as {
+        url?: string;
+        error?: { code?: string };
+      };
+      if (!res.ok || !data.url) {
+        setGoogleError(
+          data.error?.code === "RATE_LIMITED"
+            ? t("rateLimitExceeded")
+            : t("googleAccessDenied"),
+        );
+        return;
+      }
+      window.location.assign(data.url);
+    } catch {
+      setGoogleError(t("googleAccessDenied"));
+    } finally {
+      setGoogleBusy(false);
+    }
+  }
+
+  const bannerError = state.error || googleError || queryMessage;
+
   return (
-    <form className={styles.form} action={formAction}>
-      {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
-      {state.error ? (
+    <div className={styles.authStack}>
+      {bannerError ? (
         <p className={styles.error} role="alert">
-          {state.error}
+          {bannerError}
         </p>
       ) : null}
-      <label className={styles.label}>
-        {t("email")}
-        <input
-          type="email"
-          name="email"
-          className={styles.input}
-          defaultValue={isDev ? "olivia@spiora.demo" : undefined}
-          placeholder="olivia@spiora.demo"
-          autoComplete="email"
-          required
-          disabled={pending}
-        />
-      </label>
-      <label className={styles.label}>
-        {t("password")}
-        <span className={styles.passwordField}>
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            className={styles.input}
-            placeholder="••••••••"
-            autoComplete="current-password"
-            required
-            disabled={pending}
-          />
-          <button
-            type="button"
-            className={styles.passwordToggle}
-            onClick={() => setShowPassword((v) => !v)}
-            aria-label={showPassword ? t("hidePassword") : t("showPassword")}
-            aria-pressed={showPassword}
-            disabled={pending}
-          >
-            {showPassword ? (
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path
-                  fill="currentColor"
-                  d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
-                />
-                <path
-                  fill="currentColor"
-                  d="M3.3 3.3 20.7 20.7l-1.4 1.4L1.9 4.7z"
-                />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path
-                  fill="currentColor"
-                  d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
-                />
-              </svg>
-            )}
-          </button>
-        </span>
-      </label>
-      <button type="submit" className={styles.submit} disabled={pending}>
-        {pending ? t("signingIn") : t("signIn")}
+
+      <button
+        type="button"
+        className={styles.googleButton}
+        onClick={() => void continueWithGoogle()}
+        disabled={pending || googleBusy}
+      >
+        {googleBusy ? t("signingIn") : t("continueWithGoogle")}
       </button>
-      <p className={styles.forgotHint}>
-        <a href="/forgot-password">{t("forgotPasswordLink")}</a>
-      </p>
-    </form>
+
+      <p className={styles.orDivider}>{t("orDivider")}</p>
+
+      <form className={styles.form} action={formAction}>
+        {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
+        <label className={styles.label}>
+          {t("email")}
+          <input
+            type="email"
+            name="email"
+            className={styles.input}
+            defaultValue={isDev ? "olivia@spiora.demo" : undefined}
+            placeholder="olivia@spiora.demo"
+            autoComplete="email"
+            required
+            disabled={pending || googleBusy}
+          />
+        </label>
+        <label className={styles.label}>
+          {t("password")}
+          <span className={styles.passwordField}>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              className={styles.input}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              required
+              disabled={pending || googleBusy}
+            />
+            <button
+              type="button"
+              className={styles.passwordToggle}
+              onClick={() => setShowPassword((v) => !v)}
+              aria-label={showPassword ? t("hidePassword") : t("showPassword")}
+              aria-pressed={showPassword}
+              disabled={pending || googleBusy}
+            >
+              {showPassword ? (
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M3.3 3.3 20.7 20.7l-1.4 1.4L1.9 4.7z"
+                  />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                  <path
+                    fill="currentColor"
+                    d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                  />
+                </svg>
+              )}
+            </button>
+          </span>
+        </label>
+        <button
+          type="submit"
+          className={styles.submit}
+          disabled={pending || googleBusy}
+        >
+          {pending ? t("signingIn") : t("signIn")}
+        </button>
+        <p className={styles.forgotHint}>
+          <a href="/forgot-password">{t("forgotPasswordLink")}</a>
+        </p>
+      </form>
+    </div>
   );
 }

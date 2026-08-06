@@ -16,7 +16,7 @@ export async function checkPasswordFlowRateLimit(
 }
 
 export async function checkPasswordIpRateLimit(
-  namespace: "forgot-ip" | "reset-ip",
+  namespace: "forgot-ip" | "reset-ip" | "oauth-ip",
   ip?: string,
 ): Promise<LoginRateLimitResult> {
   return checkProductionSafeLoginRateLimit(`${namespace}:all`, ip);

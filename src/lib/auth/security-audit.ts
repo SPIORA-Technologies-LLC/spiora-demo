@@ -27,14 +27,53 @@ export type SecurityAuditAction =
   | "password_reset_requested"
   | "password_reset_completed"
   | "password_reset_failed"
-  | "sessions_revoked";
+  | "sessions_revoked"
+  | "google_oauth_started"
+  | "google_oauth_success"
+  | "google_oauth_denied"
+  | "google_oauth_failed";
 
 export type SecurityAuditAudience = "employee" | "client" | "unknown";
+
+function isTruthyFlag(
+  env: NodeJS.ProcessEnv,
+  name: string,
+): boolean {
+  return env[name]?.trim().toLowerCase() === "true";
+}
+
+/** Umbrella: enables password + OAuth audit. */
+export function isSecurityAuditAuthEnabled(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return isTruthyFlag(env, "SPIORA_SECURITY_AUDIT_AUTH");
+}
 
 export function isSecurityAuditPasswordEnabled(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
-  return env.SPIORA_SECURITY_AUDIT_PASSWORD?.trim().toLowerCase() === "true";
+  return (
+    isSecurityAuditAuthEnabled(env) ||
+    isTruthyFlag(env, "SPIORA_SECURITY_AUDIT_PASSWORD")
+  );
+}
+
+export function isSecurityAuditOauthEnabled(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return (
+    isSecurityAuditAuthEnabled(env) ||
+    isTruthyFlag(env, "SPIORA_SECURITY_AUDIT_OAUTH")
+  );
+}
+
+function isGoogleOAuthAuditAction(action: SecurityAuditAction): boolean {
+  return (
+    action === "google_oauth_started" ||
+    action === "google_oauth_success" ||
+    action === "google_oauth_denied" ||
+    action === "google_oauth_failed"
+  );
 }
 
 export type SecurityAuditInsert = {
@@ -50,13 +89,16 @@ export type SecurityAuditInsert = {
 };
 
 /**
- * Insert audit row when SPIORA_SECURITY_AUDIT_PASSWORD=true (migration 041 applied).
- * Returns ok:false on failure — callers must not fail user-visible success for change/reset.
+ * Insert audit row when the matching audit flag is enabled (041/042 applied).
+ * Returns ok:false on failure — callers must not fail user-visible auth success.
  */
 export async function insertSecurityAuditEvent(
   input: SecurityAuditInsert,
 ): Promise<{ ok: true } | { ok: false; reason: string }> {
-  if (!isSecurityAuditPasswordEnabled()) {
+  const enabled = isGoogleOAuthAuditAction(input.action)
+    ? isSecurityAuditOauthEnabled()
+    : isSecurityAuditPasswordEnabled();
+  if (!enabled) {
     return { ok: false, reason: "audit_disabled" };
   }
 

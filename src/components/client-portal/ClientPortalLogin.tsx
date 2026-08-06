@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
@@ -19,6 +19,41 @@ export function ClientPortalLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [googleBusy, setGoogleBusy] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "google_access_denied") {
+      setError(t("googleAccessDenied"));
+    }
+  }, [t]);
+
+  async function continueWithGoogle() {
+    if (busy || googleBusy) return;
+    setGoogleBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/client/auth/oauth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: "{}",
+      });
+      const data = (await res.json()) as {
+        url?: string;
+        error?: { code?: string };
+      };
+      if (!res.ok || !data.url) {
+        setError(t("googleAccessDenied"));
+        return;
+      }
+      window.location.assign(data.url);
+    } catch {
+      setError(t("googleAccessDenied"));
+    } finally {
+      setGoogleBusy(false);
+    }
+  }
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -61,6 +96,16 @@ export function ClientPortalLogin() {
         </div>
         <h1 className={styles.title}>{t("title")}</h1>
         <p className={styles.muted}>{t("subtitle")}</p>
+        {error ? <p className={styles.error}>{error}</p> : null}
+        <button
+          type="button"
+          className={styles.secondary}
+          onClick={() => void continueWithGoogle()}
+          disabled={busy || googleBusy}
+        >
+          {googleBusy ? t("working") : t("continueWithGoogle")}
+        </button>
+        <p className={styles.hint}>{t("orDivider")}</p>
         <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
           <label className={styles.label}>
             {t("email")}
@@ -71,6 +116,7 @@ export function ClientPortalLogin() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
+              disabled={busy || googleBusy}
             />
           </label>
           <label className={styles.label}>
@@ -83,6 +129,7 @@ export function ClientPortalLogin() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete="current-password"
+                disabled={busy || googleBusy}
               />
               <button
                 type="button"
@@ -90,7 +137,7 @@ export function ClientPortalLogin() {
                 onClick={() => setShowPassword((v) => !v)}
                 aria-label={showPassword ? t("hidePassword") : t("showPassword")}
                 aria-pressed={showPassword}
-                disabled={busy}
+                disabled={busy || googleBusy}
               >
                 {showPassword ? (
                   <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -114,8 +161,11 @@ export function ClientPortalLogin() {
               </button>
             </span>
           </label>
-          {error ? <p className={styles.error}>{error}</p> : null}
-          <button type="submit" className={styles.primary} disabled={busy}>
+          <button
+            type="submit"
+            className={styles.primary}
+            disabled={busy || googleBusy}
+          >
             {busy ? t("working") : t("submit")}
           </button>
           <p className={styles.muted}>

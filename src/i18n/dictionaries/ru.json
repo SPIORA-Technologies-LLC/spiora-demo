@@ -62,7 +62,11 @@
     "demoPasswordHint": "Пароль задаётся в переменных AUTH_PASSWORD_* в .env.local (не хранится в исходном коде). Другие email не подойдут.",
     "forgotPasswordHint": "Забыли пароль? Напишите администратору платформы — он сбросит его в разделе Settings.",
     "forgotPasswordLink": "Забыли пароль?",
-    "rateLimitExceeded": "Слишком много попыток входа. Подождите минуту и попробуйте снова."
+    "rateLimitExceeded": "Слишком много попыток входа. Подождите минуту и попробуйте снова.",
+    "continueWithGoogle": "Продолжить с Google",
+    "googleAccessDenied": "Вход через Google недоступен для этого аккаунта. Обратитесь к администратору.",
+    "unsupportedCallback": "Эта ссылка входа больше не поддерживается. Попробуйте снова со страницы входа.",
+    "orDivider": "или"
   },
   "shell": {
     "search": "Поиск…",
@@ -2670,7 +2674,10 @@
       "authUnavailable": "Клиентская аутентификация не настроена.",
       "authFailed": "Неверный email или пароль.",
       "notClient": "Этот аккаунт не является пользователем портала Spiora Client.",
-      "forgotPassword": "Забыли пароль?"
+      "forgotPassword": "Забыли пароль?",
+      "continueWithGoogle": "Продолжить с Google",
+      "googleAccessDenied": "Вход через Google недоступен для этого аккаунта. Обратитесь к администратору.",
+      "orDivider": "или"
     }
   },
   "authPassword": {

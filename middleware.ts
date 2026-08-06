@@ -172,6 +172,7 @@ export const config = {
     "/forgot-password",
     "/reset-password",
     "/auth/callback",
+    "/auth/callback/:path*",
     "/auth/confirm",
     "/auth/confirm/:path*",
     "/client",

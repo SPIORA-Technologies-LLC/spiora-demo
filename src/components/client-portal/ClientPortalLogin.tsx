@@ -96,82 +96,96 @@ export function ClientPortalLogin() {
         </div>
         <h1 className={styles.title}>{t("title")}</h1>
         <p className={styles.muted}>{t("subtitle")}</p>
-        {error ? <p className={styles.error}>{error}</p> : null}
-        <button
-          type="button"
-          className={styles.secondary}
-          onClick={() => void continueWithGoogle()}
-          disabled={busy || googleBusy}
-        >
-          {googleBusy ? t("working") : t("continueWithGoogle")}
-        </button>
-        <p className={styles.hint}>{t("orDivider")}</p>
-        <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
-          <label className={styles.label}>
-            {t("email")}
-            <input
-              className={styles.input}
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-              disabled={busy || googleBusy}
-            />
-          </label>
-          <label className={styles.label}>
-            {t("password")}
-            <span className={styles.passwordField}>
-              <input
-                className={styles.input}
-                type={showPassword ? "text" : "password"}
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                autoComplete="current-password"
-                disabled={busy || googleBusy}
-              />
-              <button
-                type="button"
-                className={styles.passwordToggle}
-                onClick={() => setShowPassword((v) => !v)}
-                aria-label={showPassword ? t("hidePassword") : t("showPassword")}
-                aria-pressed={showPassword}
-                disabled={busy || googleBusy}
-              >
-                {showPassword ? (
-                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path
-                      fill="currentColor"
-                      d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
-                    />
-                    <path
-                      fill="currentColor"
-                      d="M3.3 3.3 20.7 20.7l-1.4 1.4L1.9 4.7z"
-                    />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                    <path
-                      fill="currentColor"
-                      d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
-                    />
-                  </svg>
-                )}
-              </button>
-            </span>
-          </label>
+        <div className={styles.authStack}>
+          {error ? <p className={styles.error}>{error}</p> : null}
           <button
-            type="submit"
-            className={styles.primary}
+            type="button"
+            className={styles.googleButton}
+            onClick={() => void continueWithGoogle()}
             disabled={busy || googleBusy}
           >
-            {busy ? t("working") : t("submit")}
+            {googleBusy ? t("working") : t("continueWithGoogle")}
           </button>
-          <p className={styles.muted}>
-            <a href="/client/forgot-password">{t("forgotPassword")}</a>
-          </p>
-        </form>
+          <p className={styles.orDivider}>{t("orDivider")}</p>
+          <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
+            <label className={styles.label}>
+              {t("email")}
+              <input
+                className={styles.input}
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                autoComplete="email"
+                disabled={busy || googleBusy}
+              />
+            </label>
+            <label className={styles.label}>
+              {t("password")}
+              <span className={styles.passwordField}>
+                <input
+                  className={styles.input}
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  disabled={busy || googleBusy}
+                />
+                <button
+                  type="button"
+                  className={styles.passwordToggle}
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={
+                    showPassword ? t("hidePassword") : t("showPassword")
+                  }
+                  aria-pressed={showPassword}
+                  disabled={busy || googleBusy}
+                >
+                  {showPassword ? (
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                      />
+                      <path
+                        fill="currentColor"
+                        d="M3.3 3.3 20.7 20.7l-1.4 1.4L1.9 4.7z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="18"
+                      height="18"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill="currentColor"
+                        d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+                      />
+                    </svg>
+                  )}
+                </button>
+              </span>
+            </label>
+            <button
+              type="submit"
+              className={styles.primary}
+              disabled={busy || googleBusy}
+            >
+              {busy ? t("working") : t("submit")}
+            </button>
+            <p className={styles.muted}>
+              <a href="/client/forgot-password">{t("forgotPassword")}</a>
+            </p>
+          </form>
+        </div>
       </div>
     </div>
   );

@@ -95,7 +95,9 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       <button type="submit" className={styles.submit} disabled={pending}>
         {pending ? t("signingIn") : t("signIn")}
       </button>
-      <p className={styles.forgotHint}>{t("forgotPasswordHint")}</p>
+      <p className={styles.forgotHint}>
+        <a href="/forgot-password">{t("forgotPasswordLink")}</a>
+      </p>
     </form>
   );
 }

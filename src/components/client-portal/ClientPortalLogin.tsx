@@ -118,6 +118,9 @@ export function ClientPortalLogin() {
           <button type="submit" className={styles.primary} disabled={busy}>
             {busy ? t("working") : t("submit")}
           </button>
+          <p className={styles.muted}>
+            <a href="/client/forgot-password">{t("forgotPassword")}</a>
+          </p>
         </form>
       </div>
     </div>

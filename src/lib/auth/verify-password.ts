@@ -21,5 +21,7 @@ export async function verifyUserPassword(
     return bcrypt.compare(password, stored);
   }
 
-  return password === stored;
+  // Legacy plaintext AUTH_PASSWORD_* values are rejected.
+  // Hash with: npm run auth:hash-password
+  return false;
 }

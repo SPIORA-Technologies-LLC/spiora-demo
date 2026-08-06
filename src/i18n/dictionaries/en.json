@@ -61,6 +61,7 @@
     "demoAccountsTitle": "Demo accounts (local development)",
     "demoPasswordHint": "Password is set in AUTH_PASSWORD_* variables in .env.local (not stored in source code). Other emails will not work.",
     "forgotPasswordHint": "Forgot your password? Contact your platform administrator — they can reset it in Settings.",
+    "forgotPasswordLink": "Forgot password?",
     "rateLimitExceeded": "Too many sign-in attempts. Please wait a minute and try again."
   },
   "shell": {
@@ -2668,7 +2669,44 @@
       "working": "Signing in…",
       "authUnavailable": "Client authentication is not configured.",
       "authFailed": "Invalid email or password.",
-      "notClient": "This account is not a Spiora Client portal user."
+      "notClient": "This account is not a Spiora Client portal user.",
+      "forgotPassword": "Forgot password?"
+    }
+  },
+  "authPassword": {
+    "backToLogin": "Back to sign in",
+    "fields": {
+      "email": "Email",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm password"
+    },
+    "forgot": {
+      "title": "Forgot password",
+      "hint": "Enter your email. If an account exists, we will send reset instructions.",
+      "submit": "Send reset link",
+      "sending": "Sending…",
+      "sent": "If an account exists for this email, password reset instructions were sent."
+    },
+    "reset": {
+      "title": "Set a new password",
+      "hint": "Choose a new password for your account.",
+      "submit": "Save password",
+      "saving": "Saving…"
+    },
+    "change": {
+      "title": "Change password",
+      "hint": "Confirm your current password, then choose a new one. Other sessions will be signed out.",
+      "submit": "Update password",
+      "saving": "Updating…",
+      "success": "Password updated."
+    },
+    "errors": {
+      "generic": "Something went wrong. Please try again.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "mismatch": "Passwords do not match.",
+      "currentPasswordFailed": "Could not verify the current password. Check the password or use account recovery.",
+      "recoveryExpired": "This reset link is invalid or expired. Request a new one."
     }
   },
   "clientIntake": {

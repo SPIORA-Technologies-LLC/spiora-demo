@@ -15,6 +15,12 @@ const PUBLIC_PATHS = [
   "/api/webhooks",
   "/client/invite",
   "/client/login",
+  "/forgot-password",
+  "/reset-password",
+  "/client/forgot-password",
+  "/client/reset-password",
+  "/auth/callback",
+  "/auth/confirm",
 ];
 
 const PROTECTED_PREFIXES = [
@@ -54,7 +60,11 @@ function isClientPublicPath(pathname: string) {
   return (
     pathname.startsWith("/client/invite") ||
     pathname === "/client/login" ||
-    pathname.startsWith("/client/login/")
+    pathname.startsWith("/client/login/") ||
+    pathname === "/client/forgot-password" ||
+    pathname.startsWith("/client/forgot-password/") ||
+    pathname === "/client/reset-password" ||
+    pathname.startsWith("/client/reset-password/")
   );
 }
 
@@ -159,6 +169,11 @@ export const config = {
     "/login",
     "/join",
     "/join/:path*",
+    "/forgot-password",
+    "/reset-password",
+    "/auth/callback",
+    "/auth/confirm",
+    "/auth/confirm/:path*",
     "/client",
     "/client/:path*",
     "/dashboard",

@@ -136,7 +136,7 @@ export async function handlePasswordForgot(input: {
 export async function handlePasswordChange(input: {
   request: Request;
   audience: PasswordRecoveryAudience;
-  body: { currentPassword?: string; newPassword?: string };
+  body: { currentPassword?: string; newPassword?: string; locale?: string };
 }): Promise<NextResponse> {
   const { origin, host, ip, userAgent } = requestMeta(input.request);
   const originCheck = checkRequestOrigin(origin, host);
@@ -244,11 +244,17 @@ export async function handlePasswordChange(input: {
     }
   }
 
+  const { isAppLocale } = await import("@/i18n/config");
+  const { getRequestLocale } = await import("@/i18n/api-messages");
+  const notifyLocale = isAppLocale(input.body.locale)
+    ? input.body.locale
+    : await getRequestLocale();
+
   void sendPasswordSecurityNotification({
     to: user.email,
     audience: input.audience,
     kind: "changed",
-    truncatedIp: truncateClientIp(ip),
+    locale: notifyLocale,
   });
 
   return jsonWithAuthCookies({ ok: true }, mutations);
@@ -257,7 +263,7 @@ export async function handlePasswordChange(input: {
 export async function handlePasswordReset(input: {
   request: Request;
   audience: PasswordRecoveryAudience;
-  body: { password?: string };
+  body: { password?: string; locale?: string };
 }): Promise<NextResponse> {
   const { origin, host, ip, userAgent } = requestMeta(input.request);
   const originCheck = checkRequestOrigin(origin, host);
@@ -366,11 +372,16 @@ export async function handlePasswordReset(input: {
   }
 
   if (user.email) {
+    const { isAppLocale } = await import("@/i18n/config");
+    const { getRequestLocale } = await import("@/i18n/api-messages");
+    const notifyLocale = isAppLocale(input.body.locale)
+      ? input.body.locale
+      : await getRequestLocale();
     void sendPasswordSecurityNotification({
       to: user.email,
       audience: input.audience,
       kind: "reset",
-      truncatedIp: truncateClientIp(ip),
+      locale: notifyLocale,
     });
   }
 

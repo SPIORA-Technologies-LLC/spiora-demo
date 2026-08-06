@@ -2694,6 +2694,17 @@
       "subject": "Reset your Spiora password",
       "body": "We received a request to reset your Spiora password.\n\nOpen this link to choose a new one:\n{resetUrl}\n\nIf you did not request this, you can ignore this email."
     },
+    "notify": {
+      "subjectChanged": "Spiora password changed",
+      "subjectReset": "Spiora password reset completed",
+      "planeEmployee": "team account",
+      "planeClient": "client portal account",
+      "kindChanged": "changed",
+      "kindReset": "reset",
+      "intro": "Your Spiora {plane} password was {kind}.",
+      "warning": "If you did not make this change, reset your password immediately and contact support at info@spiora.ai.",
+      "noPassword": "This message does not include your password."
+    },
     "reset": {
       "title": "Set a new password",
       "hint": "Choose a new password for your account.",

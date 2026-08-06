@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import loginStyles from "@/app/login/login.module.css";
 import clientStyles from "@/components/client-portal/ClientInvitePage.module.css";
 
@@ -9,6 +9,7 @@ type Audience = "employee" | "client";
 
 export function ChangePasswordForm({ audience }: { audience: Audience }) {
   const t = useTranslations("authPassword");
+  const locale = useLocale();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -37,7 +38,7 @@ export function ChangePasswordForm({ audience }: { audience: Audience }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify({ currentPassword, newPassword, locale }),
       });
       const data = (await res.json()) as {
         ok?: boolean;

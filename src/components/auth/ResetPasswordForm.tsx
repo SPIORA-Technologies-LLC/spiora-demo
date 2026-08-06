@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import loginStyles from "@/app/login/login.module.css";
 import clientStyles from "@/components/client-portal/ClientInvitePage.module.css";
 
@@ -35,6 +35,7 @@ function PasswordVisibilityIcon({ visible }: { visible: boolean }) {
 
 export function ResetPasswordForm({ audience }: { audience: Audience }) {
   const t = useTranslations("authPassword");
+  const locale = useLocale();
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -65,7 +66,7 @@ export function ResetPasswordForm({ audience }: { audience: Audience }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, locale }),
       });
       const data = (await res.json()) as {
         ok?: boolean;

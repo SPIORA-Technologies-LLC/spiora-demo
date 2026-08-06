@@ -43,6 +43,35 @@
   line-height: 1.45;
 }
 
+.muted a {
+  color: #f0a8ae;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.muted a:hover {
+  color: #ffc4c8;
+  text-decoration: underline;
+}
+
+.backRow {
+  margin: 0.85rem 0 0;
+  text-align: center;
+  font-size: 0.86rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.backRow a {
+  color: #f0a8ae;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.backRow a:hover {
+  color: #ffc4c8;
+  text-decoration: underline;
+}
+
 .modeRow {
   display: grid;
   grid-template-columns: 1fr 1fr;

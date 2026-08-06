@@ -1,9 +1,10 @@
 import { ResetPasswordForm } from "@/components/auth/ResetPasswordForm";
+import { PasswordAuthShell } from "@/components/auth/PasswordAuthShell";
 
 export default function ClientResetPasswordPage() {
   return (
-    <main style={{ maxWidth: 420, margin: "48px auto", padding: 16 }}>
+    <PasswordAuthShell audience="client">
       <ResetPasswordForm audience="client" />
-    </main>
+    </PasswordAuthShell>
   );
 }

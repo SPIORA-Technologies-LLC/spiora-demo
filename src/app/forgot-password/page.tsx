@@ -1,9 +1,10 @@
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
+import { PasswordAuthShell } from "@/components/auth/PasswordAuthShell";
 
 export default function ForgotPasswordPage() {
   return (
-    <main style={{ maxWidth: 420, margin: "48px auto", padding: 16 }}>
+    <PasswordAuthShell audience="employee">
       <ForgotPasswordForm audience="employee" />
-    </main>
+    </PasswordAuthShell>
   );
 }

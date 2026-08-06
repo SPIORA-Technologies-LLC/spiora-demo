@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import loginStyles from "@/app/login/login.module.css";
+import clientStyles from "@/components/client-portal/ClientInvitePage.module.css";
 
 type Audience = "employee" | "client";
 
@@ -12,12 +14,13 @@ export function ForgotPasswordForm({ audience }: { audience: Audience }) {
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const isClient = audience === "client";
+  const styles = isClient ? clientStyles : loginStyles;
 
-  const endpoint =
-    audience === "employee"
-      ? "/api/auth/password/forgot"
-      : "/api/client/auth/password/forgot";
-  const loginHref = audience === "employee" ? "/login" : "/client/login";
+  const endpoint = isClient
+    ? "/api/client/auth/password/forgot"
+    : "/api/auth/password/forgot";
+  const loginHref = isClient ? "/client/login" : "/login";
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -53,25 +56,43 @@ export function ForgotPasswordForm({ audience }: { audience: Audience }) {
   }
 
   return (
-    <form onSubmit={(e) => void onSubmit(e)}>
-      <h1>{t("forgot.title")}</h1>
-      <p>{t("forgot.hint")}</p>
-      {message ? <p>{message}</p> : null}
-      {error ? <p role="alert">{error}</p> : null}
-      <label>
+    <form
+      className={styles.form}
+      onSubmit={(e) => void onSubmit(e)}
+      style={isClient ? undefined : { textAlign: "left" }}
+    >
+      <h1 className={styles.title}>{t("forgot.title")}</h1>
+      <p className={isClient ? styles.muted : styles.subtitle}>
+        {t("forgot.hint")}
+      </p>
+      {message ? (
+        <p className={isClient ? styles.info : styles.success}>{message}</p>
+      ) : null}
+      {error ? (
+        <p className={styles.error} role="alert">
+          {error}
+        </p>
+      ) : null}
+      <label className={styles.label}>
         {t("fields.email")}
         <input
+          className={styles.input}
           type="email"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
+          disabled={busy}
         />
       </label>
-      <button type="submit" disabled={busy}>
+      <button
+        type="submit"
+        className={isClient ? styles.primary : styles.submit}
+        disabled={busy}
+      >
         {busy ? t("forgot.sending") : t("forgot.submit")}
       </button>
-      <p>
+      <p className={isClient ? styles.backRow : styles.forgotHint}>
         <Link href={loginHref}>{t("backToLogin")}</Link>
       </p>
     </form>

@@ -62,12 +62,13 @@ export function ForgotPasswordForm({ audience }: { audience: Audience }) {
       style={isClient ? undefined : { textAlign: "left" }}
     >
       <h1 className={styles.title}>{t("forgot.title")}</h1>
-      <p className={isClient ? styles.muted : styles.subtitle}>
-        {t("forgot.hint")}
-      </p>
       {message ? (
         <p className={isClient ? styles.info : styles.success}>{message}</p>
-      ) : null}
+      ) : (
+        <p className={isClient ? styles.muted : styles.subtitle}>
+          {t("forgot.hint")}
+        </p>
+      )}
       {error ? (
         <p className={styles.error} role="alert">
           {error}

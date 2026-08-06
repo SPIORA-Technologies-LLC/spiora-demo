@@ -2686,7 +2686,11 @@
       "hint": "Enter your email. If an account exists, we will send reset instructions.",
       "submit": "Send reset link",
       "sending": "Sending…",
-      "sent": "If an account exists for this email, password reset instructions were sent."
+      "sent": "A password reset link for your Spiora account has been sent to your email."
+    },
+    "email": {
+      "subject": "Reset your Spiora password",
+      "body": "We received a request to reset your Spiora password.\n\nOpen this link to choose a new one:\n{resetUrl}\n\nIf you did not request this, you can ignore this email."
     },
     "reset": {
       "title": "Set a new password",

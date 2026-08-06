@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import loginStyles from "@/app/login/login.module.css";
 import clientStyles from "@/components/client-portal/ClientInvitePage.module.css";
 
@@ -10,6 +10,7 @@ type Audience = "employee" | "client";
 
 export function ForgotPasswordForm({ audience }: { audience: Audience }) {
   const t = useTranslations("authPassword");
+  const locale = useLocale();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -32,11 +33,10 @@ export function ForgotPasswordForm({ audience }: { audience: Audience }) {
       const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, locale }),
       });
       const data = (await res.json()) as {
         ok?: boolean;
-        message?: string;
         error?: { code?: string };
       };
       if (!res.ok) {
@@ -47,7 +47,7 @@ export function ForgotPasswordForm({ audience }: { audience: Audience }) {
         );
         return;
       }
-      setMessage(data.message ?? t("forgot.sent"));
+      setMessage(t("forgot.sent"));
     } catch {
       setError(t("errors.generic"));
     } finally {

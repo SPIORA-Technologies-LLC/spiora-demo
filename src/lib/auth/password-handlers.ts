@@ -53,7 +53,7 @@ function jsonError(code: string, status: number, message?: string) {
 export async function handlePasswordForgot(input: {
   request: Request;
   audience: PasswordRecoveryAudience;
-  body: { email?: string };
+  body: { email?: string; locale?: string };
 }): Promise<NextResponse> {
   const { origin, host, ip, userAgent } = requestMeta(input.request);
   const originCheck = checkRequestOrigin(origin, host);
@@ -63,11 +63,7 @@ export async function handlePasswordForgot(input: {
 
   const email = String(input.body.email ?? "").trim().toLowerCase();
   const generic = NextResponse.json(
-    {
-      ok: true,
-      message:
-        "If an account exists for this email, password reset instructions were sent.",
-    },
+    { ok: true },
     { headers: { "Cache-Control": "no-store" } },
   );
 
@@ -91,12 +87,28 @@ export async function handlePasswordForgot(input: {
     return jsonError("AUTH_UNAVAILABLE", 503);
   }
 
+  const { isAppLocale } = await import("@/i18n/config");
+  const { getRequestLocale } = await import("@/i18n/api-messages");
+  const locale = isAppLocale(input.body.locale)
+    ? input.body.locale
+    : await getRequestLocale();
+
   try {
-    const { createSupabaseServerAuthClient } = await import(
-      "@/lib/supabase/server-auth"
+    const { trySendLocalizedPasswordRecoveryEmail } = await import(
+      "@/lib/auth/password-recovery-email"
     );
-    const supabase = await createSupabaseServerAuthClient();
-    await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    const sentLocalized = await trySendLocalizedPasswordRecoveryEmail({
+      email,
+      redirectTo,
+      locale,
+    });
+    if (!sentLocalized) {
+      const { createSupabaseServerAuthClient } = await import(
+        "@/lib/supabase/server-auth"
+      );
+      const supabase = await createSupabaseServerAuthClient();
+      await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    }
   } catch {
     // swallow
   }

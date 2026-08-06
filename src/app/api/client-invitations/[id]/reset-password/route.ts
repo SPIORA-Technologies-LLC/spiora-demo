@@ -1,6 +1,7 @@
 import { checkRequestOrigin } from "@/lib/auth/security";
 import { getSession } from "@/lib/auth/session";
 import { clientApiError, clientApiOk } from "@/lib/client-portal/api-errors";
+import { sendClientInviteEmail } from "@/lib/client-portal/invite-email";
 import { resetClientInvitationCredentials } from "@/lib/client-portal/invitations";
 
 export const dynamic = "force-dynamic";
@@ -64,11 +65,22 @@ export async function POST(request: Request, { params }: Params) {
       );
     }
 
+    const mail = await sendClientInviteEmail({
+      to: result.email,
+      inviteUrl: result.inviteUrl,
+      temporaryPassword: result.temporaryPassword,
+      locale: result.preferredLocale,
+      kind: "password_reset",
+      firstName: firstName ?? result.firstName,
+    });
+
     return clientApiOk({
       email: result.email,
       temporaryPassword: result.temporaryPassword,
       inviteUrl: result.inviteUrl,
       state: result.state,
+      emailSent: mail.ok,
+      emailError: mail.ok ? null : mail.code,
     });
   } catch {
     return clientApiError("INTERNAL", 500);

@@ -250,6 +250,21 @@ function checkExternalSecretsInDemo(env: EnvRecord): EnvironmentViolation[] {
     }
   }
 
+  if (isTruthyEnvFrom(env, "SPIORA_ENABLE_EMAIL")) {
+    const hasEmail = Boolean(
+      (envValue(env, "BREVO_API_KEY") ||
+        envValue(env, "SENDINBLUE_API_KEY")) &&
+        (envValue(env, "SPIORA_EMAIL_FROM") || envValue(env, "EMAIL_FROM")),
+    );
+    if (!hasEmail) {
+      violations.push({
+        code: "email_config_incomplete",
+        message:
+          "SPIORA_ENABLE_EMAIL=true, но BREVO_API_KEY / SPIORA_EMAIL_FROM не заданы полностью.",
+      });
+    }
+  }
+
   return violations;
 }
 

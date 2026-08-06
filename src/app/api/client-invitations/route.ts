@@ -5,6 +5,7 @@ import {
   createClientInvitation,
   listClientInvitations,
 } from "@/lib/client-portal/invitations";
+import { sendClientInviteEmail } from "@/lib/client-portal/invite-email";
 import { clientApiError, clientApiOk } from "@/lib/client-portal/api-errors";
 
 export const dynamic = "force-dynamic";
@@ -108,6 +109,29 @@ export async function POST(request: Request) {
       );
     }
 
+    let emailSent = false;
+    let emailError: "EMAIL_NOT_CONFIGURED" | "EMAIL_SEND_FAILED" | null = null;
+
+    if (
+      !result.reused &&
+      result.temporaryPassword &&
+      result.inviteUrl
+    ) {
+      const mail = await sendClientInviteEmail({
+        to: result.invitation.email,
+        inviteUrl: result.inviteUrl,
+        temporaryPassword: result.temporaryPassword,
+        locale: result.invitation.preferredLocale,
+        kind: "invite",
+        firstName: result.invitation.firstName,
+      });
+      if (mail.ok) {
+        emailSent = true;
+      } else {
+        emailError = mail.code;
+      }
+    }
+
     // Never log inviteUrl / token / temporaryPassword
     return clientApiOk(
       {
@@ -115,6 +139,8 @@ export async function POST(request: Request) {
         inviteUrl: result.inviteUrl,
         temporaryPassword: result.temporaryPassword,
         reused: result.reused,
+        emailSent,
+        emailError,
       },
       { status: result.reused ? 200 : 201 },
     );

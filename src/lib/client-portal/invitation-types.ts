@@ -68,6 +68,8 @@ export type ResetInvitationCredentialsResult =
       temporaryPassword: string;
       inviteUrl: string;
       state: "pending" | "accepted";
+      preferredLocale: ClientPortalLocale;
+      firstName: string | null;
     }
   | { ok: false; code: string };
 

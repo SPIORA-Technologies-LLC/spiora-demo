@@ -34,6 +34,8 @@ type IssuedCredentials = {
   inviteUrl: string;
   temporaryPassword: string;
   titleKey: "createdTitle" | "resetTitle";
+  emailSent: boolean;
+  emailError: "EMAIL_NOT_CONFIGURED" | "EMAIL_SEND_FAILED" | null;
 };
 
 function newRequestId() {
@@ -159,6 +161,8 @@ export function ClientInvitationsPanel() {
         temporaryPassword?: string;
         invitation?: { email: string };
         reused?: boolean;
+        emailSent?: boolean;
+        emailError?: "EMAIL_NOT_CONFIGURED" | "EMAIL_SEND_FAILED" | null;
         error?: { message: string; code?: string };
       };
       if (!res.ok) {
@@ -177,6 +181,8 @@ export function ClientInvitationsPanel() {
           inviteUrl: data.inviteUrl,
           temporaryPassword: data.temporaryPassword,
           titleKey: "createdTitle",
+          emailSent: Boolean(data.emailSent),
+          emailError: data.emailError ?? null,
         });
       } else if (data.reused) {
         setFormError(t("errors.reusedNoUrl"));
@@ -217,6 +223,8 @@ export function ClientInvitationsPanel() {
         email?: string;
         inviteUrl?: string;
         temporaryPassword?: string;
+        emailSent?: boolean;
+        emailError?: "EMAIL_NOT_CONFIGURED" | "EMAIL_SEND_FAILED" | null;
         error?: { message: string; code?: string };
       };
       if (!res.ok || !data.temporaryPassword || !data.inviteUrl || !data.email) {
@@ -237,6 +245,8 @@ export function ClientInvitationsPanel() {
         inviteUrl: data.inviteUrl,
         temporaryPassword: data.temporaryPassword,
         titleKey: "resetTitle",
+        emailSent: Boolean(data.emailSent),
+        emailError: data.emailError ?? null,
       });
       await load();
     } catch {
@@ -397,6 +407,17 @@ export function ClientInvitationsPanel() {
             {issued ? (
               <div className={styles.success}>
                 <p className={styles.successTitle}>{t(issued.titleKey)}</p>
+                {issued.emailSent ? (
+                  <p className={styles.muted}>
+                    {t("emailSentTitle", { email: issued.email })}
+                  </p>
+                ) : (
+                  <p className={styles.error}>
+                    {issued.emailError === "EMAIL_NOT_CONFIGURED"
+                      ? t("emailNotConfiguredHint")
+                      : t("emailFailedHint")}
+                  </p>
+                )}
                 <label className={styles.credLabel}>
                   {t("fields.email")}
                   <code className={styles.url}>{issued.email}</code>

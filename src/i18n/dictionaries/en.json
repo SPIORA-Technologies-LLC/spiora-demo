@@ -2406,8 +2406,8 @@
   },
   "clientInvitations": {
     "title": "Client invitations",
-    "subtitle": "Create a link and a random password for Spiora Client. Copy the message and send it to the client.",
-    "statusHint": "After the client signs in, the Status in the table automatically changes to Accepted. Pending means the link has not been used yet. You can reissue the password at any time.",
+    "subtitle": "Create an invitation — Spiora sends the link and temporary password to the client's email.",
+    "statusHint": "After the client signs in, the Status in the table automatically changes to Accepted. Pending means the link has not been used yet. Use New password or New invitation to email fresh credentials.",
     "inviteClient": "Invite client",
     "loading": "Loading invitations…",
     "empty": "No invitations yet",
@@ -2417,13 +2417,16 @@
     "delete": "Delete",
     "confirmRevoke": "Revoke this invitation?",
     "confirmDelete": "Remove this invitation from the list? If the link is still active, it will stop working.",
-    "confirmResetPassword": "Generate a new password for this client? The old password will stop working.",
+    "confirmResetPassword": "Generate a new password and email it to the client? The old password will stop working.",
     "modalTitle": "Invite client to Spiora Client",
     "close": "Close",
     "create": "Create invitation",
     "creating": "Creating…",
     "createdTitle": "Invitation created",
     "resetTitle": "New password ready",
+    "emailSentTitle": "Email sent to {email}",
+    "emailFailedHint": "Invitation was created, but the email could not be sent. Copy the message below and send it manually.",
+    "emailNotConfiguredHint": "Email delivery is not configured. Copy the message below and send it to the client, or set SPIORA_ENABLE_EMAIL, BREVO_API_KEY, and SPIORA_EMAIL_FROM.",
     "passwordLabel": "Password",
     "linkLabel": "Link",
     "copyLink": "Copy link",
@@ -2431,6 +2434,10 @@
     "copied": "Copied",
     "copyOnceHint": "The password and link are shown only now. After you close this window they cannot be recovered from the database — only reissued.",
     "sharePackage": "Hello!\n\nYou are invited to the Spiora Client portal.\n\nLink: {url}\nEmail: {email}\nPassword: {password}\n\nOpen the link, sign in with these credentials, and accept the invitation.\nIf you lose the password, contact your manager — we can send a new one.",
+    "email": {
+      "subjectInvite": "Your Spiora Client invitation",
+      "subjectPasswordReset": "Your new Spiora Client password"
+    },
     "columns": {
       "name": "Name",
       "email": "Email",
@@ -2466,7 +2473,9 @@
       "resetFailed": "Could not reset password",
       "authProvisionFailed": "Could not create the client login. Check Supabase configuration.",
       "reusedNoUrl": "Request already processed. Create a new invitation to get a new link.",
-      "assigneeRequired": "Select an assigned employee"
+      "assigneeRequired": "Select an assigned employee",
+      "emailSendFailed": "Could not send the email to the client",
+      "emailNotConfigured": "Email delivery is not configured"
     }
   },
   "clientPortal": {

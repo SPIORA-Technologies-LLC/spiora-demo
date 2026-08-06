@@ -199,6 +199,8 @@ export async function resetClientInvitationCredentials(input: {
     temporaryPassword,
     inviteUrl,
     state,
+    preferredLocale: before.preferredLocale,
+    firstName: before.firstName,
   };
 }
 

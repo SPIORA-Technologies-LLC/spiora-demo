@@ -21,6 +21,8 @@ export type ClientApiErrorCode =
   | "ACCEPT_FAILED"
   | "ALREADY_ACCEPTED"
   | "AUTH_PROVISION_FAILED"
+  | "EMAIL_NOT_CONFIGURED"
+  | "EMAIL_SEND_FAILED"
   | "AUTH_REQUIRED"
   | "AUTH_UNAVAILABLE"
   | "RATE_LIMITED"
@@ -61,6 +63,9 @@ const MESSAGES: Record<ClientApiErrorCode, string> = {
   ACCEPT_FAILED: "Could not accept invitation",
   ALREADY_ACCEPTED: "Invitation already accepted",
   AUTH_PROVISION_FAILED: "Could not create client login credentials",
+  EMAIL_NOT_CONFIGURED:
+    "Email delivery is not configured (SPIORA_ENABLE_EMAIL / BREVO_API_KEY / SPIORA_EMAIL_FROM)",
+  EMAIL_SEND_FAILED: "Could not send invitation email",
   AUTH_REQUIRED: "Sign in required",
   AUTH_UNAVAILABLE: "Authentication is unavailable",
   RATE_LIMITED: "Too many requests",

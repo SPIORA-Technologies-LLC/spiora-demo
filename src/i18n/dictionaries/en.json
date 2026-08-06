@@ -2675,6 +2675,8 @@
   },
   "authPassword": {
     "backToLogin": "Back to sign in",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "fields": {
       "email": "Email",
       "currentPassword": "Current password",

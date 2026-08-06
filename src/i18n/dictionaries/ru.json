@@ -2675,6 +2675,8 @@
   },
   "authPassword": {
     "backToLogin": "Вернуться ко входу",
+    "showPassword": "Показать пароль",
+    "hidePassword": "Скрыть пароль",
     "fields": {
       "email": "Email",
       "currentPassword": "Текущий пароль",

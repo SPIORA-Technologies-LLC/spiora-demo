@@ -1,9 +1,7 @@
 import "server-only";
 
-import {
-  checkProductionSafeLoginRateLimit,
-  type LoginRateLimitResult,
-} from "./login-rate-limit-store";
+import type { LoginRateLimitResult } from "./login-rate-limit";
+import { checkProductionSafeLoginRateLimit } from "./login-rate-limit-store";
 
 /** Reuse persistent login limiter with namespaced keys for password flows. */
 export async function checkPasswordFlowRateLimit(

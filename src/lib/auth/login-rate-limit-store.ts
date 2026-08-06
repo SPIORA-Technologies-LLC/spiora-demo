@@ -6,6 +6,8 @@ import {
   type LoginRateLimitResult,
 } from "./login-rate-limit";
 
+export type { LoginRateLimitResult };
+
 export type LoginRateLimiter = {
   check(email: string, ip?: string): Promise<LoginRateLimitResult>;
 };

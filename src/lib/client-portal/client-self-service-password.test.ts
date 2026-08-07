@@ -129,15 +129,15 @@ describe("Phase D1 client self-service password recovery", () => {
   it("Account / MFA nav only when showMfaSettings (flag-gated UX)", () => {
     const home = read("src/components/client-portal/ClientPortalHome.tsx");
     assert.match(home, /showMfaSettings/);
-    assert.match(home, /home\.account/);
+    assert.doesNotMatch(home, /home\.account/);
     assert.match(home, /\/client\/account\/mfa/);
     assert.doesNotMatch(home, /home\.security/);
-    // Label + MFA link are inside the flag-true branch only.
+    // MFA link is inside the flag-true branch only (no redundant "Account" label).
     const accountBranch = home.slice(
       home.indexOf("showMfaSettings ? ("),
       home.indexOf(") : (", home.indexOf("showMfaSettings ? (")),
     );
-    assert.match(accountBranch, /home\.account/);
+    assert.doesNotMatch(accountBranch, /home\.account/);
     assert.match(accountBranch, /home\.twoFactor/);
     assert.match(accountBranch, /\/client\/account\/mfa/);
   });

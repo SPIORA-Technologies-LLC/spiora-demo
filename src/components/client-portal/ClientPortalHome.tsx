@@ -142,7 +142,6 @@ export function ClientPortalHome({
           <LanguageSwitcher />
           {showMfaSettings ? (
             <div className={styles.accountLinks}>
-              <span className={styles.accountLabel}>{t("home.account")}</span>
               <a className={styles.accountLink} href="/client/account/password">
                 {t("home.changePassword")}
               </a>

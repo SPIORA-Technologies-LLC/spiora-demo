@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import loginStyles from "@/app/login/login.module.css";
 import clientStyles from "@/components/client-portal/ClientInvitePage.module.css";
@@ -35,6 +36,7 @@ function PasswordVisibilityIcon({ visible }: { visible: boolean }) {
 export function ChangePasswordForm({ audience }: { audience: Audience }) {
   const t = useTranslations("authPassword");
   const locale = useLocale();
+  const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -46,6 +48,7 @@ export function ChangePasswordForm({ audience }: { audience: Audience }) {
   const [busy, setBusy] = useState(false);
   const isClient = audience === "client";
   const styles = isClient ? clientStyles : loginStyles;
+  const continueHref = isClient ? "/client" : "/settings";
 
   const endpoint = isClient
     ? "/api/client/auth/password/change"
@@ -53,9 +56,8 @@ export function ChangePasswordForm({ audience }: { audience: Audience }) {
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (busy) return;
+    if (busy || success) return;
     setError(null);
-    setSuccess(false);
     if (newPassword !== confirm) {
       setError(t("errors.mismatch"));
       return;
@@ -96,6 +98,30 @@ export function ChangePasswordForm({ audience }: { audience: Audience }) {
     }
   }
 
+  if (success) {
+    return (
+      <div
+        className={styles.form}
+        style={isClient ? undefined : { textAlign: "left" }}
+        role="status"
+      >
+        <h1 className={styles.title}>{t("change.successTitle")}</h1>
+        <p className={isClient ? styles.muted : styles.subtitle}>
+          {t("change.successBody")}
+        </p>
+        <button
+          type="button"
+          className={isClient ? styles.primary : styles.submit}
+          onClick={() => router.replace(continueHref)}
+        >
+          {isClient
+            ? t("change.successContinueClient")
+            : t("change.successContinueEmployee")}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <form
       className={styles.form}
@@ -106,11 +132,6 @@ export function ChangePasswordForm({ audience }: { audience: Audience }) {
       <p className={isClient ? styles.muted : styles.subtitle}>
         {t("change.hint")}
       </p>
-      {success ? (
-        <p className={isClient ? styles.info : styles.success}>
-          {t("change.success")}
-        </p>
-      ) : null}
       {error ? (
         <p className={styles.error} role="alert">
           {error}

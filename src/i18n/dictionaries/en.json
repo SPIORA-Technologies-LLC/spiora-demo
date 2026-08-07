@@ -2776,7 +2776,12 @@
       "hint": "Confirm your current password, then choose a new one. Other sessions will be signed out.",
       "submit": "Update password",
       "saving": "Updating…",
-      "success": "Password updated."
+      "success": "Password updated.",
+      "successTitle": "Password updated",
+      "successBody": "Your new password is saved. You stay signed in on this device. Other sessions were signed out.",
+      "successContinue": "Continue",
+      "successContinueClient": "Back to portal",
+      "successContinueEmployee": "Back to settings"
     },
     "errors": {
       "generic": "Something went wrong. Please try again.",

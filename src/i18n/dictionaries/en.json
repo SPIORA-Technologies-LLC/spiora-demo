@@ -2631,10 +2631,7 @@
       "emailLabel": "Email",
       "expiresLabel": "Link valid until",
       "passwordFromInvite": "Your manager sent you a password with this link — enter it below and sign in.",
-      "register": "Register",
-      "signIn": "Sign in",
       "firstNameField": "First name",
-      "firstNameRequired": "Enter your first name",
       "emailField": "Email",
       "passwordField": "Password",
       "showPassword": "Show password",
@@ -2643,8 +2640,6 @@
       "accept": "Accept invitation",
       "working": "Please wait…",
       "alreadySignedIn": "Already signed in? Accept with current session",
-      "confirmEmail": "Confirm your email, then return to this link to accept.",
-      "demoSkipEmailConfirm": "Demo mode: email confirmation is skipped for presentations.",
       "expiredTitle": "This invitation has expired",
       "expiredBody": "Ask your Spiora contact for a new link.",
       "revokedTitle": "This invitation was cancelled",
@@ -2661,7 +2656,7 @@
         "accepted": "Invitation was already accepted.",
         "acceptFailed": "Could not accept the invitation.",
         "authUnavailable": "Client authentication is not configured.",
-        "authFailed": "Could not sign in or register."
+        "authFailed": "Could not sign in. Check the email and temporary password from your invitation."
       }
     },
     "login": {

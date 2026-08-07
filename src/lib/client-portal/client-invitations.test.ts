@@ -296,6 +296,17 @@ describe("employee / client route guard separation (source)", () => {
     assert.doesNotMatch(layout, /getSession\(\)/);
   });
 
+  it("invite page is login-only (no self-registration tab)", () => {
+    const page = readFileSync(
+      path.join(root, "src/components/client-portal/ClientInvitePage.tsx"),
+      "utf8",
+    );
+    assert.match(page, /signInWithPassword/);
+    assert.doesNotMatch(page, /setMode\(|mode === "register"|signUp\(/);
+    assert.doesNotMatch(page, /demo-register/);
+    assert.doesNotMatch(page, /t\("register"\)/);
+  });
+
   it("resolveSessionFromAuthUserId only maps user_profiles employee roles", () => {
     const file = readFileSync(
       path.join(root, "src/lib/auth/middleware-session.ts"),

@@ -45,15 +45,12 @@ export function ClientInvitePage({ token }: Props) {
   const locale = useLocale();
   const [preview, setPreview] = useState<Preview | null>(null);
   const [loading, setLoading] = useState(true);
-  const [mode, setMode] = useState<"login" | "register">("login");
   const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [info, setInfo] = useState<string | null>(null);
-  const [demoSkipEmailConfirm, setDemoSkipEmailConfirm] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -87,19 +84,6 @@ export function ClientInvitePage({ token }: Props) {
   useEffect(() => {
     void load();
   }, [load]);
-
-  useEffect(() => {
-    void (async () => {
-      try {
-        const res = await fetch("/api/client/auth/config", { cache: "no-store" });
-        if (!res.ok) return;
-        const data = (await res.json()) as { skipEmailConfirmation?: boolean };
-        setDemoSkipEmailConfirm(Boolean(data.skipEmailConfirmation));
-      } catch {
-        setDemoSkipEmailConfirm(false);
-      }
-    })();
-  }, []);
 
   async function ensureFirstNameMetadata(name: string) {
     if (!name) return;
@@ -147,70 +131,22 @@ export function ClientInvitePage({ token }: Props) {
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    setInfo(null);
     if (!isSupabaseBrowserConfigured()) {
       setError(t("errors.authUnavailable"));
       return;
     }
 
     const cleanedName = normalizeName(firstName);
-    if (mode === "register" && !cleanedName) {
-      setError(t("firstNameRequired"));
-      return;
-    }
-
     setBusy(true);
     try {
       const supabase = createSupabaseBrowserClient();
-      if (mode === "register") {
-        if (demoSkipEmailConfirm) {
-          const demoRes = await fetch("/api/client/auth/demo-register", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: email.trim(),
-              password,
-              firstName: cleanedName,
-            }),
-          });
-          if (!demoRes.ok) {
-            setError(t("errors.authFailed"));
-            return;
-          }
-          const { error: signErr } = await supabase.auth.signInWithPassword({
-            email: email.trim(),
-            password,
-          });
-          if (signErr) {
-            setError(t("errors.authFailed"));
-            return;
-          }
-        } else {
-          const { data, error: signErr } = await supabase.auth.signUp({
-            email: email.trim(),
-            password,
-            options: {
-              data: cleanedName ? { first_name: cleanedName } : undefined,
-            },
-          });
-          if (signErr) {
-            setError(t("errors.authFailed"));
-            return;
-          }
-          if (data.user && !data.session) {
-            setInfo(t("confirmEmail"));
-            return;
-          }
-        }
-      } else {
-        const { error: signErr } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
-        if (signErr) {
-          setError(t("errors.authFailed"));
-          return;
-        }
+      const { error: signErr } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (signErr) {
+        setError(t("errors.authFailed"));
+        return;
       }
       await acceptAfterAuth(cleanedName ?? undefined);
     } catch {
@@ -252,29 +188,11 @@ export function ClientInvitePage({ token }: Props) {
             </p>
             <p className={styles.hint}>{t("passwordFromInvite")}</p>
 
-            <div className={styles.modeRow}>
-              <button
-                type="button"
-                className={mode === "login" ? styles.modeActive : styles.mode}
-                onClick={() => setMode("login")}
-              >
-                {t("signIn")}
-              </button>
-              <button
-                type="button"
-                className={mode === "register" ? styles.modeActive : styles.mode}
-                onClick={() => setMode("register")}
-              >
-                {t("register")}
-              </button>
-            </div>
-
             <form className={styles.form} onSubmit={(e) => void onSubmit(e)}>
               <label className={styles.label}>
                 {t("firstNameField")}
                 <input
                   type="text"
-                  required={mode === "register"}
                   autoComplete="given-name"
                   maxLength={80}
                   value={firstName}
@@ -300,9 +218,7 @@ export function ClientInvitePage({ token }: Props) {
                     type={showPassword ? "text" : "password"}
                     required
                     minLength={8}
-                    autoComplete={
-                      mode === "register" ? "new-password" : "current-password"
-                    }
+                    autoComplete="current-password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className={styles.input}
@@ -340,11 +256,7 @@ export function ClientInvitePage({ token }: Props) {
                 </span>
               </label>
               <p className={styles.hint}>{t("emailMustMatch")}</p>
-              {demoSkipEmailConfirm ? (
-                <p className={styles.info}>{t("demoSkipEmailConfirm")}</p>
-              ) : null}
               {error ? <p className={styles.error}>{error}</p> : null}
-              {info ? <p className={styles.info}>{info}</p> : null}
               <button type="submit" className={styles.primary} disabled={busy}>
                 {busy ? t("working") : t("accept")}
               </button>

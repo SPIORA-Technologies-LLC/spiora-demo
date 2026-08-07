@@ -17,7 +17,7 @@ export default async function ClientMfaSettingsPage() {
         padding: "1.5rem 1rem 2.5rem",
       }}
     >
-      <div className={styles.card} style={{ maxWidth: "28rem", width: "100%" }}>
+      <div className={styles.card} style={{ maxWidth: "34rem", width: "100%" }}>
         <ClientMfaSettingsPanel />
       </div>
     </main>

@@ -1,0 +1,92 @@
+.guide {
+  margin: 0 0 1.15rem;
+  text-align: left;
+}
+
+.blurb {
+  margin: 0 0 0.85rem;
+  color: rgba(244, 239, 232, 0.72);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.section {
+  margin: 0 0 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(244, 239, 232, 0.92);
+}
+
+.p {
+  margin: 0;
+  color: rgba(244, 239, 232, 0.68);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.steps {
+  margin: 0.15rem 0 0;
+  padding-left: 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  color: rgba(244, 239, 232, 0.68);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  list-style: decimal;
+}
+
+.steps li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.steps strong {
+  color: rgba(244, 239, 232, 0.9);
+  font-weight: 600;
+}
+
+.apps {
+  margin: 0.2rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.statusBox {
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 0.75rem;
+  color: rgba(244, 239, 232, 0.88);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.statusBox p {
+  margin: 0 0 0.4rem;
+}
+
+.statusBox p:last-child {
+  margin: 0;
+}
+
+.statusBox strong {
+  font-weight: 650;
+}
+
+.success {
+  border: 1px solid rgba(80, 180, 120, 0.35);
+  background: rgba(40, 120, 80, 0.15);
+}
+
+.warning {
+  border: 1px solid rgba(244, 152, 26, 0.35);
+  background: rgba(244, 152, 26, 0.1);
+}

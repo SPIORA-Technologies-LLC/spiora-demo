@@ -172,6 +172,36 @@ export function ClientPortalHome({
           <p className={styles.hint}>{t("home.hint")}</p>
         </section>
 
+        {showMfaSettings ? (
+          <section className={styles.heroCard} aria-labelledby="client-mfa-edu-title">
+            <p className={styles.tileEyebrow}>{t("home.twoFactor")}</p>
+            <h2 id="client-mfa-edu-title" className={styles.mfaEduTitle}>
+              {t("mfa.onboarding.title")}
+            </h2>
+            <div className={styles.mfaEduBlock}>
+              <h3 className={styles.mfaEduHeading}>{t("mfa.onboarding.whatTitle")}</h3>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP1")}</p>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP2")}</p>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP3")}</p>
+            </div>
+            <div className={styles.mfaEduBlock}>
+              <h3 className={styles.mfaEduHeading}>
+                {t("mfa.onboarding.recommendTitle")}
+              </h3>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP1")}</p>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP2")}</p>
+              <ul className={styles.mfaEduList}>
+                <li>{t("mfa.onboarding.recommendBullet1")}</li>
+                <li>{t("mfa.onboarding.recommendBullet2")}</li>
+                <li>{t("mfa.onboarding.recommendBullet3")}</li>
+              </ul>
+            </div>
+            <a className={styles.mfaEduCta} href="/client/account/mfa">
+              {t("mfa.onboarding.setupCta")}
+            </a>
+          </section>
+        ) : null}
+
         {caseData ? (
           <section className={styles.heroCard}>
             <h2 className={styles.processTitle}>{t("process.title")}</h2>

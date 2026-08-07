@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import styles from "@/app/login/login.module.css";
+import edu from "./ClientMfaEducation.module.css";
 
 type Status = {
   verifiedTotpCount: number;
@@ -23,6 +24,8 @@ export function ClientMfaSettingsPanel() {
   const [secret, setSecret] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
+  const [justEnabled, setJustEnabled] = useState(false);
+  const [justDisabled, setJustDisabled] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -54,6 +57,8 @@ export function ClientMfaSettingsPanel() {
     setBusy(true);
     setError(null);
     setRecoveryCodes(null);
+    setJustEnabled(false);
+    setJustDisabled(false);
     try {
       const res = await fetch("/api/client/auth/mfa/enroll", {
         method: "POST",
@@ -108,6 +113,8 @@ export function ClientMfaSettingsPanel() {
       setQrCode(null);
       setSecret(null);
       setCode("");
+      setJustEnabled(true);
+      setJustDisabled(false);
       await load();
     } catch {
       setError(t("errors.generic"));
@@ -135,6 +142,8 @@ export function ClientMfaSettingsPanel() {
         return;
       }
       setRecoveryCodes(null);
+      setJustEnabled(false);
+      setJustDisabled(true);
       await load();
     } catch {
       setError(t("errors.generic"));
@@ -174,7 +183,74 @@ export function ClientMfaSettingsPanel() {
   return (
     <div style={{ textAlign: "left" }}>
       <h1 className={styles.title}>{t("settings.title")}</h1>
+      <p className={styles.subtitle}>{t("onboarding.infoBlurb")}</p>
       <p className={styles.subtitle}>{t("settings.hint")}</p>
+
+      <div className={edu.guide}>
+        <section className={edu.section}>
+          <h2 className={edu.sectionTitle}>{t("onboarding.howTitle")}</h2>
+          <ol className={edu.steps}>
+            <li>
+              <strong>{t("onboarding.step1Label")}</strong>
+              <span>{t("onboarding.step1")}</span>
+            </li>
+            <li>
+              <strong>{t("onboarding.step2Label")}</strong>
+              <span>{t("onboarding.step2")}</span>
+            </li>
+            <li>
+              <strong>{t("onboarding.step3Label")}</strong>
+              <span>{t("onboarding.step3")}</span>
+              <ul className={edu.apps}>
+                <li>{t("onboarding.appGoogle")}</li>
+                <li>{t("onboarding.appMicrosoft")}</li>
+                <li>{t("onboarding.app2fas")}</li>
+                <li>{t("onboarding.appAuthy")}</li>
+              </ul>
+            </li>
+            <li>
+              <strong>{t("onboarding.step4Label")}</strong>
+              <span>{t("onboarding.step4")}</span>
+            </li>
+            <li>
+              <strong>{t("onboarding.step5Label")}</strong>
+              <span>{t("onboarding.step5")}</span>
+            </li>
+            <li>
+              <strong>{t("onboarding.step6Label")}</strong>
+              <span>{t("onboarding.step6")}</span>
+            </li>
+          </ol>
+          <p className={edu.p}>{t("onboarding.done")}</p>
+        </section>
+        <section className={edu.section}>
+          <h2 className={edu.sectionTitle}>{t("onboarding.lostTitle")}</h2>
+          <p className={edu.p}>{t("onboarding.lostP1")}</p>
+          <p className={edu.p}>{t("onboarding.lostP2")}</p>
+          <p className={edu.p}>{t("onboarding.lostP3")}</p>
+        </section>
+      </div>
+
+      {justEnabled ? (
+        <div className={`${edu.statusBox} ${edu.success}`} role="status">
+          <p>
+            <strong>{t("onboarding.enabledSuccessTitle")}</strong>
+          </p>
+          <p>{t("onboarding.enabledSuccessBody")}</p>
+          <p>{t("onboarding.enabledSuccessCodes")}</p>
+        </div>
+      ) : null}
+
+      {justDisabled ? (
+        <div className={`${edu.statusBox} ${edu.warning}`} role="status">
+          <p>
+            <strong>{t("onboarding.disabledTitle")}</strong>
+          </p>
+          <p>{t("onboarding.disabledBody")}</p>
+          <p>{t("onboarding.disabledHint")}</p>
+        </div>
+      ) : null}
+
       {error ? <p className={styles.error}>{error}</p> : null}
 
       {status?.mfaReenrollRequired ? (

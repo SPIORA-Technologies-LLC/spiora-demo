@@ -226,3 +226,31 @@ describe("client MFA source invariants", () => {
     assert.match(enroll, /mfa_enroll_started/);
   });
 });
+
+describe("client MFA education UX (D3.2)", () => {
+  it("home shows what/why when MFA settings are available", () => {
+    const home = read("src/components/client-portal/ClientPortalHome.tsx");
+    assert.match(home, /showMfaSettings/);
+    assert.match(home, /mfa\.onboarding\.title/);
+    assert.match(home, /mfa\.onboarding\.whatTitle/);
+    assert.match(home, /mfa\.onboarding\.recommendTitle/);
+    assert.match(home, /\/client\/account\/mfa/);
+    assert.doesNotMatch(home, /mfa\.onboarding\.howTitle/);
+  });
+
+  it("MFA page shows how-to + lost-phone education; no API/middleware changes", () => {
+    const panel = read("src/components/client-portal/ClientMfaSettingsPanel.tsx");
+    assert.match(panel, /onboarding\.howTitle/);
+    assert.match(panel, /onboarding\.lostTitle/);
+    assert.match(panel, /onboarding\.enabledSuccessTitle/);
+    assert.match(panel, /onboarding\.disabledTitle/);
+    assert.doesNotMatch(panel, /mfa-service|middleware|SPIORA_MFA/);
+
+    const en = read("src/i18n/dictionaries/en.json");
+    const ru = read("src/i18n/dictionaries/ru.json");
+    assert.match(en, /it is optional\. You can use the portal without it/);
+    assert.match(ru, /Это не обязательно\. Вы можете пользоваться порталом и без неё/);
+    assert.doesNotMatch(en, /You are required to enable MFA/);
+    assert.doesNotMatch(ru, /Вы обязаны/);
+  });
+});

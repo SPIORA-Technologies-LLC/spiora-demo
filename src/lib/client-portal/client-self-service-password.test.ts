@@ -123,6 +123,22 @@ describe("Phase D1 client self-service password recovery", () => {
     assert.match(home, /home\.changePassword/);
   });
 
+  it("Account / MFA nav only when showMfaSettings (flag-gated UX)", () => {
+    const home = read("src/components/client-portal/ClientPortalHome.tsx");
+    assert.match(home, /showMfaSettings/);
+    assert.match(home, /home\.account/);
+    assert.match(home, /\/client\/account\/mfa/);
+    assert.doesNotMatch(home, /home\.security/);
+    // Label + MFA link are inside the flag-true branch only.
+    const accountBranch = home.slice(
+      home.indexOf("showMfaSettings ? ("),
+      home.indexOf(") : (", home.indexOf("showMfaSettings ? (")),
+    );
+    assert.match(accountBranch, /home\.account/);
+    assert.match(accountBranch, /home\.twoFactor/);
+    assert.match(accountBranch, /\/client\/account\/mfa/);
+  });
+
   it("Phase B OAuth and Phase C employee MFA remain; D3 adds client MFA plane", () => {
     assert.ok(
       existsSync(path.join(root, "src/app/api/auth/oauth/google/route.ts")),

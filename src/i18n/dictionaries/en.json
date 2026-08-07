@@ -2496,7 +2496,7 @@
       "applicationStatus": "Application status",
       "hint": "This is your personal account.",
       "changePassword": "Change password",
-      "security": "Account / Security",
+      "account": "Account",
       "twoFactor": "Two-factor authentication",
       "questionnaireExplainer": "To start the residence permit process, fill out and submit the questionnaire — this is the first required step.",
       "fillQuestionnaire": "Fill out questionnaire",

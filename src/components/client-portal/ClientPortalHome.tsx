@@ -140,17 +140,21 @@ export function ClientPortalHome({
         </div>
         <div className={styles.headerActions}>
           <LanguageSwitcher />
-          <div className={styles.accountLinks}>
-            <span className={styles.accountLabel}>{t("home.security")}</span>
-            <a className={styles.accountLink} href="/client/account/password">
-              {t("home.changePassword")}
-            </a>
-            {showMfaSettings ? (
+          {showMfaSettings ? (
+            <div className={styles.accountLinks}>
+              <span className={styles.accountLabel}>{t("home.account")}</span>
+              <a className={styles.accountLink} href="/client/account/password">
+                {t("home.changePassword")}
+              </a>
               <a className={styles.accountLink} href="/client/account/mfa">
                 {t("home.twoFactor")}
               </a>
-            ) : null}
-          </div>
+            </div>
+          ) : (
+            <a className={styles.accountLink} href="/client/account/password">
+              {t("home.changePassword")}
+            </a>
+          )}
           <button type="button" className={styles.logoutBtn} onClick={() => void onLogout()}>
             {logoutLabel}
           </button>
@@ -158,12 +162,10 @@ export function ClientPortalHome({
       </header>
 
       <main className={styles.main}>
-        {mfaReenrollRequired ? (
+        {showMfaSettings && mfaReenrollRequired ? (
           <p className={styles.mfaBanner} role="status">
             {t("mfa.banner.reenroll")}{" "}
-            {showMfaSettings ? (
-              <a href="/client/account/mfa">{t("mfa.banner.reenrollCta")}</a>
-            ) : null}
+            <a href="/client/account/mfa">{t("mfa.banner.reenrollCta")}</a>
           </p>
         ) : null}
         <section className={styles.heroCard}>

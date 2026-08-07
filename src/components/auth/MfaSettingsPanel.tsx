@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import {
+  hasSeenEmployeeMfaOnboarding,
+  markEmployeeMfaOnboardingSeen,
+} from "@/lib/auth/mfa-onboarding";
+import { MfaEducationModal } from "./MfaEducationModal";
 import styles from "@/app/login/login.module.css";
 
 type Status = {
@@ -13,8 +19,9 @@ type Status = {
   challengeRequired: boolean;
 };
 
-export function MfaSettingsPanel() {
+export function MfaSettingsPanel({ userId }: { userId: string }) {
   const t = useTranslations("authMfa");
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState<Status | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -23,6 +30,13 @@ export function MfaSettingsPanel() {
   const [secret, setSecret] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
+  const [justEnabled, setJustEnabled] = useState(false);
+  const [justDisabled, setJustDisabled] = useState(false);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [onboardingView, setOnboardingView] = useState<"intro" | "details">(
+    "intro",
+  );
+  const [autoSetupDone, setAutoSetupDone] = useState(false);
 
   const load = useCallback(async () => {
     setError(null);
@@ -38,8 +52,10 @@ export function MfaSettingsPanel() {
       }
       const data = (await res.json()) as Status;
       setStatus(data);
+      return data;
     } catch {
       setError(t("errors.generic"));
+      return null;
     }
   }, [t]);
 
@@ -47,11 +63,20 @@ export function MfaSettingsPanel() {
     void load();
   }, [load]);
 
-  async function startEnroll() {
+  useEffect(() => {
+    if (!status) return;
+    if (status.verifiedTotpCount > 0) return;
+    if (hasSeenEmployeeMfaOnboarding(userId)) return;
+    setOnboardingOpen(true);
+  }, [status, userId]);
+
+  const startEnroll = useCallback(async () => {
     if (busy) return;
     setBusy(true);
     setError(null);
     setRecoveryCodes(null);
+    setJustEnabled(false);
+    setJustDisabled(false);
     try {
       const res = await fetch("/api/auth/mfa/enroll", {
         method: "POST",
@@ -79,7 +104,17 @@ export function MfaSettingsPanel() {
     } finally {
       setBusy(false);
     }
-  }
+  }, [busy, t]);
+
+  useEffect(() => {
+    if (autoSetupDone) return;
+    if (searchParams.get("setup") !== "1") return;
+    if (!status || status.verifiedTotpCount > 0) return;
+    setAutoSetupDone(true);
+    markEmployeeMfaOnboardingSeen(userId);
+    setOnboardingOpen(false);
+    void startEnroll();
+  }, [autoSetupDone, searchParams, startEnroll, status, userId]);
 
   async function verifyEnroll(event: React.FormEvent) {
     event.preventDefault();
@@ -106,6 +141,8 @@ export function MfaSettingsPanel() {
       setQrCode(null);
       setSecret(null);
       setCode("");
+      setJustEnabled(true);
+      setJustDisabled(false);
       await load();
     } catch {
       setError(t("errors.generic"));
@@ -129,6 +166,8 @@ export function MfaSettingsPanel() {
         return;
       }
       setRecoveryCodes(null);
+      setJustEnabled(false);
+      setJustDisabled(true);
       await load();
     } catch {
       setError(t("errors.generic"));
@@ -163,9 +202,90 @@ export function MfaSettingsPanel() {
 
   return (
     <div style={{ textAlign: "left" }}>
+      <MfaEducationModal
+        userId={userId}
+        open={onboardingOpen}
+        initialView={onboardingView}
+        onClose={() => {
+          markEmployeeMfaOnboardingSeen(userId);
+          setOnboardingOpen(false);
+        }}
+        onSetupNow={() => {
+          markEmployeeMfaOnboardingSeen(userId);
+          setOnboardingOpen(false);
+          void startEnroll();
+        }}
+      />
+
       <h1 className={styles.title}>{t("settings.title")}</h1>
+      <p className={styles.subtitle}>{t("onboarding.infoBlurb")}</p>
       <p className={styles.subtitle}>{t("settings.hint")}</p>
+
+      <button
+        type="button"
+        className={`${styles.secondaryAction} ${styles.secondaryActionQuiet}`}
+        style={{
+          display: "inline-block",
+          marginBottom: "1rem",
+          background: "transparent",
+          border: 0,
+          padding: 0,
+          cursor: "pointer",
+          textAlign: "left",
+        }}
+        onClick={() => {
+          setOnboardingView("details");
+          setOnboardingOpen(true);
+        }}
+      >
+        {t("onboarding.openGuide")}
+      </button>
+
       {error ? <p className={styles.error}>{error}</p> : null}
+
+      {justEnabled ? (
+        <div
+          className={styles.subtitle}
+          role="status"
+          style={{
+            marginBottom: "1rem",
+            padding: "0.85rem 1rem",
+            borderRadius: "0.75rem",
+            border: "1px solid rgba(80, 180, 120, 0.35)",
+            background: "rgba(40, 120, 80, 0.15)",
+          }}
+        >
+          <p style={{ margin: "0 0 0.4rem", fontWeight: 650 }}>
+            {t("onboarding.enabledSuccessTitle")}
+          </p>
+          <p style={{ margin: "0 0 0.4rem" }}>
+            {t("onboarding.enabledSuccessBody")}
+          </p>
+          <p style={{ margin: 0 }}>{t("onboarding.enabledSuccessCodes")}</p>
+        </div>
+      ) : null}
+
+      {justDisabled ? (
+        <div
+          className={styles.subtitle}
+          role="status"
+          style={{
+            marginBottom: "1rem",
+            padding: "0.85rem 1rem",
+            borderRadius: "0.75rem",
+            border: "1px solid rgba(244, 152, 26, 0.35)",
+            background: "rgba(244, 152, 26, 0.1)",
+          }}
+        >
+          <p style={{ margin: "0 0 0.4rem", fontWeight: 650 }}>
+            {t("onboarding.disabledTitle")}
+          </p>
+          <p style={{ margin: "0 0 0.4rem" }}>
+            {t("onboarding.disabledBody")}
+          </p>
+          <p style={{ margin: 0 }}>{t("onboarding.disabledHint")}</p>
+        </div>
+      ) : null}
 
       {status?.mfaReenrollRequired ? (
         <p className={styles.error}>{t("settings.reenrollRequired")}</p>

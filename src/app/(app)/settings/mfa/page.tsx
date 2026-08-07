@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getSession } from "@/lib/auth/session";
 import { isEmployeeMfaEnabled } from "@/lib/auth/mfa-config";
 import { redirect } from "next/navigation";
@@ -17,8 +18,10 @@ export default async function EmployeeMfaSettingsPage() {
         padding: "2rem 1.25rem 3rem",
       }}
     >
-      <div className={styles.card} style={{ maxWidth: 480, width: "100%" }}>
-        <MfaSettingsPanel />
+      <div className={styles.card} style={{ maxWidth: 560, width: "100%" }}>
+        <Suspense fallback={null}>
+          <MfaSettingsPanel userId={session.id} />
+        </Suspense>
       </div>
     </main>
   );

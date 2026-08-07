@@ -9,6 +9,7 @@ import type { AppLocale } from "@/i18n/config";
 import { translateTeamMemberName } from "@/i18n/team-members";
 import { isEmployeeMfaEnabled } from "@/lib/auth/mfa-config";
 import { MfaReenrollBanner } from "@/components/auth/MfaReenrollBanner";
+import { EmployeeMfaOnboardingHost } from "@/components/auth/EmployeeMfaOnboardingHost";
 
 export type AppShellProps = Omit<TopbarProps, "userName" | "userRole"> & {
   children: ReactNode;
@@ -55,6 +56,9 @@ export async function AppShell({
         contentClassName={contentClassName}
       >
         {showMfaBanner ? <MfaReenrollBanner /> : null}
+        {isEmployeeMfaEnabled() ? (
+          <EmployeeMfaOnboardingHost userId={session.id} />
+        ) : null}
         {children}
       </AppShellClient>
     </AppShellNotifications>

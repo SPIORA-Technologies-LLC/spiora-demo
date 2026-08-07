@@ -2,25 +2,17 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import styles from "./MfaReenrollBanner.module.css";
 
 export function MfaReenrollBanner() {
   const t = useTranslations("authMfa");
 
   return (
-    <div
-      role="status"
-      style={{
-        margin: "0 0 1rem",
-        padding: "0.75rem 1rem",
-        borderRadius: "8px",
-        border: "1px solid rgba(234, 179, 8, 0.45)",
-        background: "rgba(234, 179, 8, 0.12)",
-        color: "inherit",
-        fontSize: "0.9375rem",
-      }}
-    >
-      {t("banner.reenroll")}{" "}
-      <Link href="/settings/mfa">{t("banner.reenrollCta")}</Link>
+    <div className={styles.banner} role="status">
+      <p className={styles.message}>{t("banner.reenroll")}</p>
+      <Link href="/settings/mfa" className={styles.cta}>
+        {t("banner.reenrollCta")}
+      </Link>
     </div>
   );
 }

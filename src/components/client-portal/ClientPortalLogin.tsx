@@ -181,9 +181,9 @@ export function ClientPortalLogin() {
             >
               {busy ? t("working") : t("submit")}
             </button>
-            <p className={styles.muted}>
-              <a href="/client/forgot-password">{t("forgotPassword")}</a>
-            </p>
+            <a className={styles.forgotLink} href="/client/forgot-password">
+              {t("forgotPassword")}
+            </a>
           </form>
         </div>
       </div>

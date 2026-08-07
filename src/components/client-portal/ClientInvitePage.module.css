@@ -246,6 +246,40 @@
   font-weight: 600;
 }
 
+.forgotLink {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 0.15rem;
+  border-radius: 12px;
+  padding: 0.62rem 0.9rem;
+  border: 1px solid rgba(240, 168, 174, 0.28);
+  background: rgba(240, 168, 174, 0.06);
+  color: #f0a8ae;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  text-align: center;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.forgotLink:hover {
+  background: rgba(240, 168, 174, 0.12);
+  border-color: rgba(240, 168, 174, 0.45);
+  color: #ffc4c8;
+}
+
+.forgotLink:focus-visible {
+  outline: 2px solid rgba(240, 168, 174, 0.55);
+  outline-offset: 2px;
+}
+
 .secondary {
   margin-top: 0.65rem;
   width: 100%;

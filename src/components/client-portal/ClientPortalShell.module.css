@@ -103,6 +103,28 @@
     color 0.2s ease;
 }
 
+.accountLink {
+  border: 1px solid var(--portal-line);
+  background: transparent;
+  color: var(--portal-ink);
+  border-radius: 999px;
+  padding: 0.45rem 0.95rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.accountLink:hover {
+  border-color: rgba(232, 41, 22, 0.45);
+  background: var(--portal-accent-soft);
+}
+
 .logoutBtn:hover {
   border-color: rgba(232, 41, 22, 0.45);
   background: var(--portal-accent-soft);

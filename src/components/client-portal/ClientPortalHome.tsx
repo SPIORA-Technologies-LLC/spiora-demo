@@ -125,6 +125,9 @@ export function ClientPortalHome({
         </div>
         <div className={styles.headerActions}>
           <LanguageSwitcher />
+          <a className={styles.accountLink} href="/client/account/password">
+            {t("home.changePassword")}
+          </a>
           <button type="button" className={styles.logoutBtn} onClick={() => void onLogout()}>
             {logoutLabel}
           </button>

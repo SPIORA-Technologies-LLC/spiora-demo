@@ -33,7 +33,7 @@ type IssuedCredentials = {
   email: string;
   inviteUrl: string;
   temporaryPassword: string;
-  titleKey: "createdTitle" | "resetTitle";
+  titleKey: "createdTitle";
   emailSent: boolean;
   emailError: "EMAIL_NOT_CONFIGURED" | "EMAIL_SEND_FAILED" | null;
 };
@@ -68,6 +68,7 @@ export function ClientInvitationsPanel() {
   const [formError, setFormError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [resettingId, setResettingId] = useState<string | null>(null);
+  const [resetLinkSent, setResetLinkSent] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -210,49 +211,35 @@ export function ClientInvitationsPanel() {
     }
   }
 
-  async function onResetPassword(row: Invitation) {
-    if (!window.confirm(t("confirmResetPassword"))) return;
+  async function onSendPasswordReset(row: Invitation) {
+    if (!window.confirm(t("confirmSendPasswordReset"))) return;
     setResettingId(row.id);
     setFormError(null);
+    setResetLinkSent(null);
     try {
       const res = await fetch(
-        `/api/client-invitations/${encodeURIComponent(row.id)}/reset-password`,
-        { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" },
+        `/api/client-invitations/${encodeURIComponent(row.id)}/send-password-reset`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: "{}",
+        },
       );
       const data = (await res.json()) as {
-        email?: string;
-        inviteUrl?: string;
-        temporaryPassword?: string;
-        emailSent?: boolean;
-        emailError?: "EMAIL_NOT_CONFIGURED" | "EMAIL_SEND_FAILED" | null;
+        ok?: boolean;
         error?: { message: string; code?: string };
       };
-      if (!res.ok || !data.temporaryPassword || !data.inviteUrl || !data.email) {
-        setModalOpen(true);
-        setIssued(null);
+      if (!res.ok || !data.ok) {
         setFormError(
-          data.error?.code === "AUTH_PROVISION_FAILED"
-            ? t("errors.authProvisionFailed")
-            : t("errors.resetFailed"),
+          data.error?.code === "RATE_LIMITED"
+            ? t("errors.rateLimited")
+            : t("errors.sendResetFailed"),
         );
         return;
       }
-      setModalOpen(true);
-      setCopyDone(false);
-      setFormError(null);
-      setIssued({
-        email: data.email,
-        inviteUrl: data.inviteUrl,
-        temporaryPassword: data.temporaryPassword,
-        titleKey: "resetTitle",
-        emailSent: Boolean(data.emailSent),
-        emailError: data.emailError ?? null,
-      });
-      await load();
+      setResetLinkSent(t("passwordResetLinkSent"));
     } catch {
-      setModalOpen(true);
-      setIssued(null);
-      setFormError(t("errors.resetFailed"));
+      setFormError(t("errors.sendResetFailed"));
     } finally {
       setResettingId(null);
     }
@@ -314,6 +301,10 @@ export function ClientInvitationsPanel() {
 
       {loading ? <p className={styles.muted}>{t("loading")}</p> : null}
       {error ? <p className={styles.error}>{t("errors.loadFailed")}</p> : null}
+      {resetLinkSent ? <p className={styles.successBanner}>{resetLinkSent}</p> : null}
+      {formError && !modalOpen ? (
+        <p className={styles.error}>{formError}</p>
+      ) : null}
       {!loading && !error && filtered.length === 0 ? (
         <p className={styles.muted}>{t("empty")}</p>
       ) : null}
@@ -351,9 +342,9 @@ export function ClientInvitationsPanel() {
                         type="button"
                         className={styles.actionBtn}
                         disabled={resettingId === row.id}
-                        onClick={() => void onResetPassword(row)}
+                        onClick={() => void onSendPasswordReset(row)}
                       >
-                        {resettingId === row.id ? "…" : t("resendPassword")}
+                        {resettingId === row.id ? "…" : t("sendPasswordReset")}
                       </button>
                       <button
                         type="button"

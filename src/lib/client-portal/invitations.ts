@@ -9,7 +9,6 @@ import {
   sbGetInvitationByTokenHash,
   sbListClientInvitations,
   sbRevokeClientInvitation,
-  sbRotateInvitationToken,
   type ClientInvitationRow,
 } from "@/lib/supabase/client-invitations-repo";
 import {
@@ -28,11 +27,7 @@ import {
 import {
   createSupabaseInvitationStore,
 } from "./invitation-supabase-store";
-import type {
-  InvitationRecord,
-  InvitationStore,
-  ResetInvitationCredentialsResult,
-} from "./invitation-types";
+import type { InvitationRecord, InvitationStore } from "./invitation-types";
 import {
   localAcceptInvitation,
   localFindInvitationById,
@@ -40,13 +35,10 @@ import {
   localInsertInvitation,
   localListInvitations,
   localRevokeInvitation,
-  localRotateInvitationToken,
   type LocalInvitationRow,
 } from "./local-store";
 import {
-  buildClientInviteUrl,
   computeInvitationState,
-  generateClientInviteToken,
   hashClientInviteToken,
   isInternalTestInviteEmail,
   normalizeInviteEmail,
@@ -61,7 +53,6 @@ export type {
   CreateInvitationInput,
   CreateInvitationResult,
   InvitationPublicDto,
-  ResetInvitationCredentialsResult,
 };
 
 function toRecord(row: ClientInvitationRow | LocalInvitationRow): InvitationRecord {
@@ -148,60 +139,6 @@ export async function createClientInvitation(
   }
 
   return { ...result, temporaryPassword };
-}
-
-export async function resetClientInvitationCredentials(input: {
-  id: string;
-  origin: string;
-  firstName?: string | null;
-}): Promise<ResetInvitationCredentialsResult> {
-  const before = isSupabaseConfigured()
-    ? await sbGetInvitationById(input.id)
-    : await localFindInvitationById(input.id);
-  if (!before) return { ok: false, code: "NOT_FOUND" };
-
-  const state = computeInvitationState(before);
-  if (state !== "pending" && state !== "accepted") {
-    return { ok: false, code: "INVITATION_INVALID" };
-  }
-
-  const temporaryPassword = generateTemporaryPassword(12);
-  if (isSupabaseConfigured()) {
-    const provisioned = await provisionClientPortalAuthUser({
-      email: before.email,
-      password: temporaryPassword,
-      firstName: input.firstName,
-    });
-    if (!provisioned.ok) {
-      return { ok: false, code: "AUTH_PROVISION_FAILED" };
-    }
-  }
-
-  let inviteUrl: string;
-  if (state === "pending") {
-    const token = generateClientInviteToken();
-    const tokenHash = hashClientInviteToken(token);
-    const rotated = isSupabaseConfigured()
-      ? await sbRotateInvitationToken(before.id, tokenHash)
-      : await localRotateInvitationToken(before.id, tokenHash);
-    if (!rotated) {
-      return { ok: false, code: "INVITATION_INVALID" };
-    }
-    inviteUrl = buildClientInviteUrl(token, input.origin);
-  } else {
-    const origin = input.origin.replace(/\/$/, "");
-    inviteUrl = `${origin}/client/login`;
-  }
-
-  return {
-    ok: true,
-    email: before.email,
-    temporaryPassword,
-    inviteUrl,
-    state,
-    preferredLocale: before.preferredLocale,
-    firstName: before.firstName,
-  };
 }
 
 export async function listClientInvitations(): Promise<InvitationPublicDto[]> {

@@ -61,18 +61,6 @@ export type CreateInvitationResult =
     }
   | { ok: false; code: string };
 
-export type ResetInvitationCredentialsResult =
-  | {
-      ok: true;
-      email: string;
-      temporaryPassword: string;
-      inviteUrl: string;
-      state: "pending" | "accepted";
-      preferredLocale: ClientPortalLocale;
-      firstName: string | null;
-    }
-  | { ok: false; code: string };
-
 export type InvitationInsertInput = {
   email: string;
   firstName: string | null;

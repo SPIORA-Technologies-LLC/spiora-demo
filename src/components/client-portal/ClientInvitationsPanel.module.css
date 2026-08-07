@@ -228,6 +228,15 @@
   gap: 0.7rem;
 }
 
+.successBanner {
+  margin: 0;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: rgba(34, 120, 80, 0.12);
+  color: inherit;
+  font-size: 0.9rem;
+}
+
 .successTitle {
   margin: 0;
   font-weight: 650;

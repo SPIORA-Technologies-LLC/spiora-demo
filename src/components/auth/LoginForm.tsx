@@ -86,17 +86,6 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
         </p>
       ) : null}
 
-      <button
-        type="button"
-        className={styles.googleButton}
-        onClick={() => void continueWithGoogle()}
-        disabled={pending || googleBusy}
-      >
-        {googleBusy ? t("signingIn") : t("continueWithGoogle")}
-      </button>
-
-      <p className={styles.orDivider}>{t("orDivider")}</p>
-
       <form className={styles.form} action={formAction}>
         {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
         <label className={styles.label}>
@@ -165,6 +154,17 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
           <a href="/forgot-password">{t("forgotPasswordLink")}</a>
         </p>
       </form>
+
+      <p className={styles.orDivider}>{t("orDivider")}</p>
+
+      <button
+        type="button"
+        className={styles.googleButton}
+        onClick={() => void continueWithGoogle()}
+        disabled={pending || googleBusy}
+      >
+        {googleBusy ? t("signingIn") : t("continueWithGoogle")}
+      </button>
     </div>
   );
 }

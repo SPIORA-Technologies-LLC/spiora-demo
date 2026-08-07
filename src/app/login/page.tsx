@@ -8,6 +8,9 @@ import { getProductDescription } from "@/config/branding";
 import type { BrandingLocale } from "@/config/branding";
 import { getSession } from "@/lib/auth/session";
 import { getClientSession } from "@/lib/client-portal/session";
+import { isEmployeeMfaEnabled } from "@/lib/auth/mfa-config";
+import { needsMfaChallenge } from "@/lib/auth/mfa-aal";
+import { getEmployeeMfaAssurance } from "@/lib/auth/mfa-service";
 import styles from "./login.module.css";
 
 type LoginPageProps = {
@@ -39,6 +42,12 @@ const cardFallback = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const session = await getSession();
   if (session) {
+    if (isEmployeeMfaEnabled()) {
+      const aal = await getEmployeeMfaAssurance();
+      if (needsMfaChallenge(aal)) {
+        redirect("/mfa/challenge");
+      }
+    }
     redirect("/dashboard");
   }
 

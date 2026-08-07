@@ -1,7 +1,10 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { isEmployeeMfaEnabled } from "@/lib/auth/mfa-config";
-import { needsMfaChallenge } from "@/lib/auth/mfa-aal";
+import {
+  needsMfaChallenge,
+  reconcileAalWithVerifiedFactors,
+} from "@/lib/auth/mfa-aal";
 
 function getAnonKey(): string | null {
   return (
@@ -66,12 +69,33 @@ export async function updateSupabaseAuthSession(request: NextRequest) {
   let mfaChallengeRequired = false;
   if (user && isEmployeeMfaEnabled()) {
     try {
-      const { data: aal } =
-        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      mfaChallengeRequired = needsMfaChallenge({
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const accessToken = session?.access_token;
+      // Pass JWT so AAL loads factors via getUser(jwt), not empty session.user.factors.
+      const { data: aal } = accessToken
+        ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel(accessToken)
+        : await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+      let snapshot = {
         currentLevel: aal?.currentLevel ?? null,
         nextLevel: aal?.nextLevel ?? null,
-      });
+      };
+
+      if (
+        snapshot.currentLevel === "aal1" &&
+        snapshot.nextLevel !== "aal2"
+      ) {
+        const { data: factors } = await supabase.auth.mfa.listFactors();
+        snapshot =
+          reconcileAalWithVerifiedFactors(
+            snapshot,
+            factors?.totp?.length ?? 0,
+          ) ?? snapshot;
+      }
+
+      mfaChallengeRequired = needsMfaChallenge(snapshot);
     } catch {
       mfaChallengeRequired = false;
     }

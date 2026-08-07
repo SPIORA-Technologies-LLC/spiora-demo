@@ -97,7 +97,8 @@ export async function signOutSupabaseAuth(): Promise<void> {
   if (!isSupabaseAuthClientConfigured()) return;
   try {
     const supabase = await createSupabaseServerAuthClient();
-    await supabase.auth.signOut();
+    // Global clears refresh tokens so a leftover AAL2 session cannot stick.
+    await supabase.auth.signOut({ scope: "global" });
   } catch {
     // ignore — cookie clear best-effort
   }

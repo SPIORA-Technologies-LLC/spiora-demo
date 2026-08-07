@@ -15,3 +15,27 @@ export function needsMfaChallenge(aal: MfaAssuranceSnapshot | null): boolean {
 export function isAal2(aal: MfaAssuranceSnapshot | null): boolean {
   return aal?.currentLevel === "aal2";
 }
+
+/**
+ * auth-js getAuthenticatorAssuranceLevel() WITHOUT a JWT reads
+ * session.user.factors from the cookie/JWT session. After signInWithPassword
+ * that array is often empty even when auth.mfa_factors has verified TOTP,
+ * so nextLevel stays aal1 and MFA challenge is skipped.
+ *
+ * When callers know verified factor count (listFactors / getUser), reconcile
+ * nextLevel before needsMfaChallenge().
+ */
+export function reconcileAalWithVerifiedFactors(
+  aal: MfaAssuranceSnapshot | null,
+  verifiedFactorCount: number,
+): MfaAssuranceSnapshot | null {
+  if (!aal) return null;
+  if (aal.currentLevel === "aal2") return aal;
+  if (aal.currentLevel !== "aal1") return aal;
+  if (aal.nextLevel === "aal2") return aal;
+  if (verifiedFactorCount <= 0) return aal;
+  return {
+    currentLevel: "aal1",
+    nextLevel: "aal2",
+  };
+}

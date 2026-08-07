@@ -3,7 +3,11 @@ import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, it, before, after } from "node:test";
 import { isEmployeeMfaEnabled, MFA_MAX_VERIFIED_TOTP_FACTORS } from "./mfa-config";
-import { needsMfaChallenge, isAal2 } from "./mfa-aal";
+import {
+  needsMfaChallenge,
+  isAal2,
+  reconcileAalWithVerifiedFactors,
+} from "./mfa-aal";
 import {
   isMfaExemptApiPath,
   isMfaGatePath,
@@ -50,6 +54,35 @@ describe("MFA AAL helpers", () => {
   it("detects aal2", () => {
     assert.equal(isAal2({ currentLevel: "aal2", nextLevel: "aal2" }), true);
     assert.equal(isAal2({ currentLevel: "aal1", nextLevel: "aal2" }), false);
+  });
+
+  it("regression: verified TOTP + fresh AAL1 password session (empty session.user.factors) → challenge", () => {
+    // auth-js without JWT leaves nextLevel=aal1 when session.user.factors is empty
+    // even though auth.mfa_factors has a verified TOTP row.
+    const staleAal = { currentLevel: "aal1", nextLevel: "aal1" };
+    assert.equal(needsMfaChallenge(staleAal), false);
+
+    const reconciled = reconcileAalWithVerifiedFactors(staleAal, 1);
+    assert.deepEqual(reconciled, { currentLevel: "aal1", nextLevel: "aal2" });
+    assert.equal(needsMfaChallenge(reconciled), true);
+    // Post-login / middleware must send /mfa/challenge, not /dashboard.
+  });
+
+  it("reconcile does not downgrade aal2 or invent factors", () => {
+    assert.deepEqual(
+      reconcileAalWithVerifiedFactors(
+        { currentLevel: "aal2", nextLevel: "aal2" },
+        1,
+      ),
+      { currentLevel: "aal2", nextLevel: "aal2" },
+    );
+    assert.deepEqual(
+      reconcileAalWithVerifiedFactors(
+        { currentLevel: "aal1", nextLevel: "aal1" },
+        0,
+      ),
+      { currentLevel: "aal1", nextLevel: "aal1" },
+    );
   });
 });
 
@@ -152,5 +185,25 @@ describe("Phase C source invariants", () => {
       existsSync(path.join(process.cwd(), "src/app/api/client/auth/mfa")),
       false,
     );
+  });
+
+  it("AAL readers pass JWT / reconcile verified factors (password-session bug)", () => {
+    const service = readFileSync(
+      path.join(process.cwd(), "src/lib/auth/mfa-service.ts"),
+      "utf8",
+    );
+    assert.match(service, /getAuthenticatorAssuranceLevel\(\s*\n?\s*session\.access_token/);
+    assert.match(service, /reconcileAalWithVerifiedFactors/);
+    assert.match(service, /listFactors/);
+
+    const middlewareAuth = readFileSync(
+      path.join(process.cwd(), "src/lib/supabase/middleware-auth.ts"),
+      "utf8",
+    );
+    assert.match(
+      middlewareAuth,
+      /getAuthenticatorAssuranceLevel\(accessToken\)/,
+    );
+    assert.match(middlewareAuth, /reconcileAalWithVerifiedFactors/);
   });
 });

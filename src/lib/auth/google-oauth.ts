@@ -267,19 +267,35 @@ export async function handleGoogleOAuthCallback(input: {
   let finalSuccessUrl = successUrl;
   if (input.audience === "employee") {
     const { isEmployeeMfaEnabled } = await import("@/lib/auth/mfa-config");
-    const { needsMfaChallenge } = await import("@/lib/auth/mfa-aal");
+    const { needsMfaChallenge, reconcileAalWithVerifiedFactors } = await import(
+      "@/lib/auth/mfa-aal"
+    );
     if (isEmployeeMfaEnabled()) {
       try {
-        const { data: aal } =
-          await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const accessToken = session?.access_token;
+        const { data: aal } = accessToken
+          ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel(accessToken)
+          : await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        let snapshot = {
+          currentLevel: aal?.currentLevel ?? null,
+          nextLevel: aal?.nextLevel ?? null,
+        };
         if (
-          needsMfaChallenge({
-            currentLevel: aal?.currentLevel ?? null,
-            nextLevel: aal?.nextLevel ?? null,
-          })
+          snapshot.currentLevel === "aal1" &&
+          snapshot.nextLevel !== "aal2"
         ) {
-          const intended =
-            successUrl.pathname + successUrl.search;
+          const { data: factors } = await supabase.auth.mfa.listFactors();
+          snapshot =
+            reconcileAalWithVerifiedFactors(
+              snapshot,
+              factors?.totp?.length ?? 0,
+            ) ?? snapshot;
+        }
+        if (needsMfaChallenge(snapshot)) {
+          const intended = successUrl.pathname + successUrl.search;
           finalSuccessUrl = new URL(
             `/mfa/challenge?next=${encodeURIComponent(intended)}`,
             origin,

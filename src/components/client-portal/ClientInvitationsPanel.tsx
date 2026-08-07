@@ -67,8 +67,6 @@ export function ClientInvitationsPanel() {
   const [copyDone, setCopyDone] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [resettingId, setResettingId] = useState<string | null>(null);
-  const [resetLinkSent, setResetLinkSent] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -211,40 +209,6 @@ export function ClientInvitationsPanel() {
     }
   }
 
-  async function onSendPasswordReset(row: Invitation) {
-    if (!window.confirm(t("confirmSendPasswordReset"))) return;
-    setResettingId(row.id);
-    setFormError(null);
-    setResetLinkSent(null);
-    try {
-      const res = await fetch(
-        `/api/client-invitations/${encodeURIComponent(row.id)}/send-password-reset`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: "{}",
-        },
-      );
-      const data = (await res.json()) as {
-        ok?: boolean;
-        error?: { message: string; code?: string };
-      };
-      if (!res.ok || !data.ok) {
-        setFormError(
-          data.error?.code === "RATE_LIMITED"
-            ? t("errors.rateLimited")
-            : t("errors.sendResetFailed"),
-        );
-        return;
-      }
-      setResetLinkSent(t("passwordResetLinkSent"));
-    } catch {
-      setFormError(t("errors.sendResetFailed"));
-    } finally {
-      setResettingId(null);
-    }
-  }
-
   async function copySharePackage() {
     if (!issued) return;
     try {
@@ -301,10 +265,6 @@ export function ClientInvitationsPanel() {
 
       {loading ? <p className={styles.muted}>{t("loading")}</p> : null}
       {error ? <p className={styles.error}>{t("errors.loadFailed")}</p> : null}
-      {resetLinkSent ? <p className={styles.successBanner}>{resetLinkSent}</p> : null}
-      {formError && !modalOpen ? (
-        <p className={styles.error}>{formError}</p>
-      ) : null}
       {!loading && !error && filtered.length === 0 ? (
         <p className={styles.muted}>{t("empty")}</p>
       ) : null}
@@ -338,14 +298,6 @@ export function ClientInvitationsPanel() {
                   </td>
                   <td>
                     <div className={styles.actions}>
-                      <button
-                        type="button"
-                        className={styles.actionBtn}
-                        disabled={resettingId === row.id}
-                        onClick={() => void onSendPasswordReset(row)}
-                      >
-                        {resettingId === row.id ? "…" : t("sendPasswordReset")}
-                      </button>
                       <button
                         type="button"
                         className={styles.actionBtn}

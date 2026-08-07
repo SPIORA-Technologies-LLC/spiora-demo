@@ -9,7 +9,6 @@ export async function checkPasswordFlowRateLimit(
     | "forgot"
     | "change"
     | "reset"
-    | "staff-forgot"
     | "mfa-challenge"
     | "mfa-recovery"
     | "mfa-enroll",
@@ -23,7 +22,7 @@ export async function checkPasswordFlowRateLimit(
 }
 
 export async function checkPasswordIpRateLimit(
-  namespace: "forgot-ip" | "reset-ip" | "oauth-ip" | "mfa-ip" | "staff-forgot-ip",
+  namespace: "forgot-ip" | "reset-ip" | "oauth-ip" | "mfa-ip",
   ip?: string,
 ): Promise<LoginRateLimitResult> {
   return checkProductionSafeLoginRateLimit(`${namespace}:all`, ip);

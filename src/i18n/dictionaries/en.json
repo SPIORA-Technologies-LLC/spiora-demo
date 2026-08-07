@@ -2841,7 +2841,9 @@
       "rateLimited": "Too many attempts. Please wait and try again.",
       "mismatch": "Passwords do not match.",
       "currentPasswordFailed": "Could not verify the current password. Check the password or use account recovery.",
-      "recoveryExpired": "This reset link is invalid or expired. Request a new one."
+      "recoveryExpired": "This reset link is invalid or expired. Request a new one.",
+      "updateFailed": "Could not save the new password. Request a fresh reset link and try again.",
+      "invalidPassword": "Password must be at least 8 characters."
     }
   },
   "clientIntake": {

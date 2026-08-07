@@ -62,6 +62,9 @@ describe("Phase D1 client self-service password recovery", () => {
     assert.match(handlers, /signOut\(\)/);
     assert.match(handlers, /clearRecoveryGateCookie/);
     assert.match(handlers, /\{ ok: true \}/);
+    // MFA users: recovery is AAL1 — reset must use admin updateUserById.
+    assert.match(handlers, /admin\.updateUserById/);
+    assert.match(handlers, /AAL2 session is required/);
   });
 
   it("staff invitations UI has no password reset action", () => {

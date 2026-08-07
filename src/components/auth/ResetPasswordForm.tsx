@@ -74,13 +74,18 @@ export function ResetPasswordForm({ audience }: { audience: Audience }) {
         error?: { code?: string };
       };
       if (!res.ok) {
-        setError(
-          data.error?.code === "RECOVERY_GATE_INVALID"
-            ? t("errors.recoveryExpired")
-            : data.error?.code === "RATE_LIMITED"
-              ? t("errors.rateLimited")
-              : t("errors.generic"),
-        );
+        const code = data.error?.code;
+        if (code === "RECOVERY_GATE_INVALID") {
+          setError(t("errors.recoveryExpired"));
+        } else if (code === "RATE_LIMITED") {
+          setError(t("errors.rateLimited"));
+        } else if (code === "PASSWORD_UPDATE_FAILED") {
+          setError(t("errors.updateFailed"));
+        } else if (code === "INVALID_PASSWORD") {
+          setError(t("errors.invalidPassword"));
+        } else {
+          setError(t("errors.generic"));
+        }
         return;
       }
       setSaved(true);

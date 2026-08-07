@@ -31,6 +31,8 @@ import {
   jsonWithAuthCookies,
 } from "@/lib/supabase/auth-cookie-response";
 import { assertRecoveryRedirectToHasNoQuery } from "@/lib/auth/recovery-email-template";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 function requestMeta(request: Request) {
   const origin = request.headers.get("origin");
@@ -315,7 +317,17 @@ export async function handlePasswordReset(input: {
     return jsonError("FORBIDDEN", 403);
   }
 
-  const { error: updateError } = await supabase.auth.updateUser({ password });
+  // Recovery sessions are AAL1. With MFA enrolled, user-scoped updateUser({ password })
+  // is rejected ("AAL2 session is required…"). After gate + plane checks, set password
+  // via service role so forgot-password works for MFA users.
+  if (!isSupabaseConfigured()) {
+    return jsonError("AUTH_UNAVAILABLE", 503);
+  }
+  const admin = getSupabaseAdmin();
+  const { error: updateError } = await admin.auth.admin.updateUserById(
+    user.id,
+    { password },
+  );
   if (updateError) {
     await insertSecurityAuditEvent({
       action: "password_reset_failed",
@@ -326,7 +338,10 @@ export async function handlePasswordReset(input: {
       ipHash: ip ? hashAuditIp(ip) : null,
       emailHash: user.email ? hashAuditEmail(user.email) : null,
       userAgent,
-      metadata: { reason: "UPDATE_FAILED" },
+      metadata: {
+        reason: "UPDATE_FAILED",
+        detail: updateError.message.slice(0, 160),
+      },
     });
     return jsonError("PASSWORD_UPDATE_FAILED", 400);
   }

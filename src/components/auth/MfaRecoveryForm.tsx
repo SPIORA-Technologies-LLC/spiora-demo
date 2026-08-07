@@ -65,9 +65,11 @@ export function MfaRecoveryForm() {
       <button className={styles.submit} type="submit" disabled={busy}>
         {busy ? t("recovery.working") : t("recovery.submit")}
       </button>
-      <p className={styles.subtitle} style={{ marginTop: "1rem", marginBottom: 0 }}>
-        <Link href="/mfa/challenge">{t("recovery.backToChallenge")}</Link>
-      </p>
+      <div className={styles.secondaryActions}>
+        <Link href="/mfa/challenge" className={styles.secondaryAction}>
+          {t("recovery.backToChallenge")}
+        </Link>
+      </div>
     </form>
   );
 }

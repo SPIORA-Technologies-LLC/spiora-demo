@@ -247,6 +247,70 @@
   cursor: wait;
 }
 
+.secondaryActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-top: 1.15rem;
+  width: 100%;
+}
+
+.secondaryActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.15rem;
+  width: 100%;
+}
+
+.secondaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-width: min(100%, 9.5rem);
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--white);
+  font-family: Inter, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.secondaryAction:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 183, 74, 0.45);
+  color: #ffb74a;
+}
+
+.secondaryAction:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.secondaryActionQuiet {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: var(--gray-300);
+  font-weight: 500;
+}
+
+.secondaryActionQuiet:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: var(--white);
+}
+
 .successOverlay {
   position: fixed;
   inset: 0;

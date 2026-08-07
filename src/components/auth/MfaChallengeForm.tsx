@@ -64,27 +64,19 @@ export function MfaChallengeForm({ nextPath }: { nextPath: string }) {
       <button className={styles.submit} type="submit" disabled={busy}>
         {busy ? t("challenge.verifying") : t("challenge.submit")}
       </button>
-      <p className={styles.subtitle} style={{ marginTop: "1rem", marginBottom: 0 }}>
-        <Link href="/mfa/recovery">{t("challenge.useRecovery")}</Link>
-      </p>
-      <p className={styles.subtitle} style={{ marginTop: "0.75rem", marginBottom: 0 }}>
+      <div className={styles.secondaryActions}>
+        <Link href="/mfa/recovery" className={styles.secondaryAction}>
+          {t("challenge.useRecovery")}
+        </Link>
         <button
           type="button"
+          className={`${styles.secondaryAction} ${styles.secondaryActionQuiet}`}
           onClick={() => void signOutAction()}
           disabled={busy}
-          style={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            color: "inherit",
-            textDecoration: "underline",
-            cursor: "pointer",
-            font: "inherit",
-          }}
         >
           {t("challenge.signOut")}
         </button>
-      </p>
+      </div>
     </form>
   );
 }

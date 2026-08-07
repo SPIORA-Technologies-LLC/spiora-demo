@@ -260,11 +260,14 @@ export function MfaSettingsPanel() {
         </div>
       ) : null}
 
-      <p className={styles.subtitle} style={{ marginTop: "1.5rem" }}>
-        <Link href="/settings/password">{t("settings.passwordLink")}</Link>
-        {" · "}
-        <Link href="/settings">{t("settings.back")}</Link>
-      </p>
+      <div className={styles.secondaryActionsRow}>
+        <Link href="/settings/password" className={styles.secondaryAction}>
+          {t("settings.passwordLink")}
+        </Link>
+        <Link href="/settings" className={`${styles.secondaryAction} ${styles.secondaryActionQuiet}`}>
+          {t("settings.back")}
+        </Link>
+      </div>
     </div>
   );
 }

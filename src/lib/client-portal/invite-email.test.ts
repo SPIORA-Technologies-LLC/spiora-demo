@@ -18,6 +18,11 @@ describe("buildClientInviteEmailContent", () => {
     assert.match(content.text, /TempPass12/);
     assert.match(content.text, /https:\/\/spiora\.demo\/client\/invite\/token/);
     assert.match(content.text, /Здравствуйте/);
+    assert.match(content.text, /временный пароль/);
+    assert.match(
+      content.html,
+      /<a href="https:\/\/spiora\.demo\/client\/invite\/token" target="_blank" rel="noopener noreferrer">/,
+    );
   });
 
   it("builds EN password-reset subject", () => {
@@ -31,6 +36,11 @@ describe("buildClientInviteEmailContent", () => {
 
     assert.match(content.subject, /password/i);
     assert.match(content.text, /NewPass99/);
+    assert.match(content.text, /temporary password/i);
     assert.match(content.html, /NewPass99/);
+    assert.match(
+      content.html,
+      /<a href="https:\/\/spiora\.demo\/client\/login" target="_blank" rel="noopener noreferrer">/,
+    );
   });
 });

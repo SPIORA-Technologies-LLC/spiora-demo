@@ -2438,7 +2438,7 @@
     "copyMessage": "Copy message for client",
     "copied": "Copied",
     "copyOnceHint": "The password and link are shown only now. After you close this window they cannot be recovered from the database — only reissued.",
-    "sharePackage": "Hello!\n\nGreetings from the Spiora team.\nWe are inviting you to the Spiora Client portal.\n\nPlease open the link below and sign in with the credentials provided to accept the invitation and get started.\n\nLink: {url}\nEmail: {email}\nPassword: {password}\n\nIf you forget your password later, open the client sign-in page and use Forgot password to set a new one.\n\nKind regards,\nThe Spiora team",
+    "sharePackage": "Hello!\n\nGreetings from the Spiora team.\nWe are inviting you to the Spiora Client portal.\n\nPlease open the link below and sign in with the credentials provided to accept the invitation and get started.\n\nLink: {url}\nEmail: {email}\nPassword: {password}\n\nAfter you sign in, you can change this temporary password to your own via Change password.\nIf you forget your password later, open the client sign-in page and use Forgot password to set a new one.\n\nKind regards,\nThe Spiora team",
     "email": {
       "subjectInvite": "Your Spiora Client invitation",
       "subjectPasswordReset": "Your new Spiora Client password"

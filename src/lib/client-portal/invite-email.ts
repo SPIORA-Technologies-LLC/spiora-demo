@@ -62,9 +62,26 @@ export function buildClientInviteEmailContent(input: {
     password: input.temporaryPassword,
   });
 
-  const html = `<pre style="font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;line-height:1.5">${escapeHtml(text)}</pre>`;
+  // Plain text keeps the raw URL; HTML needs a real <a> so mail clients make it clickable.
+  let htmlBody = escapeHtml(text).replaceAll("\n", "<br/>");
+  if (isHttpUrl(input.inviteUrl)) {
+    const escapedUrl = escapeHtml(input.inviteUrl);
+    const anchor = `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer">${escapedUrl}</a>`;
+    htmlBody = htmlBody.replaceAll(escapedUrl, anchor);
+  }
+
+  const html = `<p style="font-family:Inter,system-ui,sans-serif;line-height:1.5">${htmlBody}</p>`;
 
   return { subject, text, html };
+}
+
+function isHttpUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
 }
 
 function escapeHtml(value: string): string {

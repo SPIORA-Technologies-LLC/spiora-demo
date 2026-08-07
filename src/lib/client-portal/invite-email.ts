@@ -79,7 +79,7 @@ export function buildClientInviteEmailContent(input: {
   // Plain text keeps the raw URL; HTML needs a real <a> so mail clients make it clickable.
   let htmlBody = escapeHtml(text).replaceAll("\n", "<br/>");
   const urls = [input.inviteUrl, input.loginUrl].filter(
-    (u): u is string => Boolean(u) && isHttpUrl(u),
+    (u): u is string => typeof u === "string" && isHttpUrl(u),
   );
   for (const url of urls) {
     const escapedUrl = escapeHtml(url);

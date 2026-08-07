@@ -25,4 +25,19 @@ describe("password recovery email content", () => {
     assert.match(content.subject, /Reset your Spiora password/);
     assert.match(content.text, /https:\/\/example\.com\/reset/);
   });
+
+  it("wraps reset URL in an HTML anchor for clickable mail clients", () => {
+    const resetUrl =
+      "https://www.spiora.ai/auth/confirm/client?token_hash=abc&type=recovery";
+    const content = buildPasswordRecoveryEmailContent({
+      locale: "ru",
+      resetUrl,
+    });
+    assert.match(
+      content.html,
+      /<a href="https:\/\/www\.spiora\.ai\/auth\/confirm\/client\?token_hash=abc&amp;type=recovery">/,
+    );
+    assert.match(content.html, /&amp;type=recovery/);
+    assert.doesNotMatch(content.html, /javascript:/i);
+  });
 });

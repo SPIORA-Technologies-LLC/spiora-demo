@@ -27,6 +27,15 @@ function escapeHtml(value: string): string {
     .replaceAll('"', "&quot;");
 }
 
+function isHttpResetUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 export function buildPasswordRecoveryEmailContent(input: {
   resetUrl: string;
   locale: AppLocale | string;
@@ -36,6 +45,16 @@ export function buildPasswordRecoveryEmailContent(input: {
   const text = message(locale, "authPassword.email.body", {
     resetUrl: input.resetUrl,
   });
-  const html = `<p style="font-family:Inter,system-ui,sans-serif;line-height:1.5;white-space:pre-wrap">${escapeHtml(text).replaceAll("\n", "<br/>")}</p>`;
+
+  // Plain text keeps the raw URL; HTML must use a real <a> so clients like Yahoo
+  // make it clickable (escaped URL-only text is often not auto-linked).
+  let htmlBody = escapeHtml(text).replaceAll("\n", "<br/>");
+  if (isHttpResetUrl(input.resetUrl)) {
+    const escapedUrl = escapeHtml(input.resetUrl);
+    const anchor = `<a href="${escapedUrl}">${escapedUrl}</a>`;
+    htmlBody = htmlBody.replaceAll(escapedUrl, anchor);
+  }
+
+  const html = `<p style="font-family:Inter,system-ui,sans-serif;line-height:1.5">${htmlBody}</p>`;
   return { subject, text, html };
 }

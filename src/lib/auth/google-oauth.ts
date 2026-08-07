@@ -264,5 +264,32 @@ export async function handleGoogleOAuthCallback(input: {
     metadata: { provider: "google" },
   });
 
-  return redirectWithAuthCookies(successUrl, mutations);
+  let finalSuccessUrl = successUrl;
+  if (input.audience === "employee") {
+    const { isEmployeeMfaEnabled } = await import("@/lib/auth/mfa-config");
+    const { needsMfaChallenge } = await import("@/lib/auth/mfa-aal");
+    if (isEmployeeMfaEnabled()) {
+      try {
+        const { data: aal } =
+          await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+        if (
+          needsMfaChallenge({
+            currentLevel: aal?.currentLevel ?? null,
+            nextLevel: aal?.nextLevel ?? null,
+          })
+        ) {
+          const intended =
+            successUrl.pathname + successUrl.search;
+          finalSuccessUrl = new URL(
+            `/mfa/challenge?next=${encodeURIComponent(intended)}`,
+            origin,
+          );
+        }
+      } catch {
+        // If AAL lookup fails, fall through to success path; middleware will re-check.
+      }
+    }
+  }
+
+  return redirectWithAuthCookies(finalSuccessUrl, mutations);
 }

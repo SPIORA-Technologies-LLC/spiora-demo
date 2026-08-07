@@ -23,6 +23,7 @@ import {
   signInWithSupabasePassword,
   signOutSupabaseAuth,
 } from "@/lib/auth/supabase-login";
+import { resolveEmployeePostAuthPath } from "@/lib/auth/mfa-service";
 
 export type SignInState = {
   error?: string;
@@ -81,7 +82,8 @@ export async function signInAction(
     const destination = resolvePostLoginPath(nextPath, (path) =>
       canAccessPath(result.session.role, path),
     );
-    return { redirectTo: destination };
+    const gated = await resolveEmployeePostAuthPath(destination);
+    return { redirectTo: gated };
   }
 
   // Legacy path — local only when explicitly allowed.

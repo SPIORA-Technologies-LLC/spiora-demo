@@ -31,7 +31,15 @@ export type SecurityAuditAction =
   | "google_oauth_started"
   | "google_oauth_success"
   | "google_oauth_denied"
-  | "google_oauth_failed";
+  | "google_oauth_failed"
+  | "mfa_enroll_started"
+  | "mfa_enroll_completed"
+  | "mfa_challenge_success"
+  | "mfa_challenge_failure"
+  | "mfa_disabled"
+  | "mfa_recovery_codes_generated"
+  | "mfa_recovery_used"
+  | "mfa_factor_removed";
 
 export type SecurityAuditAudience = "employee" | "client" | "unknown";
 
@@ -42,7 +50,7 @@ function isTruthyFlag(
   return env[name]?.trim().toLowerCase() === "true";
 }
 
-/** Umbrella: enables password + OAuth audit. */
+/** Umbrella: enables password + OAuth + MFA audit. */
 export function isSecurityAuditAuthEnabled(
   env: NodeJS.ProcessEnv = process.env,
 ): boolean {
@@ -67,12 +75,34 @@ export function isSecurityAuditOauthEnabled(
   );
 }
 
+export function isSecurityAuditMfaEnabled(
+  env: NodeJS.ProcessEnv = process.env,
+): boolean {
+  return (
+    isSecurityAuditAuthEnabled(env) ||
+    isTruthyFlag(env, "SPIORA_SECURITY_AUDIT_MFA")
+  );
+}
+
 function isGoogleOAuthAuditAction(action: SecurityAuditAction): boolean {
   return (
     action === "google_oauth_started" ||
     action === "google_oauth_success" ||
     action === "google_oauth_denied" ||
     action === "google_oauth_failed"
+  );
+}
+
+function isMfaAuditAction(action: SecurityAuditAction): boolean {
+  return (
+    action === "mfa_enroll_started" ||
+    action === "mfa_enroll_completed" ||
+    action === "mfa_challenge_success" ||
+    action === "mfa_challenge_failure" ||
+    action === "mfa_disabled" ||
+    action === "mfa_recovery_codes_generated" ||
+    action === "mfa_recovery_used" ||
+    action === "mfa_factor_removed"
   );
 }
 
@@ -97,7 +127,11 @@ export async function insertSecurityAuditEvent(
 ): Promise<{ ok: true } | { ok: false; reason: string }> {
   const enabled = isGoogleOAuthAuditAction(input.action)
     ? isSecurityAuditOauthEnabled()
-    : isSecurityAuditPasswordEnabled();
+    : isMfaAuditAction(input.action)
+      ? isSecurityAuditMfaEnabled()
+      : input.action === "sessions_revoked"
+        ? isSecurityAuditPasswordEnabled() || isSecurityAuditMfaEnabled()
+        : isSecurityAuditPasswordEnabled();
   if (!enabled) {
     return { ok: false, reason: "audit_disabled" };
   }

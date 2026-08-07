@@ -6,6 +6,11 @@ import { resolveSessionFromAuthUserId } from "@/lib/auth/middleware-session";
 import { getAuthProvider } from "@/lib/auth/provider";
 import { getSessionFromToken } from "@/lib/auth/session";
 import { updateSupabaseAuthSession } from "@/lib/supabase/middleware-auth";
+import {
+  isEmployeeApiPath,
+  isMfaExemptApiPath,
+  isMfaGatePath,
+} from "@/lib/auth/mfa-paths";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -91,15 +96,34 @@ export async function middleware(request: NextRequest) {
   let session = null as Awaited<ReturnType<typeof getSessionFromToken>>;
   let supabaseResponse: NextResponse | null = null;
   let authUserId: string | null = null;
+  let mfaChallengeRequired = false;
 
   if (provider === "supabase") {
     const refreshed = await updateSupabaseAuthSession(request);
     supabaseResponse = refreshed.response;
     authUserId = refreshed.user?.id ?? null;
+    mfaChallengeRequired = refreshed.mfaChallengeRequired;
     session = await resolveSessionFromAuthUserId(authUserId);
   } else {
     const token = request.cookies.get("spiora_session")?.value;
     session = await getSessionFromToken(token);
+  }
+
+  // Hard API AAL2 gate (UX redirect alone is not enough).
+  if (
+    provider === "supabase" &&
+    session &&
+    mfaChallengeRequired &&
+    isEmployeeApiPath(pathname) &&
+    !isMfaExemptApiPath(pathname)
+  ) {
+    return withSupabaseCookies(
+      NextResponse.json(
+        { error: { code: "MFA_REQUIRED" } },
+        { status: 401, headers: { "Cache-Control": "no-store" } },
+      ),
+      supabaseResponse,
+    );
   }
 
   // Spiora Client paths: never treat employee SessionUser as client access.
@@ -119,7 +143,7 @@ export async function middleware(request: NextRequest) {
     // Employee sessions cannot enter the client portal shell.
     if (session) {
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = mfaChallengeRequired ? "/mfa/challenge" : "/dashboard";
       return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
     }
 
@@ -132,14 +156,30 @@ export async function middleware(request: NextRequest) {
 
   if (pathname === "/") {
     const url = request.nextUrl.clone();
-    url.pathname = session ? "/dashboard" : "/login";
+    if (!session) {
+      url.pathname = "/login";
+    } else if (mfaChallengeRequired) {
+      url.pathname = "/mfa/challenge";
+    } else {
+      url.pathname = "/dashboard";
+    }
     return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
+  }
+
+  if (isMfaGatePath(pathname)) {
+    if (!session) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
+    }
+    const intlResponse = intlMiddleware(request);
+    return withSupabaseCookies(intlResponse, supabaseResponse);
   }
 
   if (isPublicPath(pathname)) {
     if (session && pathname === "/login") {
       const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
+      url.pathname = mfaChallengeRequired ? "/mfa/challenge" : "/dashboard";
       return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
     }
   } else if (isProtectedPath(pathname)) {
@@ -148,6 +188,13 @@ export async function middleware(request: NextRequest) {
     if (!session) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
+      url.searchParams.set("next", pathname);
+      return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
+    }
+
+    if (mfaChallengeRequired) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/mfa/challenge";
       url.searchParams.set("next", pathname);
       return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
     }
@@ -175,6 +222,8 @@ export const config = {
     "/auth/callback/:path*",
     "/auth/confirm",
     "/auth/confirm/:path*",
+    "/mfa",
+    "/mfa/:path*",
     "/client",
     "/client/:path*",
     "/dashboard",
@@ -205,5 +254,6 @@ export const config = {
     "/team/:path*",
     "/settings",
     "/settings/:path*",
+    "/api/:path*",
   ],
 };

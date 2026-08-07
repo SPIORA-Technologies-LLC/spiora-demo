@@ -7,6 +7,8 @@ import type { TopbarProps } from "./Topbar";
 import { getSession } from "@/lib/auth/session";
 import type { AppLocale } from "@/i18n/config";
 import { translateTeamMemberName } from "@/i18n/team-members";
+import { isEmployeeMfaEnabled } from "@/lib/auth/mfa-config";
+import { MfaReenrollBanner } from "@/components/auth/MfaReenrollBanner";
 
 export type AppShellProps = Omit<TopbarProps, "userName" | "userRole"> & {
   children: ReactNode;
@@ -28,6 +30,8 @@ export async function AppShell({
 
   const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("shell");
+  const showMfaBanner =
+    isEmployeeMfaEnabled() && Boolean(session.mfaReenrollRequired);
 
   return (
     <AppShellNotifications>
@@ -50,6 +54,7 @@ export async function AppShell({
         onSearchChange={onSearchChange}
         contentClassName={contentClassName}
       >
+        {showMfaBanner ? <MfaReenrollBanner /> : null}
         {children}
       </AppShellClient>
     </AppShellNotifications>

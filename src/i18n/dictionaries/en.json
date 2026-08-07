@@ -66,7 +66,8 @@
     "continueWithGoogle": "Continue with Google",
     "googleAccessDenied": "Google sign-in is not available for this account. Contact your administrator.",
     "unsupportedCallback": "This sign-in link is no longer supported. Please try again from the login page.",
-    "orDivider": "or"
+    "orDivider": "or",
+    "mfaReenrollNotice": "MFA was reset with a recovery code. Sign in again, then re-enable MFA in Settings."
   },
   "shell": {
     "search": "Search…",
@@ -1626,6 +1627,8 @@
       }
     },
     "security": {
+      "mfaLink": "My authenticator MFA",
+      "selfPasswordLink": "Change my password",
       "password": {
         "title": "Team passwords",
         "hint": "Reset a team member's password and share the new password via Telegram or WhatsApp. After reset, the old password stops working. If the password was never reset through this panel, the hosting configuration password applies.",
@@ -2678,6 +2681,55 @@
       "continueWithGoogle": "Continue with Google",
       "googleAccessDenied": "Google sign-in is not available for this account. Contact your administrator.",
       "orDivider": "or"
+    }
+  },
+  "authMfa": {
+    "challenge": {
+      "title": "Two-factor authentication",
+      "hint": "Enter the 6-digit code from your authenticator app.",
+      "codeLabel": "Authentication code",
+      "submit": "Verify",
+      "verifying": "Verifying…",
+      "useRecovery": "Use a recovery code",
+      "signOut": "Sign out"
+    },
+    "recovery": {
+      "title": "Account recovery",
+      "hint": "Enter one unused recovery code. This removes MFA and signs you out. You must sign in again and re-enable MFA.",
+      "codeLabel": "Recovery code",
+      "submit": "Recover account",
+      "working": "Recovering…",
+      "backToChallenge": "Back to authenticator code"
+    },
+    "settings": {
+      "title": "Authenticator MFA",
+      "hint": "Protect your employee account with a TOTP authenticator app. One verified factor per account.",
+      "enable": "Enable MFA",
+      "starting": "Starting…",
+      "scanHint": "Scan the QR code, then enter a code to confirm.",
+      "secretLabel": "Manual secret",
+      "confirm": "Confirm and save recovery codes",
+      "enabled": "MFA is enabled. Unused recovery codes: {count}.",
+      "disable": "Disable MFA",
+      "disableConfirm": "Disable MFA and revoke other sessions?",
+      "regenerate": "Regenerate recovery codes",
+      "regenerateConfirm": "Invalidate previous recovery codes and create new ones?",
+      "codesHint": "Save these recovery codes now. They are shown only once.",
+      "reenrollRequired": "MFA was reset. Re-enable it to clear this reminder.",
+      "passwordLink": "Change password",
+      "back": "Back to settings"
+    },
+    "banner": {
+      "reenroll": "MFA was reset with a recovery code. Re-enable MFA to protect your account.",
+      "reenrollCta": "Open MFA settings"
+    },
+    "errors": {
+      "generic": "Something went wrong. Try again.",
+      "invalidCode": "Invalid authentication code.",
+      "invalidRecovery": "Invalid or already used recovery code.",
+      "rateLimited": "Too many attempts. Please wait and try again.",
+      "disabled": "Employee MFA is not enabled on this environment.",
+      "alreadyEnrolled": "MFA is already enabled for this account."
     }
   },
   "authPassword": {

@@ -13,9 +13,10 @@ const isDev = process.env.NODE_ENV === "development";
 type LoginFormProps = {
   nextPath?: string;
   authError?: string | null;
+  mfaReenroll?: boolean;
 };
 
-export function LoginForm({ nextPath, authError }: LoginFormProps) {
+export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) {
   const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState(signInAction, initialState);
   const [showPassword, setShowPassword] = useState(false);
@@ -74,6 +75,11 @@ export function LoginForm({ nextPath, authError }: LoginFormProps) {
 
   return (
     <div className={styles.authStack}>
+      {mfaReenroll ? (
+        <p className={styles.success} role="status">
+          {t("mfaReenrollNotice")}
+        </p>
+      ) : null}
       {bannerError ? (
         <p className={styles.error} role="alert">
           {bannerError}

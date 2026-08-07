@@ -66,7 +66,8 @@
     "continueWithGoogle": "Продолжить с Google",
     "googleAccessDenied": "Вход через Google недоступен для этого аккаунта. Обратитесь к администратору.",
     "unsupportedCallback": "Эта ссылка входа больше не поддерживается. Попробуйте снова со страницы входа.",
-    "orDivider": "или"
+    "orDivider": "или",
+    "mfaReenrollNotice": "MFA сброшен через recovery code. Войдите снова и заново включите MFA в настройках."
   },
   "shell": {
     "search": "Поиск…",
@@ -1626,6 +1627,8 @@
       }
     },
     "security": {
+      "mfaLink": "Мой MFA (аутентификатор)",
+      "selfPasswordLink": "Сменить мой пароль",
       "password": {
         "title": "Пароли команды",
         "hint": "Сбросьте пароль сотруднику и передайте новый пароль в Telegram или WhatsApp. После сброса старый пароль перестаёт работать. Если пароль ещё не сбрасывали через эту панель, действует пароль из настроек хостинга.",
@@ -2678,6 +2681,55 @@
       "continueWithGoogle": "Продолжить с Google",
       "googleAccessDenied": "Вход через Google недоступен для этого аккаунта. Обратитесь к администратору.",
       "orDivider": "или"
+    }
+  },
+  "authMfa": {
+    "challenge": {
+      "title": "Двухфакторная аутентификация",
+      "hint": "Введите 6-значный код из приложения-аутентификатора.",
+      "codeLabel": "Код подтверждения",
+      "submit": "Подтвердить",
+      "verifying": "Проверка…",
+      "useRecovery": "Использовать recovery code",
+      "signOut": "Выйти"
+    },
+    "recovery": {
+      "title": "Восстановление доступа",
+      "hint": "Введите один неиспользованный recovery code. MFA будет сброшен, все сессии завершены. Затем войдите снова и заново включите MFA.",
+      "codeLabel": "Recovery code",
+      "submit": "Восстановить аккаунт",
+      "working": "Восстановление…",
+      "backToChallenge": "Назад к коду аутентификатора"
+    },
+    "settings": {
+      "title": "MFA (аутентификатор)",
+      "hint": "Защитите employee-аккаунт приложением TOTP. Один verified-фактор на аккаунт.",
+      "enable": "Включить MFA",
+      "starting": "Запуск…",
+      "scanHint": "Отсканируйте QR-код, затем введите код для подтверждения.",
+      "secretLabel": "Секрет вручную",
+      "confirm": "Подтвердить и сохранить recovery codes",
+      "enabled": "MFA включён. Неиспользованных recovery codes: {count}.",
+      "disable": "Отключить MFA",
+      "disableConfirm": "Отключить MFA и завершить другие сессии?",
+      "regenerate": "Перевыпустить recovery codes",
+      "regenerateConfirm": "Аннулировать старые recovery codes и создать новые?",
+      "codesHint": "Сохраните эти recovery codes сейчас. Они показываются только один раз.",
+      "reenrollRequired": "MFA был сброшен. Включите его снова, чтобы убрать это напоминание.",
+      "passwordLink": "Сменить пароль",
+      "back": "Назад к настройкам"
+    },
+    "banner": {
+      "reenroll": "MFA сброшен через recovery code. Включите MFA снова, чтобы защитить аккаунт.",
+      "reenrollCta": "Открыть настройки MFA"
+    },
+    "errors": {
+      "generic": "Что-то пошло не так. Попробуйте ещё раз.",
+      "invalidCode": "Неверный код подтверждения.",
+      "invalidRecovery": "Неверный или уже использованный recovery code.",
+      "rateLimited": "Слишком много попыток. Подождите и попробуйте снова.",
+      "disabled": "Employee MFA на этой среде не включён.",
+      "alreadyEnrolled": "MFA уже включён для этого аккаунта."
     }
   },
   "authPassword": {

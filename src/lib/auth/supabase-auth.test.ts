@@ -28,6 +28,7 @@ function makeProfile(overrides: Partial<UserProfile> = {}): UserProfile {
     updatedAt: "2026-01-01T00:00:00.000Z",
     archivedAt: null,
     isDemo: true,
+    mfaReenrollRequired: false,
     ...overrides,
   };
 }

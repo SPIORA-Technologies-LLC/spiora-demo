@@ -39,6 +39,8 @@ export type UserProfile = {
   updatedAt: string;
   archivedAt: string | null;
   isDemo: boolean;
+  /** Loaded when MFA flag on / patch 043 applied; otherwise false. */
+  mfaReenrollRequired: boolean;
 };
 
 export type UpdateUserProfileInput = {
@@ -96,6 +98,7 @@ export function mapUserProfileRow(row: UserProfileRow): UserProfile | null {
     updatedAt: row.updated_at,
     archivedAt: row.archived_at,
     isDemo: Boolean(row.is_demo),
+    mfaReenrollRequired: false,
   };
 }
 
@@ -120,6 +123,25 @@ export async function sbGetUserProfileByAuthUserId(
   if (error) throw error;
   if (!data) return null;
   return mapUserProfileRow(data as UserProfileRow);
+}
+
+/** Requires patch 043. Returns false if column missing or query fails. */
+export async function sbGetMfaReenrollRequired(
+  authUserId: string,
+): Promise<boolean> {
+  try {
+    const { data, error } = await (await getAdmin())
+      .from("user_profiles")
+      .select("mfa_reenroll_required")
+      .eq("auth_user_id", authUserId)
+      .maybeSingle();
+    if (error || !data) return false;
+    return Boolean(
+      (data as { mfa_reenroll_required?: boolean | null }).mfa_reenroll_required,
+    );
+  } catch {
+    return false;
+  }
 }
 
 export async function sbGetUserProfileById(

@@ -18,6 +18,8 @@ export type SessionUser = {
   status?: UserStatus;
   language?: "en" | "ru";
   timezone?: string;
+  /** App-level flag after MFA recovery — show re-enable banner until re-enroll. */
+  mfaReenrollRequired?: boolean;
 };
 
 export const ROLE_LABELS: Record<UserRole, string> = {

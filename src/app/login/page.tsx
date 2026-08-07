@@ -11,7 +11,7 @@ import { getClientSession } from "@/lib/client-portal/session";
 import styles from "./login.module.css";
 
 type LoginPageProps = {
-  searchParams: Promise<{ next?: string; error?: string }>;
+  searchParams: Promise<{ next?: string; error?: string; mfa_reenroll?: string }>;
 };
 
 const pageFallback = {
@@ -56,6 +56,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     params.error === "unsupported_callback"
       ? params.error
       : null;
+  const mfaReenroll = params.mfa_reenroll === "1";
 
   return (
     <div className={styles.page} style={pageFallback}>
@@ -67,7 +68,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <Logo priority size="lg" />
         </div>
         <p className={styles.positioning}>{getProductDescription(locale)}</p>
-        <LoginForm nextPath={nextPath} authError={authError} />
+        <LoginForm
+          nextPath={nextPath}
+          authError={authError}
+          mfaReenroll={mfaReenroll}
+        />
         {process.env.NODE_ENV !== "production" ? <DemoCredentials /> : null}
       </div>
     </div>

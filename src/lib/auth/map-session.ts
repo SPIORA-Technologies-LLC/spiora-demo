@@ -27,6 +27,7 @@ export function profileToSessionUser(
     status: profile.status,
     language: profile.language,
     timezone: profile.timezone,
+    mfaReenrollRequired: profile.mfaReenrollRequired,
   };
 }
 

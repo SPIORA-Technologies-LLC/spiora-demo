@@ -410,6 +410,11 @@ export function SettingsView({
           {t("security.password.title")}
         </h2>
         <p className={styles.sectionHint}>{t("security.password.hint")}</p>
+        <p className={styles.sectionHint}>
+          <a href="/settings/mfa">{t("security.mfaLink")}</a>
+          {" · "}
+          <a href="/settings/password">{t("security.selfPasswordLink")}</a>
+        </p>
         {demoMode ? (
           <p className={styles.demoGuardHint}>
             {tDemo("settingsPasswordReset")}

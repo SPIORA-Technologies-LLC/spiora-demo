@@ -2,6 +2,7 @@ import "server-only";
 
 import {
   isProfileAccessAllowed,
+  sbGetMfaReenrollRequired,
   sbGetUserProfileByAuthUserId,
   sbTouchUserProfileLastLogin,
   type UserProfile,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/supabase/server-auth";
 import { profileToSessionUser, type UnifiedSessionUser } from "./map-session";
 import { sanitizeAuthErrorMessage } from "./security";
+import { isEmployeeMfaEnabled } from "./mfa-config";
 
 export type SupabaseSignInResult =
   | { ok: true; session: UnifiedSessionUser }
@@ -115,7 +117,14 @@ export async function getSupabaseUnifiedSession(): Promise<UnifiedSessionUser | 
     if (!profile) return null;
     if (!isProfileAccessAllowed(profile)) return null;
 
-    return profileToSessionUser(profile);
+    const session = profileToSessionUser(profile);
+    if (!session) return null;
+
+    if (isEmployeeMfaEnabled()) {
+      session.mfaReenrollRequired = await sbGetMfaReenrollRequired(user.id);
+    }
+
+    return session;
   } catch {
     return null;
   }

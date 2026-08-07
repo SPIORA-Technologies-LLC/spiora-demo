@@ -7,12 +7,40 @@ import clientStyles from "@/components/client-portal/ClientInvitePage.module.css
 
 type Audience = "employee" | "client";
 
+function PasswordVisibilityIcon({ visible }: { visible: boolean }) {
+  if (visible) {
+    return (
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+        />
+        <path
+          fill="currentColor"
+          d="M3.3 3.3 20.7 20.7l-1.4 1.4L1.9 4.7z"
+        />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-2.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"
+      />
+    </svg>
+  );
+}
+
 export function ChangePasswordForm({ audience }: { audience: Audience }) {
   const t = useTranslations("authPassword");
   const locale = useLocale();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -58,6 +86,9 @@ export function ChangePasswordForm({ audience }: { audience: Audience }) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirm("");
+      setShowCurrent(false);
+      setShowNew(false);
+      setShowConfirm(false);
     } catch {
       setError(t("errors.generic"));
     } finally {
@@ -87,41 +118,77 @@ export function ChangePasswordForm({ audience }: { audience: Audience }) {
       ) : null}
       <label className={styles.label}>
         {t("fields.currentPassword")}
-        <input
-          className={styles.input}
-          type="password"
-          required
-          value={currentPassword}
-          onChange={(e) => setCurrentPassword(e.target.value)}
-          autoComplete="current-password"
-          disabled={busy}
-        />
+        <span className={styles.passwordField}>
+          <input
+            className={styles.input}
+            type={showCurrent ? "text" : "password"}
+            required
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            autoComplete="current-password"
+            disabled={busy}
+          />
+          <button
+            type="button"
+            className={styles.passwordToggle}
+            onClick={() => setShowCurrent((v) => !v)}
+            aria-label={showCurrent ? t("hidePassword") : t("showPassword")}
+            aria-pressed={showCurrent}
+            disabled={busy}
+          >
+            <PasswordVisibilityIcon visible={showCurrent} />
+          </button>
+        </span>
       </label>
       <label className={styles.label}>
         {t("fields.newPassword")}
-        <input
-          className={styles.input}
-          type="password"
-          required
-          minLength={8}
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          autoComplete="new-password"
-          disabled={busy}
-        />
+        <span className={styles.passwordField}>
+          <input
+            className={styles.input}
+            type={showNew ? "text" : "password"}
+            required
+            minLength={8}
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            autoComplete="new-password"
+            disabled={busy}
+          />
+          <button
+            type="button"
+            className={styles.passwordToggle}
+            onClick={() => setShowNew((v) => !v)}
+            aria-label={showNew ? t("hidePassword") : t("showPassword")}
+            aria-pressed={showNew}
+            disabled={busy}
+          >
+            <PasswordVisibilityIcon visible={showNew} />
+          </button>
+        </span>
       </label>
       <label className={styles.label}>
         {t("fields.confirmPassword")}
-        <input
-          className={styles.input}
-          type="password"
-          required
-          minLength={8}
-          value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
-          autoComplete="new-password"
-          disabled={busy}
-        />
+        <span className={styles.passwordField}>
+          <input
+            className={styles.input}
+            type={showConfirm ? "text" : "password"}
+            required
+            minLength={8}
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            autoComplete="new-password"
+            disabled={busy}
+          />
+          <button
+            type="button"
+            className={styles.passwordToggle}
+            onClick={() => setShowConfirm((v) => !v)}
+            aria-label={showConfirm ? t("hidePassword") : t("showPassword")}
+            aria-pressed={showConfirm}
+            disabled={busy}
+          >
+            <PasswordVisibilityIcon visible={showConfirm} />
+          </button>
+        </span>
       </label>
       <button
         type="submit"

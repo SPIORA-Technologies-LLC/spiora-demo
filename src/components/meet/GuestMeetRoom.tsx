@@ -133,7 +133,6 @@ function GuestMeetingStage({
         participantsOpen={participantsOpen}
         onToggleParticipants={() => setParticipantsOpen((open) => !open)}
         onLeave={onLeave}
-        hideScreenShare
       />
 
       {participantsOpen ? (

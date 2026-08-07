@@ -52,3 +52,20 @@ export async function sbGetClientPortalUserByAuthUserId(
   if (error) throw error;
   return data ? mapRow(data as DbRow) : null;
 }
+
+export async function sbGetClientPortalUserByEmail(
+  email: string,
+): Promise<ClientPortalUserRow | null> {
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return null;
+  const sb = getSupabaseAdmin();
+  const { data, error } = await sb
+    .from("client_portal_users")
+    .select(
+      "id, auth_user_id, email, preferred_locale, invitation_id, mfa_reenroll_required, created_at, updated_at",
+    )
+    .eq("email", normalized)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? mapRow(data as DbRow) : null;
+}

@@ -72,7 +72,7 @@ export function ClientPortalLogin() {
       const supabase = createSupabaseBrowserClient();
       const { error: signErr } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password,
+        password: password.trim(),
       });
       if (signErr) {
         setError(t("authFailed"));

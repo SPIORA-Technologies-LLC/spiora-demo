@@ -331,6 +331,27 @@ describe("employee / client route guard separation (source)", () => {
     assert.match(local, /Rebind after staff delete/);
   });
 
+  it("invite-again does not rotate password when portal user already exists", () => {
+    const invitations = readFileSync(
+      path.join(root, "src/lib/client-portal/invitations.ts"),
+      "utf8",
+    );
+    assert.match(invitations, /existingPortalUser:\s*true/);
+    assert.match(invitations, /sbGetClientPortalUserByEmail/);
+    assert.match(invitations, /getLocalClientPortalUserByEmail/);
+    assert.match(
+      invitations,
+      /if \(existingPortal\) \{\s*return \{ \.\.\.result, existingPortalUser: true \};/,
+    );
+
+    const panel = readFileSync(
+      path.join(root, "src/components/client-portal/ClientInvitationsPanel.tsx"),
+      "utf8",
+    );
+    assert.match(panel, /sharePackageExisting/);
+    assert.match(panel, /existingAccountHint/);
+  });
+
   it("resolveSessionFromAuthUserId only maps user_profiles employee roles", () => {
     const file = readFileSync(
       path.join(root, "src/lib/auth/middleware-session.ts"),

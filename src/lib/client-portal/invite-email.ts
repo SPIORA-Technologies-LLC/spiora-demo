@@ -3,12 +3,16 @@ import { getNestedMessage, getMessagesForLocale } from "@/i18n/messages";
 import { sendEmail, type SendEmailResult } from "@/lib/mail/send-email";
 import type { ClientPortalLocale } from "./types";
 
-export type ClientInviteEmailKind = "invite" | "password_reset";
+export type ClientInviteEmailKind =
+  | "invite"
+  | "invite_existing"
+  | "password_reset";
 
 export type SendClientInviteEmailInput = {
   to: string;
   inviteUrl: string;
-  temporaryPassword: string;
+  temporaryPassword?: string;
+  loginUrl?: string;
   locale: ClientPortalLocale | string;
   kind: ClientInviteEmailKind;
   firstName?: string | null;
@@ -44,7 +48,8 @@ function message(
 export function buildClientInviteEmailContent(input: {
   email: string;
   inviteUrl: string;
-  temporaryPassword: string;
+  temporaryPassword?: string;
+  loginUrl?: string;
   locale: ClientPortalLocale | string;
   kind: ClientInviteEmailKind;
   firstName?: string | null;
@@ -53,19 +58,31 @@ export function buildClientInviteEmailContent(input: {
   const subjectKey =
     input.kind === "password_reset"
       ? "clientInvitations.email.subjectPasswordReset"
-      : "clientInvitations.email.subjectInvite";
+      : input.kind === "invite_existing"
+        ? "clientInvitations.email.subjectInviteExisting"
+        : "clientInvitations.email.subjectInvite";
   const subject = message(locale, subjectKey);
 
-  const text = message(locale, "clientInvitations.sharePackage", {
-    url: input.inviteUrl,
-    email: input.email,
-    password: input.temporaryPassword,
-  });
+  const text =
+    input.kind === "invite_existing"
+      ? message(locale, "clientInvitations.sharePackageExisting", {
+          url: input.inviteUrl,
+          email: input.email,
+          loginUrl: input.loginUrl || input.inviteUrl,
+        })
+      : message(locale, "clientInvitations.sharePackage", {
+          url: input.inviteUrl,
+          email: input.email,
+          password: input.temporaryPassword || "",
+        });
 
   // Plain text keeps the raw URL; HTML needs a real <a> so mail clients make it clickable.
   let htmlBody = escapeHtml(text).replaceAll("\n", "<br/>");
-  if (isHttpUrl(input.inviteUrl)) {
-    const escapedUrl = escapeHtml(input.inviteUrl);
+  const urls = [input.inviteUrl, input.loginUrl].filter(
+    (u): u is string => Boolean(u) && isHttpUrl(u),
+  );
+  for (const url of urls) {
+    const escapedUrl = escapeHtml(url);
     const anchor = `<a href="${escapedUrl}" target="_blank" rel="noopener noreferrer">${escapedUrl}</a>`;
     htmlBody = htmlBody.replaceAll(escapedUrl, anchor);
   }
@@ -99,6 +116,7 @@ export async function sendClientInviteEmail(
     email: input.to,
     inviteUrl: input.inviteUrl,
     temporaryPassword: input.temporaryPassword,
+    loginUrl: input.loginUrl,
     locale: input.locale,
     kind: input.kind,
     firstName: input.firstName,

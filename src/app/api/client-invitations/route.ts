@@ -112,23 +112,34 @@ export async function POST(request: Request) {
     let emailSent = false;
     let emailError: "EMAIL_NOT_CONFIGURED" | "EMAIL_SEND_FAILED" | null = null;
 
-    if (
-      !result.reused &&
-      result.temporaryPassword &&
-      result.inviteUrl
-    ) {
-      const mail = await sendClientInviteEmail({
-        to: result.invitation.email,
-        inviteUrl: result.inviteUrl,
-        temporaryPassword: result.temporaryPassword,
-        locale: result.invitation.preferredLocale,
-        kind: "invite",
-        firstName: result.invitation.firstName,
-      });
-      if (mail.ok) {
-        emailSent = true;
-      } else {
-        emailError = mail.code;
+    if (!result.reused && result.inviteUrl) {
+      const loginUrl = `${getRequestOrigin(request).replace(/\/$/, "")}/client/login`;
+      const mail = result.temporaryPassword
+        ? await sendClientInviteEmail({
+            to: result.invitation.email,
+            inviteUrl: result.inviteUrl,
+            temporaryPassword: result.temporaryPassword,
+            locale: result.invitation.preferredLocale,
+            kind: "invite",
+            firstName: result.invitation.firstName,
+          })
+        : result.existingPortalUser
+          ? await sendClientInviteEmail({
+              to: result.invitation.email,
+              inviteUrl: result.inviteUrl,
+              loginUrl,
+              locale: result.invitation.preferredLocale,
+              kind: "invite_existing",
+              firstName: result.invitation.firstName,
+            })
+          : null;
+
+      if (mail) {
+        if (mail.ok) {
+          emailSent = true;
+        } else {
+          emailError = mail.code;
+        }
       }
     }
 
@@ -138,6 +149,7 @@ export async function POST(request: Request) {
         invitation: result.invitation,
         inviteUrl: result.inviteUrl,
         temporaryPassword: result.temporaryPassword,
+        existingPortalUser: Boolean(result.existingPortalUser),
         reused: result.reused,
         emailSent,
         emailError,

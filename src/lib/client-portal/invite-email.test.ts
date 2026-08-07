@@ -43,4 +43,23 @@ describe("buildClientInviteEmailContent", () => {
       /<a href="https:\/\/spiora\.demo\/client\/login" target="_blank" rel="noopener noreferrer">/,
     );
   });
+
+  it("builds existing-account invite without rotating password copy", () => {
+    const content = buildClientInviteEmailContent({
+      email: "client@example.com",
+      inviteUrl: "https://spiora.demo/client/invite/token",
+      loginUrl: "https://spiora.demo/client/login",
+      locale: "en",
+      kind: "invite_existing",
+    });
+
+    assert.match(content.subject, /account/i);
+    assert.match(content.text, /already exists/i);
+    assert.match(content.text, /Forgot password/);
+    assert.doesNotMatch(content.text, /Password:/);
+    assert.match(
+      content.html,
+      /<a href="https:\/\/spiora\.demo\/client\/login"/,
+    );
+  });
 });

@@ -2429,6 +2429,7 @@
     "create": "Create invitation",
     "creating": "Creating…",
     "createdTitle": "Invitation created",
+    "createdExistingTitle": "Invitation created (existing account)",
     "emailSentTitle": "Email sent to {email}",
     "emailFailedHint": "Invitation was created, but the email could not be sent. Copy the message below and send it manually.",
     "emailNotConfiguredHint": "Email delivery is not configured. Copy the message below and send it to the client, or set SPIORA_ENABLE_EMAIL, BREVO_API_KEY, and SPIORA_EMAIL_FROM.",
@@ -2438,9 +2439,13 @@
     "copyMessage": "Copy message for client",
     "copied": "Copied",
     "copyOnceHint": "The password and link are shown only now. After you close this window they cannot be recovered from the database — only reissued.",
+    "existingAccountHint": "This client already has a Spiora Client account. Their password was not changed. Ask them to sign in with the current password, or use Forgot password on the client login page.",
+    "existingCopyHint": "Password was left unchanged so an active client is not locked out after invite-again.",
     "sharePackage": "Hello!\n\nGreetings from the Spiora team.\nWe are inviting you to the Spiora Client portal.\n\nPlease open the link below and sign in with the credentials provided to accept the invitation and get started.\n\nLink: {url}\nEmail: {email}\nPassword: {password}\n\nAfter you sign in, you can change this temporary password to your own via Change password.\nIf you forget your password later, open the client sign-in page and use Forgot password to set a new one.\n\nKind regards,\nThe Spiora team",
+    "sharePackageExisting": "Hello!\n\nGreetings from the Spiora team.\nYour Spiora Client account already exists.\n\nSign in here: {loginUrl}\nEmail: {email}\n\nIf you need to accept an updated invitation link, open: {url}\nUse the password you already have. If you forgot it, open the sign-in page and use Forgot password.\n\nKind regards,\nThe Spiora team",
     "email": {
       "subjectInvite": "Your Spiora Client invitation",
+      "subjectInviteExisting": "Your Spiora Client account",
       "subjectPasswordReset": "Your new Spiora Client password"
     },
     "columns": {
@@ -2670,7 +2675,7 @@
       "submit": "Sign in",
       "working": "Signing in…",
       "authUnavailable": "Client authentication is not configured.",
-      "authFailed": "Invalid email or password.",
+      "authFailed": "Invalid email or password. If you were re-invited recently, the temporary password in an older email may no longer match — use Forgot password below.",
       "notClient": "This account is not a Spiora Client portal user.",
       "forgotPassword": "Forgot password?",
       "continueWithGoogle": "Continue with Google",

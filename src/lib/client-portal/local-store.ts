@@ -284,6 +284,16 @@ export async function getLocalClientPortalUserByAuthUserId(
   return users.find((u) => u.authUserId === authUserId) ?? null;
 }
 
+export async function getLocalClientPortalUserByEmail(
+  email: string,
+): Promise<LocalPortalUserRow | null> {
+  const normalized = email.trim().toLowerCase();
+  const users = await readJson<LocalPortalUserRow[]>(PORTAL_USERS_FILE, []);
+  return (
+    users.find((u) => u.email.trim().toLowerCase() === normalized) ?? null
+  );
+}
+
 export function localInvitationPublicState(
   row: LocalInvitationRow,
 ): ClientInvitationState {

@@ -32,8 +32,9 @@ type StateFilter = "all" | "pending" | "accepted";
 type IssuedCredentials = {
   email: string;
   inviteUrl: string;
-  temporaryPassword: string;
-  titleKey: "createdTitle";
+  temporaryPassword: string | null;
+  existingPortalUser: boolean;
+  titleKey: "createdTitle" | "createdExistingTitle";
   emailSent: boolean;
   emailError: "EMAIL_NOT_CONFIGURED" | "EMAIL_SEND_FAILED" | null;
 };
@@ -120,6 +121,20 @@ export function ClientInvitationsPanel() {
   }
 
   function buildSharePackage(creds: IssuedCredentials) {
+    if (creds.existingPortalUser || !creds.temporaryPassword) {
+      const loginUrl = (() => {
+        try {
+          return `${window.location.origin}/client/login`;
+        } catch {
+          return "/client/login";
+        }
+      })();
+      return t("sharePackageExisting", {
+        url: creds.inviteUrl,
+        email: creds.email,
+        loginUrl,
+      });
+    }
     return t("sharePackage", {
       url: creds.inviteUrl,
       email: creds.email,
@@ -158,6 +173,7 @@ export function ClientInvitationsPanel() {
       const data = (await res.json()) as {
         inviteUrl?: string;
         temporaryPassword?: string;
+        existingPortalUser?: boolean;
         invitation?: { email: string };
         reused?: boolean;
         emailSent?: boolean;
@@ -174,12 +190,15 @@ export function ClientInvitationsPanel() {
         }
         return;
       }
-      if (data.inviteUrl && data.temporaryPassword) {
+      if (data.inviteUrl && (data.temporaryPassword || data.existingPortalUser)) {
         setIssued({
           email: data.invitation?.email ?? email.trim(),
           inviteUrl: data.inviteUrl,
-          temporaryPassword: data.temporaryPassword,
-          titleKey: "createdTitle",
+          temporaryPassword: data.temporaryPassword ?? null,
+          existingPortalUser: Boolean(data.existingPortalUser),
+          titleKey: data.existingPortalUser
+            ? "createdExistingTitle"
+            : "createdTitle",
           emailSent: Boolean(data.emailSent),
           emailError: data.emailError ?? null,
         });
@@ -365,10 +384,14 @@ export function ClientInvitationsPanel() {
                   {t("fields.email")}
                   <code className={styles.url}>{issued.email}</code>
                 </label>
-                <label className={styles.credLabel}>
-                  {t("passwordLabel")}
-                  <code className={styles.url}>{issued.temporaryPassword}</code>
-                </label>
+                {issued.temporaryPassword ? (
+                  <label className={styles.credLabel}>
+                    {t("passwordLabel")}
+                    <code className={styles.url}>{issued.temporaryPassword}</code>
+                  </label>
+                ) : (
+                  <p className={styles.muted}>{t("existingAccountHint")}</p>
+                )}
                 <label className={styles.credLabel}>
                   {t("linkLabel")}
                   <code className={styles.url}>{issued.inviteUrl}</code>
@@ -380,7 +403,11 @@ export function ClientInvitationsPanel() {
                 >
                   {copyDone ? t("copied") : t("copyMessage")}
                 </button>
-                <p className={styles.muted}>{t("copyOnceHint")}</p>
+                <p className={styles.muted}>
+                  {issued.existingPortalUser
+                    ? t("existingCopyHint")
+                    : t("copyOnceHint")}
+                </p>
               </div>
             ) : (
               <form className={styles.form} onSubmit={(e) => void onCreate(e)}>

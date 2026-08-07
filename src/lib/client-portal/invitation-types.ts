@@ -57,7 +57,10 @@ export type CreateInvitationResult =
       invitation: InvitationPublicDto;
       inviteUrl: string;
       reused: boolean;
+      /** Set only for first-time Auth provisioning — never rotated for existing portal users. */
       temporaryPassword?: string;
+      /** True when client_portal_users already exists for this email (password left unchanged). */
+      existingPortalUser?: boolean;
     }
   | { ok: false; code: string };
 

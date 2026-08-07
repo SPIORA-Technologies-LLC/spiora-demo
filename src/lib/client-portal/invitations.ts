@@ -35,8 +35,10 @@ import {
   localInsertInvitation,
   localListInvitations,
   localRevokeInvitation,
+  getLocalClientPortalUserByEmail,
   type LocalInvitationRow,
 } from "./local-store";
+import { sbGetClientPortalUserByEmail } from "@/lib/supabase/client-portal-users-repo";
 import {
   computeInvitationState,
   hashClientInviteToken,
@@ -123,6 +125,17 @@ export async function createClientInvitation(
   );
   if (!result.ok || result.reused) {
     return result;
+  }
+
+  // Existing portal identity: never rotate Auth password on invite-again.
+  // Staff "delete" only hides the invite — the account and password remain.
+  // Rotating here locked clients out after logout when a new invite was issued.
+  const existingPortal = isSupabaseConfigured()
+    ? await sbGetClientPortalUserByEmail(result.invitation.email)
+    : await getLocalClientPortalUserByEmail(result.invitation.email);
+
+  if (existingPortal) {
+    return { ...result, existingPortalUser: true };
   }
 
   const temporaryPassword = generateTemporaryPassword(12);

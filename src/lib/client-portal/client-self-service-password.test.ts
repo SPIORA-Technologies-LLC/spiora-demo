@@ -21,11 +21,11 @@ describe("Phase D1 client self-service password recovery", () => {
     const ru = read("src/i18n/dictionaries/ru.json");
     assert.match(
       en,
-      /"sent": "If an account with this email exists, password recovery instructions have been sent\."/,
+      /"sent": "A password recovery link has been sent to your email\. Please check your inbox and spam folder\."/,
     );
     assert.match(
       ru,
-      /"sent": "Если аккаунт с таким email существует, мы отправили инструкции по восстановлению пароля\."/,
+      /"sent": "Ссылка для восстановления пароля отправлена на вашу почту\. Проверьте входящие и папку «Спам»\."/,
     );
     const enForgot = en.match(/"forgot":\s*\{[\s\S]*?\n\s*\}/);
     const ruForgot = ru.match(/"forgot":\s*\{[\s\S]*?\n\s*\}/);

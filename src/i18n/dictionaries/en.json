@@ -2745,7 +2745,7 @@
       "hint": "Enter your email. If an account with this email exists, we will send password recovery instructions.",
       "submit": "Send reset link",
       "sending": "Sending…",
-      "sent": "If an account with this email exists, password recovery instructions have been sent."
+      "sent": "A password recovery link has been sent to your email. Please check your inbox and spam folder."
     },
     "email": {
       "subject": "Reset your Spiora password",

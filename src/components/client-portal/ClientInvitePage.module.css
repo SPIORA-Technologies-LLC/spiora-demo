@@ -13,11 +13,13 @@
 .card {
   width: 100%;
   max-width: 28rem;
+  box-sizing: border-box;
   padding: 1.6rem 1.4rem 1.5rem;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(22, 14, 16, 0.96);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
 }
 
 .top {

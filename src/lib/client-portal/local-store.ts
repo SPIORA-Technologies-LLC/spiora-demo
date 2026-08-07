@@ -205,7 +205,41 @@ export async function localAcceptInvitation(input: {
     return { invitation: invite, portalUser: existingByAuth };
   }
   if (existingByAuth) {
-    throw new Error("portal_user_other_invite");
+    const sameEmail =
+      existingByAuth.email.trim().toLowerCase() ===
+      input.email.trim().toLowerCase();
+    if (!sameEmail) {
+      throw new Error("portal_user_other_invite");
+    }
+    // Rebind after staff delete / invite-again (mirrors Supabase path).
+    const state = computeInvitationState(invite);
+    if (state === "revoked") throw new Error("invitation_revoked");
+    if (state === "expired") throw new Error("invitation_expired");
+    if (state === "accepted") {
+      if (invite.acceptedByUserId === input.authUserId) {
+        return { invitation: invite, portalUser: existingByAuth };
+      }
+      throw new Error("invitation_accepted");
+    }
+    const now = new Date().toISOString();
+    const updatedInvite: LocalInvitationRow = {
+      ...invite,
+      acceptedAt: now,
+      acceptedByUserId: input.authUserId,
+      updatedAt: now,
+    };
+    invites[idx] = updatedInvite;
+    const rebound: LocalPortalUserRow = {
+      ...existingByAuth,
+      invitationId: invite.id,
+      preferredLocale: input.preferredLocale,
+      updatedAt: now,
+    };
+    const uIdx = users.findIndex((u) => u.id === existingByAuth.id);
+    if (uIdx >= 0) users[uIdx] = rebound;
+    await writeJson(INVITES_FILE, invites);
+    await writeJson(PORTAL_USERS_FILE, users);
+    return { invitation: updatedInvite, portalUser: rebound };
   }
 
   if (invite.acceptedAt && invite.acceptedByUserId === input.authUserId) {

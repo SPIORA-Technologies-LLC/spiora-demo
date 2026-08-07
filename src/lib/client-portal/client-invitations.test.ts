@@ -307,6 +307,30 @@ describe("employee / client route guard separation (source)", () => {
     assert.doesNotMatch(page, /t\("register"\)/);
   });
 
+  it("re-invite after staff delete rebinds portal user and resets auth via portal row", () => {
+    const provision = readFileSync(
+      path.join(root, "src/lib/client-portal/client-auth-provision.ts"),
+      "utf8",
+    );
+    assert.match(provision, /client_portal_users/);
+    assert.match(provision, /findPortalAuthUserIdByEmail/);
+    assert.match(provision, /updateUserById/);
+
+    const repo = readFileSync(
+      path.join(root, "src/lib/supabase/client-invitations-repo.ts"),
+      "utf8",
+    );
+    assert.match(repo, /rebindPortalUserToInvitation/);
+    assert.match(repo, /replaceAuthUserId/);
+    assert.match(repo, /portal_user_other_invite/);
+
+    const local = readFileSync(
+      path.join(root, "src/lib/client-portal/local-store.ts"),
+      "utf8",
+    );
+    assert.match(local, /Rebind after staff delete/);
+  });
+
   it("resolveSessionFromAuthUserId only maps user_profiles employee roles", () => {
     const file = readFileSync(
       path.join(root, "src/lib/auth/middleware-session.ts"),

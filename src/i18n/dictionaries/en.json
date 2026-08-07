@@ -2655,8 +2655,9 @@
         "revoked": "Invitation was revoked.",
         "accepted": "Invitation was already accepted.",
         "acceptFailed": "Could not accept the invitation.",
+        "portalUserExists": "This email is already linked to a client account. Sign in at Spiora Client login, or use Forgot password, then open the invite link again.",
         "authUnavailable": "Client authentication is not configured.",
-        "authFailed": "Could not sign in. Check the email and temporary password from your invitation."
+        "authFailed": "Could not sign in. Check the email and temporary password from your invitation. If you were invited before, ask your manager to send a new invite, or use Forgot password on the login page."
       }
     },
     "login": {

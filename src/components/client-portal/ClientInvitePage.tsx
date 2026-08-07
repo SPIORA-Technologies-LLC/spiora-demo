@@ -118,6 +118,8 @@ export function ClientInvitePage({ token }: Props) {
         setError(t("errors.revoked"));
       } else if (data.error?.code === "INVITATION_ACCEPTED") {
         setError(t("errors.accepted"));
+      } else if (data.error?.code === "PORTAL_USER_EXISTS") {
+        setError(t("errors.portalUserExists"));
       } else {
         setError(data.error?.message || t("errors.acceptFailed"));
       }
@@ -142,7 +144,7 @@ export function ClientInvitePage({ token }: Props) {
       const supabase = createSupabaseBrowserClient();
       const { error: signErr } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password,
+        password: password.trim(),
       });
       if (signErr) {
         setError(t("errors.authFailed"));

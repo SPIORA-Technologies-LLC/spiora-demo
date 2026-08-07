@@ -210,7 +210,7 @@ export async function sbAcceptClientInvitation(input: {
 
   const existingPortal = await sb
     .from("client_portal_users")
-    .select("id, invitation_id, auth_user_id")
+    .select("id, invitation_id, auth_user_id, email")
     .eq("auth_user_id", input.authUserId)
     .maybeSingle();
 
@@ -220,6 +220,23 @@ export async function sbAcceptClientInvitation(input: {
       if (!inv) throw new Error("invitation_not_found");
       return { invitation: inv, portalUserId: existingPortal.data.id as string };
     }
+
+    // Re-invite after staff delete: portal row is soft-kept (hard delete blocked),
+    // but invitation_id still points at the old (often staff-hidden) invite.
+    // Same email + same Auth user → rebind to the new invitation.
+    const portalEmail = String(existingPortal.data.email ?? "")
+      .trim()
+      .toLowerCase();
+    if (portalEmail && portalEmail === input.email.trim().toLowerCase()) {
+      return rebindPortalUserToInvitation({
+        portalUserId: existingPortal.data.id as string,
+        invitationId: input.invitationId,
+        authUserId: input.authUserId,
+        preferredLocale: input.preferredLocale,
+        now,
+      });
+    }
+
     throw new Error("portal_user_other_invite");
   }
 
@@ -276,18 +293,54 @@ export async function sbAcceptClientInvitation(input: {
     .single();
 
   if (portalErr) {
-    // Unique race: another request created portal user
+    // Unique race / re-invite after Auth user recreate:
+    // portal row still exists for this email (hard delete blocked) under an old auth_user_id.
     if (portalErr.code === "23505") {
       const again = await sb
         .from("client_portal_users")
-        .select("id")
+        .select("id, invitation_id, email, auth_user_id")
         .eq("auth_user_id", input.authUserId)
         .maybeSingle();
       if (again.data?.id) {
-        return {
-          invitation: mapRow(updated as DbRow),
-          portalUserId: again.data.id as string,
-        };
+        if (again.data.invitation_id === input.invitationId) {
+          return {
+            invitation: mapRow(updated as DbRow),
+            portalUserId: again.data.id as string,
+          };
+        }
+        const againEmail = String(again.data.email ?? "")
+          .trim()
+          .toLowerCase();
+        if (againEmail && againEmail === input.email.trim().toLowerCase()) {
+          return rebindPortalUserToInvitation({
+            portalUserId: again.data.id as string,
+            invitationId: input.invitationId,
+            authUserId: input.authUserId,
+            preferredLocale: input.preferredLocale,
+            now,
+          });
+        }
+      }
+
+      const byEmail = await sb
+        .from("client_portal_users")
+        .select("id, invitation_id, email, auth_user_id")
+        .eq("email", input.email.trim().toLowerCase())
+        .maybeSingle();
+      if (byEmail.data?.id) {
+        const emailMatch =
+          String(byEmail.data.email ?? "").trim().toLowerCase() ===
+          input.email.trim().toLowerCase();
+        if (emailMatch) {
+          return rebindPortalUserToInvitation({
+            portalUserId: byEmail.data.id as string,
+            invitationId: input.invitationId,
+            authUserId: input.authUserId,
+            preferredLocale: input.preferredLocale,
+            now,
+            replaceAuthUserId: true,
+          });
+        }
       }
     }
     throw portalErr;
@@ -296,5 +349,69 @@ export async function sbAcceptClientInvitation(input: {
   return {
     invitation: mapRow(updated as DbRow),
     portalUserId: portal.id as string,
+  };
+}
+
+async function rebindPortalUserToInvitation(input: {
+  portalUserId: string;
+  invitationId: string;
+  authUserId: string;
+  preferredLocale: ClientPortalLocale;
+  now: string;
+  /** When Auth user was recreated, move portal identity onto the new auth uid. */
+  replaceAuthUserId?: boolean;
+}): Promise<{ invitation: ClientInvitationRow; portalUserId: string }> {
+  const sb = getSupabaseAdmin();
+
+  const { data: updated, error: updErr } = await sb
+    .from("client_invitations")
+    .update({
+      accepted_at: input.now,
+      accepted_by_user_id: input.authUserId,
+    })
+    .eq("id", input.invitationId)
+    .is("accepted_at", null)
+    .is("revoked_at", null)
+    .gt("expires_at", input.now)
+    .select(SELECT)
+    .maybeSingle();
+
+  if (updErr) throw updErr;
+
+  if (!updated) {
+    const current = await sbGetInvitationById(input.invitationId);
+    if (!current) throw new Error("invitation_not_found");
+    if (current.revokedAt) throw new Error("invitation_revoked");
+    if (current.acceptedAt) {
+      if (current.acceptedByUserId === input.authUserId) {
+        return { invitation: current, portalUserId: input.portalUserId };
+      }
+      throw new Error("invitation_accepted");
+    }
+    if (new Date(current.expiresAt).getTime() <= Date.now()) {
+      throw new Error("invitation_expired");
+    }
+    throw new Error("invitation_not_pending");
+  }
+
+  const portalPatch: Record<string, unknown> = {
+    invitation_id: input.invitationId,
+    preferred_locale: input.preferredLocale,
+    updated_at: input.now,
+  };
+  if (input.replaceAuthUserId) {
+    portalPatch.auth_user_id = input.authUserId;
+  }
+
+  const { error: portalErr } = await sb
+    .from("client_portal_users")
+    .update(portalPatch)
+    .eq("id", input.portalUserId);
+
+  if (portalErr) throw portalErr;
+
+  return {
+    invitation: mapRow(updated as DbRow),
+    portalUserId: input.portalUserId,
   };
 }

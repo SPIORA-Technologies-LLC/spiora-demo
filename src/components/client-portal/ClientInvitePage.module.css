@@ -247,10 +247,12 @@
 }
 
 .forgotLink {
-  display: inline-flex;
+  display: flex;
   justify-content: center;
   align-items: center;
+  box-sizing: border-box;
   width: 100%;
+  max-width: 100%;
   margin-top: 0.15rem;
   border-radius: 12px;
   padding: 0.62rem 0.9rem;
@@ -277,7 +279,7 @@
 
 .forgotLink:focus-visible {
   outline: 2px solid rgba(240, 168, 174, 0.55);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 .secondary {

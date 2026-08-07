@@ -163,7 +163,7 @@ describe("google oauth fixed redirects", () => {
   });
 
   it("uses fixed success and deny paths", () => {
-    assert.equal(googleOAuthSuccessPath("employee"), "/dashboard");
+    assert.equal(googleOAuthSuccessPath("employee"), "/dashboard?enter=1");
     assert.equal(googleOAuthSuccessPath("client"), "/client?enter=1");
     assert.equal(googleOAuthDenyPath("employee"), "/login?error=google_access_denied");
     assert.equal(

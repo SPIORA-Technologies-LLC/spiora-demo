@@ -11,6 +11,7 @@ import {
 import { firstNameFromAuthMetadata } from "@/lib/client-portal/display-name";
 import type { ClientSession } from "./types";
 import { isClientPortalLocale } from "./types";
+import { resolvePasswordPlaneForAudience } from "@/lib/auth/password-plane";
 
 function mapSession(
   row: {
@@ -19,6 +20,7 @@ function mapSession(
     email: string;
     preferredLocale: string;
     invitationId: string;
+    mfaReenrollRequired?: boolean;
   },
   firstName: string | null,
 ): ClientSession | null {
@@ -30,12 +32,14 @@ function mapSession(
     firstName,
     preferredLocale: row.preferredLocale,
     invitationId: row.invitationId,
+    mfaReenrollRequired: Boolean(row.mfaReenrollRequired),
   };
 }
 
 /**
  * Server-side client portal session.
  * Requires Supabase Auth user + client_portal_users row.
+ * Fail-closed on dual employee+client membership.
  * Never elevates to employee SessionUser.
  */
 export async function getClientSession(): Promise<ClientSession | null> {
@@ -51,6 +55,9 @@ export async function getClientSession(): Promise<ClientSession | null> {
     );
 
     if (isSupabaseConfigured()) {
+      const plane = await resolvePasswordPlaneForAudience(user.id, "client");
+      if (!plane.ok) return null;
+
       const row = await sbGetClientPortalUserByAuthUserId(user.id);
       if (!row) return null;
       return mapSession(row, firstName);
@@ -58,7 +65,10 @@ export async function getClientSession(): Promise<ClientSession | null> {
 
     const local = await getLocalClientPortalUserByAuthUserId(user.id);
     if (!local) return null;
-    return mapSession(local, firstName);
+    return mapSession(
+      { ...local, mfaReenrollRequired: local.mfaReenrollRequired ?? false },
+      firstName,
+    );
   } catch {
     return null;
   }

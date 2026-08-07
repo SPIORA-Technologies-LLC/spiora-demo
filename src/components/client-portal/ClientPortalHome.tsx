@@ -32,6 +32,8 @@ type Props = {
   initialCase: ClientCasePublic | null;
   logoutLabel: string;
   showEntrySplash?: boolean;
+  showMfaSettings?: boolean;
+  mfaReenrollRequired?: boolean;
   assistantSlot?: ReactNode;
 };
 
@@ -58,6 +60,8 @@ export function ClientPortalHome({
   initialCase,
   logoutLabel,
   showEntrySplash = false,
+  showMfaSettings = false,
+  mfaReenrollRequired = false,
   assistantSlot,
 }: Props) {
   const t = useTranslations("clientPortal");
@@ -72,7 +76,18 @@ export function ClientPortalHome({
     inflightRef.current = true;
     try {
       const res = await fetch("/api/client/case");
-      if (res.status === 401 || res.status === 403) {
+      if (res.status === 401) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: { code?: string };
+        } | null;
+        if (body?.error?.code === "MFA_REQUIRED") {
+          window.location.href = "/client/mfa/challenge?next=%2Fclient";
+          return;
+        }
+        window.location.href = "/client/login";
+        return;
+      }
+      if (res.status === 403) {
         window.location.href = "/client/login";
         return;
       }
@@ -125,9 +140,17 @@ export function ClientPortalHome({
         </div>
         <div className={styles.headerActions}>
           <LanguageSwitcher />
-          <a className={styles.accountLink} href="/client/account/password">
-            {t("home.changePassword")}
-          </a>
+          <div className={styles.accountLinks}>
+            <span className={styles.accountLabel}>{t("home.security")}</span>
+            <a className={styles.accountLink} href="/client/account/password">
+              {t("home.changePassword")}
+            </a>
+            {showMfaSettings ? (
+              <a className={styles.accountLink} href="/client/account/mfa">
+                {t("home.twoFactor")}
+              </a>
+            ) : null}
+          </div>
           <button type="button" className={styles.logoutBtn} onClick={() => void onLogout()}>
             {logoutLabel}
           </button>
@@ -135,6 +158,14 @@ export function ClientPortalHome({
       </header>
 
       <main className={styles.main}>
+        {mfaReenrollRequired ? (
+          <p className={styles.mfaBanner} role="status">
+            {t("mfa.banner.reenroll")}{" "}
+            {showMfaSettings ? (
+              <a href="/client/account/mfa">{t("mfa.banner.reenrollCta")}</a>
+            ) : null}
+          </p>
+        ) : null}
         <section className={styles.heroCard}>
           <h1 className={styles.title}>{title}</h1>
           <p className={styles.hint}>{t("home.hint")}</p>

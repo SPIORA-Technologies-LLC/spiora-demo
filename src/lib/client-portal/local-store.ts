@@ -36,6 +36,7 @@ export type LocalPortalUserRow = {
   email: string;
   preferredLocale: ClientPortalLocale;
   invitationId: string;
+  mfaReenrollRequired?: boolean;
   createdAt: string;
   updatedAt: string;
 };

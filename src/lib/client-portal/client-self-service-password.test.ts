@@ -123,7 +123,7 @@ describe("Phase D1 client self-service password recovery", () => {
     assert.match(home, /home\.changePassword/);
   });
 
-  it("Phase B OAuth and Phase C employee MFA remain unchanged", () => {
+  it("Phase B OAuth and Phase C employee MFA remain; D3 adds client MFA plane", () => {
     assert.ok(
       existsSync(path.join(root, "src/app/api/auth/oauth/google/route.ts")),
     );
@@ -133,10 +133,7 @@ describe("Phase D1 client self-service password recovery", () => {
       ),
     );
     assert.ok(existsSync(path.join(root, "src/app/api/auth/mfa/status/route.ts")));
-    assert.equal(
-      existsSync(path.join(root, "src/app/api/client/auth/mfa")),
-      false,
-    );
+    assert.ok(existsSync(path.join(root, "src/app/api/client/auth/mfa")));
   });
 
   it("audit scrub strips password/token secrets", () => {

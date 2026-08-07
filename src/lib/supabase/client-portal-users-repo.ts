@@ -9,6 +9,7 @@ export type ClientPortalUserRow = {
   email: string;
   preferredLocale: ClientPortalLocale;
   invitationId: string;
+  mfaReenrollRequired: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -19,6 +20,7 @@ type DbRow = {
   email: string;
   preferred_locale: string;
   invitation_id: string;
+  mfa_reenroll_required?: boolean | null;
   created_at: string;
   updated_at: string;
 };
@@ -30,6 +32,7 @@ function mapRow(row: DbRow): ClientPortalUserRow {
     email: row.email,
     preferredLocale: row.preferred_locale === "en" ? "en" : "ru",
     invitationId: row.invitation_id,
+    mfaReenrollRequired: Boolean(row.mfa_reenroll_required),
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -42,7 +45,7 @@ export async function sbGetClientPortalUserByAuthUserId(
   const { data, error } = await sb
     .from("client_portal_users")
     .select(
-      "id, auth_user_id, email, preferred_locale, invitation_id, created_at, updated_at",
+      "id, auth_user_id, email, preferred_locale, invitation_id, mfa_reenroll_required, created_at, updated_at",
     )
     .eq("auth_user_id", authUserId)
     .maybeSingle();

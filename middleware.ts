@@ -7,6 +7,9 @@ import { getAuthProvider } from "@/lib/auth/provider";
 import { getSessionFromToken } from "@/lib/auth/session";
 import { updateSupabaseAuthSession } from "@/lib/supabase/middleware-auth";
 import {
+  isClientApiPath,
+  isClientMfaExemptApiPath,
+  isClientMfaGatePath,
   isEmployeeApiPath,
   isMfaExemptApiPath,
   isMfaGatePath,
@@ -97,12 +100,14 @@ export async function middleware(request: NextRequest) {
   let supabaseResponse: NextResponse | null = null;
   let authUserId: string | null = null;
   let mfaChallengeRequired = false;
+  let clientMfaChallengeRequired = false;
 
   if (provider === "supabase") {
     const refreshed = await updateSupabaseAuthSession(request);
     supabaseResponse = refreshed.response;
     authUserId = refreshed.user?.id ?? null;
     mfaChallengeRequired = refreshed.mfaChallengeRequired;
+    clientMfaChallengeRequired = refreshed.clientMfaChallengeRequired;
     session = await resolveSessionFromAuthUserId(authUserId);
   } else {
     const token = request.cookies.get("spiora_session")?.value;
@@ -116,6 +121,23 @@ export async function middleware(request: NextRequest) {
     mfaChallengeRequired &&
     isEmployeeApiPath(pathname) &&
     !isMfaExemptApiPath(pathname)
+  ) {
+    return withSupabaseCookies(
+      NextResponse.json(
+        { error: { code: "MFA_REQUIRED" } },
+        { status: 401, headers: { "Cache-Control": "no-store" } },
+      ),
+      supabaseResponse,
+    );
+  }
+
+  // Client-plane MFA hard gate (separate from employee; /api/client stays employee-exempt).
+  if (
+    provider === "supabase" &&
+    authUserId &&
+    clientMfaChallengeRequired &&
+    isClientApiPath(pathname) &&
+    !isClientMfaExemptApiPath(pathname)
   ) {
     return withSupabaseCookies(
       NextResponse.json(
@@ -147,8 +169,22 @@ export async function middleware(request: NextRequest) {
       return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
     }
 
+    // Client MFA challenge / recovery pages: allow AAL1 while authenticated.
+    if (isClientMfaGatePath(pathname)) {
+      const intlResponse = intlMiddleware(request);
+      intlResponse.headers.set("Cache-Control", "no-store");
+      return withSupabaseCookies(intlResponse, supabaseResponse);
+    }
+
+    // Protected client pages: enforce AAL2 when verified TOTP exists.
+    if (clientMfaChallengeRequired) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/client/mfa/challenge";
+      url.searchParams.set("next", pathname);
+      return withSupabaseCookies(NextResponse.redirect(url), supabaseResponse);
+    }
+
     // Client session is enforced in /client layout via getClientSession().
-    // Middleware only blocks employees and lets unauthenticated hit layout → /client/login.
     const intlResponse = intlMiddleware(request);
     intlResponse.headers.set("Cache-Control", "no-store");
     return withSupabaseCookies(intlResponse, supabaseResponse);

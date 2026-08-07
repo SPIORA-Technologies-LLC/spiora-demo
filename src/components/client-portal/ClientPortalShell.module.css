@@ -120,6 +120,37 @@
     color 0.2s ease;
 }
 
+.accountLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.accountLabel {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--portal-muted, #6b7280);
+  margin-right: 0.15rem;
+}
+
+.mfaBanner {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(232, 41, 22, 0.35);
+  border-radius: 0.75rem;
+  background: var(--portal-accent-soft, rgba(232, 41, 22, 0.08));
+  color: var(--portal-ink);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.mfaBanner a {
+  color: inherit;
+  font-weight: 600;
+}
+
 .accountLink:hover {
   border-color: rgba(232, 41, 22, 0.45);
   background: var(--portal-accent-soft);

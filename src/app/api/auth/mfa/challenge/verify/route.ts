@@ -12,6 +12,7 @@ import {
 import { hashAuditIp, truncateClientIp } from "@/lib/auth/password-recovery-gate";
 import { canAccessPath } from "@/lib/auth/permissions";
 import { resolvePostLoginPath } from "@/lib/auth/security";
+import { withAppEntrySplash } from "@/lib/layout/app-entry-splash";
 
 export const dynamic = "force-dynamic";
 
@@ -105,8 +106,10 @@ export async function POST(request: Request) {
     });
   }
 
-  const destination = resolvePostLoginPath(String(body.next ?? "").trim(), (path) =>
-    canAccessPath(gate.session.role, path),
+  const destination = withAppEntrySplash(
+    resolvePostLoginPath(String(body.next ?? "").trim(), (path) =>
+      canAccessPath(gate.session.role, path),
+    ),
   );
 
   return NextResponse.json(

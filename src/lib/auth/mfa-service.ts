@@ -12,13 +12,16 @@ import {
 import {
   isAal2,
   needsMfaChallenge,
-  reconcileAalWithVerifiedFactors,
   type MfaAssuranceSnapshot,
 } from "./mfa-aal";
+import { readMfaAssurance } from "./mfa-evaluate";
 import {
   countUnusedRecoveryCodes,
   replaceEmployeeRecoveryCodes,
 } from "./mfa-recovery-store";
+import { withAppEntrySplash } from "@/lib/layout/app-entry-splash";
+
+export { readMfaAssurance } from "./mfa-evaluate";
 
 export type EmployeeMfaStatus = {
   enabled: boolean;
@@ -39,60 +42,6 @@ export async function getEmployeeMfaAssurance(): Promise<MfaAssuranceSnapshot | 
   } catch {
     return null;
   }
-}
-
-/**
- * Load AAL with JWT so auth-js fetches user.factors via getUser(jwt).
- * Fallback: listFactors when session.user.factors was empty (password login).
- */
-export async function readMfaAssurance(
-  supabase: {
-    auth: {
-      getSession: () => Promise<{
-        data: { session: { access_token: string } | null };
-      }>;
-      mfa: {
-        getAuthenticatorAssuranceLevel: (jwt?: string) => Promise<{
-          data: MfaAssuranceSnapshot | null;
-          error: unknown;
-        }>;
-        listFactors: () => Promise<{
-          data: { totp: Array<{ id: string }> } | null;
-          error: unknown;
-        }>;
-      };
-    };
-  },
-): Promise<MfaAssuranceSnapshot | null> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (!session?.access_token) return null;
-
-  // Pass JWT → auth-js uses getUser(jwt) and includes factors (not cookie user).
-  const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel(
-    session.access_token,
-  );
-  if (error || !data) return null;
-
-  let snapshot: MfaAssuranceSnapshot = {
-    currentLevel: data.currentLevel,
-    nextLevel: data.nextLevel,
-  };
-
-  // Belt-and-suspenders: password sessions may still report nextLevel aal1.
-  if (
-    snapshot.currentLevel === "aal1" &&
-    snapshot.nextLevel !== "aal2"
-  ) {
-    const { data: factors } = await supabase.auth.mfa.listFactors();
-    snapshot = reconcileAalWithVerifiedFactors(
-      snapshot,
-      factors?.totp?.length ?? 0,
-    )!;
-  }
-
-  return snapshot;
 }
 
 /**
@@ -337,11 +286,11 @@ export async function regenerateRecoveryCodesRequireAal2(input: {
 export async function resolveEmployeePostAuthPath(
   intendedPath: string,
 ): Promise<string> {
-  if (!isEmployeeMfaEnabled()) return intendedPath;
+  if (!isEmployeeMfaEnabled()) return withAppEntrySplash(intendedPath);
   const aal = await getEmployeeMfaAssurance();
   if (needsMfaChallenge(aal)) {
     const next = encodeURIComponent(intendedPath);
     return `/mfa/challenge?next=${next}`;
   }
-  return intendedPath;
+  return withAppEntrySplash(intendedPath);
 }

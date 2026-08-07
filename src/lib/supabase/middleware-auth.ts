@@ -1,10 +1,8 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 import { isEmployeeMfaEnabled } from "@/lib/auth/mfa-config";
-import {
-  needsMfaChallenge,
-  reconcileAalWithVerifiedFactors,
-} from "@/lib/auth/mfa-aal";
+import { isClientMfaEnabled } from "@/lib/client-portal/mfa-config";
+import { evaluateMfaChallengeRequired } from "@/lib/auth/mfa-evaluate";
 
 function getAnonKey(): string | null {
   return (
@@ -38,6 +36,7 @@ export async function updateSupabaseAuthSession(request: NextRequest) {
       response,
       user: null as null,
       mfaChallengeRequired: false,
+      clientMfaChallengeRequired: false,
     };
   }
 
@@ -67,39 +66,20 @@ export async function updateSupabaseAuthSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   let mfaChallengeRequired = false;
-  if (user && isEmployeeMfaEnabled()) {
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const accessToken = session?.access_token;
-      // Pass JWT so AAL loads factors via getUser(jwt), not empty session.user.factors.
-      const { data: aal } = accessToken
-        ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel(accessToken)
-        : await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  let clientMfaChallengeRequired = false;
 
-      let snapshot = {
-        currentLevel: aal?.currentLevel ?? null,
-        nextLevel: aal?.nextLevel ?? null,
-      };
-
-      if (
-        snapshot.currentLevel === "aal1" &&
-        snapshot.nextLevel !== "aal2"
-      ) {
-        const { data: factors } = await supabase.auth.mfa.listFactors();
-        snapshot =
-          reconcileAalWithVerifiedFactors(
-            snapshot,
-            factors?.totp?.length ?? 0,
-          ) ?? snapshot;
-      }
-
-      mfaChallengeRequired = needsMfaChallenge(snapshot);
-    } catch {
-      mfaChallengeRequired = false;
-    }
+  const employeeMfa = isEmployeeMfaEnabled();
+  const clientMfa = isClientMfaEnabled();
+  if (user && (employeeMfa || clientMfa)) {
+    const needed = await evaluateMfaChallengeRequired(supabase);
+    if (employeeMfa) mfaChallengeRequired = needed;
+    if (clientMfa) clientMfaChallengeRequired = needed;
   }
 
-  return { response, user, mfaChallengeRequired };
+  return {
+    response,
+    user,
+    mfaChallengeRequired,
+    clientMfaChallengeRequired,
+  };
 }

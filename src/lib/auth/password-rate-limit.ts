@@ -11,7 +11,10 @@ export async function checkPasswordFlowRateLimit(
     | "reset"
     | "mfa-challenge"
     | "mfa-recovery"
-    | "mfa-enroll",
+    | "mfa-enroll"
+    | "client-mfa-challenge"
+    | "client-mfa-recovery"
+    | "client-mfa-enroll",
   emailOrSub: string,
   ip?: string,
 ): Promise<LoginRateLimitResult> {

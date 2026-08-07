@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { APP_ENTRY_SPLASH_PARAM } from "@/lib/layout/app-entry-splash";
 import styles from "./SpioraSplashV50.module.css";
 
 const STORAGE_KEY = "spiora-boot-splash-v50-seen";
@@ -16,13 +17,28 @@ type Props = {
   onDone?: () => void;
 };
 
+function consumeEntrySplashParam(): boolean {
+  try {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get(APP_ENTRY_SPLASH_PARAM) !== "1") return false;
+    url.searchParams.delete(APP_ENTRY_SPLASH_PARAM);
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    sessionStorage.removeItem(STORAGE_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function SpioraSplashV50({ force = false, onDone }: Props) {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!force && sessionStorage.getItem(STORAGE_KEY)) return;
+    const entryForce = consumeEntrySplashParam();
+    const showForced = force || entryForce;
+    if (!showForced && sessionStorage.getItem(STORAGE_KEY)) return;
 
     setVisible(true);
 
@@ -32,6 +48,7 @@ export function SpioraSplashV50({ force = false, onDone }: Props) {
     const fadeTimer = window.setTimeout(() => setExiting(true), holdMs);
     const hideTimer = window.setTimeout(() => {
       setVisible(false);
+      // Prop `force` (client portal) skips the tab gate; `enter=1` still marks seen.
       if (!force) sessionStorage.setItem(STORAGE_KEY, "1");
       onDone?.();
     }, holdMs + FADE_MS);

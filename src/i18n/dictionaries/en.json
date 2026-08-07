@@ -2497,6 +2497,7 @@
       "hint": "This is your personal account.",
       "changePassword": "Change password",
       "security": "Account / Security",
+      "twoFactor": "Two-factor authentication",
       "questionnaireExplainer": "To start the residence permit process, fill out and submit the questionnaire — this is the first required step.",
       "fillQuestionnaire": "Fill out questionnaire",
       "continueQuestionnaire": "Continue questionnaire",
@@ -2678,7 +2679,58 @@
       "forgotPassword": "Forgot password?",
       "continueWithGoogle": "Continue with Google",
       "googleAccessDenied": "Google sign-in is not available for this account. Contact your administrator.",
-      "orDivider": "or"
+      "orDivider": "or",
+      "mfaReenrollNotice": "MFA was reset. Sign in, then re-enable two-factor authentication in Account / Security."
+    },
+    "mfa": {
+      "challenge": {
+        "title": "Two-factor authentication",
+        "hint": "Enter the 6-digit code from your authenticator app.",
+        "codeLabel": "Authentication code",
+        "submit": "Verify",
+        "verifying": "Verifying…",
+        "useRecovery": "Use a recovery code",
+        "signOut": "Sign out"
+      },
+      "recovery": {
+        "title": "Account recovery",
+        "hint": "Enter one unused recovery code. This removes MFA and signs you out. Sign in again and re-enable MFA.",
+        "codeLabel": "Recovery code",
+        "submit": "Recover account",
+        "working": "Recovering…",
+        "backToChallenge": "Back to authenticator code"
+      },
+      "settings": {
+        "title": "Two-factor authentication",
+        "hint": "Optionally protect your client portal with a TOTP authenticator app. One verified factor per account.",
+        "enable": "Enable two-factor authentication",
+        "starting": "Starting…",
+        "scanHint": "Scan the QR code, then enter a code to confirm.",
+        "secretLabel": "Manual secret",
+        "confirm": "Confirm and save recovery codes",
+        "enabled": "MFA is enabled. Unused recovery codes: {count}.",
+        "disable": "Disable MFA",
+        "disableConfirm": "Disable MFA and revoke other sessions?",
+        "regenerate": "Regenerate recovery codes",
+        "regenerateConfirm": "Invalidate previous recovery codes and create new ones?",
+        "codesHint": "Save these recovery codes now. They are shown only once.",
+        "reenrollRequired": "MFA was reset. Set it up again to clear this reminder.",
+        "passwordLink": "Change password",
+        "back": "Back to portal"
+      },
+      "banner": {
+        "reenroll": "Set up two-factor authentication again to protect your account.",
+        "reenrollCta": "Open MFA settings"
+      },
+      "errors": {
+        "generic": "Something went wrong. Try again.",
+        "invalidCode": "Invalid authentication code.",
+        "invalidRecovery": "Invalid or already used recovery code.",
+        "rateLimited": "Too many attempts. Please wait and try again.",
+        "disabled": "Client MFA is not enabled on this environment.",
+        "alreadyEnrolled": "MFA is already enabled for this account.",
+        "aal2Required": "Confirm your authenticator code again, then retry."
+      }
     }
   },
   "authMfa": {

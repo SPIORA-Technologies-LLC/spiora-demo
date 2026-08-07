@@ -36,7 +36,7 @@ export function MfaChallengeForm({ nextPath }: { nextPath: string }) {
         }
         return;
       }
-      window.location.assign(data.redirectTo || "/dashboard");
+      window.location.assign(data.redirectTo || "/dashboard?enter=1");
     } catch {
       setError(t("errors.generic"));
     } finally {

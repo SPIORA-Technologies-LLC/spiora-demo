@@ -267,34 +267,12 @@ export async function handleGoogleOAuthCallback(input: {
   let finalSuccessUrl = successUrl;
   if (input.audience === "employee") {
     const { isEmployeeMfaEnabled } = await import("@/lib/auth/mfa-config");
-    const { needsMfaChallenge, reconcileAalWithVerifiedFactors } = await import(
-      "@/lib/auth/mfa-aal"
+    const { evaluateMfaChallengeRequired } = await import(
+      "@/lib/auth/mfa-evaluate"
     );
     if (isEmployeeMfaEnabled()) {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
-        const accessToken = session?.access_token;
-        const { data: aal } = accessToken
-          ? await supabase.auth.mfa.getAuthenticatorAssuranceLevel(accessToken)
-          : await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-        let snapshot = {
-          currentLevel: aal?.currentLevel ?? null,
-          nextLevel: aal?.nextLevel ?? null,
-        };
-        if (
-          snapshot.currentLevel === "aal1" &&
-          snapshot.nextLevel !== "aal2"
-        ) {
-          const { data: factors } = await supabase.auth.mfa.listFactors();
-          snapshot =
-            reconcileAalWithVerifiedFactors(
-              snapshot,
-              factors?.totp?.length ?? 0,
-            ) ?? snapshot;
-        }
-        if (needsMfaChallenge(snapshot)) {
+        if (await evaluateMfaChallengeRequired(supabase)) {
           const intended = successUrl.pathname + successUrl.search;
           finalSuccessUrl = new URL(
             `/mfa/challenge?next=${encodeURIComponent(intended)}`,
@@ -303,6 +281,26 @@ export async function handleGoogleOAuthCallback(input: {
         }
       } catch {
         // If AAL lookup fails, fall through to success path; middleware will re-check.
+      }
+    }
+  } else if (input.audience === "client") {
+    const { isClientMfaEnabled } = await import(
+      "@/lib/client-portal/mfa-config"
+    );
+    const { evaluateMfaChallengeRequired } = await import(
+      "@/lib/auth/mfa-evaluate"
+    );
+    if (isClientMfaEnabled()) {
+      try {
+        if (await evaluateMfaChallengeRequired(supabase)) {
+          const intended = successUrl.pathname + successUrl.search;
+          finalSuccessUrl = new URL(
+            `/client/mfa/challenge?next=${encodeURIComponent(intended)}`,
+            origin,
+          );
+        }
+      } catch {
+        // Middleware will re-check on /client.
       }
     }
   }

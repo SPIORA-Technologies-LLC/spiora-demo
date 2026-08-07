@@ -31,7 +31,7 @@ export type GoogleOAuthClientView = {
  * Fixed app redirects — never taken from query/body.
  */
 export function googleOAuthSuccessPath(audience: GoogleOAuthAudience): string {
-  return audience === "employee" ? "/dashboard" : "/client?enter=1";
+  return audience === "employee" ? "/dashboard?enter=1" : "/client?enter=1";
 }
 
 export function googleOAuthDenyPath(audience: GoogleOAuthAudience): string {

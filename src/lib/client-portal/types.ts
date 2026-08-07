@@ -13,6 +13,7 @@ export type ClientSession = {
   firstName: string | null;
   preferredLocale: ClientPortalLocale;
   invitationId: string;
+  mfaReenrollRequired: boolean;
 };
 
 export function isClientPortalLocale(value: string): value is ClientPortalLocale {

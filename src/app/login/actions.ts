@@ -24,6 +24,7 @@ import {
   signOutSupabaseAuth,
 } from "@/lib/auth/supabase-login";
 import { resolveEmployeePostAuthPath } from "@/lib/auth/mfa-service";
+import { withAppEntrySplash } from "@/lib/layout/app-entry-splash";
 
 export type SignInState = {
   error?: string;
@@ -112,7 +113,7 @@ export async function signInAction(
     canAccessPath(sessionUser.role, path),
   );
 
-  return { redirectTo: destination };
+  return { redirectTo: withAppEntrySplash(destination) };
 }
 
 export async function signOutAction(): Promise<void> {

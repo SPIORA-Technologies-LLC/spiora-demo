@@ -20,11 +20,16 @@ export function ClientPortalLogin() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
+  const [reenrollNotice, setReenrollNotice] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("error") === "google_access_denied") {
       setError(t("googleAccessDenied"));
+    }
+    if (params.get("mfa_reenroll") === "1") {
+      setError(null);
+      setReenrollNotice(true);
     }
   }, [t]);
 
@@ -79,6 +84,13 @@ export function ClientPortalLogin() {
         setError(t("notClient"));
         return;
       }
+      const data = (await res.json()) as {
+        mfa?: { challengeRequired?: boolean };
+      };
+      if (data.mfa?.challengeRequired) {
+        window.location.href = "/client/mfa/challenge?next=%2Fclient";
+        return;
+      }
       window.location.href = withClientPortalEntrySplash("/client");
     } catch {
       setError(t("authFailed"));
@@ -97,6 +109,11 @@ export function ClientPortalLogin() {
         <h1 className={styles.title}>{t("title")}</h1>
         <p className={styles.muted}>{t("subtitle")}</p>
         <div className={styles.authStack}>
+          {reenrollNotice ? (
+            <p className={styles.muted} role="status">
+              {t("mfaReenrollNotice")}
+            </p>
+          ) : null}
           {error ? <p className={styles.error}>{error}</p> : null}
           <button
             type="button"

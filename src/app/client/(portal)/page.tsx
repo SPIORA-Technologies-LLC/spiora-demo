@@ -2,6 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { ClientPortalAssistant } from "@/components/client-portal/ClientPortalAssistant";
 import { ClientPortalHome } from "@/components/client-portal/ClientPortalHome";
 import { getClientSession } from "@/lib/client-portal/session";
+import { isClientMfaEnabled } from "@/lib/client-portal/mfa-config";
 import { getClientQuestionnaire } from "@/lib/client-portal/questionnaire";
 import { getPortalCaseForUser } from "@/lib/client-portal/case-service";
 import { resolveClientFirstName } from "@/lib/client-portal/display-name";
@@ -68,6 +69,8 @@ export default async function ClientHomePage({ searchParams }: Props) {
       initialCase={caseData}
       logoutLabel={t("logout")}
       showEntrySplash={showEntrySplash}
+      showMfaSettings={isClientMfaEnabled()}
+      mfaReenrollRequired={session.mfaReenrollRequired}
       assistantSlot={<ClientPortalAssistant />}
     />
   );

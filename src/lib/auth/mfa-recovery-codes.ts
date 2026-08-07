@@ -54,12 +54,23 @@ export function generateRecoveryCodes(
   return codes;
 }
 
+/** Domain separation for client recovery hashes (employee hashes stay unprefixed). */
+export const CLIENT_MFA_RECOVERY_HMAC_PREFIX = "client-mfa-recovery:";
+
+/**
+ * Hash a recovery code at rest.
+ * Employee: HMAC(pepper, normalized) — unchanged for production codes.
+ * Client: pass domainPrefix = CLIENT_MFA_RECOVERY_HMAC_PREFIX.
+ */
 export function hashRecoveryCode(
   code: string,
   pepper: string,
+  domainPrefix = "",
 ): string {
   const normalized = normalizeRecoveryCode(code);
-  return createHmac("sha256", pepper).update(normalized).digest("hex");
+  return createHmac("sha256", pepper)
+    .update(domainPrefix + normalized)
+    .digest("hex");
 }
 
 export function recoveryCodesMatch(

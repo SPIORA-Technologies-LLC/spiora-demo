@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, it, before, after } from "node:test";
 import { isEmployeeMfaEnabled, MFA_MAX_VERIFIED_TOTP_FACTORS } from "./mfa-config";
@@ -180,30 +180,20 @@ describe("Phase C source invariants", () => {
     assert.match(example, /SPIORA_MFA_EMPLOYEE=false/);
   });
 
-  it("no client MFA API routes under client plane", () => {
-    assert.equal(
-      existsSync(path.join(process.cwd(), "src/app/api/client/auth/mfa")),
-      false,
-    );
-  });
-
   it("AAL readers pass JWT / reconcile verified factors (password-session bug)", () => {
-    const service = readFileSync(
-      path.join(process.cwd(), "src/lib/auth/mfa-service.ts"),
+    const evaluate = readFileSync(
+      path.join(process.cwd(), "src/lib/auth/mfa-evaluate.ts"),
       "utf8",
     );
-    assert.match(service, /getAuthenticatorAssuranceLevel\(\s*\n?\s*session\.access_token/);
-    assert.match(service, /reconcileAalWithVerifiedFactors/);
-    assert.match(service, /listFactors/);
+    assert.match(evaluate, /getAuthenticatorAssuranceLevel\(\s*\n?\s*session\.access_token/);
+    assert.match(evaluate, /reconcileAalWithVerifiedFactors/);
+    assert.match(evaluate, /listFactors/);
 
     const middlewareAuth = readFileSync(
       path.join(process.cwd(), "src/lib/supabase/middleware-auth.ts"),
       "utf8",
     );
-    assert.match(
-      middlewareAuth,
-      /getAuthenticatorAssuranceLevel\(accessToken\)/,
-    );
-    assert.match(middlewareAuth, /reconcileAalWithVerifiedFactors/);
+    assert.match(middlewareAuth, /evaluateMfaChallengeRequired/);
+    assert.match(middlewareAuth, /clientMfaChallengeRequired/);
   });
 });

@@ -1,0 +1,72 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import Link from "next/link";
+import styles from "@/app/login/login.module.css";
+
+export function ClientMfaRecoveryForm() {
+  const t = useTranslations("clientPortal.mfa");
+  const [code, setCode] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function onSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    if (busy) return;
+    setError(null);
+    setBusy(true);
+    try {
+      const res = await fetch("/api/client/auth/mfa/recovery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ code }),
+      });
+      const data = (await res.json()) as {
+        redirectTo?: string;
+        error?: { code?: string };
+      };
+      if (!res.ok) {
+        if (data.error?.code === "RATE_LIMITED") {
+          setError(t("errors.rateLimited"));
+        } else {
+          setError(t("errors.invalidRecovery"));
+        }
+        return;
+      }
+      window.location.assign(data.redirectTo || "/client/login?mfa_reenroll=1");
+    } catch {
+      setError(t("errors.generic"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <form className={styles.form} onSubmit={(e) => void onSubmit(e)} style={{ textAlign: "left" }}>
+      <h1 className={styles.title}>{t("recovery.title")}</h1>
+      <p className={styles.subtitle}>{t("recovery.hint")}</p>
+      {error ? <p className={styles.error}>{error}</p> : null}
+      <label className={styles.label}>
+        {t("recovery.codeLabel")}
+        <input
+          className={styles.input}
+          autoComplete="one-time-code"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          required
+          disabled={busy}
+        />
+      </label>
+      <button className={styles.submit} type="submit" disabled={busy}>
+        {busy ? t("recovery.working") : t("recovery.submit")}
+      </button>
+      <div className={styles.secondaryActions}>
+        <Link href="/client/mfa/challenge" className={styles.secondaryAction}>
+          {t("recovery.backToChallenge")}
+        </Link>
+      </div>
+    </form>
+  );
+}

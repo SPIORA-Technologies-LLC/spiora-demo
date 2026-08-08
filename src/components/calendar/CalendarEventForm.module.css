@@ -95,6 +95,7 @@
 
 .dateTimeGrid .field {
   gap: 0.5rem;
+  min-width: 0;
 }
 
 .formatSwitch {

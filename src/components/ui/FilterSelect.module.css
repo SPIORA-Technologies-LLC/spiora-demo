@@ -3,6 +3,11 @@
   min-width: 168px;
 }
 
+.wrapDisabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
 .trigger {
   width: 100%;
   display: flex;
@@ -76,7 +81,7 @@
   top: calc(100% + 0.45rem);
   left: 0;
   right: 0;
-  z-index: 40;
+  z-index: 60;
   margin: 0;
   padding: 0.4rem;
   list-style: none;

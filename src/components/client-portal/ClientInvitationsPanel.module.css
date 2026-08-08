@@ -154,21 +154,22 @@
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
+  overflow-y: auto;
   z-index: 50;
 }
 
 .modal {
   width: min(32rem, 100%);
-  max-height: min(90vh, 40rem);
-  overflow: auto;
+  margin: auto 0;
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: #161014;
   padding: 1rem 1.1rem 1.2rem;
   color: #f6efe9;
+  overflow: visible;
 }
 
 .modalHeader {
@@ -204,8 +205,7 @@
   font-size: 0.86rem;
 }
 
-.form input,
-.form select {
+.form input {
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   background: rgba(0, 0, 0, 0.3);
@@ -213,13 +213,9 @@
   padding: 0.5rem 0.65rem;
 }
 
-.form select {
-  padding-right: 2.25rem;
-  appearance: none;
-  background-color: rgba(0, 0, 0, 0.3);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='rgba(255,255,255,0.65)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.85rem center;
+.formSelect {
+  width: 100%;
+  min-width: 0;
 }
 
 .success {

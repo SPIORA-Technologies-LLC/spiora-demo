@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSession } from "@/components/providers/SessionProvider";
 import { Card } from "@/components/ui/Card";
+import { FilterSelect } from "@/components/ui/FilterSelect";
 import styles from "./ClientInvitationsPanel.module.css";
 
 type Invitation = {
@@ -111,6 +112,31 @@ export function ClientInvitationsPanel() {
     if (filter === "all") return items;
     return items.filter((i) => i.state === filter);
   }, [items, filter]);
+
+  const assigneeOptions = useMemo(
+    () => [
+      { value: "", label: t("fields.assigneePlaceholder") },
+      ...assignees.map((a) => ({ value: a.id, label: a.name })),
+    ],
+    [assignees, t],
+  );
+
+  const serviceOptions = useMemo(
+    () => [
+      { value: "residence_permit", label: t("services.residence_permit") },
+      { value: "consultation", label: t("services.consultation") },
+      { value: "other", label: t("services.other") },
+    ],
+    [t],
+  );
+
+  const localeOptions = useMemo(
+    () => [
+      { value: "ru", label: "Русский" },
+      { value: "en", label: "English" },
+    ],
+    [],
+  );
 
   function serviceLabel(value: string | null): string {
     if (!value) return "—";
@@ -433,46 +459,36 @@ export function ClientInvitationsPanel() {
                 </label>
                 <label>
                   {t("fields.assignee")}
-                  <select
-                    required
+                  <FilterSelect
+                    className={styles.formSelect}
                     value={assignedTo}
-                    onChange={(e) => setAssignedTo(e.target.value)}
+                    onChange={setAssignedTo}
+                    options={assigneeOptions}
+                    ariaLabel={t("fields.assignee")}
                     disabled={assigneesLoading || assignees.length === 0}
-                  >
-                    <option value="">{t("fields.assigneePlaceholder")}</option>
-                    {assignees.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {a.name}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </label>
                 <label>
                   {t("fields.service")}
-                  <select
+                  <FilterSelect
+                    className={styles.formSelect}
                     value={serviceType}
-                    onChange={(e) => setServiceType(e.target.value)}
-                  >
-                    <option value="residence_permit">
-                      {t("services.residence_permit")}
-                    </option>
-                    <option value="consultation">
-                      {t("services.consultation")}
-                    </option>
-                    <option value="other">{t("services.other")}</option>
-                  </select>
+                    onChange={setServiceType}
+                    options={serviceOptions}
+                    ariaLabel={t("fields.service")}
+                  />
                 </label>
                 <label>
                   {t("fields.locale")}
-                  <select
+                  <FilterSelect
+                    className={styles.formSelect}
                     value={preferredLocale}
-                    onChange={(e) =>
-                      setPreferredLocale(e.target.value === "en" ? "en" : "ru")
+                    onChange={(next) =>
+                      setPreferredLocale(next === "en" ? "en" : "ru")
                     }
-                  >
-                    <option value="ru">Русский</option>
-                    <option value="en">English</option>
-                  </select>
+                    options={localeOptions}
+                    ariaLabel={t("fields.locale")}
+                  />
                 </label>
                 <label>
                   {t("fields.expiresInDays")}

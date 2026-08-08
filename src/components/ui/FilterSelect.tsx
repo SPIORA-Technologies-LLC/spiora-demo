@@ -20,6 +20,7 @@ type FilterSelectProps = {
   options: FilterSelectOption[];
   ariaLabel: string;
   className?: string;
+  disabled?: boolean;
 };
 
 export function FilterSelect({
@@ -28,6 +29,7 @@ export function FilterSelect({
   options,
   ariaLabel,
   className,
+  disabled = false,
 }: FilterSelectProps) {
   const listboxId = useId();
   const wrapRef = useRef<HTMLDivElement | null>(null);
@@ -36,7 +38,7 @@ export function FilterSelect({
   const selected = options.find((option) => option.value === value);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || disabled) return;
 
     function onPointerDown(event: MouseEvent) {
       if (!wrapRef.current?.contains(event.target as Node)) {
@@ -57,9 +59,16 @@ export function FilterSelect({
       document.removeEventListener("mousedown", onPointerDown);
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
+  }, [open, disabled]);
+
+  useEffect(() => {
+    if (disabled) {
+      setOpen(false);
+    }
+  }, [disabled]);
 
   function handleTriggerKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    if (disabled) return;
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       setOpen((prev) => !prev);
@@ -73,7 +82,13 @@ export function FilterSelect({
   return (
     <div
       ref={wrapRef}
-      className={[styles.wrap, className].filter(Boolean).join(" ")}
+      className={[
+        styles.wrap,
+        disabled ? styles.wrapDisabled : "",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <button
         type="button"
@@ -84,7 +99,11 @@ export function FilterSelect({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listboxId}
-        onClick={() => setOpen((prev) => !prev)}
+        aria-disabled={disabled}
+        disabled={disabled}
+        onClick={() => {
+          if (!disabled) setOpen((prev) => !prev);
+        }}
         onKeyDown={handleTriggerKeyDown}
       >
         <span className={styles.triggerLabel}>
@@ -107,7 +126,7 @@ export function FilterSelect({
         </span>
       </button>
 
-      {open ? (
+      {open && !disabled ? (
         <ul
           id={listboxId}
           className={styles.menu}
@@ -117,7 +136,7 @@ export function FilterSelect({
           {options.map((option) => {
             const isSelected = option.value === value;
             return (
-              <li key={option.value} role="presentation">
+              <li key={option.value || "__empty"} role="presentation">
                 <button
                   type="button"
                   role="option"

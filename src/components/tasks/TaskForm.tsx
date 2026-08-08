@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { CalendarDateSelect } from "@/components/calendar/CalendarDateSelect";
 import { Button } from "@/components/ui/Button";
 import type { Task, TaskStatus } from "@/lib/tasks/types";
 import { TaskAttachmentPicker } from "./TaskAttachments";
@@ -105,15 +106,14 @@ export function TaskForm({
         />
       </label>
 
-      <label className={styles.field}>
+      <div className={styles.field}>
         <span className={styles.label}>{t("form.dueDateLabel")}</span>
-        <input
-          type="date"
-          className={styles.input}
+        <CalendarDateSelect
           value={values.dueDate}
-          onChange={(e) => setValues({ ...values, dueDate: e.target.value })}
+          onChange={(dueDate) => setValues({ ...values, dueDate })}
+          allowEmpty
         />
-      </label>
+      </div>
 
       <TaskAttachmentPicker
         files={pendingFiles}

@@ -11,6 +11,7 @@ import { resolveLocaleFromSources } from "./locale.ts";
 import {
   formatAppDate,
   formatAppNumber,
+  formatMonthDayYear,
   getMonthNames,
   getWeekdayNames,
 } from "./format.ts";
@@ -109,6 +110,12 @@ describe("i18n formatting", () => {
       timeZone: "UTC",
     });
     assert.match(formatted, /июл/i);
+  });
+
+  it("форматирует месяц день год для ru и en", () => {
+    const localDate = new Date(2026, 7, 8);
+    assert.equal(formatMonthDayYear(localDate, "ru"), "Август 8, 2026");
+    assert.equal(formatMonthDayYear(localDate, "en"), "August 8, 2026");
   });
 
   it("форматирует числа для en и ru", () => {

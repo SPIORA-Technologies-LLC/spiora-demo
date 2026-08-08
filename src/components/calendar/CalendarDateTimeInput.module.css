@@ -7,7 +7,7 @@
 
 .selectRow {
   display: grid;
-  grid-template-columns: 4.25rem minmax(0, 1fr) 5.25rem;
+  grid-template-columns: minmax(0, 1fr) 4.25rem 5.25rem;
   align-items: center;
   gap: 0.5rem;
 }

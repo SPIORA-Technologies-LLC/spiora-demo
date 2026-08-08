@@ -15,6 +15,34 @@ export function formatAppDate(
   return new Intl.DateTimeFormat(getIntlLocaleTag(locale), options).format(value);
 }
 
+/** Always month → day → year, with locale month names (nominative). */
+export function formatMonthDayYear(
+  value: Date,
+  locale: AppLocale,
+  options?: {
+    month?: "long" | "short";
+    timeZone?: string;
+  },
+): string {
+  const tag = getIntlLocaleTag(locale);
+  const monthStyle = options?.month ?? "long";
+  const common = { timeZone: options?.timeZone } as const;
+  const month = new Intl.DateTimeFormat(tag, {
+    ...common,
+    month: monthStyle,
+  }).format(value);
+  const day = new Intl.DateTimeFormat(tag, {
+    ...common,
+    day: "numeric",
+  }).format(value);
+  const year = new Intl.DateTimeFormat(tag, {
+    ...common,
+    year: "numeric",
+  }).format(value);
+  const monthLabel = month.charAt(0).toUpperCase() + month.slice(1);
+  return `${monthLabel} ${day}, ${year}`;
+}
+
 export function formatAppTime(
   value: Date,
   locale: AppLocale,

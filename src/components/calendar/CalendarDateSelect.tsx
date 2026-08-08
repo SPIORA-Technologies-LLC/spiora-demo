@@ -78,7 +78,7 @@ export function CalendarDateSelect({
 
   return (
     <div className={styles.dateWrap} id={id}>
-      <div className={styles.selectRow}>
+      <div className={styles.dateSelectRow}>
         <select
           className={[styles.select, styles.selectMonth].join(" ")}
           aria-label={t("monthAria")}

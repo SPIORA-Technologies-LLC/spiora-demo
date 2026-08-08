@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { CalendarDateSelect } from "@/components/calendar/CalendarDateSelect";
 import { Button } from "@/components/ui/Button";
+import { FilterSelect } from "@/components/ui/FilterSelect";
 import type { Task, TaskStatus } from "@/lib/tasks/types";
 import { TaskAttachmentPicker } from "./TaskAttachments";
 import styles from "./TaskForm.module.css";
@@ -149,22 +150,18 @@ export function TaskForm({
       </fieldset>
 
       {!isEditing ? (
-        <label className={styles.field}>
+        <div className={styles.field}>
           <span className={styles.label}>{t("form.statusLabel")}</span>
-          <select
-            className={styles.select}
+          <FilterSelect
+            className={styles.statusSelect}
             value={values.status}
-            onChange={(e) =>
-              setValues({ ...values, status: e.target.value as TaskStatus })
+            onChange={(status) =>
+              setValues({ ...values, status: status as TaskStatus })
             }
-          >
-            {statusOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
+            options={statusOptions}
+            ariaLabel={t("form.statusLabel")}
+          />
+        </div>
       ) : (
         <p className={styles.hint}>{t("form.statusEditHint")}</p>
       )}

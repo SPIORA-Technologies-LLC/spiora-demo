@@ -13,6 +13,7 @@ import { KbArticleMarkdown } from "@/components/knowledge-base/KbArticleMarkdown
 import { KbAttachmentsPanel } from "@/components/knowledge-base/KbAttachmentsPanel";
 import { KbTablesPanel } from "@/components/knowledge-base/KbTablesPanel";
 import { Card } from "@/components/ui/Card";
+import { FilterSelect } from "@/components/ui/FilterSelect";
 import type {
   KbArticleStatus,
   KbCategoryId,
@@ -180,6 +181,12 @@ export function KnowledgeBaseEditorView({
   }, [initialSlug, mode, scope, t]);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+    const content = document.querySelector<HTMLElement>("[data-app-content]");
+    if (content) content.scrollTop = 0;
+  }, []);
+
+  useEffect(() => {
     if (loading) return;
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -206,11 +213,20 @@ export function KnowledgeBaseEditorView({
       });
     }
     const timer = window.setTimeout(() => {
-      if (focus === "table") {
-        tablesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        filesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      const target =
+        focus === "table" ? tablesSectionRef.current : filesSectionRef.current;
+      if (!target) return;
+      const scroller = target.closest<HTMLElement>("[data-app-content]");
+      if (scroller) {
+        const targetTop =
+          target.getBoundingClientRect().top -
+          scroller.getBoundingClientRect().top +
+          scroller.scrollTop -
+          16;
+        scroller.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+        return;
       }
+      target.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 120);
     return () => window.clearTimeout(timer);
   }, [loading, t]);
@@ -507,6 +523,24 @@ export function KnowledgeBaseEditorView({
     return t("editor.status.draft");
   }, [form.status, t]);
 
+  const categoryOptions = useMemo(
+    () =>
+      CATEGORIES.map((id) => ({
+        value: id,
+        label: translateKnowledgeBaseCategory(uiLocale, id),
+      })),
+    [uiLocale],
+  );
+
+  const authorOptions = useMemo(
+    () =>
+      AUTHORS.map((id) => ({
+        value: id,
+        label: t(`authors.${id}`),
+      })),
+    [t],
+  );
+
   if (loading) {
     return <p className={styles.meta}>{t("loading.article")}</p>;
   }
@@ -624,26 +658,22 @@ export function KnowledgeBaseEditorView({
               }}
             />
           </label>
-          <label className={styles.editorLabel}>
-            {t("article.category")}
-            <select
-              className={styles.editorSelect}
+          <div className={styles.editorLabel}>
+            <span>{t("article.category")}</span>
+            <FilterSelect
+              className={styles.editorFilterSelect}
               value={form.categoryId}
               disabled={isArchived}
-              onChange={(e) =>
+              ariaLabel={t("article.category")}
+              options={categoryOptions}
+              onChange={(value) =>
                 setForm((prev) => ({
                   ...prev,
-                  categoryId: e.target.value as KbCategoryId,
+                  categoryId: value as KbCategoryId,
                 }))
               }
-            >
-              {CATEGORIES.map((id) => (
-                <option key={id} value={id}>
-                  {translateKnowledgeBaseCategory(uiLocale, id)}
-                </option>
-              ))}
-            </select>
-          </label>
+            />
+          </div>
           <p className={styles.editorLabel}>{t("article.tags")}</p>
           <div className={styles.tagPicker}>
             {TAG_OPTIONS.map((tag) => (
@@ -658,23 +688,19 @@ export function KnowledgeBaseEditorView({
               </button>
             ))}
           </div>
-          <label className={styles.editorLabel}>
-            {t("article.author")}
-            <select
-              className={styles.editorSelect}
+          <div className={styles.editorLabel}>
+            <span>{t("article.author")}</span>
+            <FilterSelect
+              className={styles.editorFilterSelect}
               value={form.authorKey}
               disabled={isArchived}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, authorKey: e.target.value }))
+              ariaLabel={t("article.author")}
+              options={authorOptions}
+              onChange={(value) =>
+                setForm((prev) => ({ ...prev, authorKey: value }))
               }
-            >
-              {AUTHORS.map((id) => (
-                <option key={id} value={id}>
-                  {t(`authors.${id}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+            />
+          </div>
         </Card>
 
         {(["en", "ru"] as const).map((locale) => (

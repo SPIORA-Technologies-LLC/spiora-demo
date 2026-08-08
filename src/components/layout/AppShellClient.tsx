@@ -70,6 +70,20 @@ export function AppShellClient({
   }, [openMobileIntro]);
 
   useLayoutEffect(() => {
+    const html = document.documentElement;
+    const { body } = document;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    window.scrollTo(0, 0);
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, []);
+
+  useLayoutEffect(() => {
     if (consumeMobileNavPageEnter()) {
       setNavEnter(true);
     }
@@ -148,6 +162,7 @@ export function AppShellClient({
           onToggleNav={() => setNavOpen((open) => !open)}
         />
         <main
+          data-app-content
           className={[styles.content, contentClassName].filter(Boolean).join(" ")}
           onClick={() => {
             if (navOpen) dismissNav();

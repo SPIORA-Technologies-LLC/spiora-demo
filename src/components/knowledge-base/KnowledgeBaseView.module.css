@@ -951,6 +951,11 @@
   color: var(--gray-300);
 }
 
+.editorFilterSelect {
+  width: 100%;
+  min-width: 0;
+}
+
 .editorInput,
 .editorSelect,
 .editorTextarea {

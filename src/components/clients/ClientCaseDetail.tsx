@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card } from "@/components/ui/Card";
+import { FilterSelect } from "@/components/ui/FilterSelect";
 import { ClientCaseFinanceTab } from "@/components/clients/ClientCaseFinanceTab";
 import {
   CLIENT_CASE_STATUSES,
@@ -113,6 +114,15 @@ export function ClientCaseDetail({
   const [busy, setBusy] = useState(false);
   const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+
+  const statusOptions = useMemo(
+    () =>
+      CLIENT_CASE_STATUSES.map((value) => ({
+        value,
+        label: caseStatusLabel(value, locale),
+      })),
+    [locale],
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -446,19 +456,16 @@ export function ClientCaseDetail({
 
       {tab === "status" ? (
         <Card className={styles.panel}>
-          <label className={styles.statusForm}>
+          <div className={styles.statusForm}>
             <span>{t("status.label")}</span>
-            <select
+            <FilterSelect
+              className={styles.statusSelect}
               value={status}
-              onChange={(e) => setStatus(e.target.value as ClientCaseStatus)}
-            >
-              {CLIENT_CASE_STATUSES.map((value) => (
-                <option key={value} value={value}>
-                  {caseStatusLabel(value, locale)}
-                </option>
-              ))}
-            </select>
-          </label>
+              onChange={(value) => setStatus(value as ClientCaseStatus)}
+              options={statusOptions}
+              ariaLabel={t("status.label")}
+            />
+          </div>
           <button type="button" disabled={busy} onClick={() => void saveStatus()}>
             {t("status.save")}
           </button>

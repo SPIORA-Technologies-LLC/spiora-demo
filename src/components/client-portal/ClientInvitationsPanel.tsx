@@ -138,14 +138,6 @@ export function ClientInvitationsPanel() {
     [],
   );
 
-  function serviceLabel(value: string | null): string {
-    if (!value) return "—";
-    if (value === "residence_permit") return t("services.residence_permit");
-    if (value === "consultation") return t("services.consultation");
-    if (value === "other") return t("services.other");
-    return value;
-  }
-
   function buildSharePackage(creds: IssuedCredentials) {
     if (creds.existingPortalUser || !creds.temporaryPassword) {
       const loginUrl = (() => {
@@ -321,10 +313,8 @@ export function ClientInvitationsPanel() {
               <tr>
                 <th>{t("columns.name")}</th>
                 <th>{t("columns.email")}</th>
-                <th>{t("columns.program")}</th>
                 <th>{t("columns.assignee")}</th>
                 <th>{t("columns.created")}</th>
-                <th>{t("columns.expires")}</th>
                 <th>{t("columns.status")}</th>
                 <th>{t("columns.actions")}</th>
               </tr>
@@ -334,10 +324,8 @@ export function ClientInvitationsPanel() {
                 <tr key={row.id}>
                   <td>{row.firstName || "—"}</td>
                   <td>{row.email}</td>
-                  <td>{serviceLabel(row.serviceType)}</td>
                   <td>{row.assignedToName || "—"}</td>
                   <td>{new Date(row.createdAt).toLocaleString(locale)}</td>
-                  <td>{new Date(row.expiresAt).toLocaleString(locale)}</td>
                   <td>
                     <span className={styles.state}>{t(`states.${row.state}`)}</span>
                   </td>

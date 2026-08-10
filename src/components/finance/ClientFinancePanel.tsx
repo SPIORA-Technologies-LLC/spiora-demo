@@ -9,6 +9,7 @@ import {
 } from "@/lib/calendar/datetime-input";
 import type { FinanceClientDetail } from "@/lib/finance/types";
 import { formatEuroFromCents } from "@/lib/finance/money";
+import { caseServiceTypeLabel } from "@/lib/client-portal/case-status-labels";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import styles from "./ClientFinancePanel.module.css";
@@ -227,6 +228,7 @@ export function ClientFinancePanel({ clientId }: Props) {
   }
 
   const { profile, summary, payments, direction } = data;
+  const directionLabel = caseServiceTypeLabel(direction, locale);
   const hasContract = profile != null && profile.contractAmountCents != null;
   const activePayments = payments.filter((p) => !p.voidedAt);
   const voidedPayments = payments.filter((p) => p.voidedAt);
@@ -264,7 +266,7 @@ export function ClientFinancePanel({ clientId }: Props) {
               </div>
               <div className={styles.fieldRow}>
                 <span className={styles.fieldLabel}>{t("direction")}</span>
-                <span className={styles.fieldValue}>{direction || "—"}</span>
+                <span className={styles.fieldValue}>{directionLabel}</span>
               </div>
               <div className={styles.fieldRow}>
                 <span className={styles.fieldLabel}>{t("paid")}</span>
@@ -332,7 +334,7 @@ export function ClientFinancePanel({ clientId }: Props) {
               />
             </label>
             <p className={styles.hint}>
-              {t("direction")}: {direction || "—"}
+              {t("direction")}: {directionLabel}
             </p>
             <Button
               type="button"

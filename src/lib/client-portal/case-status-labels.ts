@@ -83,3 +83,26 @@ export function caseActivityLabel(
   if (known) return known[locale];
   return eventType;
 }
+
+/** Questionnaire / invitation service_type keys → display labels. */
+export const CASE_SERVICE_TYPE_LABELS: Record<string, { en: string; ru: string }> = {
+  residence_permit: { en: "Residence permit", ru: "ВНЖ" },
+  digital_nomad: { en: "Digital nomad", ru: "Цифровой кочевник" },
+  citizenship: { en: "Citizenship", ru: "Гражданство" },
+  company_registration: {
+    en: "Company registration",
+    ru: "Регистрация компании",
+  },
+  consultation: { en: "Consultation", ru: "Консультация" },
+  other: { en: "Other", ru: "Другое" },
+};
+
+export function caseServiceTypeLabel(
+  serviceType: string | null | undefined,
+  locale: "en" | "ru",
+): string {
+  if (!serviceType?.trim()) return "—";
+  const known = CASE_SERVICE_TYPE_LABELS[serviceType.trim()];
+  if (known) return known[locale];
+  return serviceType;
+}

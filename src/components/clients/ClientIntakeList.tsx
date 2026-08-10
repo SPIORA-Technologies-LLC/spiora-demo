@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import type { ClientCaseIntakeItem } from "@/lib/client-portal/case-types";
-import { caseStatusLabel } from "@/lib/client-portal/case-status-labels";
+import { caseStatusLabel, caseServiceTypeLabel } from "@/lib/client-portal/case-status-labels";
 import { Card } from "@/components/ui/Card";
 import styles from "./ClientsList.module.css";
 
@@ -128,7 +128,7 @@ export function ClientIntakeList() {
                       </Link>
                     </td>
                     <td>{item.email}</td>
-                    <td>{item.serviceType ?? "—"}</td>
+                    <td>{caseServiceTypeLabel(item.serviceType, locale)}</td>
                     <td>{formatDate(item.submittedAt, locale)}</td>
                     <td>{item.assignedName ?? "—"}</td>
                     <td>{caseStatusLabel(item.currentStatus, locale)}</td>

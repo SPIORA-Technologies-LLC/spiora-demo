@@ -11,6 +11,7 @@ import {
 } from "@/lib/client-portal/case-types";
 import {
   caseActivityLabel,
+  caseServiceTypeLabel,
   caseStatusLabel,
 } from "@/lib/client-portal/case-status-labels";
 import styles from "./ClientCaseDetail.module.css";
@@ -273,7 +274,7 @@ export function ClientCaseDetail({
             </div>
             <div>
               <span className={styles.label}>{t("fields.service")}</span>
-              <span>{data.case.serviceType ?? "—"}</span>
+              <span>{caseServiceTypeLabel(data.case.serviceType, locale)}</span>
             </div>
             <div>
               <span className={styles.label}>{t("fields.assignee")}</span>

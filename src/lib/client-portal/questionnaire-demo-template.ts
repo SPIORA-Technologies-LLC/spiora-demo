@@ -233,7 +233,7 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
           required: true,
           options: [
             { value: "residence_permit", label: { en: "Residence permit", ru: "ВНЖ" } },
-            { value: "digital_nomad", label: { en: "Digital nomad", ru: "Digital nomad" } },
+            { value: "digital_nomad", label: { en: "Digital nomad", ru: "Цифровой кочевник" } },
             { value: "citizenship", label: { en: "Citizenship", ru: "Гражданство" } },
             { value: "company_registration", label: { en: "Company registration", ru: "Регистрация компании" } },
             { value: "consultation", label: { en: "Consultation", ru: "Консультация" } },

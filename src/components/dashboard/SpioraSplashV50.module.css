@@ -10,6 +10,11 @@
   color-scheme: dark;
 }
 
+/* Pre-paint cover: hide the app until we know whether to play the splash. */
+.splashGate {
+  pointer-events: all;
+}
+
 .splash::after {
   content: "";
   position: absolute;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useLayoutEffect, useState } from "react";
 import { APP_ENTRY_SPLASH_PARAM } from "@/lib/layout/app-entry-splash";
 import styles from "./SpioraSplashV50.module.css";
 
@@ -17,6 +17,8 @@ type Props = {
   onDone?: () => void;
 };
 
+type Phase = "gate" | "play" | "done";
+
 function consumeEntrySplashParam(): boolean {
   try {
     const url = new URL(window.location.href);
@@ -30,26 +32,51 @@ function consumeEntrySplashParam(): boolean {
   }
 }
 
+function shouldPlaySplash(force: boolean): boolean {
+  if (force) return true;
+  if (consumeEntrySplashParam()) return true;
+  try {
+    return !sessionStorage.getItem(STORAGE_KEY);
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Boot splash for the employee app.
+ *
+ * Starts in a solid "gate" cover so the dashboard never flashes before MFA/login
+ * entry (`?enter=1`) or the first-session animation. `useLayoutEffect` decides
+ * play vs skip before the browser paints.
+ */
 export function SpioraSplashV50({ force = false, onDone }: Props) {
-  const [visible, setVisible] = useState(false);
+  const [phase, setPhase] = useState<Phase>("gate");
   const [exiting, setExiting] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === "undefined") return;
-    const entryForce = consumeEntrySplashParam();
-    const showForced = force || entryForce;
-    if (!showForced && sessionStorage.getItem(STORAGE_KEY)) return;
 
-    setVisible(true);
+    if (!shouldPlaySplash(force)) {
+      setPhase("done");
+      return;
+    }
+
+    setPhase("play");
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const holdMs = reduced ? REDUCED_MOTION_MS : ANIMATION_MS;
 
     const fadeTimer = window.setTimeout(() => setExiting(true), holdMs);
     const hideTimer = window.setTimeout(() => {
-      setVisible(false);
+      setPhase("done");
       // Prop `force` (client portal) skips the tab gate; `enter=1` still marks seen.
-      if (!force) sessionStorage.setItem(STORAGE_KEY, "1");
+      if (!force) {
+        try {
+          sessionStorage.setItem(STORAGE_KEY, "1");
+        } catch {
+          // ignore
+        }
+      }
       onDone?.();
     }, holdMs + FADE_MS);
 
@@ -59,35 +86,45 @@ export function SpioraSplashV50({ force = false, onDone }: Props) {
     };
   }, [force, onDone]);
 
-  if (!visible) return null;
+  if (phase === "done") return null;
 
   return (
     <div
-      className={[styles.splash, exiting ? styles.splashOut : ""].filter(Boolean).join(" ")}
+      className={[
+        styles.splash,
+        phase === "gate" ? styles.splashGate : "",
+        exiting ? styles.splashOut : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
       role="status"
       aria-live="polite"
       aria-label="SPIORA"
     >
-      <div className={styles.brandStage} aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className={styles.brandFull}
-          src="/splash-v50/spiora-logo-vector.svg"
-          alt=""
-        />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className={styles.brandPower}
-          src="/splash-v50/spiora-power-only.svg"
-          alt=""
-        />
-      </div>
+      {phase === "play" ? (
+        <>
+          <div className={styles.brandStage} aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className={styles.brandFull}
+              src="/splash-v50/spiora-logo-vector.svg"
+              alt=""
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              className={styles.brandPower}
+              src="/splash-v50/spiora-power-only.svg"
+              alt=""
+            />
+          </div>
 
-      <div className={styles.waveCrop} aria-hidden="true">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/splash-v50/spiora-brandbook.png" alt="" />
-        <span className={styles.waveGlint} />
-      </div>
+          <div className={styles.waveCrop} aria-hidden="true">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/splash-v50/spiora-brandbook.png" alt="" />
+            <span className={styles.waveGlint} />
+          </div>
+        </>
+      ) : null}
 
       <span className={styles.srOnly}>SPIORA</span>
     </div>

@@ -294,19 +294,25 @@ export function ClientCaseDetail({
 
       {tab === "questionnaire" ? (
         <div className={styles.stack}>
-          {data.reviewSections.map((section) => (
-            <Card key={section.id} className={styles.panel}>
-              <h3 className={styles.sectionTitle}>{section.title}</h3>
-              <dl className={styles.reviewList}>
-                {section.items.map((item) => (
-                  <div key={item.questionId} className={styles.answerRow}>
-                    <dt>{item.label}</dt>
-                    <dd>{item.value}</dd>
-                  </div>
-                ))}
-              </dl>
+          {data.reviewSections.length === 0 ? (
+            <Card className={styles.panel}>
+              <p className={styles.message}>{t("questionnaireEmpty")}</p>
             </Card>
-          ))}
+          ) : (
+            data.reviewSections.map((section) => (
+              <Card key={section.id} className={styles.panel}>
+                <h3 className={styles.sectionTitle}>{section.title}</h3>
+                <dl className={styles.reviewList}>
+                  {section.items.map((item) => (
+                    <div key={item.questionId} className={styles.answerRow}>
+                      <dt>{item.label}</dt>
+                      <dd>{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </Card>
+            ))
+          )}
         </div>
       ) : null}
 

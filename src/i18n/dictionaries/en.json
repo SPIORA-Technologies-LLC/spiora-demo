@@ -2963,6 +2963,7 @@
       "back": "Back to intake",
       "loading": "Loading case…",
       "notFound": "Case not found",
+      "questionnaireEmpty": "Questionnaire answers are not available to display.",
       "commentFailed": "Could not add comment",
       "statusFailed": "Could not update status",
       "statusSaved": "Status updated",

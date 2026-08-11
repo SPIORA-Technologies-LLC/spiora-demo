@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useSession } from "@/components/providers/SessionProvider";
 import { Card } from "@/components/ui/Card";
 import { FilterSelect } from "@/components/ui/FilterSelect";
+import { displayClientName } from "@/lib/clients/display-name";
 import styles from "./ClientInvitationsPanel.module.css";
 
 type Invitation = {
@@ -320,36 +321,41 @@ export function ClientInvitationsPanel() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.firstName || "—"}</td>
-                  <td>{row.email}</td>
-                  <td>{row.assignedToName || "—"}</td>
-                  <td>{new Date(row.createdAt).toLocaleString(locale)}</td>
-                  <td>
-                    <span className={styles.state}>{t(`states.${row.state}`)}</span>
-                  </td>
-                  <td>
-                    <div className={styles.actions}>
-                      <button
-                        type="button"
-                        className={styles.actionBtn}
-                        onClick={() => void openModal(row.email, row.firstName)}
-                      >
-                        {t("inviteAgain")}
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.deleteBtn}
-                        disabled={deletingId === row.id}
-                        onClick={() => void onDelete(row.id)}
-                      >
-                        {deletingId === row.id ? "…" : t("delete")}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((row) => {
+                const displayName = row.firstName
+                  ? displayClientName(row.firstName, locale === "ru" ? "ru" : "en")
+                  : "—";
+                return (
+                  <tr key={row.id}>
+                    <td>{displayName}</td>
+                    <td>{row.email}</td>
+                    <td>{row.assignedToName || "—"}</td>
+                    <td>{new Date(row.createdAt).toLocaleString(locale)}</td>
+                    <td>
+                      <span className={styles.state}>{t(`states.${row.state}`)}</span>
+                    </td>
+                    <td>
+                      <div className={styles.actions}>
+                        <button
+                          type="button"
+                          className={styles.actionBtn}
+                          onClick={() => void openModal(row.email, row.firstName)}
+                        >
+                          {t("inviteAgain")}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.deleteBtn}
+                          disabled={deletingId === row.id}
+                          onClick={() => void onDelete(row.id)}
+                        >
+                          {deletingId === row.id ? "…" : t("delete")}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

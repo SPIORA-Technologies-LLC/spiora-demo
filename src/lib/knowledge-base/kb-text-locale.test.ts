@@ -24,4 +24,19 @@ describe("KB Russian → English topic translation", () => {
   it("englishFacingTopic uses translation for Cyrillic", () => {
     assert.equal(englishFacingTopic("Рабочая этика"), "Work Ethics");
   });
+
+  it("englishFacingTopic fixes transliterated Russian titles", () => {
+    assert.equal(
+      englishFacingTopic("Zdorovaya Atmosfera V Kollektive"),
+      "Healthy Atmosphere in the Team",
+    );
+    assert.equal(
+      englishFacingTopic("Korporativnaya Etika"),
+      "Corporate Ethics",
+    );
+    assert.equal(
+      englishFacingTopic("Zabota O Zdorove Sotrudnikov"),
+      "Employee Health Care",
+    );
+  });
 });

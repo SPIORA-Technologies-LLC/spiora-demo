@@ -59,6 +59,22 @@ const RU_EN_PHRASES: Array<{ re: RegExp; en: string }> = [
   },
 ];
 
+const LATIN_RU_PHRASES: Array<{ re: RegExp; en: string }> = [
+  { re: /korporativ\w*\s+etik\w*/i, en: "Corporate Ethics" },
+  { re: /raboch\w*\s+etik\w*/i, en: "Work Ethics" },
+  {
+    re: /zdorov\w*\s+atmosfer\w*.*\s+kollektiv\w*/i,
+    en: "Healthy Atmosphere in the Team",
+  },
+  { re: /vnutrenn\w*\s+kommunikatsi\w*/i, en: "Internal Communication" },
+  {
+    re: /pravil\w*\s+vnutrenn\w*\s+kommunikatsi\w*/i,
+    en: "Internal Communication Guidelines",
+  },
+  { re: /zabota\s+o\s+zdorov\w*\s+sotrudnik\w*/i, en: "Employee Health Care" },
+  { re: /onboarding\s+sotrudnik\w*/i, en: "Employee Onboarding" },
+];
+
 /** Single-token glossary (lowercase keys). */
 const RU_EN_WORDS: Record<string, string> = {
   корпоративная: "Corporate",
@@ -166,6 +182,10 @@ export function translateRussianTopicToEnglish(topic: string): string {
     if (re.test(trimmed)) return en;
   }
 
+  for (const { re, en } of LATIN_RU_PHRASES) {
+    if (re.test(trimmed)) return en;
+  }
+
   const parts = trimmed.split(/(\s+)/);
   const translated: string[] = [];
   let hit = 0;
@@ -203,7 +223,12 @@ export function transliterateCyrillicToLatin(text: string): string {
 /** English-facing title/topic from a possibly Russian prompt. */
 export function englishFacingTopic(topic: string): string {
   const trimmed = topic.trim() || "Internal workflow guide";
-  if (!isMostlyCyrillic(trimmed)) return trimmed;
+  if (!isMostlyCyrillic(trimmed)) {
+    for (const { re, en } of LATIN_RU_PHRASES) {
+      if (re.test(trimmed)) return en;
+    }
+    return trimmed;
+  }
   const translated = translateRussianTopicToEnglish(trimmed);
   if (translated && /[A-Za-z]/.test(translated)) return translated;
   const fromSlug = slugifyKbTitle(trimmed);
@@ -228,7 +253,10 @@ export function alignKbTextToLocale(
   locale: AppLocale,
   fields: { title: string; summary: string; content: string },
 ): { title: string; summary: string; content: string; corrected: boolean } {
-  if (locale !== "en" || !isMostlyCyrillic(fields.title)) {
+  const titleNeedsCorrection =
+    isMostlyCyrillic(fields.title) ||
+    LATIN_RU_PHRASES.some(({ re }) => re.test(fields.title));
+  if (locale !== "en" || !titleNeedsCorrection) {
     return { ...fields, corrected: false };
   }
 

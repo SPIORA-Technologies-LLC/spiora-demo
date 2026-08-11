@@ -157,6 +157,30 @@ describe("Knowledge Base locale switching", () => {
     assert.equal(flat.fallbackUsed, true);
   });
 
+  it("EN UI normalizes transliterated Russian title stored in en translation", () => {
+    const transliteratedInEn = {
+      ...bilingualJoin,
+      knowledge_base_article_translations: [
+        {
+          locale: "en" as const,
+          title: "Zdorovaya Atmosfera V Kollektive",
+          summary: "Draft guide generated from: Zdorovaya Atmosfera V Kollektive",
+          content: "## Overview\n\nZdorovaya Atmosfera V Kollektive",
+        },
+        {
+          locale: "ru" as const,
+          title: "Здоровая атмосфера в коллективе",
+          summary: "RU",
+          content: "## RU",
+        },
+      ],
+    };
+    const flat = flattenKbTranslationRow(transliteratedInEn, "en");
+    assert.ok(flat);
+    assert.equal(flat.title, "Healthy Atmosphere in the Team");
+    assert.equal(flat.fallbackUsed, true);
+  });
+
   it("explicit fallback reports resolvedLocale when preferred missing", () => {
     const ruOnly = {
       ...bilingualJoin,

@@ -36,6 +36,84 @@ const TABLE_COLUMNS = [
   "contract",
 ] as const;
 
+const CYRILLIC_TO_LATIN: Record<string, string> = {
+  А: "A",
+  а: "a",
+  Б: "B",
+  б: "b",
+  В: "V",
+  в: "v",
+  Г: "G",
+  г: "g",
+  Д: "D",
+  д: "d",
+  Е: "E",
+  е: "e",
+  Ё: "Yo",
+  ё: "yo",
+  Ж: "Zh",
+  ж: "zh",
+  З: "Z",
+  з: "z",
+  И: "I",
+  и: "i",
+  Й: "Y",
+  й: "y",
+  К: "K",
+  к: "k",
+  Л: "L",
+  л: "l",
+  М: "M",
+  м: "m",
+  Н: "N",
+  н: "n",
+  О: "O",
+  о: "o",
+  П: "P",
+  п: "p",
+  Р: "R",
+  р: "r",
+  С: "S",
+  с: "s",
+  Т: "T",
+  т: "t",
+  У: "U",
+  у: "u",
+  Ф: "F",
+  ф: "f",
+  Х: "Kh",
+  х: "kh",
+  Ц: "Ts",
+  ц: "ts",
+  Ч: "Ch",
+  ч: "ch",
+  Ш: "Sh",
+  ш: "sh",
+  Щ: "Shch",
+  щ: "shch",
+  Ъ: "",
+  ъ: "",
+  Ы: "Y",
+  ы: "y",
+  Ь: "",
+  ь: "",
+  Э: "E",
+  э: "e",
+  Ю: "Yu",
+  ю: "yu",
+  Я: "Ya",
+  я: "ya",
+};
+
+function displayClientName(name: string, locale: AppLocale): string {
+  if (locale !== "en" || !/[А-Яа-яЁё]/.test(name)) {
+    return name;
+  }
+  return Array.from(name)
+    .map((char) => CYRILLIC_TO_LATIN[char] ?? char)
+    .join("");
+}
+
 export function ClientsList() {
   const router = useRouter();
   const session = useSession();
@@ -111,7 +189,8 @@ export function ClientsList() {
 
   async function onDeleteClient(client: Client) {
     if (!canDelete) return;
-    if (!window.confirm(t("confirmDelete", { name: client.name }))) {
+    const clientName = displayClientName(client.name, locale);
+    if (!window.confirm(t("confirmDelete", { name: clientName }))) {
       return;
     }
     setDeletingId(client.id);
@@ -147,66 +226,69 @@ export function ClientsList() {
 
     return (
       <ul className={styles.mobileCards}>
-        {clients.map((client) => (
-          <li key={client.id}>
-            <article
-              className={styles.clientCard}
-              onClick={() => openClient(client.id)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" || event.key === " ") {
-                  event.preventDefault();
-                  openClient(client.id);
-                }
-              }}
-              tabIndex={0}
-              role="link"
-              aria-label={t("openCardAria", { name: client.name })}
-            >
-              <div className={styles.clientCardHeader}>
-                <h3 className={styles.clientCardName}>{client.name}</h3>
-                <span className={styles.clientCardStatus}>
-                  {translateClientStatus(locale, client.status)}
-                </span>
-              </div>
+        {clients.map((client) => {
+          const clientName = displayClientName(client.name, locale);
+          return (
+            <li key={client.id}>
+              <article
+                className={styles.clientCard}
+                onClick={() => openClient(client.id)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    openClient(client.id);
+                  }
+                }}
+                tabIndex={0}
+                role="link"
+                aria-label={t("openCardAria", { name: clientName })}
+              >
+                <div className={styles.clientCardHeader}>
+                  <h3 className={styles.clientCardName}>{clientName}</h3>
+                  <span className={styles.clientCardStatus}>
+                    {translateClientStatus(locale, client.status)}
+                  </span>
+                </div>
 
-              <dl className={styles.clientCardMeta}>
-                <div className={styles.clientCardRow}>
-                  <dt>{t("table.passport")}</dt>
-                  <dd>{client.passportNumber || "—"}</dd>
-                </div>
-                <div className={styles.clientCardRow}>
-                  <dt>{t("table.email")}</dt>
-                  <dd>{client.email || "—"}</dd>
-                </div>
-                <div className={styles.clientCardRow}>
-                  <dt>{t("table.referent")}</dt>
-                  <dd>{client.referentName ?? client.manager}</dd>
-                </div>
-                {client.submittedAt ? (
+                <dl className={styles.clientCardMeta}>
                   <div className={styles.clientCardRow}>
-                    <dt>{t("table.submittedAt")}</dt>
-                    <dd>{client.submittedAt}</dd>
+                    <dt>{t("table.passport")}</dt>
+                    <dd>{client.passportNumber || "—"}</dd>
+                  </div>
+                  <div className={styles.clientCardRow}>
+                    <dt>{t("table.email")}</dt>
+                    <dd>{client.email || "—"}</dd>
+                  </div>
+                  <div className={styles.clientCardRow}>
+                    <dt>{t("table.referent")}</dt>
+                    <dd>{client.referentName ?? client.manager}</dd>
+                  </div>
+                  {client.submittedAt ? (
+                    <div className={styles.clientCardRow}>
+                      <dt>{t("table.submittedAt")}</dt>
+                      <dd>{client.submittedAt}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+                {canDelete ? (
+                  <div className={styles.clientCardActions}>
+                    <button
+                      type="button"
+                      className={styles.intakeDeleteBtn}
+                      disabled={deletingId === client.id}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        void onDeleteClient(client);
+                      }}
+                    >
+                      {deletingId === client.id ? "…" : t("delete")}
+                    </button>
                   </div>
                 ) : null}
-              </dl>
-              {canDelete ? (
-                <div className={styles.clientCardActions}>
-                  <button
-                    type="button"
-                    className={styles.intakeDeleteBtn}
-                    disabled={deletingId === client.id}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      void onDeleteClient(client);
-                    }}
-                  >
-                    {deletingId === client.id ? "…" : t("delete")}
-                  </button>
-                </div>
-              ) : null}
-            </article>
-          </li>
-        ))}
+              </article>
+            </li>
+          );
+        })}
       </ul>
     );
   };
@@ -273,65 +355,68 @@ export function ClientsList() {
                   </td>
                 </tr>
               ) : (
-                clients.map((client) => (
-                  <tr
-                    key={client.id}
-                    className={styles.clickableRow}
-                    onClick={() => openClient(client.id)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        openClient(client.id);
-                      }
-                    }}
-                    tabIndex={0}
-                    role="link"
-                    aria-label={t("openCardAria", { name: client.name })}
-                  >
-                    <td>
-                      <Link
-                        href={`/clients/${encodeURIComponent(client.id)}`}
-                        className={styles.nameLink}
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        {client.name}
-                      </Link>
-                    </td>
-                    <td>
-                      <span className={styles.tableStatus}>
-                        {translateClientStatus(locale, client.status)}
-                      </span>
-                    </td>
-                    <td>{client.citizenship ?? "—"}</td>
-                    <td>{client.passportNumber || "—"}</td>
-                    <td>{client.email ?? "—"}</td>
-                    <td>{client.submittedAt ?? "—"}</td>
-                    <td>{client.expectedApprovalAt ?? "—"}</td>
-                    <td>{client.referentName ?? client.manager}</td>
-                    <td>{client.bookingAddress ?? "—"}</td>
-                    <td>{client.bookingRange ?? "—"}</td>
-                    <td>{client.approvalAt ?? "—"}</td>
-                    <td>{client.residenceCardIssuedAt ?? "—"}</td>
-                    <td>{client.appPassword ?? "—"}</td>
-                    <td>{client.partnerName ?? "—"}</td>
-                    <td>{client.contract ?? "—"}</td>
-                    {canDelete ? (
+                clients.map((client) => {
+                  const clientName = displayClientName(client.name, locale);
+                  return (
+                    <tr
+                      key={client.id}
+                      className={styles.clickableRow}
+                      onClick={() => openClient(client.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          openClient(client.id);
+                        }
+                      }}
+                      tabIndex={0}
+                      role="link"
+                      aria-label={t("openCardAria", { name: clientName })}
+                    >
                       <td>
-                        <button
-                          type="button"
-                          className={styles.intakeDeleteBtn}
-                          disabled={deletingId === client.id}
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            void onDeleteClient(client);
-                          }}
+                        <Link
+                          href={`/clients/${encodeURIComponent(client.id)}`}
+                          className={styles.nameLink}
+                          onClick={(event) => event.stopPropagation()}
                         >
-                          {deletingId === client.id ? "…" : t("delete")}
-                        </button>
+                          {clientName}
+                        </Link>
                       </td>
-                    ) : null}
-                  </tr>
-                ))
+                      <td>
+                        <span className={styles.tableStatus}>
+                          {translateClientStatus(locale, client.status)}
+                        </span>
+                      </td>
+                      <td>{client.citizenship ?? "—"}</td>
+                      <td>{client.passportNumber || "—"}</td>
+                      <td>{client.email ?? "—"}</td>
+                      <td>{client.submittedAt ?? "—"}</td>
+                      <td>{client.expectedApprovalAt ?? "—"}</td>
+                      <td>{client.referentName ?? client.manager}</td>
+                      <td>{client.bookingAddress ?? "—"}</td>
+                      <td>{client.bookingRange ?? "—"}</td>
+                      <td>{client.approvalAt ?? "—"}</td>
+                      <td>{client.residenceCardIssuedAt ?? "—"}</td>
+                      <td>{client.appPassword ?? "—"}</td>
+                      <td>{client.partnerName ?? "—"}</td>
+                      <td>{client.contract ?? "—"}</td>
+                      {canDelete ? (
+                        <td>
+                          <button
+                            type="button"
+                            className={styles.intakeDeleteBtn}
+                            disabled={deletingId === client.id}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              void onDeleteClient(client);
+                            }}
+                          >
+                            {deletingId === client.id ? "…" : t("delete")}
+                          </button>
+                        </td>
+                      ) : null}
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

@@ -312,7 +312,51 @@ const POLICY_RU: PolicyBlock[] = [
       ],
     ],
   },
-  { type: "heading", text: "13. Подтверждение ознакомления" },
+  { type: "heading", text: "13. Cookies и локальное хранилище браузера" },
+  {
+    type: "paragraph",
+    parts: [
+      "Платформа SPIORA использует cookies и механизмы локального хранения браузера (localStorage / sessionStorage) исключительно для работы сервиса, безопасности и сохранения технических настроек. Оператор не использует рекламные, маркетинговые или аналитические cookies сторонних рекламных сетей.",
+    ],
+  },
+  {
+    type: "paragraph",
+    parts: [
+      "Такие технические средства необходимы для предоставления запрошенной услуги и относятся к строго необходимым. В частности, могут использоваться:",
+    ],
+  },
+  {
+    type: "list",
+    items: [
+      [
+        { bold: "Cookies сессии и аутентификации" },
+        " (включая cookies провайдера аутентификации Supabase, а также служебные cookies сброса пароля) — для входа в клиентский кабинет, поддержания сессии после авторизации, работы двухфакторной аутентификации (MFA) и безопасного восстановления доступа;",
+      ],
+      [
+        { bold: "Cookie языка интерфейса" },
+        " (",
+        { bold: "SPIORA_LOCALE" },
+        ") — для сохранения выбранного языка (EN/RU) между посещениями;",
+      ],
+      [
+        { bold: "sessionStorage / localStorage" },
+        " — для кратковременного технического состояния интерфейса (например, отображения стартового экрана, навигации по анкете, подсказок MFA и иных UI-настроек, необходимых для корректной работы приложения). Эти данные хранятся на устройстве пользователя и не используются для рекламного профилирования.",
+      ],
+    ],
+  },
+  {
+    type: "paragraph",
+    parts: [
+      "Срок хранения cookies сессии определяется параметрами безопасности сессии и истекает при выходе из аккаунта либо по истечении срока действия сессии. Cookie языка может сохраняться дольше (до одного года) либо до удаления пользователем. Данные в sessionStorage, как правило, удаляются при закрытии вкладки браузера; данные в localStorage — до очистки пользователем или до обновления логики приложения.",
+    ],
+  },
+  {
+    type: "paragraph",
+    parts: [
+      "Пользователь может ограничить или удалить cookies и данные локального хранилища в настройках браузера. Отключение необходимых cookies может сделать невозможным вход в кабинет, сохранение языка или использование отдельных функций сервиса.",
+    ],
+  },
+  { type: "heading", text: "14. Подтверждение ознакомления" },
   {
     type: "paragraph",
     parts: [
@@ -626,7 +670,51 @@ const POLICY_EN: PolicyBlock[] = [
       ],
     ],
   },
-  { type: "heading", text: "13. Acknowledgement" },
+  { type: "heading", text: "13. Cookies and Browser Local Storage" },
+  {
+    type: "paragraph",
+    parts: [
+      "The SPIORA platform uses cookies and browser local storage mechanisms (localStorage / sessionStorage) solely to operate the service, maintain security, and remember technical preferences. The Controller does not use advertising, marketing, or analytics cookies from third-party advertising networks.",
+    ],
+  },
+  {
+    type: "paragraph",
+    parts: [
+      "These technical means are necessary to provide the requested service and are strictly necessary. In particular, the following may be used:",
+    ],
+  },
+  {
+    type: "list",
+    items: [
+      [
+        { bold: "Session and authentication cookies" },
+        " (including cookies of the Supabase authentication provider and password-reset gate cookies) — to sign in to the client portal, maintain the session after authentication, support multi-factor authentication (MFA), and enable secure account recovery;",
+      ],
+      [
+        { bold: "Interface language cookie" },
+        " (",
+        { bold: "SPIORA_LOCALE" },
+        ") — to remember the selected language (EN/RU) between visits;",
+      ],
+      [
+        { bold: "sessionStorage / localStorage" },
+        " — for short-lived technical UI state (for example, splash-screen display, questionnaire navigation state, MFA onboarding hints, and other interface preferences required for the application to work correctly). This data is stored on the user’s device and is not used for advertising profiling.",
+      ],
+    ],
+  },
+  {
+    type: "paragraph",
+    parts: [
+      "The retention period of session cookies is determined by session security settings and ends on sign-out or when the session expires. The language cookie may be retained longer (up to one year) or until deleted by the user. Data in sessionStorage is generally cleared when the browser tab is closed; data in localStorage remains until cleared by the user or updated by the application logic.",
+    ],
+  },
+  {
+    type: "paragraph",
+    parts: [
+      "The user may restrict or delete cookies and local storage data in browser settings. Disabling necessary cookies may make it impossible to sign in, retain the language preference, or use certain service features.",
+    ],
+  },
+  { type: "heading", text: "14. Acknowledgement" },
   {
     type: "paragraph",
     parts: [

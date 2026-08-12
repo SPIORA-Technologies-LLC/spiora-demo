@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Link from "next/link";
 import type { CalendarMeetingRecordingWithEvent } from "@/lib/calendar/types";
 import styles from "./MeetingRecordingsView.module.css";
 
@@ -214,12 +213,6 @@ export function MeetingRecordingsView() {
                   >
                     Смотреть
                   </button>
-                  <Link
-                    href={`/calendar?event=${encodeURIComponent(recording.eventId)}`}
-                    className={styles.eventLink}
-                  >
-                    Событие
-                  </Link>
                   <button
                     type="button"
                     className={styles.deleteButton}

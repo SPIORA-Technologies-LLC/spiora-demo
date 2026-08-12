@@ -70,7 +70,6 @@
 }
 
 .playButton,
-.eventLink,
 .deleteButton {
   min-height: 2.2rem;
   padding: 0 0.8rem;
@@ -98,14 +97,6 @@
 .deleteButton:disabled {
   opacity: 0.55;
   cursor: default;
-}
-
-.eventLink {
-  border: 1px solid var(--border-soft);
-  color: #cbd5e0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .playerOverlay {

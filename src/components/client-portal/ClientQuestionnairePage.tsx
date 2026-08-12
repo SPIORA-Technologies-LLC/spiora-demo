@@ -41,7 +41,8 @@ import {
 } from "@/lib/client-portal/questionnaire-countries";
 import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 import { CountryCombobox } from "./CountryCombobox";
-import { PersonalDataPolicyModal } from "./PersonalDataPolicyModal";
+import { QuestionnaireDateField } from "./QuestionnaireDateField";
+import { CLIENT_PRIVACY_POLICY_PATH } from "@/lib/client-portal/personal-data-policy";
 
 type SchemaSection = {
   id: string;
@@ -156,7 +157,6 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [showUpdatedBanner, setShowUpdatedBanner] = useState(false);
   const [uploadingById, setUploadingById] = useState<Record<string, boolean>>({});
   const [uploadErrorById, setUploadErrorById] = useState<Record<string, string>>({});
-  const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<CurrentResponse | null>(null);
   const localAnswersRef = useRef<Record<string, unknown>>({});
@@ -1018,7 +1018,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 : currentSection.title[locale]}
             </h2>
             {currentSection.description ? (
-              <p className={styles.displayDescription}>{currentSection.description[locale]}</p>
+              <p className={styles.sectionHint}>{currentSection.description[locale]}</p>
             ) : null}
             {currentSection.questions
               .filter((q) => !q.visibleWhen || isQuestionVisible(q as never, localAnswers))
@@ -1282,24 +1282,16 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     ) : null}
                   </div>
                 ) : q.type === "date" ? (
-                  <input
+                  <QuestionnaireDateField
                     id={`question-${q.id}`}
-                    type={localAnswers[q.id] ? "date" : "text"}
-                    placeholder={t("datePlaceholder")}
                     value={String(localAnswers[q.id] ?? "")}
-                    onFocus={(e) => {
-                      e.currentTarget.type = "date";
-                    }}
-                    onBlur={(e) => {
-                      if (!e.currentTarget.value) {
-                        e.currentTarget.type = "text";
-                      }
-                    }}
-                    onChange={(e) => onAnswer(q.id, q.type, e.target.value)}
+                    locale={locale}
+                    placeholder={t("datePlaceholder")}
+                    onChange={(next) => onAnswer(q.id, q.type, next)}
                     readOnly={Boolean(q.readOnly)}
                     className={q.readOnly ? styles.readOnlyControl : undefined}
-                    aria-invalid={errors.some((err) => err.questionId === q.id)}
-                    aria-describedby={
+                    invalid={errors.some((err) => err.questionId === q.id)}
+                    describedBy={
                       [
                         errors.some((err) => err.questionId === q.id)
                           ? `error-${q.id}`
@@ -1346,21 +1338,21 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                         {q.id === "privacy_acknowledgement" ? (
                           <>
                             {t("privacyAck.before")}
-                            <button
-                              type="button"
+                            <a
                               className={styles.policyLink}
+                              href={CLIENT_PRIVACY_POLICY_PATH}
+                              target="_blank"
+                              rel="noopener noreferrer"
                               onMouseDown={(event) => {
                                 event.preventDefault();
                                 event.stopPropagation();
                               }}
                               onClick={(event) => {
-                                event.preventDefault();
                                 event.stopPropagation();
-                                setPrivacyPolicyOpen(true);
                               }}
                             >
                               {t("privacyAck.link")}
-                            </button>
+                            </a>
                             {t("privacyAck.after")}
                           </>
                         ) : (
@@ -1446,10 +1438,6 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
           </section>
         ) : null}
       </main>
-      <PersonalDataPolicyModal
-        open={privacyPolicyOpen}
-        onClose={() => setPrivacyPolicyOpen(false)}
-      />
     </div>
   );
 }

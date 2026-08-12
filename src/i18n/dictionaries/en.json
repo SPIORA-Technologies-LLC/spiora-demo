@@ -2557,7 +2557,7 @@
       "countryHint": "Start typing or choose a country from the list",
       "countrySearchPlaceholder": "Search country…",
       "countryNoResults": "No country found",
-      "datePlaceholder": "month/day/year",
+      "datePlaceholder": "mm/dd/yyyy",
       "back": "← Back",
       "backHome": "Back to home",
       "next": "Next →",
@@ -2635,10 +2635,6 @@
       }
     },
     "privacyPolicy": {
-      "eyebrow": "Legal",
-      "close": "Close",
-      "done": "Got it",
-      "openFullPage": "Open full page",
       "backToPortal": "Back to portal",
       "footerLink": "Personal Data Processing Policy"
     },

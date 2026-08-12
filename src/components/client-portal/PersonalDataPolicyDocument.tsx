@@ -94,10 +94,7 @@ function renderBlock(block: PolicyBlock, index: number): ReactNode {
     case "acknowledgement":
       return (
         <blockquote key={index} className={styles.acknowledgement}>
-          <span className={styles.ackMark} aria-hidden>
-            ☐
-          </span>
-          <span>{renderInline(block.parts, `a-${index}`)}</span>
+          {renderInline(block.parts, `a-${index}`)}
         </blockquote>
       );
     case "closing":

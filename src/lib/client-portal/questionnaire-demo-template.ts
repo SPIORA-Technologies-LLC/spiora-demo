@@ -115,6 +115,10 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
       id: "family",
       order: 30,
       title: { en: "Family", ru: "Семья" },
+      description: {
+        en: "If you do not have a spouse, partner, or children, you can skip this section and continue.",
+        ru: "Если у вас нет супруга, партнёра или детей — этот раздел можно пропустить и перейти дальше.",
+      },
       questions: [
         {
           id: "spouse_or_partner",

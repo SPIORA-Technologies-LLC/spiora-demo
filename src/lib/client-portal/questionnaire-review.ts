@@ -3,6 +3,7 @@ import { DISPLAY_ONLY_TYPES } from "./questionnaire-types";
 import { isQuestionVisible } from "./questionnaire-visibility";
 import { isQuestionnaireFileAnswer } from "./questionnaire-attachment-formats";
 import { countryLabel } from "./questionnaire-countries";
+import { formatQuestionnaireDate } from "./questionnaire-date";
 
 type ReviewQuestion = {
   id: string;
@@ -43,6 +44,9 @@ export function formatAnswerForReview(
   }
   if (question.type === "country" && typeof value === "string") {
     return countryLabel(value, locale);
+  }
+  if (question.type === "date" && typeof value === "string") {
+    return formatQuestionnaireDate(value, locale);
   }
   if (question.type === "file") {
     if (isQuestionnaireFileAnswer(value)) return value.fileName;

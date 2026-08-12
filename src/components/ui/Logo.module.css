@@ -38,14 +38,19 @@
 .compact {
   width: min(172px, calc(100vw - 72px));
   max-width: 100%;
+  /* Compact asset is tightly cropped; keep a little air so the O is not clipped. */
   aspect-ratio: 600 / 82;
   height: auto;
+  padding-block: 0.4rem;
+  box-sizing: content-box;
+  overflow: visible;
 }
 
 .image {
   width: 100% !important;
   height: 100% !important;
   object-fit: contain;
+  object-position: center;
   display: block;
 }
 
@@ -55,6 +60,7 @@
 .lg .image,
 .sidebar .image {
   height: auto !important;
+  max-height: none;
 }
 
 .withText {

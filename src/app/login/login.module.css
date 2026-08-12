@@ -10,6 +10,7 @@
 .card {
   width: 100%;
   max-width: 440px;
+  box-sizing: border-box;
   padding: 2rem;
   background: var(--gray-800);
   border: 1px solid var(--border-soft);
@@ -259,6 +260,9 @@
   gap: 0.55rem;
   margin-top: 1.15rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .secondaryActionsRow {
@@ -267,6 +271,9 @@
   gap: 0.55rem;
   margin-top: 1.15rem;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .secondaryAction {
@@ -274,6 +281,8 @@
   align-items: center;
   justify-content: center;
   flex: 1 1 auto;
+  box-sizing: border-box;
+  max-width: 100%;
   min-width: min(100%, 9.5rem);
   padding: 0.65rem 1rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -390,10 +399,13 @@
 
   .secondaryActionsRow {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .secondaryAction {
     width: 100%;
+    max-width: 100%;
     min-width: 0;
+    flex: 0 0 auto;
   }
 }

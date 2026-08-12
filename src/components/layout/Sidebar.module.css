@@ -194,9 +194,9 @@
     width: 100%;
     max-width: 100%;
     flex-shrink: 0;
-    overflow: hidden;
+    overflow: visible;
     box-sizing: border-box;
-    padding: 14px 12px 18px;
+    padding: 16px 12px 22px;
   }
 
   .nav {
@@ -225,7 +225,7 @@
   }
 
   .brandMobile {
-    padding: 12px 10px 16px;
+    padding: 14px 10px 20px;
   }
 
   .navLink {

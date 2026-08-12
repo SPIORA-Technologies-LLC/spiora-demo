@@ -1,6 +1,8 @@
 .shell {
   display: flex;
   height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
   overflow: hidden;
   background: var(--bg-page);
   color: #ffffff;
@@ -44,6 +46,8 @@
   padding: 1.5rem;
   overflow-x: hidden;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   background: var(--bg-page);
 }
 
@@ -60,7 +64,7 @@
 
 @media (max-width: 900px) {
   .content {
-    padding: 1rem;
+    padding: 1rem 1rem max(1.5rem, calc(env(safe-area-inset-bottom, 0px) + 1.5rem));
     transition: opacity var(--transition-slow);
   }
 
@@ -136,6 +140,6 @@
 
 @media (max-width: 640px) {
   .content {
-    padding: 0.75rem;
+    padding: 0.75rem 0.75rem max(1.75rem, calc(env(safe-area-inset-bottom, 0px) + 1.75rem));
   }
 }

@@ -301,9 +301,32 @@
     padding: 0.875rem 1rem;
   }
 
+  .wrap {
+    gap: 0.75rem;
+    padding-bottom: 2rem;
+  }
+
+  .panelTitle {
+    font-size: 0.95rem;
+    margin-bottom: 0.55rem;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions > * {
+    width: 100%;
+    justify-content: center;
+  }
+
   .paymentItem {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;
+  }
+
+  .emptyPayments {
+    padding: 0.85rem 0.5rem 1.1rem;
   }
 }

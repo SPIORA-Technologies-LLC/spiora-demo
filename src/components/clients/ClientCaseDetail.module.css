@@ -25,11 +25,14 @@
   padding: 0.35rem 0.8rem;
   cursor: pointer;
   font-size: 0.85rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tabActive {
   border-color: var(--border-burgundy);
   background: rgba(120, 40, 50, 0.35);
+  color: #fff;
 }
 
 .panel {
@@ -205,6 +208,64 @@
   margin-top: 0.2rem;
 }
 
+@media (max-width: 800px) {
+  .fieldGrid,
+  .answerRow {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    margin: 0 -0.75rem;
+    padding: 0.35rem 0.75rem 0.45rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    touch-action: pan-x;
+    position: sticky;
+    top: -0.15rem;
+    z-index: 6;
+    background: linear-gradient(
+      180deg,
+      var(--bg-page) 70%,
+      rgba(10, 10, 10, 0.92) 100%
+    );
+    mask-image: linear-gradient(
+      90deg,
+      transparent 0,
+      #000 0.75rem,
+      #000 calc(100% - 0.75rem),
+      transparent 100%
+    );
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab,
+  .tabActive {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    min-height: 2.1rem;
+  }
+
+  .tabActive {
+    background: linear-gradient(
+      180deg,
+      rgba(168, 51, 61, 0.42),
+      rgba(120, 40, 50, 0.28)
+    );
+    border-color: rgba(255, 183, 74, 0.35);
+    box-shadow: 0 0 0 1px rgba(255, 183, 74, 0.12);
+  }
+}
+
 @media (max-width: 640px) {
   .docList li {
     flex-direction: column;
@@ -214,6 +275,42 @@
   .docActions {
     width: fit-content;
     align-self: flex-end;
+  }
+
+  .tabs {
+    margin: 0 -0.75rem;
+    padding: 0.1rem 0.75rem 0.3rem;
+  }
+
+  .historyList {
+    margin-left: 0.15rem;
+  }
+
+  .historyItem {
+    padding: 0.7rem 0 0.8rem 0.95rem;
+  }
+
+  .historyTime {
+    font-size: 0.72rem;
+  }
+
+  .historyEvent {
+    font-size: 0.875rem;
+  }
+
+  .financeWrap {
+    gap: 0.65rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .financeHint {
+    font-size: 0.8rem;
+    line-height: 1.4;
+  }
+
+  .page {
+    gap: 0.85rem;
+    padding-bottom: 1.25rem;
   }
 }
 
@@ -289,13 +386,61 @@
   gap: 0.75rem;
 }
 
-.commentMeta,
-.historyList li {
+.commentMeta {
   display: flex;
   gap: 0.75rem;
   justify-content: space-between;
   color: var(--gray-200);
   font-size: 0.85rem;
+}
+
+.historyList {
+  gap: 0;
+  margin-top: 0.35rem;
+  padding-left: 0.15rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.historyItem {
+  position: relative;
+  padding: 0.75rem 0 0.85rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.historyItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0.25rem;
+}
+
+.historyItem::before {
+  content: "";
+  position: absolute;
+  top: 1.05rem;
+  left: -0.28rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 183, 74, 0.85);
+  box-shadow: 0 0 0 3px rgba(255, 183, 74, 0.12);
+}
+
+.historyTime {
+  display: block;
+  margin: 0 0 0.3rem;
+  color: var(--gray-300);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: normal;
+}
+
+.historyEvent {
+  margin: 0;
+  color: var(--white);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
 .statusForm {
@@ -320,6 +465,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  min-width: 0;
+  padding-bottom: 0.5rem;
 }
 
 .financeHint {
@@ -332,11 +479,4 @@
   margin: 0;
   padding: 1rem 0;
   color: var(--gray-200);
-}
-
-@media (max-width: 800px) {
-  .fieldGrid,
-  .answerRow {
-    grid-template-columns: 1fr;
-  }
 }

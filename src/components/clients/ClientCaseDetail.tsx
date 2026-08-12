@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { FilterSelect } from "@/components/ui/FilterSelect";
 import { ClientCaseFinanceTab } from "@/components/clients/ClientCaseFinanceTab";
@@ -107,6 +107,7 @@ export function ClientCaseDetail({
   const locale = useLocale() as "en" | "ru";
   const t = useTranslations("clientIntake.detail");
   const [tab, setTab] = useState<TabId>("overview");
+  const tabsRef = useRef<HTMLDivElement | null>(null);
   const [data, setData] = useState<CaseDetailPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState("");
@@ -242,17 +243,31 @@ export function ClientCaseDetail({
       : []),
   ];
 
+  useEffect(() => {
+    const root = tabsRef.current;
+    if (!root) return;
+    const active = root.querySelector<HTMLElement>(`[data-tab-id="${tab}"]`);
+    active?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [tab]);
+
   return (
     <div className={styles.page}>
       <Link href="/clients/intake" className={styles.back}>
         ← {t("back")}
       </Link>
 
-      <div className={styles.tabs}>
+      <div className={styles.tabs} role="tablist" aria-label={t("sectionTitle")} ref={tabsRef}>
         {tabs.map((item) => (
           <button
             key={item.id}
             type="button"
+            role="tab"
+            aria-selected={tab === item.id}
+            data-tab-id={item.id}
             className={tab === item.id ? styles.tabActive : styles.tab}
             onClick={() => setTab(item.id)}
           >
@@ -476,18 +491,24 @@ export function ClientCaseDetail({
         <Card className={styles.panel}>
           <ul className={styles.historyList}>
             {data.activity.map((item) => (
-              <li key={item.id}>
-                <span>{formatDateTime(item.createdAt, locale)}</span>
-                <span>{caseActivityLabel(item.eventType, locale)}</span>
+              <li key={item.id} className={styles.historyItem}>
+                <time className={styles.historyTime} dateTime={item.createdAt}>
+                  {formatDateTime(item.createdAt, locale)}
+                </time>
+                <p className={styles.historyEvent}>
+                  {caseActivityLabel(item.eventType, locale)}
+                </p>
               </li>
             ))}
             {data.history.map((item) => (
-              <li key={`status-${item.id}`}>
-                <span>{formatDateTime(item.createdAt, locale)}</span>
-                <span>
+              <li key={`status-${item.id}`} className={styles.historyItem}>
+                <time className={styles.historyTime} dateTime={item.createdAt}>
+                  {formatDateTime(item.createdAt, locale)}
+                </time>
+                <p className={styles.historyEvent}>
                   {caseStatusLabel(item.toStatus, locale)}
                   {item.note ? ` — ${item.note}` : ""}
-                </span>
+                </p>
               </li>
             ))}
           </ul>

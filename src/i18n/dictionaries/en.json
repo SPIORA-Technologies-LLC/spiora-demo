@@ -2958,6 +2958,7 @@
     "empty": "No submitted applications yet",
     "delete": "Delete",
     "confirmDelete": "Are you sure you want to remove “{name}” from the list?",
+    "openCardAria": "Open application {name}",
     "columns": {
       "name": "Client",
       "firstName": "First name",

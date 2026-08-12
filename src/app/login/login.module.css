@@ -367,3 +367,33 @@
   line-height: 1.5;
   color: var(--gray-300);
 }
+
+@media (max-width: 640px) {
+  .page {
+    padding: 0.85rem;
+    align-items: flex-start;
+  }
+
+  .card {
+    padding: 1.35rem 1.1rem;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+
+  .input,
+  .submit {
+    font-size: 16px;
+    min-height: 2.75rem;
+  }
+
+  .secondaryActionsRow {
+    flex-direction: column;
+  }
+
+  .secondaryAction {
+    width: 100%;
+    min-width: 0;
+  }
+}

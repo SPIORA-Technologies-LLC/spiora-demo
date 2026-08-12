@@ -133,3 +133,18 @@
   letter-spacing: 0.015em;
   color: var(--policy-ink);
 }
+
+@media (max-width: 640px) {
+  .company {
+    padding: 1rem;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+
+  .paragraph,
+  .list {
+    font-size: 0.94rem;
+  }
+}

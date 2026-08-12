@@ -772,6 +772,46 @@
 @media (max-width: 900px) {
   .page {
     grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 0.85rem;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(12, 12, 14, 0.92);
+  }
+
+  .sectionList {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 0.45rem;
+    padding-bottom: 0.15rem;
+    margin: 0 -0.15rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .sectionList li {
+    flex: 0 0 auto;
+  }
+
+  .sectionList a {
+    white-space: nowrap;
+    align-items: center;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .navLinkCurrent {
+    border-color: rgba(244, 152, 26, 0.45);
+    background: rgba(244, 152, 26, 0.12);
   }
 
   .actions {
@@ -783,5 +823,57 @@
   .secondaryBtn {
     width: 100%;
     text-align: center;
+    min-height: 2.75rem;
+  }
+
+  .header h1 {
+    font-size: 1.25rem;
+  }
+
+  .sectionHint {
+    font-size: 0.88rem;
+  }
+
+  .reviewList {
+    gap: 0.85rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .sidebar,
+  .card {
+    padding: 0.85rem;
+    border-radius: 14px;
+  }
+
+  .sectionTitle {
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.7rem;
+    font-size: 1.2rem;
+  }
+
+  .field input:not([type="checkbox"]),
+  .field textarea,
+  .field select,
+  .booleanLabel {
+    font-size: 16px;
+  }
+
+  .booleanRow {
+    align-items: flex-start;
+    padding: 0.8rem 0.85rem;
+  }
+
+  .fileDropzone {
+    padding: 1rem 0.85rem;
+  }
+
+  .errorSummary,
+  .reviewWarning {
+    padding: 0.85rem;
   }
 }

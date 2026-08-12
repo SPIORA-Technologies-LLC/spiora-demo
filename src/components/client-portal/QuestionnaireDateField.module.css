@@ -10,6 +10,18 @@
   padding-right: 2.6rem;
 }
 
+@media (max-width: 640px) {
+  .textInput {
+    font-size: 16px;
+    min-height: 2.75rem;
+  }
+
+  .pickerHit {
+    width: 2rem;
+    height: 2rem;
+  }
+}
+
 .pickerHit {
   position: absolute;
   top: 50%;

@@ -281,10 +281,21 @@
 
   .composer {
     padding: 0.7rem 1rem 0.9rem;
+    grid-template-columns: 1fr;
   }
 
   .title {
     font-size: 1.05rem;
+  }
+
+  .input {
+    font-size: 16px;
+    min-height: 2.75rem;
+  }
+
+  .sendBtn {
+    width: 100%;
+    min-height: 2.75rem;
   }
 }
 

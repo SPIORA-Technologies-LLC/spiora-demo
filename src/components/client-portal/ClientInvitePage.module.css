@@ -319,3 +319,31 @@
   background: linear-gradient(180deg, #a8333d, #7d222b);
   color: #fff;
 }
+
+@media (max-width: 640px) {
+  .page {
+    padding: 0.85rem;
+    align-items: flex-start;
+  }
+
+  .card {
+    padding: 1.25rem 1rem 1.3rem;
+    border-radius: 16px;
+  }
+
+  .title {
+    font-size: 1.2rem;
+  }
+
+  .input,
+  .primary,
+  .googleButton,
+  .forgotLink {
+    font-size: 16px;
+    min-height: 2.75rem;
+  }
+
+  .modeRow {
+    grid-template-columns: 1fr;
+  }
+}

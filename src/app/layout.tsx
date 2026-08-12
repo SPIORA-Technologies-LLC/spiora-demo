@@ -53,6 +53,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   themeColor: branding.accentColor,
   viewportFit: "cover",
+  // Keep focused chat/composer fields above the on-screen keyboard on mobile.
+  interactiveWidget: "resizes-content",
 };
 
 export default async function RootLayout({

@@ -82,6 +82,7 @@ export function TeamChatView({
 }: TeamChatViewProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("teamChat");
+  const wrapRef = useRef<HTMLDivElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -115,6 +116,7 @@ export function TeamChatView({
   );
   const [viewMode, setViewMode] = useState<"chat" | "shared">("chat");
   const [sharedTab, setSharedTab] = useState<TeamChatSharedMediaType>("image");
+  const [composing, setComposing] = useState(false);
 
   const isOwner = user.role === "owner";
 
@@ -144,6 +146,35 @@ export function TeamChatView({
     const el = listRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
+  }, []);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    const vv = window.visualViewport;
+    if (!wrap) return;
+
+    const syncKeyboardInset = () => {
+      if (!vv) {
+        wrap.style.setProperty("--team-chat-keyboard-inset", "0px");
+        return;
+      }
+      const inset = Math.max(
+        0,
+        Math.round(window.innerHeight - vv.height - vv.offsetTop),
+      );
+      wrap.style.setProperty("--team-chat-keyboard-inset", `${inset}px`);
+    };
+
+    syncKeyboardInset();
+    vv?.addEventListener("resize", syncKeyboardInset);
+    vv?.addEventListener("scroll", syncKeyboardInset);
+    window.addEventListener("resize", syncKeyboardInset);
+    return () => {
+      vv?.removeEventListener("resize", syncKeyboardInset);
+      vv?.removeEventListener("scroll", syncKeyboardInset);
+      window.removeEventListener("resize", syncKeyboardInset);
+      wrap.style.removeProperty("--team-chat-keyboard-inset");
+    };
   }, []);
 
   useEffect(() => {
@@ -710,42 +741,48 @@ export function TeamChatView({
   }
 
   return (
-    <div className={styles.wrap}>
-      <SectionHeader
-        title={t("title")}
-        subtitle={t("subtitle", { companyName: branding.companyName })}
-        action={
-          isOwner ? (
-            <Button
-              type="button"
-              variant="danger"
-              onClick={() => setClearOpen(true)}
-            >
-              {t("clearChat")}
-            </Button>
-          ) : null
-        }
-      />
-
-      <div className={styles.searchRow}>
-        <input
-          className={styles.search}
-          type="search"
-          placeholder={t("searchPlaceholder")}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          disabled={viewMode === "shared"}
-        />
-        <Button
-          type="button"
-          variant={viewMode === "shared" ? "primary" : "secondary"}
-          className={styles.viewToggleBtn}
-          onClick={() =>
-            setViewMode((current) => (current === "chat" ? "shared" : "chat"))
+    <div
+      className={styles.wrap}
+      ref={wrapRef}
+      data-composing={composing ? "true" : undefined}
+    >
+      <div className={styles.topChrome}>
+        <SectionHeader
+          title={t("title")}
+          subtitle={t("subtitle", { companyName: branding.companyName })}
+          action={
+            isOwner ? (
+              <Button
+                type="button"
+                variant="danger"
+                onClick={() => setClearOpen(true)}
+              >
+                {t("clearChat")}
+              </Button>
+            ) : null
           }
-        >
-          {viewMode === "shared" ? t("viewChat") : t("viewShared")}
-        </Button>
+        />
+
+        <div className={styles.searchRow}>
+          <input
+            className={styles.search}
+            type="search"
+            placeholder={t("searchPlaceholder")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            disabled={viewMode === "shared"}
+          />
+          <Button
+            type="button"
+            variant={viewMode === "shared" ? "primary" : "secondary"}
+            className={styles.viewToggleBtn}
+            onClick={() =>
+              setViewMode((current) => (current === "chat" ? "shared" : "chat"))
+            }
+          >
+            {viewMode === "shared" ? t("viewChat") : t("viewShared")}
+          </Button>
+        </div>
       </div>
 
       {viewMode === "chat" && pinnedMessages.length > 0 ? (
@@ -846,7 +883,15 @@ export function TeamChatView({
       </div>
       )}
 
-      <div className={styles.composer}>
+      <div
+        className={styles.composer}
+        onFocusCapture={() => setComposing(true)}
+        onBlurCapture={(event) => {
+          const next = event.relatedTarget as Node | null;
+          if (next && event.currentTarget.contains(next)) return;
+          setComposing(false);
+        }}
+      >
         {replyTarget ? (
           <div className={styles.composerReply}>
             <ChatReplyQuote

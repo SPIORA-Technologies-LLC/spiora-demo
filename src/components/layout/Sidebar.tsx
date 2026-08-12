@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/login/actions";
 import { Logo } from "@/components/ui/Logo";
+import { PwaInstallSidebarButton } from "@/components/pwa/PwaInstallSidebarButton";
 import { getNavItemsForRole } from "@/lib/auth/permissions";
 import type { UserRole } from "@/lib/auth/types";
 import styles from "./Sidebar.module.css";
@@ -193,6 +194,7 @@ export function Sidebar({
       </nav>
 
       <div className={styles.mobileFooter}>
+        <PwaInstallSidebarButton />
         <form action={signOutAction}>
           <button type="submit" className={styles.logoutBtn}>
             <i

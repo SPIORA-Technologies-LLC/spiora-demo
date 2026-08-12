@@ -208,7 +208,10 @@
     "ru": "RU"
   },
   "pwa": {
-    "installHint": "Install {productName} as an app on your laptop — quick access from the desktop.",
+    "installHint": "Install {productName} as an app on your phone — quick access from the home screen.",
+    "installIos": "On iPhone/iPad: tap Share, then “Add to Home Screen”.",
+    "installAndroidManual": "In your browser menu choose “Install app” or “Add to Home screen”.",
+    "installNav": "Download demo app",
     "install": "Install",
     "dismiss": "Not now"
   },

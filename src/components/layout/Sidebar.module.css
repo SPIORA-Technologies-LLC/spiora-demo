@@ -167,8 +167,11 @@
     min-height: 0;
     box-shadow: none;
     border-right: none;
-    padding: max(12px, env(safe-area-inset-top)) 16px
-      max(16px, env(safe-area-inset-bottom));
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: max(12px, env(safe-area-inset-top, 0px)) 16px 0;
   }
 
   .brandMobileLogo {
@@ -197,8 +200,9 @@
   }
 
   .nav {
-    flex: 1;
-    min-height: 0;
+    flex: 0 0 auto;
+    min-height: auto;
+    overflow: visible;
     padding-top: 2px;
   }
 
@@ -209,13 +213,15 @@
 
   .mobileFooter {
     display: block;
+    margin-top: 0.75rem;
+    padding-top: 10px;
+    padding-bottom: max(2.5rem, calc(env(safe-area-inset-bottom, 0px) + 2rem));
   }
 }
 
 @media (max-width: 640px) {
   .sidebar {
-    padding: max(10px, env(safe-area-inset-top)) 14px
-      max(14px, env(safe-area-inset-bottom));
+    padding: max(10px, env(safe-area-inset-top, 0px)) 14px 0;
   }
 
   .brandMobile {
@@ -234,5 +240,9 @@
 
   .externalIcon {
     display: none;
+  }
+
+  .mobileFooter {
+    padding-bottom: max(3rem, calc(env(safe-area-inset-bottom, 0px) + 2.5rem));
   }
 }

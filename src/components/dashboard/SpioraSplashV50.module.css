@@ -186,9 +186,9 @@
 /* Mobile */
 @media (max-width: 640px) {
   .brandStage {
-    --power-grow: 2.78;
-    width: 90vw;
-    top: 40%;
+    --power-grow: 2.2;
+    width: 92vw;
+    top: 42%;
   }
 
   .waveCrop {

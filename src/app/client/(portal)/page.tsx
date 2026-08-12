@@ -9,14 +9,15 @@ import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 import { redirect } from "next/navigation";
 
 type Props = {
-  searchParams: Promise<{ enter?: string }>;
+  searchParams?: Promise<{ enter?: string }>;
 };
 
 export default async function ClientHomePage({ searchParams }: Props) {
   const session = await getClientSession();
   if (!session) redirect("/client/login");
-  const params = await searchParams;
-  const showEntrySplash = params.enter === "1";
+  // Drain searchParams so Next can resolve the request; splash no longer depends on ?enter=1.
+  await searchParams;
+  const showEntrySplash = true;
   const t = await getTranslations("clientPortal");
   const [questionnaire, caseData] = await Promise.all([
     getClientQuestionnaire({

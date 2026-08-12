@@ -17,6 +17,7 @@
   flex-direction: column;
   color: var(--portal-ink);
   font-family: var(--font-display);
+  overflow-x: hidden;
   background:
     radial-gradient(ellipse 55% 40% at 12% -8%, rgba(232, 41, 22, 0.18), transparent 60%),
     radial-gradient(ellipse 45% 35% at 92% 8%, rgba(244, 152, 26, 0.1), transparent 55%),
@@ -211,6 +212,10 @@
 
 .orderAssistant {
   order: 5;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .main {
@@ -218,6 +223,8 @@
   max-width: 58rem;
   margin: 0 auto;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 2.4rem 1.35rem 3.5rem;
   display: flex;
   flex-direction: column;
@@ -227,6 +234,10 @@
 .heroCard {
   position: relative;
   overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 1.85rem 1.7rem 1.7rem;
   border-radius: var(--portal-radius);
   border: 1px solid var(--portal-line);
@@ -619,6 +630,9 @@
     display: block;
     order: 6;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .mobileAccountActions .accountActions {
@@ -627,18 +641,26 @@
     align-items: stretch;
     gap: 0.55rem;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .accountLinks {
     width: 100%;
   }
 
-  .accountLink,
-  .logoutBtn {
-    width: 100%;
-    flex: 0 0 auto;
-    text-align: center;
+  .mobileAccountActions .accountLink,
+  .mobileAccountActions .logoutBtn {
+    display: flex;
+    align-items: center;
     justify-content: center;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    text-align: center;
     min-height: 2.65rem;
     padding: 0.7rem 1rem;
     font-size: 0.9rem;
@@ -648,7 +670,7 @@
     background: rgba(0, 0, 0, 0.45);
   }
 
-  .logoutBtn {
+  .mobileAccountActions .logoutBtn {
     border-color: rgba(232, 41, 22, 0.5);
   }
 

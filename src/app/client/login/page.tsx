@@ -2,6 +2,7 @@ import { getClientSession } from "@/lib/client-portal/session";
 import { isClientMfaEnabled } from "@/lib/client-portal/mfa-config";
 import { getClientMfaAssurance } from "@/lib/client-portal/mfa-service";
 import { needsMfaChallenge } from "@/lib/auth/mfa-aal";
+import { withClientPortalEntrySplash } from "@/lib/client-portal/entry-splash";
 import { redirect } from "next/navigation";
 import { ClientPortalLogin } from "@/components/client-portal/ClientPortalLogin";
 
@@ -14,7 +15,7 @@ export default async function ClientLoginPage() {
         redirect("/client/mfa/challenge?next=%2Fclient");
       }
     }
-    redirect("/client");
+    redirect(withClientPortalEntrySplash("/client"));
   }
   return <ClientPortalLogin />;
 }

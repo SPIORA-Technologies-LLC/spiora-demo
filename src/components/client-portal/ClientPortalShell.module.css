@@ -89,8 +89,8 @@
 }
 
 .logoutBtn {
-  border: 1px solid var(--portal-line);
-  background: transparent;
+  border: 1px solid rgba(244, 152, 26, 0.45);
+  background: rgba(0, 0, 0, 0.35);
   color: var(--portal-ink);
   border-radius: 999px;
   padding: 0.45rem 0.95rem;
@@ -99,6 +99,7 @@
   font-weight: 500;
   letter-spacing: 0.02em;
   cursor: pointer;
+  box-sizing: border-box;
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
@@ -106,8 +107,8 @@
 }
 
 .accountLink {
-  border: 1px solid var(--portal-line);
-  background: transparent;
+  border: 1px solid rgba(244, 152, 26, 0.45);
+  background: rgba(0, 0, 0, 0.35);
   color: var(--portal-ink);
   border-radius: 999px;
   padding: 0.45rem 0.95rem;
@@ -116,10 +117,18 @@
   font-weight: 500;
   letter-spacing: 0.02em;
   text-decoration: none;
+  box-sizing: border-box;
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
     color 0.2s ease;
+}
+
+.accountActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .accountLinks {
@@ -154,13 +163,54 @@
 }
 
 .accountLink:hover {
-  border-color: rgba(232, 41, 22, 0.45);
-  background: var(--portal-accent-soft);
+  border-color: rgba(244, 152, 26, 0.75);
+  background: rgba(244, 152, 26, 0.12);
+  color: #ffd39a;
 }
 
 .logoutBtn:hover {
-  border-color: rgba(232, 41, 22, 0.45);
+  border-color: rgba(232, 41, 22, 0.65);
   background: var(--portal-accent-soft);
+  color: #fecaca;
+}
+
+.headerAccountActions {
+  display: contents;
+}
+
+.mobileAccountActions {
+  display: none;
+}
+
+.orderBanner {
+  order: 0;
+}
+
+.orderWelcome {
+  order: 1;
+}
+
+.orderMfa {
+  order: 2;
+  display: flex;
+  flex-direction: column;
+  gap: inherit;
+}
+
+.orderMfa:empty {
+  display: none;
+}
+
+.orderCase {
+  order: 3;
+}
+
+.orderQuestionnaire {
+  order: 4;
+}
+
+.orderAssistant {
+  order: 5;
 }
 
 .main {
@@ -561,15 +611,69 @@
     gap: 0.5rem;
   }
 
+  .headerAccountActions {
+    display: none;
+  }
+
+  .mobileAccountActions {
+    display: block;
+    order: 6;
+    width: 100%;
+  }
+
+  .mobileAccountActions .accountActions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.55rem;
+    width: 100%;
+  }
+
   .accountLinks {
     width: 100%;
   }
 
   .accountLink,
   .logoutBtn {
-    flex: 1 1 auto;
+    width: 100%;
+    flex: 0 0 auto;
     text-align: center;
-    min-height: 2.5rem;
+    justify-content: center;
+    min-height: 2.65rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-width: 1.5px;
+    border-color: rgba(244, 152, 26, 0.55);
+    background: rgba(0, 0, 0, 0.45);
+  }
+
+  .logoutBtn {
+    border-color: rgba(232, 41, 22, 0.5);
+  }
+
+  .orderBanner {
+    order: 0;
+  }
+
+  .orderWelcome {
+    order: 1;
+  }
+
+  .orderCase {
+    order: 2;
+  }
+
+  .orderQuestionnaire {
+    order: 3;
+  }
+
+  .orderAssistant {
+    order: 4;
+  }
+
+  .orderMfa {
+    order: 5;
   }
 
   .grid {

@@ -117,6 +117,59 @@ export function ClientPortalHome({
   const currentStatus: ClientCaseStatus | null = caseData?.currentStatus ?? null;
   const nextStep = currentStatus ? nextCaseStatus(currentStatus) : null;
 
+  const renderAccountActions = () => (
+    <div className={styles.accountActions}>
+      {showMfaSettings ? (
+        <>
+          <a className={styles.accountLink} href="/client/account/password">
+            {t("home.changePassword")}
+          </a>
+          <a className={styles.accountLink} href="/client/account/mfa">
+            {t("home.twoFactor")}
+          </a>
+        </>
+      ) : (
+        <a className={styles.accountLink} href="/client/account/password">
+          {t("home.changePassword")}
+        </a>
+      )}
+      <button type="button" className={styles.logoutBtn} onClick={() => void onLogout()}>
+        {logoutLabel}
+      </button>
+    </div>
+  );
+
+  const mfaEducation =
+    showMfaSettings ? (
+      <section className={styles.heroCard} aria-labelledby="client-mfa-edu-title">
+        <p className={styles.tileEyebrow}>{t("home.twoFactor")}</p>
+        <h2 id="client-mfa-edu-title" className={styles.mfaEduTitle}>
+          {t("mfa.onboarding.title")}
+        </h2>
+        <div className={styles.mfaEduBlock}>
+          <h3 className={styles.mfaEduHeading}>{t("mfa.onboarding.whatTitle")}</h3>
+          <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP1")}</p>
+          <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP2")}</p>
+          <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP3")}</p>
+        </div>
+        <div className={styles.mfaEduBlock}>
+          <h3 className={styles.mfaEduHeading}>
+            {t("mfa.onboarding.recommendTitle")}
+          </h3>
+          <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP1")}</p>
+          <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP2")}</p>
+          <ul className={styles.mfaEduList}>
+            <li>{t("mfa.onboarding.recommendBullet1")}</li>
+            <li>{t("mfa.onboarding.recommendBullet2")}</li>
+            <li>{t("mfa.onboarding.recommendBullet3")}</li>
+          </ul>
+        </div>
+        <a className={styles.mfaEduCta} href="/client/account/mfa">
+          {t("mfa.onboarding.setupCta")}
+        </a>
+      </section>
+    ) : null;
+
   return (
     <>
       {entrySplash ? <ClientPortalEntrySplash onDone={dismissSplash} /> : null}
@@ -140,70 +193,26 @@ export function ClientPortalHome({
         </div>
         <div className={styles.headerActions}>
           <LanguageSwitcher />
-          {showMfaSettings ? (
-            <div className={styles.accountLinks}>
-              <a className={styles.accountLink} href="/client/account/password">
-                {t("home.changePassword")}
-              </a>
-              <a className={styles.accountLink} href="/client/account/mfa">
-                {t("home.twoFactor")}
-              </a>
-            </div>
-          ) : (
-            <a className={styles.accountLink} href="/client/account/password">
-              {t("home.changePassword")}
-            </a>
-          )}
-          <button type="button" className={styles.logoutBtn} onClick={() => void onLogout()}>
-            {logoutLabel}
-          </button>
+          <div className={styles.headerAccountActions}>{renderAccountActions()}</div>
         </div>
       </header>
 
       <main className={styles.main}>
         {showMfaSettings && mfaReenrollRequired ? (
-          <p className={styles.mfaBanner} role="status">
+          <p className={`${styles.mfaBanner} ${styles.orderBanner}`} role="status">
             {t("mfa.banner.reenroll")}{" "}
             <a href="/client/account/mfa">{t("mfa.banner.reenrollCta")}</a>
           </p>
         ) : null}
-        <section className={styles.heroCard}>
+        <section className={`${styles.heroCard} ${styles.orderWelcome}`}>
           <h1 className={styles.title}>{title}</h1>
           <p className={styles.hint}>{t("home.hint")}</p>
         </section>
 
-        {showMfaSettings ? (
-          <section className={styles.heroCard} aria-labelledby="client-mfa-edu-title">
-            <p className={styles.tileEyebrow}>{t("home.twoFactor")}</p>
-            <h2 id="client-mfa-edu-title" className={styles.mfaEduTitle}>
-              {t("mfa.onboarding.title")}
-            </h2>
-            <div className={styles.mfaEduBlock}>
-              <h3 className={styles.mfaEduHeading}>{t("mfa.onboarding.whatTitle")}</h3>
-              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP1")}</p>
-              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP2")}</p>
-              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP3")}</p>
-            </div>
-            <div className={styles.mfaEduBlock}>
-              <h3 className={styles.mfaEduHeading}>
-                {t("mfa.onboarding.recommendTitle")}
-              </h3>
-              <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP1")}</p>
-              <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP2")}</p>
-              <ul className={styles.mfaEduList}>
-                <li>{t("mfa.onboarding.recommendBullet1")}</li>
-                <li>{t("mfa.onboarding.recommendBullet2")}</li>
-                <li>{t("mfa.onboarding.recommendBullet3")}</li>
-              </ul>
-            </div>
-            <a className={styles.mfaEduCta} href="/client/account/mfa">
-              {t("mfa.onboarding.setupCta")}
-            </a>
-          </section>
-        ) : null}
+        <div className={styles.orderMfa}>{mfaEducation}</div>
 
         {caseData ? (
-          <section className={styles.heroCard}>
+          <section className={`${styles.heroCard} ${styles.orderCase}`}>
             <h2 className={styles.processTitle}>{t("process.title")}</h2>
             <p className={styles.status}>
               <span className={styles.statusDot} aria-hidden />
@@ -238,7 +247,7 @@ export function ClientPortalHome({
           </section>
         ) : null}
 
-        <section className={styles.grid}>
+        <section className={`${styles.grid} ${styles.orderQuestionnaire}`}>
           <article className={styles.placeholder}>
             <p className={styles.tileEyebrow}>{t("nav.questionnaire")}</p>
             <h2>{questionnaireStatus}</h2>
@@ -258,7 +267,11 @@ export function ClientPortalHome({
           </article>
         </section>
 
-        {assistantSlot}
+        {assistantSlot ? (
+          <div className={styles.orderAssistant}>{assistantSlot}</div>
+        ) : null}
+
+        <div className={styles.mobileAccountActions}>{renderAccountActions()}</div>
       </main>
 
       <footer className={styles.legalFooter}>

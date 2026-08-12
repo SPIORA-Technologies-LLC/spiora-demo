@@ -1524,6 +1524,7 @@
     "title": "Settings",
     "subtitle": "Team access management",
     "demoBadge": "Demo mode",
+    "backToList": "Back to sections",
     "demoContent": {
       "readOnlyNotice": "Preview only — settings cannot be changed in demo mode.",
       "profile": {

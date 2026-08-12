@@ -118,6 +118,7 @@ export function SettingsView({
   const tDemo = useTranslations("demoGuard");
   const tLang = useTranslations("language");
   const [activeTab, setActiveTab] = useState<SettingsTab>("profile");
+  const [mobileShowPanel, setMobileShowPanel] = useState(false);
   const [members, setMembers] = useState<PasswordMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [resetTarget, setResetTarget] = useState<PasswordMember | null>(null);
@@ -532,7 +533,10 @@ export function SettingsView({
         <span className={styles.demoBadge}>{t("demoBadge")}</span>
       ) : null}
 
-      <div className={styles.layout}>
+      <div
+        className={styles.layout}
+        data-mobile-view={mobileShowPanel ? "detail" : "list"}
+      >
         <nav className={styles.tabNav} aria-label={t("title")}>
           {TAB_ORDER.map((tab) => (
             <button
@@ -541,7 +545,10 @@ export function SettingsView({
               className={
                 activeTab === tab ? styles.tabActive : styles.tab
               }
-              onClick={() => setActiveTab(tab)}
+              onClick={() => {
+                setActiveTab(tab);
+                setMobileShowPanel(true);
+              }}
             >
               <span className={styles.tabTitle}>{t(`tabs.${tab}.title`)}</span>
               <span className={styles.tabHint}>{t(`tabs.${tab}.hint`)}</span>
@@ -549,7 +556,16 @@ export function SettingsView({
           ))}
         </nav>
 
-        <div className={styles.tabPanel}>{renderTabContent()}</div>
+        <div className={styles.tabPanel}>
+          <button
+            type="button"
+            className={styles.mobileBack}
+            onClick={() => setMobileShowPanel(false)}
+          >
+            ← {t("backToList")}
+          </button>
+          {renderTabContent()}
+        </div>
       </div>
 
       {resetTarget ? (

@@ -75,6 +75,10 @@
   min-width: 0;
 }
 
+.mobileBack {
+  display: none;
+}
+
 .sectionCard {
   padding: 1.25rem;
 }
@@ -346,6 +350,45 @@
   .tabNav {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .layout[data-mobile-view="list"] .tabPanel {
+    display: none;
+  }
+
+  .layout[data-mobile-view="list"] .tabActive {
+    background: rgba(0, 0, 0, 0.45);
+    border-color: var(--border-soft, rgba(255, 255, 255, 0.08));
+    color: var(--gray-300);
+  }
+
+  .layout[data-mobile-view="list"] .tabActive .tabHint {
+    color: var(--gray-400);
+  }
+
+  .layout[data-mobile-view="detail"] .tabNav {
+    display: none;
+  }
+
+  .mobileBack {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0 0 0.85rem;
+    padding: 0.45rem 0.15rem;
+    border: 0;
+    background: transparent;
+    color: var(--accent-burgundy-light, #ffb74a);
+    font-family: Inter, sans-serif;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .mobileBack:hover,
+  .mobileBack:focus-visible {
+    color: var(--white);
+    outline: none;
   }
 }
 

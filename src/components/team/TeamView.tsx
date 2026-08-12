@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 import { OnlineIndicator } from "@/components/presence/OnlineIndicator";
 import type { AppLocale } from "@/i18n/config";
@@ -178,6 +179,24 @@ export function TeamView({ user }: TeamViewProps) {
   const [statsLoading, setStatsLoading] = useState(false);
   const [statsError, setStatsError] = useState(false);
   const [selectedDay, setSelectedDay] = useState<ActivityDayStat | null>(null);
+  const [portalReady, setPortalReady] = useState(false);
+  const [overlayDismissArmed, setOverlayDismissArmed] = useState(false);
+
+  useEffect(() => {
+    setPortalReady(true);
+  }, []);
+
+  useEffect(() => {
+    const overlayOpen = Boolean(statsTarget || deleteTarget || addOpen);
+    if (!overlayOpen) {
+      setOverlayDismissArmed(false);
+      return;
+    }
+    // Avoid the same mobile tap that opened the modal from hitting the backdrop.
+    setOverlayDismissArmed(false);
+    const timer = window.setTimeout(() => setOverlayDismissArmed(true), 350);
+    return () => window.clearTimeout(timer);
+  }, [statsTarget, deleteTarget, addOpen]);
 
   const fetchMembers = useCallback(async (opts?: { silent?: boolean }) => {
     if (!opts?.silent) setLoading(true);
@@ -461,7 +480,20 @@ export function TeamView({ user }: TeamViewProps) {
                   <div className={styles.main}>
                     <p className={styles.name}>
                       <span className={styles.nameRow}>
-                        {memberName}
+                        {canOpenStats ? (
+                          <button
+                            type="button"
+                            className={styles.nameButton}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openMemberStats(member);
+                            }}
+                          >
+                            {memberName}
+                          </button>
+                        ) : (
+                          memberName
+                        )}
                         <OnlineIndicator online={Boolean(member.isOnline)} />
                       </span>
                       {isSelf ? (
@@ -521,14 +553,20 @@ export function TeamView({ user }: TeamViewProps) {
         </ul>
       )}
 
-      {statsTarget ? (
-        <div className={styles.overlay} role="dialog" aria-modal="true">
-          <div
-            className={styles.backdrop}
-            onClick={closeMemberStats}
-            aria-hidden
-          />
-          <Card className={styles.statsModal}>
+      {portalReady && statsTarget
+        ? createPortal(
+            <div className={styles.overlay} role="dialog" aria-modal="true">
+              <div
+                className={styles.backdrop}
+                onClick={() => {
+                  if (overlayDismissArmed) closeMemberStats();
+                }}
+                aria-hidden
+              />
+              <Card
+                className={styles.statsModal}
+                onClick={(event) => event.stopPropagation()}
+              >
             <h2 className={styles.modalTitle}>{t("stats.title")}</h2>
             <p className={styles.confirmName}>
               {translateTeamMemberName(
@@ -723,18 +761,26 @@ export function TeamView({ user }: TeamViewProps) {
                 {t("stats.close")}
               </Button>
             </div>
-          </Card>
-        </div>
-      ) : null}
+              </Card>
+            </div>,
+            document.body,
+          )
+        : null}
 
-      {deleteTarget ? (
-        <div className={styles.overlay} role="dialog" aria-modal="true">
-          <div
-            className={styles.backdrop}
-            onClick={() => !deleting && setDeleteTarget(null)}
-            aria-hidden
-          />
-          <Card className={styles.modal}>
+      {portalReady && deleteTarget
+        ? createPortal(
+            <div className={styles.overlay} role="dialog" aria-modal="true">
+              <div
+                className={styles.backdrop}
+                onClick={() => {
+                  if (overlayDismissArmed && !deleting) setDeleteTarget(null);
+                }}
+                aria-hidden
+              />
+              <Card
+                className={styles.modal}
+                onClick={(event) => event.stopPropagation()}
+              >
             <h2 className={styles.modalTitle}>{t("modal.title")}</h2>
             <p className={styles.confirmText}>{t("modal.body")}</p>
             <p className={styles.confirmName}>
@@ -762,23 +808,28 @@ export function TeamView({ user }: TeamViewProps) {
                 {deleting ? t("modal.deleting") : t("modal.deleteBtn")}
               </Button>
             </div>
-          </Card>
-        </div>
-      ) : null}
+              </Card>
+            </div>,
+            document.body,
+          )
+        : null}
 
-      {addOpen ? (
-        <div className={styles.overlay} role="dialog" aria-modal="true">
-          <div
-            className={styles.backdrop}
-            onClick={() => {
-              if (!creating) {
-                setAddOpen(false);
-                resetAddForm();
-              }
-            }}
-            aria-hidden
-          />
-          <Card className={styles.modal}>
+      {portalReady && addOpen
+        ? createPortal(
+            <div className={styles.overlay} role="dialog" aria-modal="true">
+              <div
+                className={styles.backdrop}
+                onClick={() => {
+                  if (!overlayDismissArmed || creating) return;
+                  setAddOpen(false);
+                  resetAddForm();
+                }}
+                aria-hidden
+              />
+              <Card
+                className={styles.modal}
+                onClick={(event) => event.stopPropagation()}
+              >
             {createdPassword ? (
               <>
                 <h2 className={styles.modalTitle}>{t("addModal.createdTitle")}</h2>
@@ -870,9 +921,11 @@ export function TeamView({ user }: TeamViewProps) {
                 </div>
               </>
             )}
-          </Card>
-        </div>
-      ) : null}
+              </Card>
+            </div>,
+            document.body,
+          )
+        : null}
 
       <Toast message={toast} onClose={() => setToast(null)} />
     </div>

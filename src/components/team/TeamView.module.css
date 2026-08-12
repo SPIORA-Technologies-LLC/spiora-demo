@@ -45,6 +45,28 @@
   color: var(--white);
 }
 
+.nameButton {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 183, 74, 0.55);
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+
+.nameButton:hover,
+.nameButton:focus-visible {
+  color: #ffb74a;
+  text-decoration-color: #ffb74a;
+  outline: none;
+}
+
 .nameRow {
   display: inline-flex;
   align-items: center;
@@ -109,7 +131,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  z-index: 250;
+  z-index: 400;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -447,5 +469,37 @@
 
   .actions button {
     width: 100%;
+  }
+
+  .overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .statsModal,
+  .modal {
+    max-width: none;
+    width: 100%;
+    max-height: min(92dvh, 100%);
+    border-radius: 16px 16px 0 0;
+    padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  .yearGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .calGridWeek .calCell {
+    min-height: 3.75rem;
+  }
+
+  .confirmActions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .confirmActions > * {
+    width: 100%;
+    justify-content: center;
   }
 }

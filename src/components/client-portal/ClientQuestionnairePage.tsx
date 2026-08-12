@@ -98,7 +98,6 @@ function sectionNavMarker(
 ): string {
   if (state === "current") return "●";
   if (state === "completed") return "✓";
-  if (state === "optional") return "·";
   return "○";
 }
 

@@ -79,6 +79,8 @@
   flex: 0 0 auto;
   width: 1rem;
   text-align: center;
+  font-size: 0.95rem;
+  line-height: 1.35;
 }
 
 .navLinkCurrent {

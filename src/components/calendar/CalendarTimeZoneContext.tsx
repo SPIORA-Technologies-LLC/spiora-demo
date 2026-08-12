@@ -1,6 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useLocale } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
+import { getIntlLocaleTag } from "@/i18n/format";
 import { CALENDAR_TIMEZONE } from "@/lib/calendar/constants";
 import {
   formatTimeZoneLabel,
@@ -24,6 +27,7 @@ export function CalendarTimeZoneProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const locale = useLocale() as AppLocale;
   const [timeZone, setTimeZone] = useState(CALENDAR_TIMEZONE);
 
   useEffect(() => {
@@ -33,9 +37,9 @@ export function CalendarTimeZoneProvider({
   const value = useMemo(
     () => ({
       timeZone,
-      timeZoneLabel: formatTimeZoneLabel(timeZone),
+      timeZoneLabel: formatTimeZoneLabel(timeZone, getIntlLocaleTag(locale)),
     }),
-    [timeZone],
+    [locale, timeZone],
   );
 
   return (

@@ -13,6 +13,7 @@ import styles from "./ClientInvitePage.module.css";
 
 export function ClientPortalLogin() {
   const t = useTranslations("clientPortal.login");
+  const tPrivacy = useTranslations("clientPortal.privacyPolicy");
   const locale = useLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -200,6 +201,9 @@ export function ClientPortalLogin() {
             </button>
             <a className={styles.forgotLink} href="/client/forgot-password">
               {t("forgotPassword")}
+            </a>
+            <a className={styles.privacyLink} href="/client/privacy">
+              {tPrivacy("footerLink")}
             </a>
           </form>
         </div>

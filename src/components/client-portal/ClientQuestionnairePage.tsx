@@ -41,6 +41,7 @@ import {
 } from "@/lib/client-portal/questionnaire-countries";
 import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 import { CountryCombobox } from "./CountryCombobox";
+import { PersonalDataPolicyModal } from "./PersonalDataPolicyModal";
 
 type SchemaSection = {
   id: string;
@@ -156,6 +157,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [showUpdatedBanner, setShowUpdatedBanner] = useState(false);
   const [uploadingById, setUploadingById] = useState<Record<string, boolean>>({});
   const [uploadErrorById, setUploadErrorById] = useState<Record<string, string>>({});
+  const [privacyPolicyOpen, setPrivacyPolicyOpen] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<CurrentResponse | null>(null);
   const localAnswersRef = useRef<Record<string, unknown>>({});
@@ -1342,8 +1344,33 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                     <span className={styles.booleanBox} aria-hidden="true" />
                     <span className={styles.booleanCopy}>
                       <span className={styles.booleanLabel}>
-                        {q.label[locale]}
-                        {q.required ? " *" : ""}
+                        {q.id === "privacy_acknowledgement" ? (
+                          <>
+                            {t("privacyAck.before")}
+                            <button
+                              type="button"
+                              className={styles.policyLink}
+                              onMouseDown={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                              }}
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                setPrivacyPolicyOpen(true);
+                              }}
+                            >
+                              {t("privacyAck.link")}
+                            </button>
+                            {t("privacyAck.after")}
+                          </>
+                        ) : (
+                          <>
+                            {q.label[locale]}
+                            {q.required ? " *" : ""}
+                          </>
+                        )}
+                        {q.id === "privacy_acknowledgement" && q.required ? " *" : null}
                       </span>
                       {q.description ? (
                         <span id={`desc-${q.id}`} className={styles.booleanHint}>
@@ -1420,6 +1447,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
           </section>
         ) : null}
       </main>
+      <PersonalDataPolicyModal
+        open={privacyPolicyOpen}
+        onClose={() => setPrivacyPolicyOpen(false)}
+      />
     </div>
   );
 }

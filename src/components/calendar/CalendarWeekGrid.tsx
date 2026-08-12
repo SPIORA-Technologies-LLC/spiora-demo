@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { AppLocale } from "@/i18n/config";
 import { getWeekdayNames } from "@/i18n/format";
+import { resolveCalendarEventTitle } from "@/lib/calendar/demo-event-title";
 import { formatEventTimeRange } from "@/lib/calendar/format";
 import { formatDateKey } from "@/lib/calendar/range";
 import type { CalendarEvent } from "@/lib/calendar/types";
@@ -41,6 +42,7 @@ function WeekEventBlock({
   const locale = useLocale() as AppLocale;
   const { timeZone } = useCalendarTimeZone();
   const timeRange = formatEventTimeRange(layout.event, timeZone, locale);
+  const displayTitle = resolveCalendarEventTitle(layout.event.title, locale);
   const isCompact = layout.heightRatio < 0.05;
   const scopeClass =
     layout.event.scope === "personal"
@@ -62,15 +64,15 @@ function WeekEventBlock({
         height: `${layout.heightRatio * 100}%`,
       }}
       onClick={() => onEventClick?.(layout.event)}
-      title={`${layout.event.title} · ${timeRange}`}
-      aria-label={`${layout.event.title}, ${timeRange}`}
+      title={`${displayTitle} · ${timeRange}`}
+      aria-label={`${displayTitle}, ${timeRange}`}
     >
       {isCompact ? (
-        <span className={styles.weekEventTitle}>{layout.event.title}</span>
+        <span className={styles.weekEventTitle}>{displayTitle}</span>
       ) : (
         <>
           <span className={styles.weekEventTime}>{timeRange}</span>
-          <span className={styles.weekEventTitle}>{layout.event.title}</span>
+          <span className={styles.weekEventTitle}>{displayTitle}</span>
         </>
       )}
     </button>
@@ -145,7 +147,9 @@ export function CalendarWeekGrid({
           <div className={styles.allDayLabel}>{t("allDay")}</div>
           {columns.map((column) => (
             <div key={column.dateKey} className={styles.allDayCell}>
-              {getAllDayEventsForWeekDay(events, column.dateKey, timeZone).map((event) => (
+              {getAllDayEventsForWeekDay(events, column.dateKey, timeZone).map((event) => {
+                const displayTitle = resolveCalendarEventTitle(event.title, locale);
+                return (
                 <button
                   key={event.id}
                   type="button"
@@ -157,11 +161,12 @@ export function CalendarWeekGrid({
                   ].join(" ")}
                   style={{ position: "relative", height: "auto" }}
                   onClick={() => onEventClick?.(event)}
-                  title={event.title}
+                  title={displayTitle}
                 >
-                  <span className={styles.weekEventTitle}>{event.title}</span>
+                  <span className={styles.weekEventTitle}>{displayTitle}</span>
                 </button>
-              ))}
+                );
+              })}
             </div>
           ))}
         </div>

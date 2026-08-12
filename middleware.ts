@@ -27,6 +27,7 @@ const PUBLIC_PATHS = [
   "/reset-password",
   "/client/forgot-password",
   "/client/reset-password",
+  "/client/privacy",
   "/auth/callback",
   "/auth/confirm",
 ];
@@ -72,7 +73,9 @@ function isClientPublicPath(pathname: string) {
     pathname === "/client/forgot-password" ||
     pathname.startsWith("/client/forgot-password/") ||
     pathname === "/client/reset-password" ||
-    pathname.startsWith("/client/reset-password/")
+    pathname.startsWith("/client/reset-password/") ||
+    pathname === "/client/privacy" ||
+    pathname.startsWith("/client/privacy/")
   );
 }
 

@@ -2627,7 +2627,20 @@
         "archived": "Archived",
         "unavailable": "Temporarily unavailable"
       },
-      "loadError": "Could not load questionnaire ({code}). Please try again later."
+      "loadError": "Could not load questionnaire ({code}). Please try again later.",
+      "privacyAck": {
+        "before": "I confirm that I have read the ",
+        "link": "Personal Data Processing Policy",
+        "after": ", understand how my personal data will be processed, accept its terms, and consent to the processing of the personal data I provide for the requested service."
+      }
+    },
+    "privacyPolicy": {
+      "eyebrow": "Legal",
+      "close": "Close",
+      "done": "Got it",
+      "openFullPage": "Open full page",
+      "backToPortal": "Back to portal",
+      "footerLink": "Personal Data Processing Policy"
     },
     "invite": {
       "loading": "Checking invitation…",

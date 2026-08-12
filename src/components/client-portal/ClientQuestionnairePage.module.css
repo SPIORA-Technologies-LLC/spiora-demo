@@ -212,6 +212,30 @@
   color: #f6efe9;
 }
 
+.policyLink {
+  display: inline;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #f4981a;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+  cursor: pointer;
+}
+
+.policyLink:hover {
+  color: #ffb24a;
+}
+
+.policyLink:focus-visible {
+  outline: 2px solid rgba(244, 152, 26, 0.55);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
 .booleanHint {
   font-size: 0.82rem;
   line-height: 1.4;

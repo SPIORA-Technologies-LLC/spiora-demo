@@ -13,6 +13,8 @@
   --portal-radius-sm: 1rem;
 
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   color: var(--portal-ink);
   font-family: var(--font-display);
   background:
@@ -162,8 +164,10 @@
 }
 
 .main {
+  flex: 1 1 auto;
   max-width: 58rem;
   margin: 0 auto;
+  width: 100%;
   padding: 2.4rem 1.35rem 3.5rem;
   display: flex;
   flex-direction: column;
@@ -512,6 +516,25 @@
 
 .processHistory li span:last-child {
   color: var(--portal-ink);
+}
+
+.legalFooter {
+  margin-top: auto;
+  padding: 1.25rem 1.6rem 1.75rem;
+  border-top: 1px solid var(--portal-line);
+  text-align: center;
+}
+
+.legalFooter a {
+  color: var(--portal-muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.01em;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.legalFooter a:hover {
+  color: var(--portal-warm);
 }
 
 @media (max-width: 800px) {

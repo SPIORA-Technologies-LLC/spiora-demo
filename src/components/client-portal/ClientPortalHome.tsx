@@ -260,6 +260,10 @@ export function ClientPortalHome({
 
         {assistantSlot}
       </main>
+
+      <footer className={styles.legalFooter}>
+        <a href="/client/privacy">{t("privacyPolicy.footerLink")}</a>
+      </footer>
     </div>
     </>
   );

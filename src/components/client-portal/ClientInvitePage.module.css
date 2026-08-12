@@ -291,6 +291,21 @@
   outline-offset: -2px;
 }
 
+.privacyLink {
+  display: block;
+  margin: 0.9rem auto 0;
+  width: fit-content;
+  color: rgba(244, 239, 232, 0.55);
+  font-size: 0.8rem;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 0.16em;
+}
+
+.privacyLink:hover {
+  color: #f0a8ae;
+}
+
 .secondary {
   margin-top: 0.65rem;
   width: 100%;

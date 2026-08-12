@@ -21,4 +21,12 @@ describe("timezone helpers", () => {
     assert.match(label, /Europe|Moscow|Москва/i);
     assert.match(label, /UTC|GMT|[+-]\d/);
   });
+
+  it("formats timezone names in the requested locale", () => {
+    const en = formatTimeZoneLabel("Europe/Berlin", "en-US");
+    const ru = formatTimeZoneLabel("Europe/Berlin", "ru-RU");
+    assert.doesNotMatch(en, /[А-Яа-яЁё]/);
+    assert.match(ru, /[А-Яа-яЁё]/);
+    assert.match(en, /UTC|GMT|[+-]\d/);
+  });
 });

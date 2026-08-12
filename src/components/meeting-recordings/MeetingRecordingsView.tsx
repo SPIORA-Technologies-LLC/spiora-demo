@@ -4,9 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 import type { CalendarMeetingRecordingWithEvent } from "@/lib/calendar/types";
 import styles from "./MeetingRecordingsView.module.css";
 
-function formatDuration(seconds: number | null): string {
+function formatDuration(seconds: number | null): string | null {
   if (!seconds || seconds <= 0) {
-    return "—";
+    return null;
   }
 
   const minutes = Math.floor(seconds / 60);
@@ -14,9 +14,9 @@ function formatDuration(seconds: number | null): string {
   return `${minutes}:${String(remainder).padStart(2, "0")}`;
 }
 
-function formatFileSize(bytes: number | null): string {
+function formatFileSize(bytes: number | null): string | null {
   if (!bytes || bytes <= 0) {
-    return "—";
+    return null;
   }
 
   const mb = bytes / (1024 * 1024);
@@ -32,6 +32,17 @@ function formatSavedAt(recording: CalendarMeetingRecordingWithEvent): string {
     hour: "2-digit",
     minute: "2-digit",
   });
+}
+
+function buildRecordingMeta(recording: CalendarMeetingRecordingWithEvent): string {
+  return [
+    `Сохранено: ${formatSavedAt(recording)}`,
+    recording.startedByName?.trim() || null,
+    formatDuration(recording.durationSeconds),
+    formatFileSize(recording.fileSizeBytes),
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
 export function MeetingRecordingsView() {
@@ -191,13 +202,7 @@ export function MeetingRecordingsView() {
                 <div className={styles.itemMain}>
                   <h2 className={styles.itemTitle}>{recording.eventTitle}</h2>
                   <p className={styles.itemMeta}>
-                    Сохранено: {formatSavedAt(recording)}
-                    {" · "}
-                    {recording.startedByName}
-                    {" · "}
-                    {formatDuration(recording.durationSeconds)}
-                    {" · "}
-                    {formatFileSize(recording.fileSizeBytes)}
+                    {buildRecordingMeta(recording)}
                   </p>
                   {recording.linkedClientName ? (
                     <p className={styles.clientMeta}>

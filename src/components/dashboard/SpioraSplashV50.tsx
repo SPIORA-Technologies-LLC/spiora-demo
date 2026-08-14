@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { APP_ENTRY_SPLASH_PARAM } from "@/lib/layout/app-entry-splash";
 import styles from "./SpioraSplashV50.module.css";
 
@@ -43,15 +43,17 @@ function shouldPlaySplash(force: boolean): boolean {
 }
 
 /**
- * Boot splash for the employee app.
+ * Boot splash for the employee app and client portal.
  *
- * Starts in a solid "gate" cover so the dashboard never flashes before MFA/login
- * entry (`?enter=1`) or the first-session animation. `useLayoutEffect` decides
- * play vs skip before the browser paints.
+ * `force` (client portal) SSRs the logo immediately so the OS/PWA app-icon
+ * splash is replaced by the wordmark, not a second power icon. Without `force`,
+ * a solid gate covers the dashboard until play-or-skip is decided.
  */
 export function SpioraSplashV50({ force = false, onDone }: Props) {
-  const [phase, setPhase] = useState<Phase>("gate");
+  const [phase, setPhase] = useState<Phase>(force ? "play" : "gate");
   const [exiting, setExiting] = useState(false);
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
 
   useLayoutEffect(() => {
     if (typeof window === "undefined") return;
@@ -77,14 +79,14 @@ export function SpioraSplashV50({ force = false, onDone }: Props) {
           // ignore
         }
       }
-      onDone?.();
+      onDoneRef.current?.();
     }, holdMs + FADE_MS);
 
     return () => {
       window.clearTimeout(fadeTimer);
       window.clearTimeout(hideTimer);
     };
-  }, [force, onDone]);
+  }, [force]);
 
   if (phase === "done") return null;
 
@@ -109,12 +111,15 @@ export function SpioraSplashV50({ force = false, onDone }: Props) {
               className={styles.brandFull}
               src="/splash-v50/spiora-logo-vector.svg"
               alt=""
+              fetchPriority="high"
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               className={styles.brandPower}
               src="/splash-v50/spiora-power-only.svg"
               alt=""
+              // Hidden until CSS animation so an unstyled first paint is the logo, not the icon.
+              style={{ opacity: 0 }}
             />
           </div>
 

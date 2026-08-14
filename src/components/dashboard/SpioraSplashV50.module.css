@@ -55,8 +55,8 @@
 }
 
 .brandFull {
-  opacity: 0;
-  animation: wordmark-sequence 3.35s 0.25s ease-in-out forwards;
+  opacity: 1;
+  animation: wordmark-sequence 3.35s ease-in-out forwards;
 }
 
 .brandPower {
@@ -142,10 +142,7 @@
 }
 
 @keyframes wordmark-sequence {
-  0% {
-    opacity: 0;
-  }
-  34%,
+  0%,
   70% {
     opacity: 1;
   }

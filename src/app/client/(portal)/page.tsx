@@ -15,9 +15,8 @@ type Props = {
 export default async function ClientHomePage({ searchParams }: Props) {
   const session = await getClientSession();
   if (!session) redirect("/client/login");
-  // Drain searchParams so Next can resolve the request; splash no longer depends on ?enter=1.
+  // Drain searchParams so Next can resolve the request; splash is owned by the portal layout.
   await searchParams;
-  const showEntrySplash = true;
   const t = await getTranslations("clientPortal");
   const [questionnaire, caseData] = await Promise.all([
     getClientQuestionnaire({
@@ -69,7 +68,6 @@ export default async function ClientHomePage({ searchParams }: Props) {
       questionnaireStarted={questionnaireStarted}
       initialCase={caseData}
       logoutLabel={t("logout")}
-      showEntrySplash={showEntrySplash}
       showMfaSettings={isClientMfaEnabled()}
       mfaReenrollRequired={session.mfaReenrollRequired}
       assistantSlot={<ClientPortalAssistant />}

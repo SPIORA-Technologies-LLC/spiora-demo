@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { ClientPortalSplashHost } from "@/components/client-portal/ClientPortalSplashHost";
 import { getClientSession } from "@/lib/client-portal/session";
 
 export default async function ClientPortalLayout({
@@ -11,5 +12,16 @@ export default async function ClientPortalLayout({
     redirect("/client/login");
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      <link
+        rel="preload"
+        href="/splash-v50/spiora-logo-vector.svg"
+        as="image"
+        type="image/svg+xml"
+      />
+      <link rel="preload" href="/splash-v50/spiora-brandbook.png" as="image" />
+      <ClientPortalSplashHost>{children}</ClientPortalSplashHost>
+    </>
+  );
 }

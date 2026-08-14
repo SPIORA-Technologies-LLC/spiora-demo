@@ -40,9 +40,12 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
       questions: [
         { id: "first_name", type: "text", order: 10, label: { en: "First name", ru: "Имя" }, required: true, validation: { minLength: 1, maxLength: 100 } },
         { id: "last_name", type: "text", order: 20, label: { en: "Last name", ru: "Фамилия" }, required: true, validation: { minLength: 1, maxLength: 100 } },
+        { id: "patronymic", type: "text", order: 25, label: { en: "Patronymic (if applicable)", ru: "Отчество" }, validation: { maxLength: 100 } },
         { id: "previous_names", type: "text", order: 30, label: { en: "Previous surname", ru: "Прежняя фамилия" }, validation: { maxLength: 200 } },
         { id: "date_of_birth", type: "date", order: 40, label: { en: "Date of birth", ru: "Дата рождения" }, required: true },
         { id: "place_of_birth", type: "text", order: 50, label: { en: "Place of birth", ru: "Место рождения" }, validation: { maxLength: 200 } },
+        { id: "passport_number", type: "text", order: 52, label: { en: "Passport number", ru: "Номер паспорта" }, required: true, validation: { minLength: 1, maxLength: 40 } },
+        { id: "passport_issue_date", type: "date", order: 54, label: { en: "Date of passport issue", ru: "Дата выдачи паспорта" }, required: true },
         { id: "citizenship", type: "country", order: 60, label: { en: "Citizenship", ru: "Гражданство" }, required: true },
         { id: "other_citizenships", type: "text", order: 70, label: { en: "Other citizenships", ru: "Другие гражданства" }, validation: { maxLength: 200 } },
         {
@@ -88,7 +91,7 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
         { id: "phone", type: "phone", order: 20, label: { en: "Phone", ru: "Телефон" }, required: true },
         { id: "country_of_residence", type: "country", order: 30, label: { en: "Country of residence", ru: "Страна проживания" }, required: true },
         { id: "city", type: "text", order: 40, label: { en: "City", ru: "Город" }, validation: { maxLength: 120 } },
-        { id: "address", type: "textarea", order: 50, label: { en: "Address", ru: "Адрес" }, validation: { maxLength: 500 } },
+        { id: "address", type: "textarea", order: 50, label: { en: "Address", ru: "Адрес" }, required: true, validation: { maxLength: 500 } },
         {
           id: "preferred_contact_method",
           type: "select",
@@ -371,6 +374,40 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
           order: 40,
           label: { en: "I acknowledge the privacy policy", ru: "Ознакомлен(а) с политикой конфиденциальности" },
           required: true,
+        },
+      ],
+    },
+    {
+      id: "consulting_agreement",
+      order: 80,
+      title: {
+        en: "Consulting services agreement",
+        ru: "Договор о консультационных услугах",
+      },
+      description: {
+        en: "Open the agreement, review the terms, and confirm your consent. Your personal details are filled in from the questionnaire.",
+        ru: "Откройте договор, ознакомьтесь с условиями и подтвердите согласие. Ваши данные подставляются из анкеты автоматически.",
+      },
+      questions: [
+        {
+          id: "consulting_agreement_intro",
+          type: "information",
+          order: 10,
+          label: {
+            en: "The agreement below is filled in from your answers. You do not need to type anything in the contract — only confirm the terms.",
+            ru: "Договор ниже заполняется из ваших ответов. В самом договоре ничего вводить не нужно — достаточно подтвердить условия.",
+          },
+        },
+        {
+          id: "consulting_agreement_acknowledgement",
+          type: "boolean",
+          order: 20,
+          label: {
+            en: "I confirm all terms of the consulting services agreement",
+            ru: "Подтверждаю все пункты договора о консультационных услугах",
+          },
+          required: true,
+          validation: { mustBeTrue: true },
         },
       ],
     },

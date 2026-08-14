@@ -7,6 +7,7 @@ import type { QuestionType } from "./questionnaire-types";
 import { DISPLAY_ONLY_TYPES } from "./questionnaire-types";
 import { isEmptyAnswer } from "./questionnaire-empty-values";
 import { isQuestionVisible } from "./questionnaire-visibility";
+import { CONSULTING_AGREEMENT_QUESTION_ID } from "./consulting-agreement-fields";
 
 export type SectionProgressMap = Record<
   string,
@@ -24,6 +25,11 @@ type NavQuestion = {
   label?: { en: string; ru: string };
   visibleWhen?: { questionId: string; operator: string; value?: unknown };
 };
+
+function isRequiredAnswerFilled(questionId: string, value: unknown): boolean {
+  if (questionId === CONSULTING_AGREEMENT_QUESTION_ID) return value === true;
+  return !isEmptyAnswer(value);
+}
 
 type NavSection = {
   id: string;
@@ -117,7 +123,7 @@ export function computeLiveSectionProgress(
       if (!q.required) continue;
       secTotal++;
       totalRequired++;
-      if (!isEmptyAnswer(answers[q.id])) {
+      if (isRequiredAnswerFilled(q.id, answers[q.id])) {
         secCompleted++;
         completedRequired++;
       }
@@ -158,7 +164,7 @@ export function listIncompleteRequiredFields(
       if (q.readOnly || q.derivedFrom) continue;
       if (!isQuestionVisible(q as never, answers)) continue;
       if (!q.required) continue;
-      if (!isEmptyAnswer(answers[q.id])) continue;
+      if (isRequiredAnswerFilled(q.id, answers[q.id])) continue;
       incomplete.push({
         sectionId: section.id,
         questionId: q.id,
@@ -188,7 +194,7 @@ export function validateSectionRequiredFields(
     if (!isQuestionVisible(q as never, answers)) continue;
     if (q.readOnly || q.derivedFrom) continue;
     if (!q.required) continue;
-    if (!isEmptyAnswer(answers[q.id])) continue;
+    if (isRequiredAnswerFilled(q.id, answers[q.id])) continue;
     const label = q.label?.[locale] || q.label?.en || q.id;
     errors.push({
       sectionId: section.id,

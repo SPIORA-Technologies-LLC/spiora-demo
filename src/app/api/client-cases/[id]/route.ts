@@ -50,6 +50,7 @@ export async function GET(_request: Request, context: RouteContext) {
       clientDocuments: detail.clientDocuments,
       questionnaire: detail.questionnaire,
       reviewSections: detail.reviewSections,
+      agreement: detail.agreement,
     },
     { headers: { "Cache-Control": "no-store" } },
   );

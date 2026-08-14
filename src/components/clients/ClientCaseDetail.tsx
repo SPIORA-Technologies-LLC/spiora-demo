@@ -6,6 +6,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { FilterSelect } from "@/components/ui/FilterSelect";
 import { ClientCaseFinanceTab } from "@/components/clients/ClientCaseFinanceTab";
+import { ConsultingAgreementDocument } from "@/components/client-portal/ConsultingAgreementDocument";
+import type { ConsultingAgreementView } from "@/lib/client-portal/consulting-agreement-fields";
 import {
   CLIENT_CASE_STATUSES,
   type ClientCaseStatus,
@@ -72,11 +74,13 @@ type CaseDetailPayload = {
     createdAt: string;
   }>;
   reviewSections: ReviewSection[];
+  agreement: ConsultingAgreementView | null;
 };
 
 type TabId =
   | "overview"
   | "questionnaire"
+  | "agreement"
   | "documents"
   | "comments"
   | "status"
@@ -196,6 +200,23 @@ export function ClientCaseDetail({
     await load();
   }
 
+  async function acceptAgreement(accepted: boolean) {
+    setBusy(true);
+    setMessage(null);
+    const res = await fetch(`/api/client-cases/${caseId}/agreement`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ accepted }),
+    });
+    setBusy(false);
+    if (!res.ok) {
+      setMessage(t("agreementFailed"));
+      return;
+    }
+    const json = (await res.json()) as { agreement: ConsultingAgreementView };
+    setData((prev) => (prev ? { ...prev, agreement: json.agreement } : prev));
+  }
+
   async function deleteDocument(doc: { id: string; fileName: string }) {
     if (!window.confirm(t("documents.confirmDelete", { name: doc.fileName }))) {
       return;
@@ -228,12 +249,10 @@ export function ClientCaseDetail({
     }
   }
 
-  if (loading) return <p>{t("loading")}</p>;
-  if (!data) return <p>{t("notFound")}</p>;
-
   const tabs: Array<{ id: TabId; label: string }> = [
     { id: "overview", label: t("tabs.overview") },
     { id: "questionnaire", label: t("tabs.questionnaire") },
+    { id: "agreement", label: t("tabs.agreement") },
     { id: "documents", label: t("tabs.documents") },
     { id: "comments", label: t("tabs.comments") },
     { id: "status", label: t("tabs.status") },
@@ -253,6 +272,9 @@ export function ClientCaseDetail({
       block: "nearest",
     });
   }, [tab]);
+
+  if (loading) return <p>{t("loading")}</p>;
+  if (!data) return <p>{t("notFound")}</p>;
 
   return (
     <div className={styles.page}>
@@ -337,6 +359,25 @@ export function ClientCaseDetail({
                 </dl>
               </Card>
             ))
+          )}
+        </div>
+      ) : null}
+
+      {tab === "agreement" ? (
+        <div className={styles.stack}>
+          {data.agreement ? (
+            <ConsultingAgreementDocument
+              view={{ ...data.agreement, locale }}
+              clientDisabled
+              showEmployeeCheckbox
+              onEmployeeAccept={
+                busy ? undefined : (accepted) => void acceptAgreement(accepted)
+              }
+            />
+          ) : (
+            <Card className={styles.panel}>
+              <p className={styles.message}>{t("agreementEmpty")}</p>
+            </Card>
           )}
         </div>
       ) : null}

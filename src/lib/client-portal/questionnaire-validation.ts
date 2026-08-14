@@ -324,6 +324,13 @@ function validateValueType(
           reason: "INVALID_FORMAT",
         };
       }
+      if (v?.mustBeTrue && value !== true) {
+        return {
+          code: "CONSENT_REQUIRED",
+          message: `${label} must be accepted`,
+          reason: "MISSING_REQUIRED",
+        };
+      }
       return null;
     }
     case "file": {

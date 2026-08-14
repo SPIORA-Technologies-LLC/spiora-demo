@@ -6,6 +6,7 @@ import { DISPLAY_ONLY_TYPES } from "./questionnaire-types";
 import { isEmptyAnswer } from "./questionnaire-empty-values";
 import { flattenQuestions, getOrderedSections } from "./questionnaire-schema";
 import { isQuestionVisible } from "./questionnaire-visibility";
+import { CONSULTING_AGREEMENT_QUESTION_ID } from "./consulting-agreement-fields";
 
 export type ProgressResult = {
   percent: number;
@@ -39,7 +40,11 @@ export function calculateQuestionnaireProgress(
       secTotal++;
       totalRequired++;
       const val = answers[q.id];
-      if (!isEmptyAnswer(val)) {
+      const filled =
+        q.id === CONSULTING_AGREEMENT_QUESTION_ID
+          ? val === true
+          : !isEmptyAnswer(val);
+      if (filled) {
         secCompleted++;
         completedRequired++;
       }

@@ -54,6 +54,8 @@ export type QuestionValidation = {
   minDate?: string;
   maxDate?: string;
   maxSelections?: number;
+  /** Required boolean consents must be explicitly true. */
+  mustBeTrue?: boolean;
 };
 
 export type QuestionDefinition = {

@@ -43,6 +43,12 @@ import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 import { CountryCombobox } from "./CountryCombobox";
 import { QuestionnaireDateField } from "./QuestionnaireDateField";
 import { CLIENT_PRIVACY_POLICY_PATH } from "@/lib/client-portal/personal-data-policy";
+import {
+  CONSULTING_AGREEMENT_QUESTION_ID,
+  CONSULTING_AGREEMENT_SECTION_ID,
+  buildConsultingAgreementPreview,
+} from "@/lib/client-portal/consulting-agreement-fields";
+import { ConsultingAgreementDocument } from "./ConsultingAgreementDocument";
 
 type SchemaSection = {
   id: string;
@@ -1020,8 +1026,36 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
             {currentSection.description ? (
               <p className={styles.sectionHint}>{currentSection.description[locale]}</p>
             ) : null}
+            {currentSection.id === CONSULTING_AGREEMENT_SECTION_ID ? (
+              <ConsultingAgreementDocument
+                view={buildConsultingAgreementPreview(localAnswers, locale, {
+                  submittedAt: data?.questionnaire.submittedAt,
+                })}
+                onClientAccept={
+                  data?.questionnaire.status === "submitted" ||
+                  data?.questionnaire.status === "locked"
+                    ? undefined
+                    : (accepted) =>
+                        onAnswer(
+                          CONSULTING_AGREEMENT_QUESTION_ID,
+                          "boolean",
+                          accepted,
+                        )
+                }
+                clientDisabled={
+                  data?.questionnaire.status === "submitted" ||
+                  data?.questionnaire.status === "locked"
+                }
+              />
+            ) : null}
             {currentSection.questions
               .filter((q) => !q.visibleWhen || isQuestionVisible(q as never, localAnswers))
+              .filter((q) =>
+                currentSection.id === CONSULTING_AGREEMENT_SECTION_ID
+                  ? q.id !== CONSULTING_AGREEMENT_QUESTION_ID &&
+                    q.id !== "consulting_agreement_intro"
+                  : true,
+              )
               .map((q) =>
               DISPLAY_ONLY_TYPES.has(q.type as never) ? (
                 <div

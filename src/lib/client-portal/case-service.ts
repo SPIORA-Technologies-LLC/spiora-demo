@@ -29,6 +29,24 @@ import {
 } from "./case-document-storage";
 import type { CaseDocumentRecord } from "./case-store";
 
+async function persistConsultingAgreement(input: {
+  questionnaireId: string;
+  caseId: string;
+  portalUserId: string;
+  locale: "en" | "ru";
+  answers: QuestionnaireRecord["answers"];
+  submittedAt: string;
+}) {
+  try {
+    const { saveAgreementFromSubmission } = await import(
+      "./consulting-agreement-service"
+    );
+    await saveAgreementFromSubmission(input);
+  } catch {
+    // Case submit must not fail if the agreement snapshot cannot be stored.
+  }
+}
+
 async function getQuestionnaireStore() {
   if (isSupabaseConfigured()) {
     return createSupabaseQuestionnaireStore(getSupabaseAdmin());
@@ -165,6 +183,14 @@ export async function submitQuestionnaireAndCreateCase(
               actorName: existing.assignedName,
             }),
           );
+          await persistConsultingAgreement({
+            questionnaireId: prepared.record.id,
+            caseId: existing.id,
+            portalUserId: prepared.record.clientPortalUserId,
+            locale,
+            answers: prepared.record.answers,
+            submittedAt: existing.submittedAt,
+          });
           return {
             ok: true as const,
             record: prepared.record,
@@ -192,6 +218,14 @@ export async function submitQuestionnaireAndCreateCase(
         actorName: atomic.case.assignedName,
       }),
     );
+    await persistConsultingAgreement({
+      questionnaireId: prepared.record.id,
+      caseId: atomic.case.id,
+      portalUserId: prepared.record.clientPortalUserId,
+      locale,
+      answers: prepared.record.answers,
+      submittedAt: atomic.submittedAt,
+    });
     return {
       ok: true as const,
       record: refreshed ?? prepared.record,
@@ -239,6 +273,14 @@ export async function submitQuestionnaireAndCreateCase(
       actorName: atomic.case.assignedName,
     }),
   );
+  await persistConsultingAgreement({
+    questionnaireId: record.id,
+    caseId: atomic.case.id,
+    portalUserId: record.clientPortalUserId,
+    locale,
+    answers: record.answers,
+    submittedAt: atomic.submittedAt,
+  });
 
   return {
     ok: true as const,
@@ -331,6 +373,29 @@ export async function getEmployeeCaseDetail(caseId: string, locale: "en" | "ru" 
         }
       : null,
     reviewSections,
+    agreement: questionnaire
+      ? await import("./consulting-agreement-service").then(
+          async ({ getAgreementByCaseId, viewFromRecord }) => {
+            const record = await getAgreementByCaseId(caseId);
+            if (record) return viewFromRecord(record);
+            const { buildConsultingAgreementPreview } = await import(
+              "./consulting-agreement-fields"
+            );
+            return buildConsultingAgreementPreview(
+              questionnaire.answers,
+              locale,
+              {
+                submittedAt: questionnaire.submittedAt,
+                clientAcceptedAt:
+                  questionnaire.answers.consulting_agreement_acknowledgement ===
+                  true
+                    ? questionnaire.submittedAt
+                    : null,
+              },
+            );
+          },
+        )
+      : null,
   };
 }
 

@@ -2642,6 +2642,43 @@
       "backToPortal": "Back to portal",
       "footerLink": "Personal Data Processing Policy"
     },
+    "consultingAgreement": {
+      "loading": "Loading agreement…",
+      "loadFailed": "Could not load the agreement.",
+      "backToPortal": "Back to portal",
+      "homeEyebrow": "Agreement",
+      "homeTitle": "Consulting services agreement",
+      "homeHint": "Saved from your questionnaire. You can open, download, or print it at any time.",
+      "open": "Open agreement",
+      "no": "No.",
+      "provider": "PROVIDER",
+      "providerHereinafter": "hereinafter referred to as the \"Provider\",",
+      "client": "CLIENT",
+      "providerFields": {
+        "ico": "Company registration number (IČO):",
+        "dic": "Tax identification number (DIČ):",
+        "authority": "Registering authority:",
+        "bank": "Bank account:"
+      },
+      "clientFields": {
+        "passport": "Passport:",
+        "issued": "Date of passport issue:",
+        "address": "Address:"
+      },
+      "jointly": "hereinafter referred to as the \"Client\", jointly referred to as the \"Parties\", have entered into this Agreement as follows:",
+      "signatures": "SIGNATURES OF THE PARTIES",
+      "placeAndDate": "Place and date:",
+      "providerRole": "Poskytovateľ / Provider",
+      "clientRole": "Objednávateľ / Client",
+      "namePosition": "Name / position:",
+      "clientConsent": "I confirm all terms of this consulting services agreement.",
+      "employeeConsent": "The Provider confirms all terms of this agreement.",
+      "employeePending": "Awaiting Provider confirmation.",
+      "accepted": "Confirmed",
+      "notAccepted": "Not yet confirmed",
+      "download": "Save agreement",
+      "print": "Print"
+    },
     "invite": {
       "loading": "Checking invitation…",
       "validTitle": "You are invited to Spiora Client",
@@ -2982,9 +3019,12 @@
       "statusFailed": "Could not update status",
       "statusSaved": "Status updated",
       "uploadFailed": "Could not upload document",
+      "agreementFailed": "Could not save Provider confirmation",
+      "agreementEmpty": "The consulting agreement is not available yet.",
       "tabs": {
         "overview": "Overview",
         "questionnaire": "Questionnaire",
+        "agreement": "Agreement",
         "documents": "Documents",
         "comments": "Comments",
         "status": "Status",

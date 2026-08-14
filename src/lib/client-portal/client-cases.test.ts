@@ -40,11 +40,15 @@ const REQUIRED_OPS = [
   { op: "set" as const, questionId: "citizenship", value: "UA" },
   { op: "set" as const, questionId: "phone", value: "+3801234567" },
   { op: "set" as const, questionId: "country_of_residence", value: "HR" },
+  { op: "set" as const, questionId: "address", value: "Zagreb, Ilica 1" },
+  { op: "set" as const, questionId: "passport_number", value: "AB123456" },
+  { op: "set" as const, questionId: "passport_issue_date", value: "2020-01-15" },
   { op: "set" as const, questionId: "employment_status", value: "employed" },
   { op: "set" as const, questionId: "service_goal", value: "consultation" },
   { op: "set" as const, questionId: "target_country", value: "HR" },
   { op: "set" as const, questionId: "data_accuracy_confirmation", value: true },
   { op: "set" as const, questionId: "privacy_acknowledgement", value: true },
+  { op: "set" as const, questionId: "consulting_agreement_acknowledgement", value: true },
 ];
 
 describe("case store production selection", () => {

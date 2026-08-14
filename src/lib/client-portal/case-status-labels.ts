@@ -69,10 +69,13 @@ export const CASE_ACTIVITY_LABELS: Record<
 };
 
 export function caseStatusLabel(
-  status: ClientCaseStatus,
+  status: ClientCaseStatus | string | null | undefined,
   locale: "en" | "ru",
 ): string {
-  return CASE_STATUS_LABELS[status][locale];
+  if (!status) return "—";
+  const known = CASE_STATUS_LABELS[status as ClientCaseStatus];
+  if (known) return known[locale];
+  return String(status);
 }
 
 export function caseActivityLabel(

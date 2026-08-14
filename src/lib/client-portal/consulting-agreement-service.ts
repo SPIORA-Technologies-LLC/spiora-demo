@@ -26,6 +26,15 @@ function store() {
   return createSupabaseConsultingAgreementStore(getSupabaseAdmin());
 }
 
+async function safeRead<T>(fn: () => Promise<T | null>): Promise<T | null> {
+  try {
+    return await fn();
+  } catch {
+    // Table may be missing before patch 046 is applied; never break portal UI.
+    return null;
+  }
+}
+
 function recordToView(
   record: ConsultingAgreementRecord,
   answers?: QuestionnaireAnswers,
@@ -49,21 +58,27 @@ function recordToView(
 export async function getAgreementByPortalUser(
   portalUserId: string,
 ): Promise<ConsultingAgreementRecord | null> {
-  if (useSupabase()) return store().getByPortalUserId(portalUserId);
+  if (useSupabase()) {
+    return safeRead(() => store().getByPortalUserId(portalUserId));
+  }
   return localGetAgreementByPortalUserId(portalUserId);
 }
 
 export async function getAgreementByCaseId(
   caseId: string,
 ): Promise<ConsultingAgreementRecord | null> {
-  if (useSupabase()) return store().getByCaseId(caseId);
+  if (useSupabase()) {
+    return safeRead(() => store().getByCaseId(caseId));
+  }
   return localGetAgreementByCaseId(caseId);
 }
 
 export async function getAgreementByQuestionnaireId(
   questionnaireId: string,
 ): Promise<ConsultingAgreementRecord | null> {
-  if (useSupabase()) return store().getByQuestionnaireId(questionnaireId);
+  if (useSupabase()) {
+    return safeRead(() => store().getByQuestionnaireId(questionnaireId));
+  }
   return localGetAgreementByQuestionnaireId(questionnaireId);
 }
 
@@ -101,12 +116,16 @@ export async function saveAgreementFromSubmission(input: {
     employeeUserId: null as string | null,
   };
   if (useSupabase()) {
-    const existing = await store().getByQuestionnaireId(input.questionnaireId);
-    return store().upsert({
-      ...payload,
-      employeeAcceptedAt: existing?.employeeAcceptedAt ?? null,
-      employeeUserId: existing?.employeeUserId ?? null,
-    });
+    try {
+      const existing = await store().getByQuestionnaireId(input.questionnaireId);
+      return await store().upsert({
+        ...payload,
+        employeeAcceptedAt: existing?.employeeAcceptedAt ?? null,
+        employeeUserId: existing?.employeeUserId ?? null,
+      });
+    } catch {
+      // Fall through to local mirror so the portal still has a readable snapshot.
+    }
   }
   return localUpsertAgreement(payload);
 }
@@ -117,7 +136,11 @@ export async function acceptAgreementByEmployee(input: {
   accepted: boolean;
 }): Promise<ConsultingAgreementRecord | null> {
   if (useSupabase()) {
-    return store().acceptByEmployee(input);
+    try {
+      return await store().acceptByEmployee(input);
+    } catch {
+      return null;
+    }
   }
   const existing = await localGetAgreementByCaseId(input.caseId);
   if (!existing) return null;

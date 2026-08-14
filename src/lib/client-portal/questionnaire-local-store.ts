@@ -85,20 +85,38 @@ async function ensureDemoSeed(): Promise<void> {
   const hasV1 = versions.versions.some(
     (v) => v.templateId === templateId && v.version === 1,
   );
+  const schema = GENERAL_CLIENT_ONBOARDING_SCHEMA;
+  const schemaHash = hashQuestionnaireSchema(schema);
   if (!hasV1) {
-    const schema = GENERAL_CLIENT_ONBOARDING_SCHEMA;
     const now = new Date().toISOString();
     versions.versions.push({
       id: randomUUID(),
       templateId,
       version: 1,
       schema,
-      schemaHash: hashQuestionnaireSchema(schema),
+      schemaHash,
       status: "published",
       publishedAt: now,
       createdAt: now,
     });
     await writeJson(VERSIONS_FILE, versions);
+  } else {
+    // Keep local published v1 aligned with the in-code demo schema.
+    let changed = false;
+    versions.versions = versions.versions.map((version) => {
+      if (version.templateId !== templateId || version.version !== 1) {
+        return version;
+      }
+      if (version.schemaHash === schemaHash) return version;
+      changed = true;
+      return {
+        ...version,
+        schema,
+        schemaHash,
+        status: "published",
+      };
+    });
+    if (changed) await writeJson(VERSIONS_FILE, versions);
   }
 }
 

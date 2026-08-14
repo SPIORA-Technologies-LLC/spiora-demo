@@ -251,16 +251,28 @@ export function ClientPortalHome({
           </article>
         </section>
 
-        {questionnaireSubmitted ? (
+        {questionnaireUnavailable ? null : (
           <section className={`${styles.grid} ${styles.orderQuestionnaire}`}>
             <article className={styles.placeholder}>
               <p className={styles.tileEyebrow}>{t("consultingAgreement.homeEyebrow")}</p>
               <h2>{t("consultingAgreement.homeTitle")}</h2>
-              <p>{t("consultingAgreement.homeHint")}</p>
-              <a href="/client/agreement">{t("consultingAgreement.open")}</a>
+              <p>
+                {questionnaireSubmitted
+                  ? t("consultingAgreement.homeHint")
+                  : t("consultingAgreement.homeHintDraft")}
+              </p>
+              <a
+                href={
+                  questionnaireSubmitted
+                    ? "/client/agreement"
+                    : "/client/questionnaire/consulting_agreement"
+                }
+              >
+                {t("consultingAgreement.open")}
+              </a>
             </article>
           </section>
-        ) : null}
+        )}
 
         {assistantSlot ? (
           <div className={styles.orderAssistant}>{assistantSlot}</div>

@@ -29,31 +29,45 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   const { id } = await context.params;
-  const detail = await getEmployeeCaseDetail(
-    id,
-    locale === "ru" ? "ru" : "en",
-  );
-  if (!detail) {
+  try {
+    const detail = await getEmployeeCaseDetail(
+      id,
+      locale === "ru" ? "ru" : "en",
+    );
+    if (!detail) {
+      return NextResponse.json(
+        { error: translateApiMessage(locale, "notFound") },
+        { status: 404 },
+      );
+    }
+
     return NextResponse.json(
-      { error: translateApiMessage(locale, "notFound") },
-      { status: 404 },
+      {
+        case: detail.record,
+        history: detail.history,
+        comments: detail.comments,
+        activity: detail.activity,
+        employeeDocuments: detail.employeeDocuments,
+        clientDocuments: detail.clientDocuments,
+        questionnaire: detail.questionnaire,
+        reviewSections: detail.reviewSections,
+        agreement: detail.agreement,
+      },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  } catch (error) {
+    if (error instanceof CaseStoreConfigurationError) {
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: 503 },
+      );
+    }
+    console.error("[client-cases/:id] GET failed", error);
+    return NextResponse.json(
+      { error: translateApiMessage(locale, "loadClientFailed") },
+      { status: 500 },
     );
   }
-
-  return NextResponse.json(
-    {
-      case: detail.record,
-      history: detail.history,
-      comments: detail.comments,
-      activity: detail.activity,
-      employeeDocuments: detail.employeeDocuments,
-      clientDocuments: detail.clientDocuments,
-      questionnaire: detail.questionnaire,
-      reviewSections: detail.reviewSections,
-      agreement: detail.agreement,
-    },
-    { headers: { "Cache-Control": "no-store" } },
-  );
 }
 
 export async function DELETE(request: Request, context: RouteContext) {

@@ -131,16 +131,21 @@ export function ClientCaseDetail({
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/client-cases/${caseId}`);
-    if (!res.ok) {
+    setMessage(null);
+    try {
+      const res = await fetch(`/api/client-cases/${caseId}`);
+      if (!res.ok) {
+        setData(null);
+        return;
+      }
+      const json = (await res.json()) as CaseDetailPayload;
+      setData(json);
+      setStatus(json.case.currentStatus);
+    } catch {
       setData(null);
+    } finally {
       setLoading(false);
-      return;
     }
-    const json = (await res.json()) as CaseDetailPayload;
-    setData(json);
-    setStatus(json.case.currentStatus);
-    setLoading(false);
   }, [caseId]);
 
   useEffect(() => {

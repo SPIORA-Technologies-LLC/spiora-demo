@@ -2649,6 +2649,7 @@
       "homeEyebrow": "Agreement",
       "homeTitle": "Consulting services agreement",
       "homeHint": "Saved from your questionnaire. You can open, download, or print it at any time.",
+      "homeHintDraft": "Open the agreement once personal details are filled in. Confirm it before submitting the questionnaire.",
       "open": "Open agreement",
       "no": "No.",
       "provider": "PROVIDER",

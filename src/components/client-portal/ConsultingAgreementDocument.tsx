@@ -23,8 +23,8 @@ type Props = {
   showActions?: boolean;
 };
 
-function Fill({ value }: { value: string }) {
-  if (value.trim()) {
+function Fill({ value }: { value?: string | null }) {
+  if (typeof value === "string" && value.trim()) {
     return <span className={styles.value}>{value}</span>;
   }
   return <span className={styles.blank} />;
@@ -41,7 +41,17 @@ export function ConsultingAgreementDocument({
 }: Props) {
   const t = useTranslations("clientPortal.consultingAgreement");
   const locale = view.locale;
-  const party = view.party;
+  const party = view.party ?? {
+    firstName: "",
+    lastName: "",
+    patronymic: "",
+    fullName: "",
+    passportNumber: "",
+    passportIssueDate: "",
+    passportIssueDateIso: "",
+    address: "",
+    city: "",
+  };
   const place = [party.city, view.agreementDate].filter(Boolean).join(", ");
 
   function html() {

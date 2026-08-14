@@ -344,12 +344,16 @@ export async function getEmployeeCaseDetail(caseId: string, locale: "en" | "ru" 
   let reviewSections: ReturnType<typeof buildReviewSections> = [];
 
   if (questionnaire) {
-    const version = await qStore.getPublishedVersionById(questionnaire.templateVersionId);
-    if (version) {
-      const resolved = resolvePublishedTemplateVersion(version);
-      if (resolved) {
-        reviewSections = buildReviewSections(resolved.schema, questionnaire.answers, locale);
+    try {
+      const version = await qStore.getPublishedVersionById(questionnaire.templateVersionId);
+      if (version) {
+        const resolved = resolvePublishedTemplateVersion(version);
+        if (resolved) {
+          reviewSections = buildReviewSections(resolved.schema, questionnaire.answers, locale);
+        }
       }
+    } catch {
+      reviewSections = [];
     }
   }
 
@@ -373,29 +377,28 @@ export async function getEmployeeCaseDetail(caseId: string, locale: "en" | "ru" 
         }
       : null,
     reviewSections,
-    agreement: questionnaire
-      ? await import("./consulting-agreement-service").then(
-          async ({ getAgreementByCaseId, viewFromRecord }) => {
-            const record = await getAgreementByCaseId(caseId);
-            if (record) return viewFromRecord(record);
-            const { buildConsultingAgreementPreview } = await import(
-              "./consulting-agreement-fields"
-            );
-            return buildConsultingAgreementPreview(
-              questionnaire.answers,
-              locale,
-              {
-                submittedAt: questionnaire.submittedAt,
-                clientAcceptedAt:
-                  questionnaire.answers.consulting_agreement_acknowledgement ===
-                  true
-                    ? questionnaire.submittedAt
-                    : null,
-              },
-            );
-          },
-        )
-      : null,
+    agreement: await (async () => {
+      if (!questionnaire) return null;
+      try {
+        const { getAgreementByCaseId, viewFromRecord } = await import(
+          "./consulting-agreement-service"
+        );
+        const saved = await getAgreementByCaseId(caseId);
+        if (saved) return viewFromRecord(saved);
+        const { buildConsultingAgreementPreview } = await import(
+          "./consulting-agreement-fields"
+        );
+        return buildConsultingAgreementPreview(questionnaire.answers, locale, {
+          submittedAt: questionnaire.submittedAt,
+          clientAcceptedAt:
+            questionnaire.answers.consulting_agreement_acknowledgement === true
+              ? questionnaire.submittedAt
+              : null,
+        });
+      } catch {
+        return null;
+      }
+    })(),
   };
 }
 

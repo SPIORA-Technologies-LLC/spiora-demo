@@ -77,6 +77,7 @@ type CurrentResponse = {
     startedAt: string | null;
     lastSavedAt: string | null;
     reviewedAt: string | null;
+    submittedAt: string | null;
   };
   template: {
     id: string;
@@ -968,7 +969,31 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 </button>
               </section>
             ) : null}
-            {reviewSections.map((section) => (
+            <div className={styles.card}>
+              <ConsultingAgreementDocument
+                view={buildConsultingAgreementPreview(localAnswers, locale, {
+                  submittedAt: data?.questionnaire.submittedAt,
+                })}
+                onClientAccept={
+                  data?.questionnaire.status === "submitted" ||
+                  data?.questionnaire.status === "locked"
+                    ? undefined
+                    : (accepted) =>
+                        onAnswer(
+                          CONSULTING_AGREEMENT_QUESTION_ID,
+                          "boolean",
+                          accepted,
+                        )
+                }
+                clientDisabled={
+                  data?.questionnaire.status === "submitted" ||
+                  data?.questionnaire.status === "locked"
+                }
+              />
+            </div>
+            {reviewSections
+              .filter((section) => section.id !== CONSULTING_AGREEMENT_SECTION_ID)
+              .map((section) => (
               <article key={section.id} className={`${styles.card} ${styles.reviewSection}`}>
                 <h3 className={styles.reviewSectionTitle}>{section.title}</h3>
                 <dl className={styles.reviewList}>

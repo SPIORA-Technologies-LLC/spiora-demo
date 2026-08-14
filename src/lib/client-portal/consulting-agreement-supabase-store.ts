@@ -39,6 +39,17 @@ function fromRow(row: Row): ConsultingAgreementRecord {
   };
 }
 
+function isMissingRelationError(error: { code?: string; message?: string }) {
+  const code = error.code ?? "";
+  const message = (error.message ?? "").toLowerCase();
+  return (
+    code === "42P01" ||
+    code === "PGRST205" ||
+    message.includes("could not find the table") ||
+    message.includes("does not exist")
+  );
+}
+
 export function createSupabaseConsultingAgreementStore(client: SupabaseClient) {
   return {
     async getByQuestionnaireId(questionnaireId: string) {
@@ -47,7 +58,10 @@ export function createSupabaseConsultingAgreementStore(client: SupabaseClient) {
         .select("*")
         .eq("questionnaire_id", questionnaireId)
         .maybeSingle();
-      if (error) throw error;
+      if (error) {
+        if (isMissingRelationError(error)) return null;
+        throw error;
+      }
       return data ? fromRow(data as Row) : null;
     },
     async getByPortalUserId(portalUserId: string) {
@@ -58,7 +72,10 @@ export function createSupabaseConsultingAgreementStore(client: SupabaseClient) {
         .order("updated_at", { ascending: false })
         .limit(1)
         .maybeSingle();
-      if (error) throw error;
+      if (error) {
+        if (isMissingRelationError(error)) return null;
+        throw error;
+      }
       return data ? fromRow(data as Row) : null;
     },
     async getByCaseId(caseId: string) {
@@ -67,7 +84,10 @@ export function createSupabaseConsultingAgreementStore(client: SupabaseClient) {
         .select("*")
         .eq("case_id", caseId)
         .maybeSingle();
-      if (error) throw error;
+      if (error) {
+        if (isMissingRelationError(error)) return null;
+        throw error;
+      }
       return data ? fromRow(data as Row) : null;
     },
     async upsert(input: {

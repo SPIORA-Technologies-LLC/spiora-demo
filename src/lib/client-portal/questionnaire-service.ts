@@ -20,7 +20,6 @@ import {
 } from "./questionnaire-demo-template";
 import {
   GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
-  GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY,
   hashQuestionnaireSchema,
 } from "./questionnaire-schema";
 import { hydrateDerivedAnswers } from "./questionnaire-derived";
@@ -100,23 +99,15 @@ function mapStatus(record: QuestionnaireRecord | null): QuestionnairePublicState
 }
 
 /**
- * When a published row belongs to the demo onboarding template and its stored
- * schema_hash is the current constant or a known legacy hash, prefer the
- * in-code canonical schema (and current hash). This upgrades option lists
- * (e.g. RUB) without requiring a SQL patch, and also heals jsonb drift.
+ * When a published row belongs to the demo onboarding template, always prefer
+ * the in-code canonical schema. The demo template is owned by the app; this
+ * upgrades fields (passport, consulting agreement, etc.) without a SQL patch.
  */
 export function reconcilePublishedTemplateVersion(
   version: TemplateVersionRecord,
 ): TemplateVersionRecord {
   const templateKey = version.schema?.templateKey;
-  const knownHashes = new Set<string>([
-    GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH,
-    ...GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY,
-  ]);
-  if (
-    templateKey === GENERAL_CLIENT_ONBOARDING_TEMPLATE_KEY &&
-    knownHashes.has(version.schemaHash)
-  ) {
+  if (templateKey === GENERAL_CLIENT_ONBOARDING_TEMPLATE_KEY) {
     return {
       ...version,
       schema: GENERAL_CLIENT_ONBOARDING_SCHEMA,

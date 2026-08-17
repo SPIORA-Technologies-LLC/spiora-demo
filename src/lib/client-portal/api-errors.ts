@@ -40,7 +40,27 @@ export type ClientApiErrorCode =
   | "QUESTIONNAIRE_ALREADY_SUBMITTED"
   | "INVALID_STATUS"
   | "CASE_NOT_FOUND"
-  | "INTERNAL";
+  | "INTERNAL"
+  | "OTP_INVALID"
+  | "OTP_EXPIRED"
+  | "OTP_TOO_MANY_ATTEMPTS"
+  | "OTP_RATE_LIMITED"
+  | "OTP_NOT_REQUESTED"
+  | "CONTRACT_NOT_FOUND"
+  | "CONTRACT_ACCESS_DENIED"
+  | "CONTRACT_WRONG_STATUS"
+  | "CONTRACT_ALREADY_SIGNED"
+  | "CONTRACT_SUPERSEDED"
+  | "CONTRACT_CANCELLED"
+  | "DOCUMENT_HASH_MISMATCH"
+  | "PROVIDER_PERMISSION_REQUIRED"
+  | "PROVIDER_MFA_REQUIRED"
+  | "PROVIDER_MFA_NOT_CONFIGURED"
+  | "PROVIDER_CONFIRMATION_REQUIRED"
+  | "PROVIDER_PROFILE_INCOMPLETE"
+  | "FINALIZATION_FAILED"
+  | "CONSENT_REQUIRED"
+  | "AGREEMENT_NOT_SIGNED";
 
 const MESSAGES: Record<ClientApiErrorCode, string> = {
   UNAUTHORIZED: "Authentication required",
@@ -84,6 +104,27 @@ const MESSAGES: Record<ClientApiErrorCode, string> = {
   INVALID_STATUS: "Invalid case status",
   CASE_NOT_FOUND: "Case not found",
   INTERNAL: "Something went wrong",
+  OTP_INVALID: "Invalid verification code",
+  OTP_EXPIRED: "Verification code expired",
+  OTP_TOO_MANY_ATTEMPTS: "Too many verification attempts",
+  OTP_RATE_LIMITED: "Please wait before requesting another code",
+  OTP_NOT_REQUESTED: "Request a verification code first",
+  CONTRACT_NOT_FOUND: "Agreement not found",
+  CONTRACT_ACCESS_DENIED: "Agreement access denied",
+  CONTRACT_WRONG_STATUS: "Agreement is not in a signable state",
+  CONTRACT_ALREADY_SIGNED: "Agreement is already signed",
+  CONTRACT_SUPERSEDED: "This agreement version was replaced",
+  CONTRACT_CANCELLED: "Agreement was cancelled",
+  DOCUMENT_HASH_MISMATCH: "Agreement file no longer matches the signed version",
+  PROVIDER_PERMISSION_REQUIRED: "You cannot sign as SPIORA",
+  PROVIDER_MFA_REQUIRED: "Complete MFA before signing as SPIORA",
+  PROVIDER_MFA_NOT_CONFIGURED:
+    "Employee MFA must be enabled (SPIORA_MFA_EMPLOYEE=true) before provider signing in production",
+  PROVIDER_CONFIRMATION_REQUIRED: "Confirm signing on behalf of SPIORA",
+  PROVIDER_PROFILE_INCOMPLETE: "Your name is required to sign",
+  FINALIZATION_FAILED: "Could not finalize the signed agreement",
+  CONSENT_REQUIRED: "Consent is required",
+  AGREEMENT_NOT_SIGNED: "Sign the agreement before submitting the questionnaire",
 };
 
 export function clientApiError(

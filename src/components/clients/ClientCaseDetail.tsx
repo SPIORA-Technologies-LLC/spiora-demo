@@ -8,6 +8,7 @@ import { FilterSelect } from "@/components/ui/FilterSelect";
 import { ClientCaseFinanceTab } from "@/components/clients/ClientCaseFinanceTab";
 import { ConsultingAgreementDocument } from "@/components/client-portal/ConsultingAgreementDocument";
 import type { ConsultingAgreementView } from "@/lib/client-portal/consulting-agreement-fields";
+import type { ConsultingAgreementSignView } from "@/lib/client-portal/sign-types";
 import {
   CLIENT_CASE_STATUSES,
   type ClientCaseStatus,
@@ -74,7 +75,23 @@ type CaseDetailPayload = {
     createdAt: string;
   }>;
   reviewSections: ReviewSection[];
-  agreement: ConsultingAgreementView | null;
+  agreement: (ConsultingAgreementView & {
+    sign?: ConsultingAgreementSignView | null;
+  }) | null;
+};
+
+type AuditPayload = {
+  versionId: string;
+  transactionId: string;
+  events: Array<{
+    id: string;
+    eventType: string;
+    actor: string;
+    occurredAt: string;
+    documentHash?: string | null;
+    ipAddress?: string | null;
+    userAgent?: string | null;
+  }>;
 };
 
 type TabId =
@@ -119,6 +136,8 @@ export function ClientCaseDetail({
   const [busy, setBusy] = useState(false);
   const [deletingDocId, setDeletingDocId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [audit, setAudit] = useState<AuditPayload | null>(null);
+  const [auditOpen, setAuditOpen] = useState(false);
 
   const statusOptions = useMemo(
     () =>
@@ -206,6 +225,41 @@ export function ClientCaseDetail({
   }
 
   async function acceptAgreement(accepted: boolean) {
+    if (data?.agreement?.sign) {
+      if (
+        !accepted &&
+        !window.confirm(t("sign.providerConfirm", { name: data.case.firstName ?? "—" }))
+      ) {
+        return;
+      }
+      setBusy(true);
+      setMessage(null);
+      const res = await fetch(`/api/client-cases/${caseId}/agreement`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: accepted }),
+      });
+      setBusy(false);
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as {
+          code?: string;
+        } | null;
+        const code = payload?.code;
+        setMessage(
+          code === "PROVIDER_PERMISSION_REQUIRED" ||
+            code === "PROVIDER_MFA_REQUIRED" ||
+            code === "DOCUMENT_HASH_MISMATCH" ||
+            code === "CONTRACT_WRONG_STATUS" ||
+            code === "CONTRACT_CANCELLED" ||
+            code === "CONTRACT_SUPERSEDED"
+            ? t(`sign.errors.${code}`)
+            : t("agreementFailed"),
+        );
+        return;
+      }
+      await load();
+      return;
+    }
     setBusy(true);
     setMessage(null);
     const res = await fetch(`/api/client-cases/${caseId}/agreement`, {
@@ -220,6 +274,23 @@ export function ClientCaseDetail({
     }
     const json = (await res.json()) as { agreement: ConsultingAgreementView };
     setData((prev) => (prev ? { ...prev, agreement: json.agreement } : prev));
+  }
+
+  async function toggleAudit() {
+    if (auditOpen) {
+      setAuditOpen(false);
+      return;
+    }
+    if (!audit) {
+      const res = await fetch(`/api/client-cases/${caseId}/agreement/audit`);
+      if (!res.ok) {
+        setMessage(t("agreementFailed"));
+        return;
+      }
+      const json = (await res.json()) as AuditPayload;
+      setAudit(json);
+    }
+    setAuditOpen(true);
   }
 
   async function deleteDocument(doc: { id: string; fileName: string }) {
@@ -371,14 +442,185 @@ export function ClientCaseDetail({
       {tab === "agreement" ? (
         <div className={styles.stack}>
           {data.agreement ? (
-            <ConsultingAgreementDocument
-              view={{ ...data.agreement, locale }}
-              clientDisabled
-              showEmployeeCheckbox
-              onEmployeeAccept={
-                busy ? undefined : (accepted) => void acceptAgreement(accepted)
-              }
-            />
+            <>
+              {data.agreement.sign ? (
+                <Card className={styles.panel}>
+                  <p className={styles.message}>
+                    {t(`sign.status.${data.agreement.sign.status}`)}
+                  </p>
+                  <p className={styles.message}>
+                    Contract: {data.agreement.sign.agreementNumber}
+                  </p>
+                  <p className={styles.message}>
+                    {t("sign.version")}: {data.agreement.sign.versionNumber}
+                  </p>
+                  <p className={styles.message}>
+                    {t("sign.transactionId")}: {data.agreement.sign.transactionId}
+                  </p>
+                  <p className={styles.message}>
+                    Client signer: {data.agreement.sign.clientSignerName ?? "—"}
+                  </p>
+                  <p className={styles.message}>
+                    Client signed at:{" "}
+                    {data.agreement.sign.clientSignedAt
+                      ? formatDateTime(data.agreement.sign.clientSignedAt, locale)
+                      : "—"}
+                  </p>
+                  <p className={styles.message}>
+                    Provider signer: {data.agreement.sign.providerSignerName ?? "—"}
+                  </p>
+                  <p className={styles.message}>
+                    Provider title: {data.agreement.sign.providerSignerTitle ?? "—"}
+                  </p>
+                  <p className={styles.message}>
+                    Provider signed at:{" "}
+                    {data.agreement.sign.providerSignedAt
+                      ? formatDateTime(data.agreement.sign.providerSignedAt, locale)
+                      : "—"}
+                  </p>
+                  {data.agreement.sign.canProviderSign ? (
+                    <button
+                      type="button"
+                      className={styles.docActionBtn}
+                      disabled={busy}
+                      onClick={() => void acceptAgreement(true)}
+                    >
+                      {t("sign.providerSign")}
+                    </button>
+                  ) : null}
+                  <div className={styles.docActions}>
+                    <button
+                      type="button"
+                      className={styles.docActionBtn}
+                      disabled={busy}
+                      onClick={() =>
+                        void fetch(`/api/client-cases/${caseId}/agreement/new-version`, {
+                          method: "POST",
+                        }).then(async (res) => {
+                          if (!res.ok) {
+                            setMessage(t("agreementFailed"));
+                            return;
+                          }
+                          await load();
+                        })
+                      }
+                    >
+                      New version
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.docActionBtn}
+                      disabled={
+                        busy ||
+                        data.agreement.sign.status === "completed" ||
+                        data.agreement.sign.status === "provider_signed"
+                      }
+                      onClick={() =>
+                        void fetch(`/api/client-cases/${caseId}/agreement/cancel`, {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({}),
+                        }).then(async (res) => {
+                          if (!res.ok) {
+                            setMessage(t("agreementFailed"));
+                            return;
+                          }
+                          await load();
+                        })
+                      }
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.docActionBtn}
+                      onClick={() => void toggleAudit()}
+                    >
+                      Audit
+                    </button>
+                  </div>
+                  <div className={styles.docActions}>
+                    <a
+                      className={styles.docActionBtn}
+                      href={`/api/client-cases/${caseId}/agreement/pdf?kind=${
+                        data.agreement.sign.status === "completed" ? "final" : "source"
+                      }`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {t("sign.viewPdf")}
+                    </a>
+                    <a
+                      className={styles.docActionBtn}
+                      href={`/api/client-cases/${caseId}/agreement/pdf?kind=${
+                        data.agreement.sign.status === "completed" ? "final" : "source"
+                      }&download=1`}
+                    >
+                      {t("sign.downloadPdf")}
+                    </a>
+                  </div>
+                  {data.agreement.sign.history && data.agreement.sign.history.length > 1 ? (
+                    <div className={styles.docList}>
+                      <strong>{t("sign.previousVersions")}</strong>
+                      {data.agreement.sign.history.map((item) => (
+                        <div key={item.versionId} className={styles.historyItem}>
+                          <span>
+                            {t("sign.version")} {item.versionNumber} ·{" "}
+                            {t(`sign.status.${item.status}`)}
+                          </span>
+                          {item.hasSourcePdf ? (
+                            <a
+                              className={styles.docActionBtn}
+                              href={`/api/client-cases/${caseId}/agreement/pdf?kind=source&versionId=${item.versionId}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {t("sign.sourcePdf")}
+                            </a>
+                          ) : null}
+                          {item.hasFinalPdf ? (
+                            <a
+                              className={styles.docActionBtn}
+                              href={`/api/client-cases/${caseId}/agreement/pdf?kind=final&versionId=${item.versionId}`}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              {t("sign.finalPdf")}
+                            </a>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  {auditOpen && audit ? (
+                    <div className={styles.docList}>
+                      {audit.events.map((event) => (
+                        <div key={event.id} className={styles.historyItem}>
+                          <strong>
+                            {formatDateTime(event.occurredAt, locale)} · {event.eventType}
+                          </strong>
+                          <span>{event.actor}</span>
+                          {event.documentHash ? <span>{event.documentHash}</span> : null}
+                          {event.ipAddress ? <span>{event.ipAddress}</span> : null}
+                          {event.userAgent ? <span>{event.userAgent}</span> : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </Card>
+              ) : null}
+              <ConsultingAgreementDocument
+                view={{ ...data.agreement, locale }}
+                clientDisabled
+                employeeDisabled={Boolean(data.agreement.sign)}
+                showEmployeeCheckbox={!data.agreement.sign}
+                onEmployeeAccept={
+                  busy || data.agreement.sign
+                    ? undefined
+                    : (accepted) => void acceptAgreement(accepted)
+                }
+              />
+            </>
           ) : (
             <Card className={styles.panel}>
               <p className={styles.message}>{t("agreementEmpty")}</p>

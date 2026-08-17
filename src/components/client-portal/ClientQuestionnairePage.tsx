@@ -48,6 +48,7 @@ import {
   CONSULTING_AGREEMENT_SECTION_ID,
   buildConsultingAgreementPreview,
 } from "@/lib/client-portal/consulting-agreement-fields";
+import type { ConsultingAgreementSignView } from "@/lib/client-portal/sign-types";
 import { ConsultingAgreementDocument } from "./ConsultingAgreementDocument";
 
 type SchemaSection = {
@@ -164,6 +165,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
   const [showUpdatedBanner, setShowUpdatedBanner] = useState(false);
   const [uploadingById, setUploadingById] = useState<Record<string, boolean>>({});
   const [uploadErrorById, setUploadErrorById] = useState<Record<string, string>>({});
+  const [agreementSign, setAgreementSign] =
+    useState<ConsultingAgreementSignView | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dataRef = useRef<CurrentResponse | null>(null);
   const localAnswersRef = useRef<Record<string, unknown>>({});
@@ -206,6 +209,17 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     setSaving(initialQuestionnaireSaveState(json.questionnaire));
     setSaveErrorCode(null);
     setLoading(false);
+    try {
+      const agreementRes = await fetch("/api/client/agreement", { cache: "no-store" });
+      if (agreementRes.ok) {
+        const agreementJson = (await agreementRes.json()) as {
+          agreement?: { sign?: ConsultingAgreementSignView | null };
+        };
+        setAgreementSign(agreementJson.agreement?.sign ?? null);
+      }
+    } catch {
+      setAgreementSign(null);
+    }
   }
 
   useEffect(() => {
@@ -782,7 +796,10 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
       data?.questionnaire.status === "not_started" ||
       data?.questionnaire.status === "in_review") &&
     incompleteRequired.length === 0 &&
-    !(validationGateActive && orderedValidationErrors.length > 0);
+    !(validationGateActive && orderedValidationErrors.length > 0) &&
+    (agreementSign?.status === "client_signed" ||
+      agreementSign?.status === "provider_signed" ||
+      agreementSign?.status === "completed");
 
   if (loading) {
     return <div className={styles.page}><p>{t("loading")}</p></div>;
@@ -971,9 +988,18 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
             ) : null}
             <div className={styles.card}>
               <ConsultingAgreementDocument
-                view={buildConsultingAgreementPreview(localAnswers, locale, {
-                  submittedAt: data?.questionnaire.submittedAt,
-                })}
+                view={{
+                  ...buildConsultingAgreementPreview(localAnswers, locale, {
+                    submittedAt: data?.questionnaire.submittedAt,
+                  }),
+                  sign: agreementSign,
+                }}
+                preferPdfAfterPublish
+                showClientSign={
+                  data?.questionnaire.status !== "submitted" &&
+                  data?.questionnaire.status !== "locked"
+                }
+                onClientSigned={setAgreementSign}
                 onClientAccept={
                   data?.questionnaire.status === "submitted" ||
                   data?.questionnaire.status === "locked"
@@ -1053,9 +1079,18 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
             ) : null}
             {currentSection.id === CONSULTING_AGREEMENT_SECTION_ID ? (
               <ConsultingAgreementDocument
-                view={buildConsultingAgreementPreview(localAnswers, locale, {
-                  submittedAt: data?.questionnaire.submittedAt,
-                })}
+                view={{
+                  ...buildConsultingAgreementPreview(localAnswers, locale, {
+                    submittedAt: data?.questionnaire.submittedAt,
+                  }),
+                  sign: agreementSign,
+                }}
+                preferPdfAfterPublish
+                showClientSign={
+                  data?.questionnaire.status !== "submitted" &&
+                  data?.questionnaire.status !== "locked"
+                }
+                onClientSigned={setAgreementSign}
                 onClientAccept={
                   data?.questionnaire.status === "submitted" ||
                   data?.questionnaire.status === "locked"

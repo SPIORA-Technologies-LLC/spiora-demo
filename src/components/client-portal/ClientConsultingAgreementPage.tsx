@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { Logo } from "@/components/ui/Logo";
 import { ConsultingAgreementDocument } from "./ConsultingAgreementDocument";
@@ -10,7 +10,6 @@ import privacyStyles from "@/app/client/privacy/privacy.module.css";
 
 export function ClientConsultingAgreementPage() {
   const t = useTranslations("clientPortal.consultingAgreement");
-  const locale = useLocale() as "en" | "ru";
   const [view, setView] = useState<ConsultingAgreementView | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,7 +22,7 @@ export function ClientConsultingAgreementPage() {
         if (!res.ok) throw new Error("failed");
         const json = (await res.json()) as { agreement: ConsultingAgreementView };
         if (!cancelled) {
-          setView({ ...json.agreement, locale });
+          setView(json.agreement);
           setError(null);
         }
       } catch {
@@ -39,7 +38,7 @@ export function ClientConsultingAgreementPage() {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [locale, t]);
+  }, [t]);
 
   return (
     <div className={privacyStyles.page}>
@@ -60,10 +59,15 @@ export function ClientConsultingAgreementPage() {
         {!error && !view ? <p>{t("loading")}</p> : null}
         {view ? (
           <ConsultingAgreementDocument
-            view={{ ...view, locale }}
+            view={view}
             clientDisabled
             employeeDisabled
             showEmployeeCheckbox
+            showClientSign={Boolean(view.sign?.canClientSign)}
+            preferPdfAfterPublish
+            onClientSigned={(sign) =>
+              setView((prev) => (prev ? { ...prev, sign } : prev))
+            }
           />
         ) : null}
       </main>

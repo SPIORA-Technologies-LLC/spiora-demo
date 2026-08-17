@@ -31,6 +31,18 @@ export async function POST() {
           ? 403
           : 400;
 
+    if (result.code === "AGREEMENT_NOT_SIGNED") {
+      return Response.json(
+        {
+          error: {
+            code: "AGREEMENT_NOT_SIGNED",
+            message: "Sign the agreement before submitting the questionnaire",
+          },
+        },
+        { status: 400, headers: { "Cache-Control": "no-store" } },
+      );
+    }
+
     if (result.code === "QUESTIONNAIRE_VALIDATION_FAILED") {
       const errors =
         "errors" in result

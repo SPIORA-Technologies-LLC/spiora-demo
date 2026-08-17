@@ -1,6 +1,7 @@
 import "server-only";
 
 import { randomUUID } from "node:crypto";
+import type { SessionUser } from "@/lib/auth/types";
 import { getCaseStore } from "./case-store-selection";
 import {
   extractCaseSnapshotFromAnswers,
@@ -42,6 +43,8 @@ async function persistConsultingAgreement(input: {
       "./consulting-agreement-service"
     );
     await saveAgreementFromSubmission(input);
+    const { attachCaseToSignContract } = await import("./sign/service");
+    await attachCaseToSignContract(input.questionnaireId, input.caseId);
   } catch {
     // Case submit must not fail if the agreement snapshot cannot be stored.
   }
@@ -144,6 +147,20 @@ export async function submitQuestionnaireAndCreateCase(
     locale,
   );
   if (!prepared.ok) return prepared;
+
+  if (!prepared.alreadySubmitted) {
+    try {
+      const { assertQuestionnaireSigned } = await import("./sign/service");
+      const { SignError } = await import("./sign/errors");
+      await assertQuestionnaireSigned(prepared.record.id);
+    } catch (error) {
+      const { SignError } = await import("./sign/errors");
+      if (error instanceof SignError && error.code === "AGREEMENT_NOT_SIGNED") {
+        return { ok: false as const, code: "AGREEMENT_NOT_SIGNED" };
+      }
+      throw error;
+    }
+  }
 
   const snapshot = extractCaseSnapshotFromAnswers(
     prepared.record.answers,
@@ -384,22 +401,55 @@ export async function getEmployeeCaseDetail(caseId: string, locale: "en" | "ru" 
           "./consulting-agreement-service"
         );
         const saved = await getAgreementByCaseId(caseId);
-        if (saved) return viewFromRecord(saved);
+        const { getSignViewForCase, viewWithSign } = await import("./sign/service");
+        const sign = await getSignViewForCase(caseId, { canProviderSign: true });
+        if (saved) {
+          return viewWithSign(viewFromRecord(saved), sign);
+        }
         const { buildConsultingAgreementPreview } = await import(
           "./consulting-agreement-fields"
         );
-        return buildConsultingAgreementPreview(questionnaire.answers, locale, {
+        const preview = buildConsultingAgreementPreview(questionnaire.answers, locale, {
           submittedAt: questionnaire.submittedAt,
           clientAcceptedAt:
             questionnaire.answers.consulting_agreement_acknowledgement === true
               ? questionnaire.submittedAt
               : null,
         });
+        return viewWithSign(preview, sign);
       } catch {
         return null;
       }
     })(),
   };
+}
+
+export async function createAgreementReplacementVersionForCase(input: {
+  caseId: string;
+  actorUser: SessionUser;
+  locale: "en" | "ru";
+  ipAddress?: string | null;
+  userAgent?: string | null;
+}) {
+  const store = await getCaseStore();
+  const record = await store.getById(input.caseId);
+  if (!record) return null;
+  const qStore = await getQuestionnaireStore();
+  const questionnaire = await qStore.getById(record.questionnaireId);
+  if (!questionnaire) return null;
+  const { createReplacementAgreementVersion } = await import("./sign/service");
+  return createReplacementAgreementVersion({
+    questionnaireId: questionnaire.id,
+    portalUserId: questionnaire.clientPortalUserId,
+    portalEmail: record.email ?? "",
+    answers: questionnaire.answers,
+    locale: input.locale,
+    actor: input.actorUser,
+    meta: {
+      ipAddress: input.ipAddress ?? null,
+      userAgent: input.userAgent ?? null,
+    },
+  });
 }
 
 export async function changeCaseStatus(input: {

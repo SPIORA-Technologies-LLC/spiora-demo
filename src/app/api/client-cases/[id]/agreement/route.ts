@@ -4,6 +4,15 @@ import { checkRequestOrigin } from "@/lib/auth/security";
 import { getRequestLocale, translateApiMessage } from "@/i18n/api-messages";
 import { acceptAgreementByEmployee } from "@/lib/client-portal/consulting-agreement-service";
 import { viewFromRecord } from "@/lib/client-portal/consulting-agreement-service";
+import {
+  getSignForCase,
+  providerSignAgreement,
+  viewWithSign,
+  getSignViewForCase,
+} from "@/lib/client-portal/sign/service";
+import { SignError } from "@/lib/client-portal/sign/errors";
+import { readRequestAuditMeta } from "@/lib/client-portal/sign/request-meta";
+import { canSignConsultingAgreementAsProvider } from "@/lib/client-portal/sign/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +48,38 @@ export async function POST(request: Request, context: RouteContext) {
   const { id } = await context.params;
   const body = (await request.json().catch(() => null)) as {
     accepted?: unknown;
+    confirm?: unknown;
   } | null;
+
+  const found = await getSignForCase(id);
+  if (found) {
+    const confirm = body?.confirm === true || body?.accepted === true;
+    try {
+      const sign = await providerSignAgreement({
+        session,
+        versionId: found.version.id,
+        confirm,
+        meta: readRequestAuditMeta(request),
+      });
+      return NextResponse.json(
+        { agreement: { sign }, sign },
+        { headers: { "Cache-Control": "no-store" } },
+      );
+    } catch (error) {
+      if (error instanceof SignError) {
+        const status = error.httpStatus;
+        return NextResponse.json(
+          { error: error.code, code: error.code },
+          { status },
+        );
+      }
+      return NextResponse.json(
+        { error: translateApiMessage(locale, "loadClientFailed") },
+        { status: 500 },
+      );
+    }
+  }
+
   if (!body || typeof body.accepted !== "boolean") {
     return NextResponse.json(
       { error: translateApiMessage(locale, "validationFailed") },
@@ -59,8 +99,11 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
+  const sign = await getSignViewForCase(id, {
+    canProviderSign: canSignConsultingAgreementAsProvider(session),
+  });
   return NextResponse.json(
-    { agreement: viewFromRecord(record) },
+    { agreement: viewWithSign(viewFromRecord(record), sign) },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

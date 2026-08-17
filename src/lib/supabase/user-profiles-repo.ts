@@ -11,6 +11,7 @@ export type UserProfileRow = {
   last_name: string;
   display_name: string;
   avatar_url: string | null;
+  signing_title?: string | null;
   role: string;
   status: string;
   language: string;
@@ -30,6 +31,7 @@ export type UserProfile = {
   lastName: string;
   displayName: string;
   avatarUrl: string | null;
+  signingTitle?: string | null;
   role: PlannedUserRole;
   status: UserStatus;
   language: SupportedUserLanguage;
@@ -53,7 +55,7 @@ export type UpdateUserProfileInput = {
 };
 
 const PROFILE_SELECT =
-  "id, auth_user_id, email, first_name, last_name, display_name, avatar_url, role, status, language, timezone, last_login_at, created_at, updated_at, archived_at, is_demo";
+  "id, auth_user_id, email, first_name, last_name, display_name, avatar_url, signing_title, role, status, language, timezone, last_login_at, created_at, updated_at, archived_at, is_demo";
 
 function isPlannedRole(value: string): value is PlannedUserRole {
   return (
@@ -89,6 +91,7 @@ export function mapUserProfileRow(row: UserProfileRow): UserProfile | null {
     lastName: row.last_name,
     displayName: row.display_name,
     avatarUrl: row.avatar_url,
+    signingTitle: row.signing_title,
     role: row.role,
     status: row.status,
     language,

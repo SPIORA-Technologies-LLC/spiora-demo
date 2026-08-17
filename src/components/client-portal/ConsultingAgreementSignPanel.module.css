@@ -1,0 +1,129 @@
+.panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.85rem;
+  border: 1px solid rgba(22, 21, 19, 0.14);
+  background: rgba(255, 255, 255, 0.62);
+}
+
+.meta {
+  margin-bottom: 0.85rem;
+  font-size: 0.84rem;
+}
+
+.meta p {
+  margin: 0.15rem 0;
+}
+
+.status {
+  font-weight: 650;
+}
+
+.viewerWrap {
+  margin: 0 0 1rem;
+  border: 1px solid rgba(22, 21, 19, 0.12);
+  border-radius: 0.85rem;
+  overflow: hidden;
+  background: #f4f0ea;
+}
+
+.viewer {
+  display: block;
+  width: 100%;
+  min-height: 70vh;
+  border: 0;
+  background: white;
+}
+
+.form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.checkRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.checkRow input {
+  margin-top: 0.2rem;
+  width: 1.05rem;
+  height: 1.05rem;
+  accent-color: #e82916;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.86rem;
+}
+
+.field input {
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid rgba(22, 21, 19, 0.18);
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.primaryBtn {
+  border: none;
+  background: #161513;
+  color: #fff7ef;
+}
+
+.primaryBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.secondaryBtn {
+  border: 1px solid rgba(22, 21, 19, 0.18);
+  background: #fff;
+  color: #161513;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+}
+
+.done {
+  font-size: 0.88rem;
+}
+
+.message {
+  margin-top: 0.65rem;
+  color: #0f6b35;
+  font-size: 0.86rem;
+}
+
+.error {
+  margin-top: 0.65rem;
+  color: #b0120f;
+  font-size: 0.86rem;
+}

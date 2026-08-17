@@ -11,6 +11,8 @@ import {
   consultingAgreementFileName,
 } from "@/lib/client-portal/consulting-agreement-html";
 import type { ConsultingAgreementView } from "@/lib/client-portal/consulting-agreement-fields";
+import type { ConsultingAgreementSignView } from "@/lib/client-portal/sign-types";
+import { ConsultingAgreementSignPanel } from "./ConsultingAgreementSignPanel";
 import styles from "./ConsultingAgreementDocument.module.css";
 
 type Props = {
@@ -21,6 +23,9 @@ type Props = {
   employeeDisabled?: boolean;
   showEmployeeCheckbox?: boolean;
   showActions?: boolean;
+  showClientSign?: boolean;
+  onClientSigned?: (sign: ConsultingAgreementSignView) => void;
+  preferPdfAfterPublish?: boolean;
 };
 
 function Fill({ value }: { value?: string | null }) {
@@ -38,6 +43,9 @@ export function ConsultingAgreementDocument({
   employeeDisabled = false,
   showEmployeeCheckbox = false,
   showActions = true,
+  showClientSign = false,
+  onClientSigned,
+  preferPdfAfterPublish = false,
 }: Props) {
   const t = useTranslations("clientPortal.consultingAgreement");
   const locale = view.locale;
@@ -53,6 +61,8 @@ export function ConsultingAgreementDocument({
     city: "",
   };
   const place = [party.city, view.agreementDate].filter(Boolean).join(", ");
+
+  const publishedForClient = preferPdfAfterPublish && Boolean(showClientSign && view.sign?.versionId);
 
   function html() {
     return buildConsultingAgreementHtml(view, {
@@ -107,6 +117,27 @@ export function ConsultingAgreementDocument({
 
   return (
     <article className={styles.sheet}>
+      {publishedForClient ? (
+        <>
+          <p className={styles.brand}>{CONSULTING_AGREEMENT_BRAND.letters}</p>
+          <p className={styles.slogan}>{CONSULTING_AGREEMENT_BRAND.slogan}</p>
+          <p className={styles.program}>
+            {pickLocaleText(CONSULTING_AGREEMENT_BRAND.program, locale)}
+          </p>
+          <h1 className={styles.title}>
+            {pickLocaleText(CONSULTING_AGREEMENT_BRAND.title, locale)}
+          </h1>
+          <p className={styles.meta}>
+            {t("no")} {view.agreementNumber}
+          </p>
+          <ConsultingAgreementSignPanel
+            sign={view.sign ?? null}
+            disabled={clientDisabled}
+            onSigned={onClientSigned}
+          />
+        </>
+      ) : (
+        <>
       <p className={styles.brand}>{CONSULTING_AGREEMENT_BRAND.letters}</p>
       <p className={styles.slogan}>{CONSULTING_AGREEMENT_BRAND.slogan}</p>
       <p className={styles.program}>
@@ -213,12 +244,12 @@ export function ConsultingAgreementDocument({
             {t("namePosition")} <Fill value={party.fullName} />
           </p>
           <label
-            className={`${styles.checkRow} ${clientDisabled || !onClientAccept ? styles.checkRowDisabled : ""}`}
+            className={`${styles.checkRow} ${clientDisabled || !onClientAccept || showClientSign ? styles.checkRowDisabled : ""}`}
           >
             <input
               type="checkbox"
               checked={view.clientAccepted}
-              disabled={clientDisabled || !onClientAccept}
+              disabled={clientDisabled || !onClientAccept || showClientSign}
               onChange={(event) => onClientAccept?.(event.target.checked)}
             />
             <span>{t("clientConsent")}</span>
@@ -226,7 +257,17 @@ export function ConsultingAgreementDocument({
         </div>
       </div>
 
-      {showActions ? (
+      {showClientSign ? (
+        <ConsultingAgreementSignPanel
+          sign={view.sign ?? null}
+          disabled={clientDisabled}
+          onSigned={onClientSigned}
+        />
+      ) : null}
+        </>
+      )}
+
+      {showActions && !publishedForClient ? (
         <div className={styles.actions}>
           <button type="button" className={styles.actionBtn} onClick={download}>
             {t("download")}

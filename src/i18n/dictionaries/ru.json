@@ -2678,7 +2678,56 @@
       "accepted": "Подтверждено",
       "notAccepted": "Ещё не подтверждено",
       "download": "Сохранить договор",
-      "print": "Печать"
+      "print": "Печать",
+      "sign": {
+        "version": "Версия",
+        "transactionId": "Transaction ID",
+        "consent": "Я ознакомился(ась) с договором, подтверждаю правильность указанных в нём данных, принимаю условия договора и соглашаюсь использовать код, направленный на мой подтверждённый e-mail, для подтверждения подписания данного договора.",
+        "requestOtp": "Получить код",
+        "resendIn": "Повтор через {seconds} с",
+        "otpLabel": "Код подтверждения",
+        "signAgreement": "Подписать договор",
+        "working": "Подождите…",
+        "otpSent": "Код отправлен на ваш e-mail.",
+        "signedSuccess": "Договор подписан.",
+        "clientSignedAt": "Подписано вами",
+        "awaitingProvider": "Ожидается подтверждение SPIORA",
+        "completedBoth": "Подписан обеими сторонами",
+        "viewPdf": "Открыть договор",
+        "downloadPdf": "Скачать договор",
+        "status": {
+          "none": "Договор ещё не опубликован",
+          "draft": "Черновик",
+          "awaiting_client_signature": "Ожидает подписи клиента",
+          "client_signed": "Подписан клиентом",
+          "provider_signed": "Подписан SPIORA",
+          "completed": "Завершён",
+          "expired": "Истёк",
+          "cancelled": "Отменён",
+          "superseded": "Заменён новой версией"
+        },
+        "errors": {
+          "OTP_INVALID": "Неверный код",
+          "OTP_EXPIRED": "Срок действия кода истёк",
+          "OTP_TOO_MANY_ATTEMPTS": "Слишком много попыток",
+          "OTP_RATE_LIMITED": "Подождите перед повторной отправкой кода",
+          "OTP_NOT_REQUESTED": "Сначала запросите код",
+          "CONTRACT_NOT_FOUND": "Договор не найден",
+          "CONTRACT_ACCESS_DENIED": "Нет доступа к договору",
+          "CONTRACT_WRONG_STATUS": "Договор не готов к подписанию",
+          "CONTRACT_ALREADY_SIGNED": "Договор уже подписан",
+          "CONTRACT_SUPERSEDED": "Эта версия договора заменена",
+          "CONTRACT_CANCELLED": "Договор отменён",
+          "DOCUMENT_HASH_MISMATCH": "Файл договора больше не совпадает с подписанной версией",
+          "CONSENT_REQUIRED": "Требуется согласие",
+          "EMAIL_NOT_CONFIGURED": "Почта не настроена",
+          "EMAIL_SEND_FAILED": "Не удалось отправить код",
+          "AGREEMENT_NOT_SIGNED": "Сначала нужно подписать договор",
+          "PROVIDER_PERMISSION_REQUIRED": "Недостаточно прав для подписи от имени SPIORA",
+          "PROVIDER_MFA_REQUIRED": "Перед подписью от имени SPIORA нужно пройти MFA",
+          "INTERNAL": "Произошла ошибка"
+        }
+      }
     },
     "invite": {
       "loading": "Проверяем приглашение…",
@@ -3022,6 +3071,35 @@
       "uploadFailed": "Не удалось загрузить документ",
       "agreementFailed": "Не удалось сохранить подтверждение Исполнителя",
       "agreementEmpty": "Договор пока недоступен.",
+      "sign": {
+        "providerSign": "Подписать от имени SPIORA",
+        "providerConfirm": "Подтвердить подписание от имени SPIORA для {name}?",
+        "version": "Версия",
+        "transactionId": "Transaction ID",
+        "viewPdf": "Открыть PDF",
+        "downloadPdf": "Скачать PDF",
+        "previousVersions": "Предыдущие версии",
+        "sourcePdf": "Исходный PDF",
+        "finalPdf": "Финальный PDF",
+        "status": {
+          "awaiting_client_signature": "Ожидается подпись клиента",
+          "client_signed": "Клиент подписал",
+          "provider_signed": "Подписан SPIORA",
+          "completed": "Подписан обеими сторонами",
+          "expired": "Истёк",
+          "cancelled": "Отменён",
+          "superseded": "Заменён",
+          "draft": "Черновик"
+        },
+        "errors": {
+          "PROVIDER_PERMISSION_REQUIRED": "Недостаточно прав для подписи от имени SPIORA",
+          "PROVIDER_MFA_REQUIRED": "Перед подписью от имени SPIORA нужно пройти MFA",
+          "DOCUMENT_HASH_MISMATCH": "Файл договора больше не совпадает с подписанной версией",
+          "CONTRACT_WRONG_STATUS": "Договор нельзя подписать в текущем статусе",
+          "CONTRACT_CANCELLED": "Договор отменён",
+          "CONTRACT_SUPERSEDED": "Эта версия договора заменена"
+        }
+      },
       "tabs": {
         "overview": "Обзор",
         "questionnaire": "Анкета",

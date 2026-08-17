@@ -4,7 +4,18 @@ import createNextIntlPlugin from "next-intl/plugin";
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["pdf-parse"],
+  serverExternalPackages: ["pdf-parse", "pdfkit"],
+  outputFileTracingIncludes: {
+    "/api/client/agreement/publish": [
+      "./src/lib/client-portal/sign/fonts/NotoSans-Regular.ttf",
+    ],
+    "/api/client-cases/[id]/agreement": [
+      "./src/lib/client-portal/sign/fonts/NotoSans-Regular.ttf",
+    ],
+    "/api/client-cases/[id]/agreement/new-version": [
+      "./src/lib/client-portal/sign/fonts/NotoSans-Regular.ttf",
+    ],
+  },
   headers: async () => [
     {
       source: "/sw.js",

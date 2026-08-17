@@ -1,6 +1,7 @@
 import type { AppLocale } from "@/i18n/config";
 import { formatQuestionnaireDate } from "./questionnaire-date";
 import type { QuestionnaireAnswers } from "./questionnaire-types";
+import type { ConsultingAgreementSignView } from "./sign-types";
 
 export const CONSULTING_AGREEMENT_SECTION_ID = "consulting_agreement";
 export const CONSULTING_AGREEMENT_QUESTION_ID =
@@ -31,6 +32,7 @@ export type ConsultingAgreementView = {
   employeeAccepted: boolean;
   employeeAcceptedAt: string | null;
   submitted: boolean;
+  sign?: ConsultingAgreementSignView | null;
 };
 
 function asTrimmed(value: unknown): string {

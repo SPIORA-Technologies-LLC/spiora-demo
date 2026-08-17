@@ -2678,7 +2678,56 @@
       "accepted": "Confirmed",
       "notAccepted": "Not yet confirmed",
       "download": "Save agreement",
-      "print": "Print"
+      "print": "Print",
+      "sign": {
+        "version": "Version",
+        "transactionId": "Transaction ID",
+        "consent": "I have read the agreement, confirm the data is correct, accept the terms, and agree to use a one-time code sent to my verified email to sign this agreement.",
+        "requestOtp": "Get verification code",
+        "resendIn": "Resend in {seconds}s",
+        "otpLabel": "Verification code",
+        "signAgreement": "Sign agreement",
+        "working": "Please wait…",
+        "otpSent": "Verification code sent to your email.",
+        "signedSuccess": "Agreement signed.",
+        "clientSignedAt": "Signed by you",
+        "awaitingProvider": "Awaiting SPIORA confirmation",
+        "completedBoth": "Signed by both parties",
+        "viewPdf": "View agreement",
+        "downloadPdf": "Download agreement",
+        "status": {
+          "none": "Agreement not published yet",
+          "draft": "Draft",
+          "awaiting_client_signature": "Awaiting client signature",
+          "client_signed": "Signed by client",
+          "provider_signed": "Signed by SPIORA",
+          "completed": "Completed",
+          "expired": "Expired",
+          "cancelled": "Cancelled",
+          "superseded": "Superseded"
+        },
+        "errors": {
+          "OTP_INVALID": "Invalid verification code",
+          "OTP_EXPIRED": "Verification code expired",
+          "OTP_TOO_MANY_ATTEMPTS": "Too many attempts",
+          "OTP_RATE_LIMITED": "Please wait before requesting another code",
+          "OTP_NOT_REQUESTED": "Request a verification code first",
+          "CONTRACT_NOT_FOUND": "Agreement not found",
+          "CONTRACT_ACCESS_DENIED": "Agreement access denied",
+          "CONTRACT_WRONG_STATUS": "Agreement is not ready for signing",
+          "CONTRACT_ALREADY_SIGNED": "Agreement already signed",
+          "CONTRACT_SUPERSEDED": "This agreement version was replaced",
+          "CONTRACT_CANCELLED": "Agreement was cancelled",
+          "DOCUMENT_HASH_MISMATCH": "The agreement file no longer matches the signed version",
+          "CONSENT_REQUIRED": "Consent is required",
+          "EMAIL_NOT_CONFIGURED": "Email is not configured",
+          "EMAIL_SEND_FAILED": "Could not send verification code",
+          "AGREEMENT_NOT_SIGNED": "The consulting agreement must be signed first",
+          "PROVIDER_PERMISSION_REQUIRED": "You cannot sign as SPIORA",
+          "PROVIDER_MFA_REQUIRED": "Complete MFA before signing as SPIORA",
+          "INTERNAL": "Something went wrong"
+        }
+      }
     },
     "invite": {
       "loading": "Checking invitation…",
@@ -3022,6 +3071,35 @@
       "uploadFailed": "Could not upload document",
       "agreementFailed": "Could not save Provider confirmation",
       "agreementEmpty": "The consulting agreement is not available yet.",
+      "sign": {
+        "providerSign": "Sign as SPIORA",
+        "providerConfirm": "Confirm signing on behalf of SPIORA for {name}?",
+        "version": "Version",
+        "transactionId": "Transaction ID",
+        "viewPdf": "View PDF",
+        "downloadPdf": "Download PDF",
+        "previousVersions": "Previous versions",
+        "sourcePdf": "Source PDF",
+        "finalPdf": "Final PDF",
+        "status": {
+          "awaiting_client_signature": "Awaiting client signature",
+          "client_signed": "Client signed",
+          "provider_signed": "Signed by SPIORA",
+          "completed": "Signed by both parties",
+          "expired": "Expired",
+          "cancelled": "Cancelled",
+          "superseded": "Superseded",
+          "draft": "Draft"
+        },
+        "errors": {
+          "PROVIDER_PERMISSION_REQUIRED": "You cannot sign as SPIORA",
+          "PROVIDER_MFA_REQUIRED": "Complete MFA before signing as SPIORA",
+          "DOCUMENT_HASH_MISMATCH": "The agreement file no longer matches the signed version",
+          "CONTRACT_WRONG_STATUS": "Agreement is not in a signable state",
+          "CONTRACT_CANCELLED": "Agreement was cancelled",
+          "CONTRACT_SUPERSEDED": "This agreement version was replaced"
+        }
+      },
       "tabs": {
         "overview": "Overview",
         "questionnaire": "Questionnaire",

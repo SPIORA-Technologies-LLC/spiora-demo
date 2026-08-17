@@ -163,12 +163,13 @@ export function ConsultingAgreementSignPanel({
       setPdfError(null);
       return;
     }
+    const pdfUrl = viewHref;
     let cancelled = false;
     let objectUrl: string | null = null;
     setPdfError(null);
     async function loadPdf() {
       try {
-        const res = await fetch(viewHref, { cache: "no-store" });
+        const res = await fetch(pdfUrl, { cache: "no-store" });
         if (!res.ok) {
           const json = (await res.json().catch(() => null)) as {
             error?: { code?: string };

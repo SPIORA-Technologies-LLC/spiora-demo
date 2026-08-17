@@ -2696,7 +2696,7 @@
         "viewPdf": "View agreement",
         "downloadPdf": "Download agreement",
         "status": {
-          "none": "Agreement not published yet",
+          "none": "Read the agreement, confirm consent, and request a code — the agreement will be published automatically.",
           "draft": "Draft",
           "awaiting_client_signature": "Awaiting client signature",
           "client_signed": "Signed by client",

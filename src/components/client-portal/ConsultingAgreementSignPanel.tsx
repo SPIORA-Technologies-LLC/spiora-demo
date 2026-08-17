@@ -47,8 +47,10 @@ export function ConsultingAgreementSignPanel({
     return () => window.clearInterval(id);
   }, [cooldown]);
 
+  const canStartClientSign = !localSign || Boolean(localSign.canClientSign);
+
   const canRequestOtp =
-    Boolean(localSign?.canClientSign) &&
+    canStartClientSign &&
     consent &&
     !disabled &&
     !busy &&
@@ -76,6 +78,7 @@ export function ConsultingAgreementSignPanel({
     }
     setLocalSign(json.sign);
     setCooldown(json.sign.otpCooldownSeconds);
+    onSigned?.(json.sign);
     return json.sign;
   }
 
@@ -185,7 +188,7 @@ export function ConsultingAgreementSignPanel({
         </div>
       ) : null}
 
-      {localSign?.status === "awaiting_client_signature" ? (
+      {canStartClientSign ? (
         <div className={styles.form}>
           <label className={styles.checkRow}>
             <input

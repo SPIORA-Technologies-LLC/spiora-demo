@@ -117,27 +117,6 @@ export function ConsultingAgreementDocument({
 
   return (
     <article className={styles.sheet}>
-      {publishedForClient ? (
-        <>
-          <p className={styles.brand}>{CONSULTING_AGREEMENT_BRAND.letters}</p>
-          <p className={styles.slogan}>{CONSULTING_AGREEMENT_BRAND.slogan}</p>
-          <p className={styles.program}>
-            {pickLocaleText(CONSULTING_AGREEMENT_BRAND.program, locale)}
-          </p>
-          <h1 className={styles.title}>
-            {pickLocaleText(CONSULTING_AGREEMENT_BRAND.title, locale)}
-          </h1>
-          <p className={styles.meta}>
-            {t("no")} {view.agreementNumber}
-          </p>
-          <ConsultingAgreementSignPanel
-            sign={view.sign ?? null}
-            disabled={clientDisabled}
-            onSigned={onClientSigned}
-          />
-        </>
-      ) : (
-        <>
       <p className={styles.brand}>{CONSULTING_AGREEMENT_BRAND.letters}</p>
       <p className={styles.slogan}>{CONSULTING_AGREEMENT_BRAND.slogan}</p>
       <p className={styles.program}>
@@ -150,112 +129,78 @@ export function ConsultingAgreementDocument({
         {t("no")} {view.agreementNumber}
       </p>
 
-      <section className={styles.party}>
-        <h2 className={styles.partyTitle}>{t("provider")}</h2>
-        <p>
-          {pickLocaleText(CONSULTING_AGREEMENT_BRAND.providerLegalName, locale)}
-        </p>
-        <p>{t("providerHereinafter")}</p>
-        <p className={styles.fill}>
-          {t("providerFields.ico")} <span className={styles.blank} />
-        </p>
-        <p className={styles.fill}>
-          {t("providerFields.dic")} <span className={styles.blank} />
-        </p>
-        <p className={styles.fill}>
-          {t("providerFields.authority")} <span className={styles.blank} />
-        </p>
-        <p className={styles.fill}>
-          {t("providerFields.bank")} <span className={styles.blank} />
-        </p>
-      </section>
+      {!publishedForClient ? (
+        <>
+          <section className={styles.party}>
+            <h2 className={styles.partyTitle}>{t("provider")}</h2>
+            <p>
+              {pickLocaleText(CONSULTING_AGREEMENT_BRAND.providerLegalName, locale)}
+            </p>
+            <p>{t("providerHereinafter")}</p>
+            <p className={styles.fill}>
+              {t("providerFields.ico")} <span className={styles.blank} />
+            </p>
+            <p className={styles.fill}>
+              {t("providerFields.dic")} <span className={styles.blank} />
+            </p>
+            <p className={styles.fill}>
+              {t("providerFields.authority")} <span className={styles.blank} />
+            </p>
+            <p className={styles.fill}>
+              {t("providerFields.bank")} <span className={styles.blank} />
+            </p>
+          </section>
 
-      <section className={styles.party}>
-        <h2 className={styles.partyTitle}>{t("client")}</h2>
-        <p>
-          <Fill value={party.fullName} />
-        </p>
-        <p className={styles.fill}>
-          {t("clientFields.passport")} <Fill value={party.passportNumber} />
-        </p>
-        <p className={styles.fill}>
-          {t("clientFields.issued")} <Fill value={party.passportIssueDate} />
-        </p>
-        <p className={styles.fill}>
-          {t("clientFields.address")} <Fill value={party.address} />
-        </p>
-      </section>
+          <section className={styles.party}>
+            <h2 className={styles.partyTitle}>{t("client")}</h2>
+            <p>
+              <Fill value={party.fullName} />
+            </p>
+            <p className={styles.fill}>
+              {t("clientFields.passport")} <Fill value={party.passportNumber} />
+            </p>
+            <p className={styles.fill}>
+              {t("clientFields.issued")} <Fill value={party.passportIssueDate} />
+            </p>
+            <p className={styles.fill}>
+              {t("clientFields.address")} <Fill value={party.address} />
+            </p>
+          </section>
 
-      <p className={styles.jointly}>{t("jointly")}</p>
+          <p className={styles.jointly}>{t("jointly")}</p>
 
-      {CONSULTING_AGREEMENT_ARTICLES.map((article) => (
-        <section key={article.roman} className={styles.article}>
-          <h2 className={styles.articleTitle}>
-            {article.roman}. {pickLocaleText(article.title, locale)}
-          </h2>
-          {article.clauses.map((clause) => (
-            <div key={`${article.roman}-${clause.n}`}>
-              <p className={styles.clause}>
-                <span className={styles.num}>{clause.n}.</span>
-                {clause[locale]}
-              </p>
-              {clause.items ? (
-                <ul className={styles.items}>
-                  {clause.items.map((item) => (
-                    <li key={item.key}>
-                      <span className={styles.key}>{item.key})</span>
-                      {item[locale]}
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
-            </div>
+          {CONSULTING_AGREEMENT_ARTICLES.map((article) => (
+            <section key={article.roman} className={styles.article}>
+              <h2 className={styles.articleTitle}>
+                {article.roman}. {pickLocaleText(article.title, locale)}
+              </h2>
+              {article.clauses.map((clause) => (
+                <div key={`${article.roman}-${clause.n}`}>
+                  <p className={styles.clause}>
+                    <span className={styles.num}>{clause.n}.</span>
+                    {clause[locale]}
+                  </p>
+                  {clause.items ? (
+                    <ul className={styles.items}>
+                      {clause.items.map((item) => (
+                        <li key={item.key}>
+                          <span className={styles.key}>{item.key})</span>
+                          {item[locale]}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </div>
+              ))}
+            </section>
           ))}
-        </section>
-      ))}
 
-      <h2 className={styles.signTitle}>{t("signatures")}</h2>
-      <p className={styles.fill}>
-        {t("placeAndDate")} <Fill value={place} />
-      </p>
-      <div className={styles.signGrid}>
-        <div className={styles.signBox}>
-          <p className={styles.signRole}>{t("providerRole")}</p>
-          <p>{t("namePosition")}</p>
-          <label
-            className={`${styles.checkRow} ${employeeDisabled || !onEmployeeAccept ? styles.checkRowDisabled : ""}`}
-          >
-            <input
-              type="checkbox"
-              checked={view.employeeAccepted}
-              disabled={employeeDisabled || !onEmployeeAccept}
-              onChange={(event) => onEmployeeAccept?.(event.target.checked)}
-            />
-            <span>
-              {showEmployeeCheckbox || view.employeeAccepted
-                ? t("employeeConsent")
-                : t("employeePending")}
-            </span>
-          </label>
-        </div>
-        <div className={styles.signBox}>
-          <p className={styles.signRole}>{t("clientRole")}</p>
-          <p>
-            {t("namePosition")} <Fill value={party.fullName} />
+          <h2 className={styles.signTitle}>{t("signatures")}</h2>
+          <p className={styles.fill}>
+            {t("placeAndDate")} <Fill value={place} />
           </p>
-          <label
-            className={`${styles.checkRow} ${clientDisabled || !onClientAccept || showClientSign ? styles.checkRowDisabled : ""}`}
-          >
-            <input
-              type="checkbox"
-              checked={view.clientAccepted}
-              disabled={clientDisabled || !onClientAccept || showClientSign}
-              onChange={(event) => onClientAccept?.(event.target.checked)}
-            />
-            <span>{t("clientConsent")}</span>
-          </label>
-        </div>
-      </div>
+        </>
+      ) : null}
 
       {showClientSign ? (
         <ConsultingAgreementSignPanel
@@ -263,8 +208,45 @@ export function ConsultingAgreementDocument({
           disabled={clientDisabled}
           onSigned={onClientSigned}
         />
-      ) : null}
-        </>
+      ) : (
+        <div className={styles.signGrid}>
+          <div className={styles.signBox}>
+            <p className={styles.signRole}>{t("providerRole")}</p>
+            <p>{t("namePosition")}</p>
+            <label
+              className={`${styles.checkRow} ${employeeDisabled || !onEmployeeAccept ? styles.checkRowDisabled : ""}`}
+            >
+              <input
+                type="checkbox"
+                checked={view.employeeAccepted}
+                disabled={employeeDisabled || !onEmployeeAccept}
+                onChange={(event) => onEmployeeAccept?.(event.target.checked)}
+              />
+              <span>
+                {showEmployeeCheckbox || view.employeeAccepted
+                  ? t("employeeConsent")
+                  : t("employeePending")}
+              </span>
+            </label>
+          </div>
+          <div className={styles.signBox}>
+            <p className={styles.signRole}>{t("clientRole")}</p>
+            <p>
+              {t("namePosition")} <Fill value={party.fullName} />
+            </p>
+            <label
+              className={`${styles.checkRow} ${clientDisabled || !onClientAccept ? styles.checkRowDisabled : ""}`}
+            >
+              <input
+                type="checkbox"
+                checked={view.clientAccepted}
+                disabled={clientDisabled || !onClientAccept}
+                onChange={(event) => onClientAccept?.(event.target.checked)}
+              />
+              <span>{t("clientConsent")}</span>
+            </label>
+          </div>
+        </div>
       )}
 
       {showActions && !publishedForClient ? (

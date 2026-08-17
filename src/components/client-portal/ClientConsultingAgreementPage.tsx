@@ -60,10 +60,7 @@ export function ClientConsultingAgreementPage() {
         {view ? (
           <ConsultingAgreementDocument
             view={view}
-            clientDisabled
-            employeeDisabled
-            showEmployeeCheckbox
-            showClientSign={Boolean(view.sign?.canClientSign)}
+            showClientSign
             preferPdfAfterPublish
             onClientSigned={(sign) =>
               setView((prev) => (prev ? { ...prev, sign } : prev))

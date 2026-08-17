@@ -506,6 +506,17 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
     });
   }
 
+  function handleAgreementSigned(sign: ConsultingAgreementSignView) {
+    setAgreementSign(sign);
+    if (
+      sign.status === "client_signed" ||
+      sign.status === "provider_signed" ||
+      sign.status === "completed"
+    ) {
+      onAnswer(CONSULTING_AGREEMENT_QUESTION_ID, "boolean", true);
+    }
+  }
+
   async function onUploadFile(questionId: string, file: File) {
     setUploadErrorById((prev) => ({ ...prev, [questionId]: "" }));
     setUploadingById((prev) => ({ ...prev, [questionId]: true }));
@@ -995,22 +1006,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                   sign: agreementSign,
                 }}
                 preferPdfAfterPublish
-                showClientSign={
-                  data?.questionnaire.status !== "submitted" &&
-                  data?.questionnaire.status !== "locked"
-                }
-                onClientSigned={setAgreementSign}
-                onClientAccept={
-                  data?.questionnaire.status === "submitted" ||
-                  data?.questionnaire.status === "locked"
-                    ? undefined
-                    : (accepted) =>
-                        onAnswer(
-                          CONSULTING_AGREEMENT_QUESTION_ID,
-                          "boolean",
-                          accepted,
-                        )
-                }
+                showClientSign
+                onClientSigned={handleAgreementSigned}
                 clientDisabled={
                   data?.questionnaire.status === "submitted" ||
                   data?.questionnaire.status === "locked"
@@ -1086,22 +1083,8 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                   sign: agreementSign,
                 }}
                 preferPdfAfterPublish
-                showClientSign={
-                  data?.questionnaire.status !== "submitted" &&
-                  data?.questionnaire.status !== "locked"
-                }
-                onClientSigned={setAgreementSign}
-                onClientAccept={
-                  data?.questionnaire.status === "submitted" ||
-                  data?.questionnaire.status === "locked"
-                    ? undefined
-                    : (accepted) =>
-                        onAnswer(
-                          CONSULTING_AGREEMENT_QUESTION_ID,
-                          "boolean",
-                          accepted,
-                        )
-                }
+                showClientSign
+                onClientSigned={handleAgreementSigned}
                 clientDisabled={
                   data?.questionnaire.status === "submitted" ||
                   data?.questionnaire.status === "locked"

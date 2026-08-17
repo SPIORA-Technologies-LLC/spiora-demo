@@ -1,5 +1,9 @@
 import "server-only";
 
+import {
+  defaultTransactionalEmailHtml,
+  wrapTransactionalEmailHtml,
+} from "./branded-html";
 import { getMailConfig } from "./config";
 
 export type SendEmailInput = {
@@ -46,9 +50,9 @@ export async function sendEmail(
         to: [{ email: to }],
         subject: input.subject.trim(),
         textContent: input.text,
-        htmlContent:
-          input.html ??
-          `<pre style="font-family:ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;line-height:1.5">${escapeHtml(input.text)}</pre>`,
+        htmlContent: input.html
+          ? wrapTransactionalEmailHtml(input.html)
+          : defaultTransactionalEmailHtml(input.text),
       }),
     });
 
@@ -64,12 +68,4 @@ export async function sendEmail(
   } catch {
     return { ok: false, code: "EMAIL_SEND_FAILED" };
   }
-}
-
-function escapeHtml(value: string): string {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;");
 }

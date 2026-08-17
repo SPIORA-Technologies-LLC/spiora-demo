@@ -470,6 +470,14 @@
   line-height: 1.4;
 }
 
+.tileStatus {
+  margin: 0.55rem 0 0;
+  color: rgba(245, 238, 230, 0.9);
+  font-size: 0.9rem;
+  font-weight: 550;
+  line-height: 1.45;
+}
+
 .tileExplainer {
   margin: 0.7rem 0 0;
   color: rgba(245, 238, 230, 0.78);

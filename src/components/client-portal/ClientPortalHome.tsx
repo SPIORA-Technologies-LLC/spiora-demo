@@ -13,8 +13,11 @@ import { Logo } from "@/components/ui/Logo";
 import {
   caseStatusLabel,
 } from "@/lib/client-portal/case-status-labels";
+import type { AppLocale } from "@/i18n/config";
 import type { ClientCasePublic, ClientCaseStatus } from "@/lib/client-portal/case-types";
 import { nextCaseStatus } from "@/lib/client-portal/case-types";
+import { formatSignedAt } from "@/lib/client-portal/format-signed-at";
+import type { ConsultingAgreementSignView } from "@/lib/client-portal/sign-types";
 import styles from "./ClientPortalShell.module.css";
 
 const POLL_MS = 45_000;
@@ -62,9 +65,12 @@ export function ClientPortalHome({
   assistantSlot,
 }: Props) {
   const t = useTranslations("clientPortal");
-  const locale = useLocale() as "en" | "ru";
+  const locale = useLocale() as AppLocale;
   const [caseData, setCaseData] = useState<ClientCasePublic | null>(initialCase);
+  const [agreementSign, setAgreementSign] =
+    useState<ConsultingAgreementSignView | null>(null);
   const inflightRef = useRef(false);
+  const agreementInflightRef = useRef(false);
 
   const refreshCase = useCallback(async () => {
     if (inflightRef.current) return;
@@ -103,6 +109,32 @@ export function ClientPortalHome({
     }, POLL_MS);
     return () => window.clearInterval(id);
   }, [questionnaireSubmitted, initialCase, refreshCase]);
+
+  const refreshAgreement = useCallback(async () => {
+    if (questionnaireUnavailable || agreementInflightRef.current) return;
+    agreementInflightRef.current = true;
+    try {
+      const res = await fetch("/api/client/agreement");
+      if (!res.ok) return;
+      const json = (await res.json()) as {
+        agreement?: { sign?: ConsultingAgreementSignView | null };
+      };
+      setAgreementSign(json.agreement?.sign ?? null);
+    } catch {
+      // keep last known status
+    } finally {
+      agreementInflightRef.current = false;
+    }
+  }, [questionnaireUnavailable]);
+
+  useEffect(() => {
+    if (questionnaireUnavailable) return;
+    void refreshAgreement();
+    const id = window.setInterval(() => {
+      void refreshAgreement();
+    }, POLL_MS);
+    return () => window.clearInterval(id);
+  }, [questionnaireUnavailable, refreshAgreement]);
 
   async function onLogout() {
     await fetch("/api/client/logout", { method: "POST" });
@@ -256,11 +288,31 @@ export function ClientPortalHome({
             <article className={styles.placeholder}>
               <p className={styles.tileEyebrow}>{t("consultingAgreement.homeEyebrow")}</p>
               <h2>{t("consultingAgreement.homeTitle")}</h2>
-              <p>
-                {questionnaireSubmitted
-                  ? t("consultingAgreement.homeHint")
-                  : t("consultingAgreement.homeHintDraft")}
-              </p>
+              {agreementSign && agreementSign.status !== "draft" ? (
+                <>
+                  <p className={styles.tileStatus}>
+                    {t(`consultingAgreement.sign.status.${agreementSign.status}`)}
+                  </p>
+                  {agreementSign.clientSignedAt ? (
+                    <p>
+                      {t("consultingAgreement.sign.clientSignedAt")}:{" "}
+                      {formatSignedAt(agreementSign.clientSignedAt, locale)}
+                    </p>
+                  ) : null}
+                  {agreementSign.providerSignedAt ? (
+                    <p>
+                      {t("consultingAgreement.sign.providerSignedAt")}:{" "}
+                      {formatSignedAt(agreementSign.providerSignedAt, locale)}
+                    </p>
+                  ) : null}
+                </>
+              ) : (
+                <p>
+                  {questionnaireSubmitted
+                    ? t("consultingAgreement.homeHint")
+                    : t("consultingAgreement.homeHintDraft")}
+                </p>
+              )}
               <a
                 href={
                   questionnaireSubmitted

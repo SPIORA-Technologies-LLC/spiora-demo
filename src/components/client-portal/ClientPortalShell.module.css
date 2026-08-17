@@ -478,6 +478,28 @@
   line-height: 1.45;
 }
 
+.agreementTile {
+  gap: 0.95rem;
+  padding: 1.4rem 1.25rem 1.35rem;
+}
+
+.agreementTile .tileEyebrow,
+.agreementTile h2,
+.agreementTile p,
+.agreementTile .tileStatus {
+  margin: 0;
+}
+
+.agreementMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.agreementTile a {
+  margin-top: 0.35rem;
+}
+
 .tileExplainer {
   margin: 0.7rem 0 0;
   color: rgba(245, 238, 230, 0.78);

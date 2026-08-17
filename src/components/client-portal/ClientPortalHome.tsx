@@ -285,11 +285,11 @@ export function ClientPortalHome({
 
         {questionnaireUnavailable ? null : (
           <section className={`${styles.grid} ${styles.orderQuestionnaire}`}>
-            <article className={styles.placeholder}>
+            <article className={`${styles.placeholder} ${styles.agreementTile}`}>
               <p className={styles.tileEyebrow}>{t("consultingAgreement.homeEyebrow")}</p>
               <h2>{t("consultingAgreement.homeTitle")}</h2>
               {agreementSign && agreementSign.status !== "draft" ? (
-                <>
+                <div className={styles.agreementMeta}>
                   <p className={styles.tileStatus}>
                     {t(`consultingAgreement.sign.status.${agreementSign.status}`)}
                   </p>
@@ -305,7 +305,7 @@ export function ClientPortalHome({
                       {formatSignedAt(agreementSign.providerSignedAt, locale)}
                     </p>
                   ) : null}
-                </>
+                </div>
               ) : (
                 <p>
                   {questionnaireSubmitted

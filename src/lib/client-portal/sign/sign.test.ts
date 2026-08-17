@@ -700,10 +700,11 @@ describe("SPIORA Sign service", () => {
       },
     };
     const hash = "a".repeat(64);
+    const ruTx = "SP-D172F58D644D4DEE821C7A1C292DCD32";
     const ruBytes = await buildFinalAgreementPdf(snapshot, {
       agreementNumber: snapshot.agreementNumber,
       versionNumber: 2,
-      transactionId: "TX-RU-1",
+      transactionId: ruTx,
       clientName: snapshot.party.fullName,
       clientSignedAt: "2026-08-17T10:00:00.000Z",
       providerName: "Olivia Owner",
@@ -715,22 +716,27 @@ describe("SPIORA Sign service", () => {
     const ruParser = new PDFParse({ data: ruBytes });
     const ruText = (await ruParser.getText()).text ?? "";
     await ruParser.destroy?.();
-    assert.match(ruText, /ФИО/);
-    assert.match(ruText, /Должность/);
+    const ruCompact = ruText.replace(/\s/g, "");
+    assert.match(ruText, /SPIORA SIGN/);
+    assert.match(ruText, /СВЕДЕНИЯ ОБ ЭЛЕКТРОННОМ ПОДПИСАНИИ/);
+    assert.match(ruText, /ПОДТВЕРЖДЕНО ЭЛЕКТРОННО/);
+    assert.match(ruText, /КЛИЕНТ/);
+    assert.match(ruText, /SPIORA/);
     assert.match(ruText, /Transaction ID/);
-    assert.match(ruText, /Версия/);
-    assert.match(ruText, /Дата\/время/);
-    assert.match(ruText, /SHA-256 source PDF/);
-    assert.match(ruText, /Метод подтверждения/);
+    assert.match(ruText, /SHA-256/);
     assert.match(ruText, /Александрович-Петровский/);
-    assert.ok(ruText.includes(hash));
+    assert.ok(ruText.includes(ruTx));
+    assert.ok(ruCompact.includes(hash));
+    assert.doesNotMatch(ruText, /Qualified Electronic Signature/i);
+    assert.doesNotMatch(ruText, /Квалифицированн/);
 
+    const enTx = "SP-E172F58D644D4DEE821C7A1C292DCD32";
     const enBytes = await buildFinalAgreementPdf(
       { ...snapshot, locale: "en" },
       {
         agreementNumber: snapshot.agreementNumber,
         versionNumber: 2,
-        transactionId: "TX-EN-1",
+        transactionId: enTx,
         clientName: "Ivan Ivanov",
         clientSignedAt: "2026-08-17T10:00:00.000Z",
         providerName: "Olivia Owner",
@@ -743,13 +749,17 @@ describe("SPIORA Sign service", () => {
     const enParser = new PDFParse({ data: enBytes });
     const enText = (await enParser.getText()).text ?? "";
     await enParser.destroy?.();
-    assert.match(enText, /Signer/);
-    assert.match(enText, /Title/);
+    const enCompact = enText.replace(/\s/g, "");
+    assert.match(enText, /SPIORA SIGN/);
+    assert.match(enText, /ELECTRONIC SIGNING CERTIFICATE/);
+    assert.match(enText, /ELECTRONICALLY CONFIRMED/);
+    assert.match(enText, /CLIENT/);
+    assert.match(enText, /SPIORA/);
     assert.match(enText, /Transaction ID/);
-    assert.match(enText, /Version/);
-    assert.match(enText, /Date\/time/);
-    assert.match(enText, /SHA-256 of the source PDF/);
-    assert.match(enText, /Verification method/);
+    assert.match(enText, /SHA-256/);
+    assert.ok(enText.includes(enTx));
+    assert.ok(enCompact.includes(hash));
+    assert.doesNotMatch(enText, /Qualified Electronic Signature/i);
   });
 
   it("publish fails when storage write succeeds but read fails", async () => {

@@ -7,21 +7,10 @@ import {
 import { formatQuestionnaireDate } from "../questionnaire-date";
 import type { FrozenAgreementSnapshot } from "../sign-types";
 import { resolveSignPdfFontPath } from "./font";
-import { formatSignDateTimes, pdfCopy } from "./pdf-copy";
-import { getSignConfig } from "./config";
+import { pdfCopy } from "./pdf-copy";
+import { writeCertificatePage, type CertificateInput } from "./pdf-certificate";
 
-export type CertificateInput = {
-  agreementNumber: string;
-  versionNumber: number;
-  transactionId: string;
-  clientName: string;
-  clientSignedAt: string;
-  providerName: string;
-  providerTitle: string;
-  providerSignedAt: string;
-  sourcePdfHash: string;
-  locale: FrozenAgreementSnapshot["locale"];
-};
+export type { CertificateInput };
 
 function dash(value: string): string {
   return value.trim() || "____________________";
@@ -136,48 +125,6 @@ function writeAgreementBody(
   doc.text(`${copy.namePosition} ${dash(party.fullName)}`);
 }
 
-function writeCertificate(doc: PDFKit.PDFDocument, cert: CertificateInput) {
-  const copy = pdfCopy(cert.locale);
-  const tz = getSignConfig().timezone;
-  const clientTimes = formatSignDateTimes(cert.clientSignedAt, tz, cert.locale);
-  const providerTimes = formatSignDateTimes(
-    cert.providerSignedAt,
-    tz,
-    cert.locale,
-  );
-
-  doc.addPage();
-  doc.fontSize(14).text(copy.certificateTitle, { align: "center" });
-  doc.moveDown(1);
-  doc.fontSize(11);
-  doc.text(`${copy.no} ${cert.agreementNumber}`);
-  doc.text(`${copy.versionLabel}: ${cert.versionNumber}`);
-  doc.text(`${copy.transactionLabel}: ${cert.transactionId}`);
-  doc.moveDown(0.8);
-  doc.fontSize(12).text(copy.clientHeading);
-  doc.fontSize(11);
-  doc.text(`${copy.signer} ${cert.clientName}`, { width: 480 });
-  doc.text(copy.confirmedElectronically);
-  doc.text(copy.dateTime);
-  doc.text(clientTimes.local);
-  doc.text(clientTimes.utc);
-  doc.text(copy.method);
-  doc.text(copy.methodBody);
-  doc.moveDown(0.8);
-  doc.fontSize(12).text(copy.providerHeading);
-  doc.fontSize(11);
-  doc.text(`${copy.signer} ${cert.providerName}`, { width: 480 });
-  doc.text(`${copy.title} ${cert.providerTitle}`, { width: 480 });
-  doc.text(copy.dateTime);
-  doc.text(providerTimes.local);
-  doc.text(providerTimes.utc);
-  doc.moveDown(0.8);
-  doc.text(copy.sourceHash);
-  doc.fontSize(9).text(cert.sourcePdfHash, { width: 480 });
-  doc.moveDown(0.8);
-  doc.fontSize(11).text(copy.journalNote);
-}
-
 export async function buildSourceAgreementPdf(
   snapshot: FrozenAgreementSnapshot,
 ): Promise<Buffer> {
@@ -190,6 +137,6 @@ export async function buildFinalAgreementPdf(
 ): Promise<Buffer> {
   return collectPdf((doc) => {
     writeAgreementBody(doc, snapshot);
-    writeCertificate(doc, certificate);
+    writeCertificatePage(doc, certificate);
   });
 }

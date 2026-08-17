@@ -31,6 +31,20 @@ type Copy = {
   title: string;
   sourceHash: string;
   journalNote: string;
+  productLabel: string;
+  certificateSubtitle: string;
+  bothConfirmed: string;
+  electronicallyConfirmed: string;
+  agreementLabel: string;
+  integrityTitle: string;
+  sourceHashLabel: string;
+  verificationLabel: string;
+  verifyAccount: string;
+  verifyEmailOtp: string;
+  verifyEmployeeAccount: string;
+  verifyEmployeeMfa: string;
+  stampConfirmed: string;
+  stampElectronicDocument: string;
 };
 
 const EN: Copy = {
@@ -54,7 +68,7 @@ const EN: Copy = {
   namePosition: "Name / position:",
   versionLabel: "Version",
   transactionLabel: "Transaction ID",
-  certificateTitle: "ELECTRONIC SIGNING DETAILS",
+  certificateTitle: "ELECTRONIC SIGNING CERTIFICATE",
   clientHeading: "CLIENT",
   providerHeading: "SPIORA",
   confirmedElectronically: "The document was confirmed electronically through SPIORA.",
@@ -66,7 +80,21 @@ const EN: Copy = {
   title: "Title:",
   sourceHash: "SHA-256 of the source PDF:",
   journalNote:
-    "Signing events and the technical journal are stored in the SPIORA information system.",
+    "Electronic confirmation events and the technical audit trail are stored in the SPIORA information system.",
+  productLabel: "SPIORA SIGN",
+  certificateSubtitle: "Electronic Document Verification",
+  bothConfirmed: "DOCUMENT CONFIRMED BY BOTH PARTIES",
+  electronicallyConfirmed: "ELECTRONICALLY CONFIRMED",
+  agreementLabel: "AGREEMENT",
+  integrityTitle: "DOCUMENT INTEGRITY",
+  sourceHashLabel: "SHA-256 of the source PDF",
+  verificationLabel: "Verification",
+  verifyAccount: "Authenticated SPIORA account",
+  verifyEmailOtp: "One-time code to verified e-mail",
+  verifyEmployeeAccount: "SPIORA employee account",
+  verifyEmployeeMfa: "Employee MFA",
+  stampConfirmed: "CONFIRMED",
+  stampElectronicDocument: "ELECTRONIC DOCUMENT",
 };
 
 const RU: Copy = {
@@ -102,7 +130,21 @@ const RU: Copy = {
   title: "Должность:",
   sourceHash: "SHA-256 source PDF:",
   journalNote:
-    "Сведения о событиях подписания и технический журнал хранятся в информационной системе SPIORA.",
+    "Сведения о событиях электронного подтверждения и технический журнал хранятся в информационной системе SPIORA.",
+  productLabel: "SPIORA SIGN",
+  certificateSubtitle: "Электронное подтверждение документа",
+  bothConfirmed: "ДОКУМЕНТ ПОДТВЕРЖДЁН ОБЕИМИ СТОРОНАМИ",
+  electronicallyConfirmed: "ПОДТВЕРЖДЕНО ЭЛЕКТРОННО",
+  agreementLabel: "ДОГОВОР",
+  integrityTitle: "КОНТРОЛЬ ЦЕЛОСТНОСТИ ДОКУМЕНТА",
+  sourceHashLabel: "SHA-256 исходного PDF",
+  verificationLabel: "Подтверждение",
+  verifyAccount: "Авторизованный аккаунт SPIORA",
+  verifyEmailOtp: "Одноразовый код на подтверждённый e-mail",
+  verifyEmployeeAccount: "Аккаунт сотрудника SPIORA",
+  verifyEmployeeMfa: "Многофакторная аутентификация сотрудника",
+  stampConfirmed: "ПОДТВЕРЖДЕНО",
+  stampElectronicDocument: "ЭЛЕКТРОННЫЙ ДОКУМЕНТ",
 };
 
 export function pdfCopy(locale: AppLocale): Copy {

@@ -1,9 +1,24 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
 import type { ConsultingAgreementSignView } from "@/lib/client-portal/sign-types";
 import styles from "./ConsultingAgreementSignPanel.module.css";
+
+function formatSignedAt(iso: string | null, locale: AppLocale): string {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return new Intl.DateTimeFormat(locale === "ru" ? "ru-RU" : "en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
 
 type Props = {
   sign: ConsultingAgreementSignView | null;
@@ -20,6 +35,7 @@ export function ConsultingAgreementSignPanel({
   disabled = false,
   onSigned,
 }: Props) {
+  const locale = useLocale() as AppLocale;
   const t = useTranslations("clientPortal.consultingAgreement.sign");
   const [consent, setConsent] = useState(false);
   const [otp, setOtp] = useState("");
@@ -277,7 +293,9 @@ export function ConsultingAgreementSignPanel({
         localSign.status === "provider_signed" ||
         localSign.status === "completed") ? (
         <div className={styles.done}>
-          <p>{t("clientSignedAt")}: {localSign.clientSignedAt ?? "—"}</p>
+          <p>
+            {t("clientSignedAt")}: {formatSignedAt(localSign.clientSignedAt, locale)}
+          </p>
           {localSign.status === "completed" ? (
             <p>{t("completedBoth")}</p>
           ) : (

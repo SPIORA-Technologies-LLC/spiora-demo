@@ -45,7 +45,6 @@ export function ClientConsultingAgreementPage() {
       <header className={privacyStyles.header}>
         <a className={privacyStyles.brand} href="/client">
           <Logo size="sm" />
-          <span>SPIORA</span>
         </a>
         <div className={privacyStyles.headerActions}>
           <LanguageSwitcher compact />

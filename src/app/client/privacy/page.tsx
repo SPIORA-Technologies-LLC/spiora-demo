@@ -22,7 +22,6 @@ export default async function ClientPrivacyPolicyPage() {
       <header className={styles.header}>
         <a className={styles.brand} href="/client">
           <Logo size="sm" />
-          <span>SPIORA</span>
         </a>
         <div className={styles.headerActions}>
           <LanguageSwitcher compact />

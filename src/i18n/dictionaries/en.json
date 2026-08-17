@@ -2824,15 +2824,15 @@
         "whatP1": "Usually, email and a password are enough to sign in.",
         "whatP2": "If someone else learns your password, they could access your account.",
         "whatP3": "Two-factor authentication adds a second layer of protection. After your password, Spiora asks for a one-time six-digit code from an app on your phone. Even if your password is known to someone else, signing in still needs your phone.",
-        "recommendTitle": "Do I need to turn MFA on?",
+        "recommendTitle": "Do I need to turn on two-factor authentication?",
         "recommendP1": "No — it is optional. You can use the portal without it.",
-        "recommendP2": "We still recommend enabling MFA if:",
+        "recommendP2": "We still recommend enabling two-factor authentication if:",
         "recommendBullet1": "your account holds confidential documents;",
         "recommendBullet2": "you work with personal data;",
         "recommendBullet3": "you want stronger protection for your account.",
-        "setupCta": "Open two-factor settings",
+        "setupCta": "Open two-factor authentication settings",
         "infoBlurb": "Two-factor authentication protects your account even if your password is compromised.",
-        "howTitle": "How to turn MFA on",
+        "howTitle": "How to turn on two-factor authentication",
         "step1Label": "Step 1",
         "step1": "Open Two-factor authentication in the portal header.",
         "step2Label": "Step 2",
@@ -2852,18 +2852,18 @@
         "done": "From the next sign-in, after your password Spiora will ask for a one-time code from the app.",
         "lostTitle": "If you lose your phone",
         "lostP1": "Don’t worry — if you saved your recovery codes, you can restore access yourself.",
-        "lostP2": "After recovery, set up MFA again.",
+        "lostP2": "After recovery, set up two-factor authentication again.",
         "lostP3": "If recovery codes are also unavailable, contact Spiora support.",
         "enabledSuccessTitle": "You’re all set",
         "enabledSuccessBody": "Your account is now protected with two-factor authentication. At the next sign-in, after your password you will need a six-digit code from the app.",
         "enabledSuccessCodes": "Keep your recovery codes in a safe place.",
         "disabledTitle": "Two-factor authentication is off",
         "disabledBody": "Sign-in now uses your password only.",
-        "disabledHint": "You can turn MFA back on whenever you like."
+        "disabledHint": "You can turn two-factor authentication back on whenever you like."
       },
       "banner": {
         "reenroll": "Set up two-factor authentication again to protect your account.",
-        "reenrollCta": "Open MFA settings"
+        "reenrollCta": "Open two-factor authentication settings"
       },
       "errors": {
         "generic": "Something went wrong. Try again.",
@@ -2918,17 +2918,17 @@
       "whatTitle": "What is two-factor authentication?",
       "whatP1": "Usually, email and a password are enough to sign in.",
       "whatP2": "If someone else learns your password, they could access your work account.",
-      "whatP3": "Two-factor authentication (MFA) adds a second layer of protection. After your password, Spiora asks for a six-digit code from an authenticator app on your phone. Even if your password is compromised, signing in still needs your phone.",
-      "recommendTitle": "Should I turn MFA on?",
+      "whatP3": "Two-factor authentication adds a second layer of protection. After your password, Spiora asks for a six-digit code from an authenticator app on your phone. Even if your password is compromised, signing in still needs your phone.",
+      "recommendTitle": "Should I turn on two-factor authentication?",
       "recommendP1": "Yes. For Spiora team members, two-factor authentication is a strongly recommended security practice.",
       "recommendP2": "To protect corporate and client data, we strongly recommend using two-factor authentication. It helps protect:",
       "recommendBullet1": "client data;",
       "recommendBullet2": "corporate information;",
       "recommendBullet3": "internal documents;",
       "recommendBullet4": "administrative functions in the system.",
-      "howTitle": "How to turn MFA on",
+      "howTitle": "How to turn on two-factor authentication",
       "step1Label": "Step 1",
-      "step1": "Open My authenticator MFA.",
+      "step1": "Open two-factor authentication settings.",
       "step2Label": "Step 2",
       "step2": "Tap Enable two-factor authentication.",
       "step3Label": "Step 3",
@@ -2946,7 +2946,7 @@
       "done": "From the next sign-in, after your password Spiora will ask for a one-time code from the app.",
       "lostTitle": "If you lose your phone",
       "lostP1": "You can use your recovery codes to restore access.",
-      "lostP2": "After recovery, set up MFA again.",
+      "lostP2": "After recovery, set up two-factor authentication again.",
       "lostP3": "If recovery codes are also unavailable, contact your system administrator.",
       "setupNow": "Set up now",
       "later": "Later",
@@ -2959,11 +2959,11 @@
       "enabledSuccessCodes": "Keep your recovery codes in a safe place.",
       "disabledTitle": "Two-factor authentication is off",
       "disabledBody": "Sign-in now uses your password only.",
-      "disabledHint": "We recommend turning MFA back on as soon as you can."
+      "disabledHint": "We recommend turning two-factor authentication back on as soon as you can."
     },
     "banner": {
       "reenroll": "MFA was reset with a recovery code. Re-enable MFA to protect your account.",
-      "reenrollCta": "Open MFA settings"
+      "reenrollCta": "Open two-factor authentication settings"
     },
     "errors": {
       "generic": "Something went wrong. Try again.",

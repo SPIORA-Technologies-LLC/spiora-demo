@@ -11,7 +11,12 @@ type Copy = {
   bank: string;
   passport: string;
   issued: string;
+  country: string;
+  postalCode: string;
+  city: string;
   address: string;
+  email: string;
+  phone: string;
   jointly: string;
   signatures: string;
   placeAndDate: string;
@@ -58,7 +63,12 @@ const EN: Copy = {
   bank: "Bank account:",
   passport: "Passport:",
   issued: "Date of passport issue:",
+  country: "Country:",
+  postalCode: "Postal code:",
+  city: "City:",
   address: "Address:",
+  email: "Email:",
+  phone: "Phone:",
   jointly:
     'hereinafter referred to as the "Client", jointly referred to as the "Parties", have entered into this Agreement as follows:',
   signatures: "SIGNATURES OF THE PARTIES",
@@ -108,7 +118,12 @@ const RU: Copy = {
   bank: "Банковский счёт:",
   passport: "Паспорт:",
   issued: "Дата выдачи паспорта:",
+  country: "Страна:",
+  postalCode: "Почтовый индекс:",
+  city: "Город:",
   address: "Адрес:",
+  email: "Email:",
+  phone: "Телефон:",
   jointly:
     "далее именуемый «Клиент», совместно именуемые «Стороны», заключили настоящий Договор о нижеследующем:",
   signatures: "ПОДПИСИ СТОРОН",

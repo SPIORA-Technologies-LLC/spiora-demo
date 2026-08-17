@@ -98,13 +98,14 @@ export function hashQuestionnaireSchema(schema: QuestionnaireSchema): string {
 
 /** Fixed canonical hash for general_client_onboarding demo schema (current). */
 export const GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH =
-  "25ef2b4e503b6c09478792e36171dbb889e895e549b9b62573c55287fe663a09";
+  "f0b51905a8e7a123d56494d9e70c2d5aa8cecb9f88ce70b94320db905191b51a";
 
 /**
  * Previously published hashes for the same demo template.
  * Used to reconcile/upgrade stored rows to the in-code schema without SQL.
  */
 export const GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY = [
+  "25ef2b4e503b6c09478792e36171dbb889e895e549b9b62573c55287fe663a09",
   "44fdf4f32780c29d5624ba6e912dfeee317d8789932105a506514321bd7c2fe2",
   "c8ec967f072ad3f980324c02dbe0121046f5aab6f3ab734014e51737b84187a7",
   "9bedcf5adc70bd2f1b3324753def531acc639756da7c6ae728a716a5c9c71c46",

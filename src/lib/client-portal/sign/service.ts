@@ -12,6 +12,7 @@ import {
   CONSULTING_AGREEMENT_VERSION,
   buildConsultingAgreementPreview,
   extractConsultingAgreementParty,
+  normalizeConsultingAgreementParty,
   type ConsultingAgreementView,
 } from "../consulting-agreement-fields";
 import type { QuestionnaireAnswers } from "../questionnaire-types";
@@ -541,7 +542,9 @@ export async function publishClientAgreement(input: {
 }): Promise<ConsultingAgreementSignView> {
   const store = storeOf(input.deps);
   const locale = input.locale === "ru" ? "ru" : "en";
-  const party = extractConsultingAgreementParty(input.answers, locale);
+  const party = extractConsultingAgreementParty(input.answers, locale, {
+    portalEmail: input.session.email,
+  });
   const occurredAt = nowIso(input.deps);
   const dateIso = occurredAt.slice(0, 10);
   const snapshot: FrozenAgreementSnapshot = {
@@ -712,7 +715,9 @@ export async function createReplacementAgreementVersion(input: {
   const locale = input.locale === "ru" ? "ru" : "en";
   const occurredAt = nowIso(input.deps);
   const dateIso = occurredAt.slice(0, 10);
-  const party = extractConsultingAgreementParty(input.answers, locale);
+  const party = extractConsultingAgreementParty(input.answers, locale, {
+    portalEmail: input.portalEmail,
+  });
   const snapshot: FrozenAgreementSnapshot = {
     locale,
     templateVersion: CONSULTING_AGREEMENT_VERSION,
@@ -1465,21 +1470,16 @@ export async function buildClientAgreementPayload(input: {
       canProviderSign: input.canProviderSign,
     });
     const preview = buildConsultingAgreementPreview(
-      {
-        first_name: found.version.snapshot.party.firstName,
-        last_name: found.version.snapshot.party.lastName,
-        patronymic: found.version.snapshot.party.patronymic,
-        passport_number: found.version.snapshot.party.passportNumber,
-        passport_issue_date: found.version.snapshot.party.passportIssueDateIso,
-        address: found.version.snapshot.party.address,
-        city: found.version.snapshot.party.city,
-      },
+      {},
       found.version.locale,
       {
         submittedAt: `${found.version.snapshot.agreementDateIso}T00:00:00.000Z`,
         clientAcceptedAt: sign.clientSignedAt,
         employeeAcceptedAt: sign.providerSignedAt,
       },
+    );
+    preview.party = normalizeConsultingAgreementParty(
+      found.version.snapshot.party,
     );
     return viewWithSign(
       { ...preview, agreementNumber: found.contract.agreementNumber },
@@ -1492,6 +1492,7 @@ export async function buildClientAgreementPayload(input: {
       input.answers?.consulting_agreement_acknowledgement === true
         ? input.lastSavedAt ?? null
         : null,
+    portalEmail: input.session.email,
   });
   return { ...preview, sign: null };
 }

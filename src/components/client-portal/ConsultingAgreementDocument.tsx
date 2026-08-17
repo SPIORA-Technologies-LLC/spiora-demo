@@ -10,7 +10,10 @@ import {
   buildConsultingAgreementHtml,
   consultingAgreementFileName,
 } from "@/lib/client-portal/consulting-agreement-html";
-import type { ConsultingAgreementView } from "@/lib/client-portal/consulting-agreement-fields";
+import {
+  normalizeConsultingAgreementParty,
+  type ConsultingAgreementView,
+} from "@/lib/client-portal/consulting-agreement-fields";
 import type { ConsultingAgreementSignView } from "@/lib/client-portal/sign-types";
 import { Logo } from "@/components/ui/Logo";
 import { ConsultingAgreementSignPanel } from "./ConsultingAgreementSignPanel";
@@ -50,17 +53,7 @@ export function ConsultingAgreementDocument({
 }: Props) {
   const t = useTranslations("clientPortal.consultingAgreement");
   const locale = view.locale;
-  const party = view.party ?? {
-    firstName: "",
-    lastName: "",
-    patronymic: "",
-    fullName: "",
-    passportNumber: "",
-    passportIssueDate: "",
-    passportIssueDateIso: "",
-    address: "",
-    city: "",
-  };
+  const party = normalizeConsultingAgreementParty(view.party);
   const place = [party.city, view.agreementDate].filter(Boolean).join(", ");
 
   const publishedForClient =
@@ -81,7 +74,12 @@ export function ConsultingAgreementDocument({
       clientFields: {
         passport: t("clientFields.passport"),
         issued: t("clientFields.issued"),
+        country: t("clientFields.country"),
+        postalCode: t("clientFields.postalCode"),
+        city: t("clientFields.city"),
         address: t("clientFields.address"),
+        email: t("clientFields.email"),
+        phone: t("clientFields.phone"),
       },
       jointly: t("jointly"),
       signatures: t("signatures"),
@@ -167,7 +165,22 @@ export function ConsultingAgreementDocument({
               {t("clientFields.issued")} <Fill value={party.passportIssueDate} />
             </p>
             <p className={styles.fill}>
+              {t("clientFields.country")} <Fill value={party.country} />
+            </p>
+            <p className={styles.fill}>
+              {t("clientFields.postalCode")} <Fill value={party.postalCode} />
+            </p>
+            <p className={styles.fill}>
+              {t("clientFields.city")} <Fill value={party.city} />
+            </p>
+            <p className={styles.fill}>
               {t("clientFields.address")} <Fill value={party.address} />
+            </p>
+            <p className={styles.fill}>
+              {t("clientFields.email")} <Fill value={party.email} />
+            </p>
+            <p className={styles.fill}>
+              {t("clientFields.phone")} <Fill value={party.phone} />
             </p>
           </section>
 

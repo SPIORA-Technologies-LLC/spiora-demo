@@ -90,12 +90,13 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
         },
         { id: "phone", type: "phone", order: 20, label: { en: "Phone", ru: "Телефон" }, required: true },
         { id: "country_of_residence", type: "country", order: 30, label: { en: "Country of residence", ru: "Страна проживания" }, required: true },
-        { id: "city", type: "text", order: 40, label: { en: "City", ru: "Город" }, validation: { maxLength: 120 } },
-        { id: "address", type: "textarea", order: 50, label: { en: "Address", ru: "Адрес" }, required: true, validation: { maxLength: 500 } },
+        { id: "postal_code", type: "text", order: 40, label: { en: "Postal code", ru: "Почтовый индекс" }, required: true, validation: { maxLength: 20 } },
+        { id: "city", type: "text", order: 50, label: { en: "City", ru: "Город" }, required: true, validation: { maxLength: 120 } },
+        { id: "address", type: "textarea", order: 60, label: { en: "Address", ru: "Адрес" }, required: true, validation: { maxLength: 500 } },
         {
           id: "preferred_contact_method",
           type: "select",
-          order: 60,
+          order: 70,
           label: { en: "Preferred contact method", ru: "Предпочтительный способ связи" },
           options: [
             { value: "email", label: { en: "Email", ru: "Email" } },
@@ -105,7 +106,7 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
         {
           id: "preferred_language",
           type: "select",
-          order: 70,
+          order: 80,
           label: { en: "Preferred language", ru: "Предпочтительный язык" },
           options: [
             { value: "en", label: { en: "English", ru: "Английский" } },

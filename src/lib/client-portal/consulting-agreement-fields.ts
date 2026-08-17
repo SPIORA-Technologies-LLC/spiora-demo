@@ -1,4 +1,5 @@
 import type { AppLocale } from "@/i18n/config";
+import { countryLabel } from "./questionnaire-countries";
 import { formatQuestionnaireDate } from "./questionnaire-date";
 import type { QuestionnaireAnswers } from "./questionnaire-types";
 import type { ConsultingAgreementSignView } from "./sign-types";
@@ -16,9 +17,52 @@ export type ConsultingAgreementParty = {
   passportNumber: string;
   passportIssueDate: string;
   passportIssueDateIso: string;
-  address: string;
+  country: string;
+  postalCode: string;
   city: string;
+  address: string;
+  email: string;
+  phone: string;
 };
+
+export function emptyConsultingAgreementParty(): ConsultingAgreementParty {
+  return {
+    firstName: "",
+    lastName: "",
+    patronymic: "",
+    fullName: "",
+    passportNumber: "",
+    passportIssueDate: "",
+    passportIssueDateIso: "",
+    country: "",
+    postalCode: "",
+    city: "",
+    address: "",
+    email: "",
+    phone: "",
+  };
+}
+
+export function normalizeConsultingAgreementParty(
+  party: Partial<ConsultingAgreementParty> | null | undefined,
+): ConsultingAgreementParty {
+  if (!party) return emptyConsultingAgreementParty();
+  return {
+    firstName: asTrimmed(party.firstName),
+    lastName: asTrimmed(party.lastName),
+    patronymic: asTrimmed(party.patronymic),
+    fullName: asTrimmed(party.fullName),
+    passportNumber: asTrimmed(party.passportNumber),
+    passportIssueDate: asTrimmed(party.passportIssueDate),
+    passportIssueDateIso: asTrimmed(party.passportIssueDateIso),
+    country: asTrimmed(party.country),
+    postalCode: asTrimmed(party.postalCode),
+    city: asTrimmed(party.city),
+    address: asTrimmed(party.address),
+    email: asTrimmed(party.email),
+    phone: asTrimmed(party.phone),
+  };
+}
 
 export type ConsultingAgreementView = {
   locale: AppLocale;
@@ -70,11 +114,13 @@ export function todayIsoDate(now = new Date()): string {
 export function extractConsultingAgreementParty(
   answers: QuestionnaireAnswers,
   locale: AppLocale,
+  options?: { portalEmail?: string },
 ): ConsultingAgreementParty {
   const firstName = asTrimmed(answers.first_name);
   const lastName = asTrimmed(answers.last_name);
   const patronymic = asTrimmed(answers.patronymic);
   const passportIssueDateIso = asTrimmed(answers.passport_issue_date);
+  const countryCode = asTrimmed(answers.country_of_residence);
   return {
     firstName,
     lastName,
@@ -85,8 +131,12 @@ export function extractConsultingAgreementParty(
     passportIssueDate: passportIssueDateIso
       ? formatQuestionnaireDate(passportIssueDateIso, locale)
       : "",
-    address: asTrimmed(answers.address),
+    country: countryCode ? countryLabel(countryCode, locale) : "",
+    postalCode: asTrimmed(answers.postal_code),
     city: asTrimmed(answers.city),
+    address: asTrimmed(answers.address),
+    email: asTrimmed(answers.email) || asTrimmed(options?.portalEmail),
+    phone: asTrimmed(answers.phone),
   };
 }
 
@@ -97,6 +147,7 @@ export function buildConsultingAgreementPreview(
     submittedAt?: string | null;
     clientAcceptedAt?: string | null;
     employeeAcceptedAt?: string | null;
+    portalEmail?: string;
   },
 ): ConsultingAgreementView {
   const iso =
@@ -107,7 +158,9 @@ export function buildConsultingAgreementPreview(
     agreementNumber: isoDateToAgreementNumber(iso),
     agreementDateIso: iso,
     agreementDate: formatQuestionnaireDate(iso, locale),
-    party: extractConsultingAgreementParty(answers, locale),
+    party: extractConsultingAgreementParty(answers, locale, {
+      portalEmail: options?.portalEmail,
+    }),
     clientAccepted:
       answers[CONSULTING_AGREEMENT_QUESTION_ID] === true ||
       Boolean(options?.clientAcceptedAt),

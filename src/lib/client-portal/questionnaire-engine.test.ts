@@ -206,6 +206,8 @@ describe("questionnaire draft lifecycle", () => {
         { op: "set", questionId: "citizenship", value: "UA" },
         { op: "set", questionId: "phone", value: "+3801234567" },
         { op: "set", questionId: "country_of_residence", value: "HR" },
+        { op: "set", questionId: "postal_code", value: "10000" },
+        { op: "set", questionId: "city", value: "Zagreb" },
         { op: "set", questionId: "address", value: "Zagreb, Ilica 1" },
         { op: "set", questionId: "passport_number", value: "AB123456" },
         { op: "set", questionId: "passport_issue_date", value: "2020-01-15" },

@@ -30,13 +30,24 @@ describe("consulting agreement merge fields", () => {
         patronymic: "Ivanovich",
         passport_number: "AB123456",
         passport_issue_date: "2020-01-15",
-        address: "Zagreb, Ilica 1",
+        country_of_residence: "HR",
+        postal_code: "10000",
+        city: "Zagreb",
+        address: "Ilica 1",
+        email: "ivan@example.com",
+        phone: "+385123456",
       },
       "en",
     );
     assert.equal(party.fullName, "Ivan Ivanovich Ivanov");
     assert.equal(party.passportNumber, "AB123456");
     assert.match(party.passportIssueDate, /15/);
+    assert.match(party.country.toLowerCase(), /croatia/);
+    assert.equal(party.postalCode, "10000");
+    assert.equal(party.city, "Zagreb");
+    assert.equal(party.address, "Ilica 1");
+    assert.equal(party.email, "ivan@example.com");
+    assert.equal(party.phone, "+385123456");
     assert.equal(isoDateToAgreementNumber("2026-08-14"), "2026/08/14");
   });
 
@@ -48,6 +59,8 @@ describe("consulting agreement merge fields", () => {
       citizenship: "UA",
       phone: "+3801234567",
       country_of_residence: "HR",
+      postal_code: "10000",
+      city: "Zagreb",
       address: "Zagreb",
       passport_number: "AB123456",
       passport_issue_date: "2020-01-15",

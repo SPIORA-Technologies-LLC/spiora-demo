@@ -40,8 +40,12 @@ const answers = {
   patronymic: "Ivanovich",
   passport_number: "AB123456",
   passport_issue_date: "2020-01-15",
-  address: "Zagreb, Ilica 1",
+  country_of_residence: "HR",
+  postal_code: "10000",
   city: "Zagreb",
+  address: "Zagreb, Ilica 1",
+  email: "client@example.com",
+  phone: "+385123456",
   consulting_agreement_acknowledgement: true,
 };
 
@@ -695,8 +699,12 @@ describe("SPIORA Sign service", () => {
         passportNumber: "AB123456",
         passportIssueDate: "15.01.2020",
         passportIssueDateIso: "2020-01-15",
-        address: "Zagreb, Ilica 1",
+        country: "Хорватия",
+        postalCode: "10000",
         city: "Zagreb",
+        address: "Ilica 1",
+        email: "client@example.com",
+        phone: "+385123456",
       },
     };
     const hash = "a".repeat(64);
@@ -725,6 +733,20 @@ describe("SPIORA Sign service", () => {
     assert.match(ruText, /Transaction ID/);
     assert.match(ruText, /SHA-256/);
     assert.match(ruText, /Александрович-Петровский/);
+    assert.match(ruText, /Страна:/);
+    assert.match(ruText, /Хорватия/);
+    assert.match(ruText, /Почтовый индекс:/);
+    assert.match(ruText, /10000/);
+    assert.match(ruText, /Город:/);
+    assert.match(ruText, /Zagreb/);
+    assert.match(ruText, /Адрес:/);
+    assert.match(ruText, /Ilica 1/);
+    assert.match(ruText, /Email:/);
+    assert.match(ruText, /client@example\.com/);
+    assert.match(ruText, /Телефон:/);
+    assert.match(ruText, /\+385123456/);
+    assert.doesNotMatch(ruText, /S P I O R A/);
+    assert.doesNotMatch(ruText, /ONE PLATFORM\. INFINITE SOLUTIONS/);
     assert.ok(ruText.includes(ruTx));
     assert.ok(ruCompact.includes(hash));
     assert.doesNotMatch(ruText, /Qualified Electronic Signature/i);

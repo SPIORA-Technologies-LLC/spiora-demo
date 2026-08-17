@@ -40,6 +40,8 @@ const REQUIRED_OPS = [
   { op: "set" as const, questionId: "citizenship", value: "UA" },
   { op: "set" as const, questionId: "phone", value: "+3801234567" },
   { op: "set" as const, questionId: "country_of_residence", value: "HR" },
+  { op: "set" as const, questionId: "postal_code", value: "10000" },
+  { op: "set" as const, questionId: "city", value: "Zagreb" },
   { op: "set" as const, questionId: "address", value: "Zagreb, Ilica 1" },
   { op: "set" as const, questionId: "passport_number", value: "AB123456" },
   { op: "set" as const, questionId: "passport_issue_date", value: "2020-01-15" },

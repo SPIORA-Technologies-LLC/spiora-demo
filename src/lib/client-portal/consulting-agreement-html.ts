@@ -5,10 +5,13 @@ import {
   CONSULTING_AGREEMENT_BRAND,
   pickLocaleText,
 } from "./consulting-agreement-content";
-import type { ConsultingAgreementView } from "./consulting-agreement-fields";
+import {
+  normalizeConsultingAgreementParty,
+  type ConsultingAgreementView,
+} from "./consulting-agreement-fields";
 
-function dash(value: string): string {
-  return value.trim() || "____________________";
+function dash(value?: string | null): string {
+  return (value ?? "").trim() || "____________________";
 }
 
 function escapeHtml(value: string): string {
@@ -38,7 +41,7 @@ export function buildConsultingAgreementHtml(
   },
 ): string {
   const locale: AppLocale = view.locale;
-  const party = view.party;
+  const party = normalizeConsultingAgreementParty(view.party);
   const articles = CONSULTING_AGREEMENT_ARTICLES.map((article) => {
     const clauses = article.clauses
       .map((clause) => {
@@ -101,7 +104,12 @@ export function buildConsultingAgreementHtml(
     <p><strong>${escapeHtml(dash(party.fullName))}</strong></p>
     <p class="fill">${escapeHtml(labels.clientFields.passport)} ${escapeHtml(dash(party.passportNumber))}</p>
     <p class="fill">${escapeHtml(labels.clientFields.issued)} ${escapeHtml(dash(party.passportIssueDate))}</p>
+    <p class="fill">${escapeHtml(labels.clientFields.country)} ${escapeHtml(dash(party.country))}</p>
+    <p class="fill">${escapeHtml(labels.clientFields.postalCode)} ${escapeHtml(dash(party.postalCode))}</p>
+    <p class="fill">${escapeHtml(labels.clientFields.city)} ${escapeHtml(dash(party.city))}</p>
     <p class="fill">${escapeHtml(labels.clientFields.address)} ${escapeHtml(dash(party.address))}</p>
+    <p class="fill">${escapeHtml(labels.clientFields.email)} ${escapeHtml(dash(party.email))}</p>
+    <p class="fill">${escapeHtml(labels.clientFields.phone)} ${escapeHtml(dash(party.phone))}</p>
   </section>
   <p>${escapeHtml(labels.jointly)}</p>
   ${articles}

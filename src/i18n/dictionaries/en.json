@@ -2664,7 +2664,12 @@
       "clientFields": {
         "passport": "Passport:",
         "issued": "Date of passport issue:",
-        "address": "Address:"
+        "country": "Country:",
+        "postalCode": "Postal code:",
+        "city": "City:",
+        "address": "Address:",
+        "email": "Email:",
+        "phone": "Phone:"
       },
       "jointly": "hereinafter referred to as the \"Client\", jointly referred to as the \"Parties\", have entered into this Agreement as follows:",
       "signatures": "SIGNATURES OF THE PARTIES",

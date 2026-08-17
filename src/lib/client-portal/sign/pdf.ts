@@ -4,6 +4,7 @@ import {
   CONSULTING_AGREEMENT_BRAND,
   pickLocaleText,
 } from "../consulting-agreement-content";
+import { normalizeConsultingAgreementParty } from "../consulting-agreement-fields";
 import { formatQuestionnaireDate } from "../questionnaire-date";
 import type { FrozenAgreementSnapshot } from "../sign-types";
 import { resolveSignPdfFontPath } from "./font";
@@ -16,8 +17,8 @@ import { writeCertificatePage, type CertificateInput } from "./pdf-certificate";
 
 export type { CertificateInput };
 
-function dash(value: string): string {
-  return value.trim() || "____________________";
+function dash(value?: string | null): string {
+  return (value ?? "").trim() || "____________________";
 }
 
 async function collectPdf(
@@ -52,25 +53,21 @@ async function collectPdf(
 function drawAgreementLogo(doc: PDFKit.PDFDocument) {
   const logoPath = resolveSignPdfLogoPath();
   if (!logoPath) {
-    doc.fontSize(14).text(CONSULTING_AGREEMENT_BRAND.letters, {
-      align: "center",
-    });
-    doc.moveDown(0.3);
-    doc.fontSize(9).text(CONSULTING_AGREEMENT_BRAND.slogan, {
-      align: "center",
-    });
     return;
   }
-  const width = 168;
-  const height = width / SIGN_PDF_LOGO_ASPECT;
-  const x = (doc.page.width - width) / 2;
+  const padX = 16;
+  const padY = 10;
+  const imgWidth = 168;
+  const imgHeight = imgWidth / SIGN_PDF_LOGO_ASPECT;
+  const boxWidth = imgWidth + padX * 2;
+  const boxHeight = imgHeight + padY * 2;
+  const x = (doc.page.width - boxWidth) / 2;
   const y = doc.y;
   doc.save();
-  doc.roundedRect(x, y, width, height, 3).fill("#000000");
-  doc.roundedRect(x, y, width, height, 3).clip();
-  doc.image(logoPath, x, y, { width, height });
+  doc.roundedRect(x, y, boxWidth, boxHeight, 4).fill("#000000");
+  doc.image(logoPath, x + padX, y + padY, { width: imgWidth, height: imgHeight });
   doc.restore();
-  doc.y = y + height + 12;
+  doc.y = y + boxHeight + 12;
 }
 
 function writeAgreementBody(
@@ -79,7 +76,7 @@ function writeAgreementBody(
 ) {
   const locale = snapshot.locale;
   const copy = pdfCopy(locale);
-  const party = snapshot.party;
+  const party = normalizeConsultingAgreementParty(snapshot.party);
   const date = formatQuestionnaireDate(snapshot.agreementDateIso, locale);
   const place = [party.city, date].filter(Boolean).join(", ");
 
@@ -114,7 +111,12 @@ function writeAgreementBody(
   doc.text(dash(party.fullName));
   doc.text(`${copy.passport} ${dash(party.passportNumber)}`);
   doc.text(`${copy.issued} ${dash(party.passportIssueDate)}`);
+  doc.text(`${copy.country} ${dash(party.country)}`);
+  doc.text(`${copy.postalCode} ${dash(party.postalCode)}`);
+  doc.text(`${copy.city} ${dash(party.city)}`);
   doc.text(`${copy.address} ${dash(party.address)}`);
+  doc.text(`${copy.email} ${dash(party.email)}`);
+  doc.text(`${copy.phone} ${dash(party.phone)}`);
   doc.moveDown(0.6);
   doc.text(copy.jointly);
   doc.moveDown(0.8);

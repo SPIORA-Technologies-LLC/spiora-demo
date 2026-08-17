@@ -445,35 +445,45 @@ export function ClientCaseDetail({
             <>
               {data.agreement.sign ? (
                 <Card className={styles.panel}>
-                  <p className={styles.message}>
-                    {t(`sign.status.${data.agreement.sign.status}`)}
-                  </p>
-                  {data.agreement.sign.versionNumber > 1 ? (
-                    <p className={styles.message}>
-                      {t("sign.version")}: {data.agreement.sign.versionNumber}
+                  <div className={styles.signSummary}>
+                    <p className={styles.signStatus}>
+                      {t(`sign.status.${data.agreement.sign.status}`)}
                     </p>
-                  ) : null}
-                  <p className={styles.message}>
-                    {t("sign.clientSigner")}: {data.agreement.sign.clientSignerName ?? "—"}
-                  </p>
-                  <p className={styles.message}>
-                    {t("sign.clientSignedAt")}:{" "}
-                    {data.agreement.sign.clientSignedAt
-                      ? formatDateTime(data.agreement.sign.clientSignedAt, locale)
-                      : "—"}
-                  </p>
-                  <p className={styles.message}>
-                    {t("sign.providerSigner")}: {data.agreement.sign.providerSignerName ?? "—"}
-                  </p>
-                  <p className={styles.message}>
-                    {t("sign.providerTitle")}: {data.agreement.sign.providerSignerTitle ?? "—"}
-                  </p>
-                  <p className={styles.message}>
-                    {t("sign.providerSignedAt")}:{" "}
-                    {data.agreement.sign.providerSignedAt
-                      ? formatDateTime(data.agreement.sign.providerSignedAt, locale)
-                      : "—"}
-                  </p>
+                    {data.agreement.sign.versionNumber > 1 ? (
+                      <p className={styles.signVersion}>
+                        {t("sign.version")} {data.agreement.sign.versionNumber}
+                      </p>
+                    ) : null}
+                    <div className={styles.signParties}>
+                      <div className={styles.signParty}>
+                        <p className={styles.signPartyLabel}>{t("sign.clientSigner")}</p>
+                        <p className={styles.signPartyName}>
+                          {data.agreement.sign.clientSignerName ?? "—"}
+                        </p>
+                        <p className={styles.signPartyDate}>
+                          {data.agreement.sign.clientSignedAt
+                            ? formatDateTime(data.agreement.sign.clientSignedAt, locale)
+                            : "—"}
+                        </p>
+                      </div>
+                      <div className={styles.signParty}>
+                        <p className={styles.signPartyLabel}>{t("sign.providerSigner")}</p>
+                        <p className={styles.signPartyName}>
+                          {data.agreement.sign.providerSignerName ?? "—"}
+                        </p>
+                        {data.agreement.sign.providerSignerTitle ? (
+                          <p className={styles.signPartyRole}>
+                            {data.agreement.sign.providerSignerTitle}
+                          </p>
+                        ) : null}
+                        <p className={styles.signPartyDate}>
+                          {data.agreement.sign.providerSignedAt
+                            ? formatDateTime(data.agreement.sign.providerSignedAt, locale)
+                            : "—"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                   {data.agreement.sign.hasSourcePdf || data.agreement.sign.hasFinalPdf ? (
                     <iframe
                       className={styles.pdfFrame}

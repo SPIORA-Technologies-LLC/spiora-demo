@@ -147,6 +147,80 @@
   background: #fff;
 }
 
+.signSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin: 0 0 0.35rem;
+}
+
+.signStatus {
+  margin: 0;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.28rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 41, 22, 0.28);
+  background: rgba(232, 41, 22, 0.12);
+  color: #f3cfc8;
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.signVersion {
+  margin: -0.35rem 0 0;
+  color: var(--gray-300);
+  font-size: 0.72rem;
+}
+
+.signParties {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.signParty {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+  padding: 0.7rem 0.8rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.signPartyLabel {
+  margin: 0;
+  color: var(--gray-300);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.signPartyName {
+  margin: 0;
+  color: #f6efe8;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.signPartyRole {
+  margin: 0;
+  color: var(--gray-300);
+  font-size: 0.74rem;
+}
+
+.signPartyDate {
+  margin: 0.12rem 0 0;
+  color: rgba(240, 210, 168, 0.92);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .docActionBtn,
 .docDeleteBtn {
   display: inline-flex;
@@ -220,7 +294,8 @@
 
 @media (max-width: 800px) {
   .fieldGrid,
-  .answerRow {
+  .answerRow,
+  .signParties {
     grid-template-columns: 1fr;
   }
 

@@ -5,7 +5,6 @@ import {
   pickLocaleText,
 } from "../consulting-agreement-content";
 import { normalizeConsultingAgreementParty } from "../consulting-agreement-fields";
-import { formatQuestionnaireDate } from "../questionnaire-date";
 import type { FrozenAgreementSnapshot } from "../sign-types";
 import { resolveSignPdfFontPath } from "./font";
 import {
@@ -77,8 +76,6 @@ function writeAgreementBody(
   const locale = snapshot.locale;
   const copy = pdfCopy(locale);
   const party = normalizeConsultingAgreementParty(snapshot.party);
-  const date = formatQuestionnaireDate(snapshot.agreementDateIso, locale);
-  const place = [party.city, date].filter(Boolean).join(", ");
 
   drawAgreementLogo(doc);
   doc
@@ -140,16 +137,6 @@ function writeAgreementBody(
     }
     doc.moveDown(0.4);
   }
-
-  doc.fontSize(12).text(copy.signatures);
-  doc.moveDown(0.3);
-  doc.fontSize(10).text(`${copy.placeAndDate} ${dash(place)}`);
-  doc.moveDown(0.6);
-  doc.text(copy.providerRole);
-  doc.text(copy.namePosition);
-  doc.moveDown(0.8);
-  doc.text(copy.clientRole);
-  doc.text(`${copy.namePosition} ${dash(party.fullName)}`);
 }
 
 export async function buildSourceAgreementPdf(

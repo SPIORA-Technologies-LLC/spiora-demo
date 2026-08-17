@@ -54,7 +54,6 @@ export function ConsultingAgreementDocument({
   const t = useTranslations("clientPortal.consultingAgreement");
   const locale = view.locale;
   const party = normalizeConsultingAgreementParty(view.party);
-  const place = [party.city, view.agreementDate].filter(Boolean).join(", ");
 
   const publishedForClient =
     preferPdfAfterPublish && Boolean(showClientSign && view.sign?.versionId);
@@ -82,13 +81,6 @@ export function ConsultingAgreementDocument({
         phone: t("clientFields.phone"),
       },
       jointly: t("jointly"),
-      signatures: t("signatures"),
-      placeAndDate: t("placeAndDate"),
-      providerRole: t("providerRole"),
-      clientRole: t("clientRole"),
-      namePosition: t("namePosition"),
-      accepted: t("accepted"),
-      notAccepted: t("notAccepted"),
     });
   }
 
@@ -211,11 +203,6 @@ export function ConsultingAgreementDocument({
               ))}
             </section>
           ))}
-
-          <h2 className={styles.signTitle}>{t("signatures")}</h2>
-          <p className={styles.fill}>
-            {t("placeAndDate")} <Fill value={place} />
-          </p>
         </>
       ) : null}
 

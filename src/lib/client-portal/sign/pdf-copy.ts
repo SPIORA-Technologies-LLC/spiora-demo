@@ -18,11 +18,6 @@ type Copy = {
   email: string;
   phone: string;
   jointly: string;
-  signatures: string;
-  placeAndDate: string;
-  providerRole: string;
-  clientRole: string;
-  namePosition: string;
   versionLabel: string;
   transactionLabel: string;
   certificateTitle: string;
@@ -71,11 +66,6 @@ const EN: Copy = {
   phone: "Phone:",
   jointly:
     'hereinafter referred to as the "Client", jointly referred to as the "Parties", have entered into this Agreement as follows:',
-  signatures: "SIGNATURES OF THE PARTIES",
-  placeAndDate: "Place and date:",
-  providerRole: "Poskytovateľ / Provider",
-  clientRole: "Objednávateľ / Client",
-  namePosition: "Name / position:",
   versionLabel: "Version",
   transactionLabel: "Transaction ID",
   certificateTitle: "ELECTRONIC SIGNING CERTIFICATE",
@@ -126,11 +116,6 @@ const RU: Copy = {
   phone: "Телефон:",
   jointly:
     "далее именуемый «Клиент», совместно именуемые «Стороны», заключили настоящий Договор о нижеследующем:",
-  signatures: "ПОДПИСИ СТОРОН",
-  placeAndDate: "Место и дата:",
-  providerRole: "Poskytovateľ / Исполнитель",
-  clientRole: "Objednávateľ / Клиент",
-  namePosition: "ФИО / должность:",
   versionLabel: "Версия",
   transactionLabel: "Transaction ID",
   certificateTitle: "СВЕДЕНИЯ ОБ ЭЛЕКТРОННОМ ПОДПИСАНИИ",

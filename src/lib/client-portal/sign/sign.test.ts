@@ -747,6 +747,9 @@ describe("SPIORA Sign service", () => {
     assert.match(ruText, /\+385123456/);
     assert.doesNotMatch(ruText, /S P I O R A/);
     assert.doesNotMatch(ruText, /ONE PLATFORM\. INFINITE SOLUTIONS/);
+    assert.doesNotMatch(ruText, /ПОДПИСИ СТОРОН/);
+    assert.doesNotMatch(ruText, /Poskytovateľ/);
+    assert.doesNotMatch(ruText, /ФИО \/ должность/);
     assert.ok(ruText.includes(ruTx));
     assert.ok(ruCompact.includes(hash));
     assert.doesNotMatch(ruText, /Qualified Electronic Signature/i);
@@ -782,6 +785,8 @@ describe("SPIORA Sign service", () => {
     assert.ok(enText.includes(enTx));
     assert.ok(enCompact.includes(hash));
     assert.doesNotMatch(enText, /Qualified Electronic Signature/i);
+    assert.doesNotMatch(enText, /SIGNATURES OF THE PARTIES/);
+    assert.doesNotMatch(enText, /Poskytovateľ/);
   });
 
   it("publish fails when storage write succeeds but read fails", async () => {

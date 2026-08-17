@@ -31,13 +31,6 @@ export function buildConsultingAgreementHtml(
     providerFields: Record<string, string>;
     clientFields: Record<string, string>;
     jointly: string;
-    signatures: string;
-    placeAndDate: string;
-    providerRole: string;
-    clientRole: string;
-    namePosition: string;
-    accepted: string;
-    notAccepted: string;
   },
 ): string {
   const locale: AppLocale = view.locale;
@@ -59,8 +52,6 @@ export function buildConsultingAgreementHtml(
     return `<section class="article"><h2>${escapeHtml(article.roman)}. ${escapeHtml(pickLocaleText(article.title, locale))}</h2>${clauses}</section>`;
   }).join("");
 
-  const place = [party.city, view.agreementDate].filter(Boolean).join(", ");
-
   return `<!DOCTYPE html>
 <html lang="${locale}">
 <head>
@@ -81,9 +72,6 @@ export function buildConsultingAgreementHtml(
   .n { font-weight: 700; margin-right: 6px; }
   .items { margin: 6px 0 10px 1.4rem; }
   .key { font-weight: 700; margin-right: 4px; }
-  .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
-  .box { border-top: 1px solid #111; padding-top: 10px; }
-  .check { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -113,20 +101,6 @@ export function buildConsultingAgreementHtml(
   </section>
   <p>${escapeHtml(labels.jointly)}</p>
   ${articles}
-  <h2>${escapeHtml(labels.signatures)}</h2>
-  <p>${escapeHtml(labels.placeAndDate)} ${escapeHtml(dash(place))}</p>
-  <div class="sign">
-    <div class="box">
-      <p>${escapeHtml(labels.providerRole)}</p>
-      <p>${escapeHtml(labels.namePosition)}</p>
-      <p class="check">${view.employeeAccepted ? escapeHtml(labels.accepted) : escapeHtml(labels.notAccepted)}</p>
-    </div>
-    <div class="box">
-      <p>${escapeHtml(labels.clientRole)}</p>
-      <p>${escapeHtml(labels.namePosition)} <strong>${escapeHtml(dash(party.fullName))}</strong></p>
-      <p class="check">${view.clientAccepted ? escapeHtml(labels.accepted) : escapeHtml(labels.notAccepted)}</p>
-    </div>
-  </div>
 </body>
 </html>`;
 }

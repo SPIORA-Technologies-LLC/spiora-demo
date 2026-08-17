@@ -448,15 +448,11 @@ export function ClientCaseDetail({
                   <p className={styles.message}>
                     {t(`sign.status.${data.agreement.sign.status}`)}
                   </p>
-                  <p className={styles.message}>
-                    Contract: {data.agreement.sign.agreementNumber}
-                  </p>
-                  <p className={styles.message}>
-                    {t("sign.version")}: {data.agreement.sign.versionNumber}
-                  </p>
-                  <p className={styles.message}>
-                    {t("sign.transactionId")}: {data.agreement.sign.transactionId}
-                  </p>
+                  {data.agreement.sign.versionNumber > 1 ? (
+                    <p className={styles.message}>
+                      {t("sign.version")}: {data.agreement.sign.versionNumber}
+                    </p>
+                  ) : null}
                   <p className={styles.message}>
                     Client signer: {data.agreement.sign.clientSignerName ?? "—"}
                   </p>

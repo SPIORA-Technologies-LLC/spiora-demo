@@ -1,3 +1,4 @@
+import { branding } from "@/config/branding";
 import type { AppLocale } from "@/i18n/config";
 import {
   CONSULTING_AGREEMENT_ARTICLES,
@@ -64,8 +65,8 @@ export function buildConsultingAgreementHtml(
 <title>${escapeHtml(pickLocaleText(CONSULTING_AGREEMENT_BRAND.title, locale))}</title>
 <style>
   body { font-family: Georgia, "Times New Roman", serif; color: #111; background: #fff; margin: 0; padding: 32px; line-height: 1.45; }
-  .brand { letter-spacing: 0.42em; font-weight: 700; text-align: center; margin: 0; }
-  .slogan { text-align: center; letter-spacing: 0.12em; font-size: 12px; margin: 6px 0 24px; }
+  .logo { text-align: center; margin: 0 0 18px; }
+  .logo img { width: 220px; height: auto; border-radius: 6px; }
   h1 { text-align: center; font-size: 18px; margin: 8px 0; }
   .meta { text-align: center; margin: 0 0 24px; }
   .party { margin: 16px 0; }
@@ -83,8 +84,7 @@ export function buildConsultingAgreementHtml(
 </style>
 </head>
 <body>
-  <p class="brand">${escapeHtml(CONSULTING_AGREEMENT_BRAND.letters)}</p>
-  <p class="slogan">${escapeHtml(CONSULTING_AGREEMENT_BRAND.slogan)}</p>
+  <p class="logo"><img src="${escapeHtml(branding.logoPath)}" alt="${escapeHtml(branding.productName)}" /></p>
   <p class="meta">${escapeHtml(pickLocaleText(CONSULTING_AGREEMENT_BRAND.program, locale))}</p>
   <h1>${escapeHtml(pickLocaleText(CONSULTING_AGREEMENT_BRAND.title, locale))}</h1>
   <p class="meta">${escapeHtml(labels.no)} ${escapeHtml(view.agreementNumber)}</p>

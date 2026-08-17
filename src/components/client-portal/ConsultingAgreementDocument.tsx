@@ -12,6 +12,7 @@ import {
 } from "@/lib/client-portal/consulting-agreement-html";
 import type { ConsultingAgreementView } from "@/lib/client-portal/consulting-agreement-fields";
 import type { ConsultingAgreementSignView } from "@/lib/client-portal/sign-types";
+import { Logo } from "@/components/ui/Logo";
 import { ConsultingAgreementSignPanel } from "./ConsultingAgreementSignPanel";
 import styles from "./ConsultingAgreementDocument.module.css";
 
@@ -119,8 +120,9 @@ export function ConsultingAgreementDocument({
 
   return (
     <article className={styles.sheet}>
-      <p className={styles.brand}>{CONSULTING_AGREEMENT_BRAND.letters}</p>
-      <p className={styles.slogan}>{CONSULTING_AGREEMENT_BRAND.slogan}</p>
+      <div className={styles.logoWrap}>
+        <Logo size="md" />
+      </div>
       <p className={styles.program}>
         {pickLocaleText(CONSULTING_AGREEMENT_BRAND.program, locale)}
       </p>

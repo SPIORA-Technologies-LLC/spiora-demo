@@ -7,6 +7,10 @@ import {
 import { formatQuestionnaireDate } from "../questionnaire-date";
 import type { FrozenAgreementSnapshot } from "../sign-types";
 import { resolveSignPdfFontPath } from "./font";
+import {
+  resolveSignPdfLogoPath,
+  SIGN_PDF_LOGO_ASPECT,
+} from "./logo";
 import { pdfCopy } from "./pdf-copy";
 import { writeCertificatePage, type CertificateInput } from "./pdf-certificate";
 
@@ -45,6 +49,30 @@ async function collectPdf(
   return done;
 }
 
+function drawAgreementLogo(doc: PDFKit.PDFDocument) {
+  const logoPath = resolveSignPdfLogoPath();
+  if (!logoPath) {
+    doc.fontSize(14).text(CONSULTING_AGREEMENT_BRAND.letters, {
+      align: "center",
+    });
+    doc.moveDown(0.3);
+    doc.fontSize(9).text(CONSULTING_AGREEMENT_BRAND.slogan, {
+      align: "center",
+    });
+    return;
+  }
+  const width = 168;
+  const height = width / SIGN_PDF_LOGO_ASPECT;
+  const x = (doc.page.width - width) / 2;
+  const y = doc.y;
+  doc.save();
+  doc.roundedRect(x, y, width, height, 3).fill("#000000");
+  doc.roundedRect(x, y, width, height, 3).clip();
+  doc.image(logoPath, x, y, { width, height });
+  doc.restore();
+  doc.y = y + height + 12;
+}
+
 function writeAgreementBody(
   doc: PDFKit.PDFDocument,
   snapshot: FrozenAgreementSnapshot,
@@ -55,10 +83,7 @@ function writeAgreementBody(
   const date = formatQuestionnaireDate(snapshot.agreementDateIso, locale);
   const place = [party.city, date].filter(Boolean).join(", ");
 
-  doc.fontSize(14).text(CONSULTING_AGREEMENT_BRAND.letters, { align: "center" });
-  doc.moveDown(0.3);
-  doc.fontSize(9).text(CONSULTING_AGREEMENT_BRAND.slogan, { align: "center" });
-  doc.moveDown(0.2);
+  drawAgreementLogo(doc);
   doc
     .fontSize(10)
     .text(pickLocaleText(CONSULTING_AGREEMENT_BRAND.program, locale), {

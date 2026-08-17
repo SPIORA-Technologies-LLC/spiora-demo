@@ -200,15 +200,10 @@ export function ConsultingAgreementSignPanel({
   return (
     <section className={styles.panel} aria-live="polite">
       <div className={styles.meta}>
-        {localSign ? (
-          <>
-            <p>
-              {t("version")}: {localSign.versionNumber}
-            </p>
-            <p>
-              {t("transactionId")}: {localSign.transactionId}
-            </p>
-          </>
+        {localSign && localSign.versionNumber > 1 ? (
+          <p>
+            {t("version")}: {localSign.versionNumber}
+          </p>
         ) : null}
         <p className={styles.status}>{t(`status.${statusKey(status)}`)}</p>
       </div>

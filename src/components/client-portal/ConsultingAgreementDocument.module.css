@@ -9,11 +9,16 @@
 .logoWrap {
   display: flex;
   justify-content: center;
-  margin: 0 0 0.9rem;
+  align-items: center;
+  margin: 0 auto 1rem;
+  padding: 0.7rem 1.15rem;
+  max-width: 16.5rem;
+  background: #000000;
+  border-radius: 0.45rem;
 }
 
 .logoWrap :global(img) {
-  border-radius: 0.35rem;
+  display: block;
 }
 
 .program,

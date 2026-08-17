@@ -65,8 +65,8 @@ export function buildConsultingAgreementHtml(
 <title>${escapeHtml(pickLocaleText(CONSULTING_AGREEMENT_BRAND.title, locale))}</title>
 <style>
   body { font-family: Georgia, "Times New Roman", serif; color: #111; background: #fff; margin: 0; padding: 32px; line-height: 1.45; }
-  .logo { text-align: center; margin: 0 0 18px; }
-  .logo img { width: 220px; height: auto; border-radius: 6px; }
+  .logo { text-align: center; margin: 0 auto 18px; padding: 12px 18px; max-width: 260px; background: #000; border-radius: 8px; }
+  .logo img { width: 220px; height: auto; display: block; margin: 0 auto; }
   h1 { text-align: center; font-size: 18px; margin: 8px 0; }
   .meta { text-align: center; margin: 0 0 24px; }
   .party { margin: 16px 0; }

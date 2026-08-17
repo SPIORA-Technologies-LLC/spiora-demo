@@ -2701,7 +2701,7 @@
           "awaiting_client_signature": "Awaiting client signature",
           "client_signed": "Signed by client",
           "provider_signed": "Signed by SPIORA",
-          "completed": "Completed",
+          "completed": "The agreement signing process is complete",
           "expired": "Expired",
           "cancelled": "Cancelled",
           "superseded": "Superseded"

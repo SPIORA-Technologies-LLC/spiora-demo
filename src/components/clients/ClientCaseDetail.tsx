@@ -227,7 +227,7 @@ export function ClientCaseDetail({
   async function acceptAgreement(accepted: boolean) {
     if (data?.agreement?.sign) {
       if (
-        !accepted &&
+        accepted &&
         !window.confirm(t("sign.providerConfirm", { name: data.case.firstName ?? "—" }))
       ) {
         return;
@@ -478,6 +478,15 @@ export function ClientCaseDetail({
                       ? formatDateTime(data.agreement.sign.providerSignedAt, locale)
                       : "—"}
                   </p>
+                  {data.agreement.sign.hasSourcePdf || data.agreement.sign.hasFinalPdf ? (
+                    <iframe
+                      className={styles.pdfFrame}
+                      title={t("sign.viewPdf")}
+                      src={`/api/client-cases/${caseId}/agreement/pdf?kind=${
+                        data.agreement.sign.status === "completed" ? "final" : "source"
+                      }`}
+                    />
+                  ) : null}
                   {data.agreement.sign.canProviderSign ? (
                     <button
                       type="button"
@@ -620,6 +629,23 @@ export function ClientCaseDetail({
                     : (accepted) => void acceptAgreement(accepted)
                 }
               />
+              {data.agreement.sign ? (
+                <Card className={styles.panel}>
+                  <p className={styles.message}>
+                    {t(`sign.status.${data.agreement.sign.status}`)}
+                  </p>
+                  {data.agreement.sign.canProviderSign ? (
+                    <button
+                      type="button"
+                      className={styles.docActionBtn}
+                      disabled={busy}
+                      onClick={() => void acceptAgreement(true)}
+                    >
+                      {t("sign.providerSign")}
+                    </button>
+                  ) : null}
+                </Card>
+              ) : null}
             </>
           ) : (
             <Card className={styles.panel}>

@@ -137,6 +137,16 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
+.pdfFrame {
+  display: block;
+  width: 100%;
+  min-height: 70vh;
+  margin: 0.75rem 0 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
 .docActionBtn,
 .docDeleteBtn {
   display: inline-flex;

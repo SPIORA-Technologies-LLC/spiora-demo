@@ -4,6 +4,7 @@ import { checkRequestOrigin } from "@/lib/auth/security";
 import { getRequestLocale, translateApiMessage } from "@/i18n/api-messages";
 import { acceptAgreementByEmployee } from "@/lib/client-portal/consulting-agreement-service";
 import { viewFromRecord } from "@/lib/client-portal/consulting-agreement-service";
+import { getCaseStore } from "@/lib/client-portal/case-store-selection";
 import {
   getSignForCase,
   providerSignAgreement,
@@ -51,7 +52,9 @@ export async function POST(request: Request, context: RouteContext) {
     confirm?: unknown;
   } | null;
 
-  const found = await getSignForCase(id);
+  const caseStore = await getCaseStore();
+  const intake = await caseStore.getById(id);
+  const found = await getSignForCase(id, undefined, intake?.questionnaireId);
   if (found) {
     const confirm = body?.confirm === true || body?.accepted === true;
     try {
@@ -101,6 +104,7 @@ export async function POST(request: Request, context: RouteContext) {
 
   const sign = await getSignViewForCase(id, {
     canProviderSign: canSignConsultingAgreementAsProvider(session),
+    questionnaireId: intake?.questionnaireId,
   });
   return NextResponse.json(
     { agreement: viewWithSign(viewFromRecord(record), sign) },

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth/session";
 import { getRequestLocale, translateApiMessage } from "@/i18n/api-messages";
+import { getCaseStore } from "@/lib/client-portal/case-store-selection";
 import { getSignVersionForCase, readAuthorizedPdf } from "@/lib/client-portal/sign/service";
 import { readRequestAuditMeta } from "@/lib/client-portal/sign/request-meta";
 import { SignError } from "@/lib/client-portal/sign/errors";
@@ -29,7 +30,14 @@ export async function GET(request: Request, context: RouteContext) {
   const url = new URL(request.url);
   const kind = url.searchParams.get("kind") === "final" ? "final" : "source";
   const download = url.searchParams.get("download") === "1";
-  const found = await getSignVersionForCase(id, url.searchParams.get("versionId"));
+  const caseStore = await getCaseStore();
+  const intake = await caseStore.getById(id);
+  const found = await getSignVersionForCase(
+    id,
+    url.searchParams.get("versionId"),
+    undefined,
+    intake?.questionnaireId,
+  );
   if (!found) {
     return NextResponse.json(
       { error: translateApiMessage(locale, "notFound") },

@@ -10,6 +10,7 @@ import {
   providerSignAgreement,
   readAuthorizedPdf,
   requestClientOtp,
+  getSignViewForCase,
   type SignDeps,
 } from "./service.ts";
 import type { ClientSession } from "../types.ts";
@@ -893,5 +894,40 @@ describe("SPIORA Sign service", () => {
     assert.equal(firstPdf.hash, sign.sourcePdfHash);
     assert.equal(secondPdf.hash, sign.sourcePdfHash);
     assert.ok(otp.otpCooldownSeconds > 0);
+  });
+
+  it("finds a client-signed envelope by questionnaire when caseId was not attached", async () => {
+    const setup = deps();
+    const sign = await publishClientAgreement({
+      session,
+      questionnaireId: "q-attach-case",
+      answers,
+      locale: "en",
+      deps: setup.deps,
+    });
+    await requestClientOtp({
+      session,
+      versionId: sign.versionId,
+      consent: true,
+      deps: setup.deps,
+    });
+    await clientSignAgreement({
+      session,
+      versionId: sign.versionId,
+      otp: "583214",
+      consent: true,
+      deps: setup.deps,
+    });
+    const before = await setup.store.getContractByCaseId("case-attach");
+    assert.equal(before, null);
+    const view = await getSignViewForCase("case-attach", {
+      canProviderSign: true,
+      deps: setup.deps,
+      questionnaireId: "q-attach-case",
+    });
+    assert.equal(view?.status, "client_signed");
+    assert.equal(view?.canProviderSign, true);
+    const linked = await setup.store.getContractByCaseId("case-attach");
+    assert.ok(linked);
   });
 });

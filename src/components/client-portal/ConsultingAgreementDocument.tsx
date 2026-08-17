@@ -62,7 +62,9 @@ export function ConsultingAgreementDocument({
   };
   const place = [party.city, view.agreementDate].filter(Boolean).join(", ");
 
-  const publishedForClient = preferPdfAfterPublish && Boolean(showClientSign && view.sign?.versionId);
+  const publishedForClient =
+    preferPdfAfterPublish && Boolean(showClientSign && view.sign?.versionId);
+  const hideLegacySignatures = Boolean(showClientSign || view.sign);
 
   function html() {
     return buildConsultingAgreementHtml(view, {
@@ -208,7 +210,7 @@ export function ConsultingAgreementDocument({
           disabled={clientDisabled}
           onSigned={onClientSigned}
         />
-      ) : (
+      ) : hideLegacySignatures ? null : (
         <div className={styles.signGrid}>
           <div className={styles.signBox}>
             <p className={styles.signRole}>{t("providerRole")}</p>

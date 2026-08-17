@@ -43,10 +43,14 @@ async function persistConsultingAgreement(input: {
       "./consulting-agreement-service"
     );
     await saveAgreementFromSubmission(input);
+  } catch {
+    // Case submit must not fail if the agreement snapshot cannot be stored.
+  }
+  try {
     const { attachCaseToSignContract } = await import("./sign/service");
     await attachCaseToSignContract(input.questionnaireId, input.caseId);
   } catch {
-    // Case submit must not fail if the agreement snapshot cannot be stored.
+    // Sign envelope may already exist without a case_id; lookup can repair later.
   }
 }
 
@@ -402,7 +406,10 @@ export async function getEmployeeCaseDetail(caseId: string, locale: "en" | "ru" 
         );
         const saved = await getAgreementByCaseId(caseId);
         const { getSignViewForCase, viewWithSign } = await import("./sign/service");
-        const sign = await getSignViewForCase(caseId, { canProviderSign: true });
+        const sign = await getSignViewForCase(caseId, {
+          canProviderSign: true,
+          questionnaireId: questionnaire.id,
+        });
         if (saved) {
           return viewWithSign(viewFromRecord(saved), sign);
         }

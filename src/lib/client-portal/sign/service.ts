@@ -432,9 +432,13 @@ export async function getSignForPortalUser(
 
 export async function getSignViewForCase(
   caseId: string,
-  opts?: { canProviderSign?: boolean; deps?: SignDeps },
+  opts?: {
+    canProviderSign?: boolean;
+    deps?: SignDeps;
+    questionnaireId?: string | null;
+  },
 ): Promise<ConsultingAgreementSignView | null> {
-  const found = await getSignForCase(caseId, opts?.deps);
+  const found = await getSignForCase(caseId, opts?.deps, opts?.questionnaireId);
   if (!found) return null;
   const store = storeOf(opts?.deps);
   return toSignView(store, found.contract, found.version, {
@@ -446,13 +450,21 @@ export async function getSignViewForCase(
 export async function getSignForCase(
   caseId: string,
   deps?: SignDeps,
+  questionnaireId?: string | null,
 ): Promise<{
   contract: SignContractRecord;
   version: SignVersionRecord;
 } | null> {
   const store = storeOf(deps);
   return safeStore(async () => {
-    const contract = await store.getContractByCaseId(caseId);
+    let contract = await store.getContractByCaseId(caseId);
+    if (!contract && questionnaireId) {
+      contract = await store.getContractByQuestionnaireId(questionnaireId);
+      if (contract && contract.caseId !== caseId) {
+        await store.updateContract(contract.id, { caseId });
+        contract = { ...contract, caseId };
+      }
+    }
     if (!contract) return null;
     const version = await loadActive(store, contract);
     if (!version) return null;
@@ -464,11 +476,12 @@ export async function getSignVersionForCase(
   caseId: string,
   versionId?: string | null,
   deps?: SignDeps,
+  questionnaireId?: string | null,
 ): Promise<{
   contract: SignContractRecord;
   version: SignVersionRecord;
 } | null> {
-  const found = await getSignForCase(caseId, deps);
+  const found = await getSignForCase(caseId, deps, questionnaireId);
   if (!found) return null;
   if (!versionId || versionId === found.version.id) return found;
   const store = storeOf(deps);

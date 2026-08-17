@@ -454,22 +454,22 @@ export function ClientCaseDetail({
                     </p>
                   ) : null}
                   <p className={styles.message}>
-                    Client signer: {data.agreement.sign.clientSignerName ?? "—"}
+                    {t("sign.clientSigner")}: {data.agreement.sign.clientSignerName ?? "—"}
                   </p>
                   <p className={styles.message}>
-                    Client signed at:{" "}
+                    {t("sign.clientSignedAt")}:{" "}
                     {data.agreement.sign.clientSignedAt
                       ? formatDateTime(data.agreement.sign.clientSignedAt, locale)
                       : "—"}
                   </p>
                   <p className={styles.message}>
-                    Provider signer: {data.agreement.sign.providerSignerName ?? "—"}
+                    {t("sign.providerSigner")}: {data.agreement.sign.providerSignerName ?? "—"}
                   </p>
                   <p className={styles.message}>
-                    Provider title: {data.agreement.sign.providerSignerTitle ?? "—"}
+                    {t("sign.providerTitle")}: {data.agreement.sign.providerSignerTitle ?? "—"}
                   </p>
                   <p className={styles.message}>
-                    Provider signed at:{" "}
+                    {t("sign.providerSignedAt")}:{" "}
                     {data.agreement.sign.providerSignedAt
                       ? formatDateTime(data.agreement.sign.providerSignedAt, locale)
                       : "—"}
@@ -510,7 +510,7 @@ export function ClientCaseDetail({
                         })
                       }
                     >
-                      New version
+                      {t("sign.newVersion")}
                     </button>
                     <button
                       type="button"
@@ -534,14 +534,14 @@ export function ClientCaseDetail({
                         })
                       }
                     >
-                      Cancel
+                      {t("sign.cancelContract")}
                     </button>
                     <button
                       type="button"
                       className={styles.docActionBtn}
                       onClick={() => void toggleAudit()}
                     >
-                      Audit
+                      {t("sign.audit")}
                     </button>
                   </div>
                   <div className={styles.docActions}>
@@ -614,33 +614,19 @@ export function ClientCaseDetail({
                   ) : null}
                 </Card>
               ) : null}
-              <ConsultingAgreementDocument
-                view={{ ...data.agreement, locale }}
-                clientDisabled
-                employeeDisabled={Boolean(data.agreement.sign)}
-                showEmployeeCheckbox={!data.agreement.sign}
-                onEmployeeAccept={
-                  busy || data.agreement.sign
-                    ? undefined
-                    : (accepted) => void acceptAgreement(accepted)
-                }
-              />
-              {data.agreement.sign ? (
-                <Card className={styles.panel}>
-                  <p className={styles.message}>
-                    {t(`sign.status.${data.agreement.sign.status}`)}
-                  </p>
-                  {data.agreement.sign.canProviderSign ? (
-                    <button
-                      type="button"
-                      className={styles.docActionBtn}
-                      disabled={busy}
-                      onClick={() => void acceptAgreement(true)}
-                    >
-                      {t("sign.providerSign")}
-                    </button>
-                  ) : null}
-                </Card>
+              {!data.agreement.sign ||
+              !(data.agreement.sign.hasSourcePdf || data.agreement.sign.hasFinalPdf) ? (
+                <ConsultingAgreementDocument
+                  view={{ ...data.agreement, locale }}
+                  clientDisabled
+                  employeeDisabled={Boolean(data.agreement.sign)}
+                  showEmployeeCheckbox={!data.agreement.sign}
+                  onEmployeeAccept={
+                    busy || data.agreement.sign
+                      ? undefined
+                      : (accepted) => void acceptAgreement(accepted)
+                  }
+                />
               ) : null}
             </>
           ) : (

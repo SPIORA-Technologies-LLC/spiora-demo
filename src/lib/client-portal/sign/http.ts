@@ -23,7 +23,10 @@ export function signErrorResponse(error: unknown) {
   if (error instanceof Error && SIGN_ERROR_CODES.includes(error.message as never)) {
     return clientApiError(error.message as ClientApiErrorCode, 400);
   }
-  console.error("[spiora-sign]", error instanceof Error ? error.name : "error");
+  console.error(
+    "[spiora-sign]",
+    error instanceof Error ? `${error.name}: ${error.message}` : "error",
+  );
   return clientApiError("INTERNAL", 500);
 }
 

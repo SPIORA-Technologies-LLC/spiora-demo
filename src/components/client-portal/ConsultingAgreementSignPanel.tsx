@@ -30,6 +30,8 @@ export function ConsultingAgreementSignPanel({
   const [localSign, setLocalSign] = useState<ConsultingAgreementSignView | null>(
     sign,
   );
+  const [pdfObjectUrl, setPdfObjectUrl] = useState<string | null>(null);
+  const [pdfError, setPdfError] = useState<string | null>(null);
 
   useEffect(() => {
     setLocalSign(sign);
@@ -155,6 +157,45 @@ export function ConsultingAgreementSignPanel({
     return `/api/client/agreement/pdf?versionId=${encodeURIComponent(localSign.versionId)}&kind=${kind}`;
   }, [localSign]);
 
+  useEffect(() => {
+    if (!viewHref) {
+      setPdfObjectUrl(null);
+      setPdfError(null);
+      return;
+    }
+    let cancelled = false;
+    let objectUrl: string | null = null;
+    setPdfError(null);
+    async function loadPdf() {
+      try {
+        const res = await fetch(viewHref, { cache: "no-store" });
+        if (!res.ok) {
+          const json = (await res.json().catch(() => null)) as {
+            error?: { code?: string };
+          } | null;
+          if (!cancelled) {
+            setPdfError(json?.error?.code ?? "INTERNAL");
+          }
+          return;
+        }
+        const blob = await res.blob();
+        objectUrl = URL.createObjectURL(blob);
+        if (cancelled) {
+          URL.revokeObjectURL(objectUrl);
+          return;
+        }
+        setPdfObjectUrl(objectUrl);
+      } catch {
+        if (!cancelled) setPdfError("INTERNAL");
+      }
+    }
+    void loadPdf();
+    return () => {
+      cancelled = true;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [viewHref]);
+
   return (
     <section className={styles.panel} aria-live="polite">
       <div className={styles.meta}>
@@ -171,21 +212,24 @@ export function ConsultingAgreementSignPanel({
         <p className={styles.status}>{t(`status.${statusKey(status)}`)}</p>
       </div>
 
-      {viewHref ? (
+      {pdfObjectUrl ? (
         <div className={styles.viewerWrap}>
-          <object
-            data={viewHref}
-            type="application/pdf"
+          <iframe
+            src={pdfObjectUrl}
             className={styles.viewer}
-            aria-label={t("viewPdf")}
-          >
-            <iframe
-              src={viewHref}
-              className={styles.viewer}
-              title={t("viewPdf")}
-            />
-          </object>
+            title={t("viewPdf")}
+          />
         </div>
+      ) : pdfError ? (
+        <p className={styles.error} role="alert">
+          {(() => {
+            try {
+              return t(`errors.${pdfError}` as never);
+            } catch {
+              return t("errors.INTERNAL");
+            }
+          })()}
+        </p>
       ) : null}
 
       {canStartClientSign ? (

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
+import { pickChainTip } from "./event-chain.ts";
 import { createMemorySignStore } from "./local-store.ts";
 import {
   cancelAgreementVersion,
@@ -77,6 +78,24 @@ afterEach(() => {
   process.env.NODE_ENV = originalNodeEnv;
   if (originalMfaFlag === undefined) delete process.env.SPIORA_MFA_EMPLOYEE;
   else process.env.SPIORA_MFA_EMPLOYEE = originalMfaFlag;
+});
+
+describe("SPIORA Sign event chain", () => {
+  it("picks the true tip when timestamps match and ids sort the other way", () => {
+    const first = {
+      id: "z-later-uuid",
+      eventHash: "hash-1",
+      previousEventHash: "0".repeat(64),
+      occurredAt: "2026-08-17T10:00:00.000Z",
+    };
+    const second = {
+      id: "a-earlier-uuid",
+      eventHash: "hash-2",
+      previousEventHash: "hash-1",
+      occurredAt: "2026-08-17T10:00:00.000Z",
+    };
+    assert.equal(pickChainTip([first, second])?.eventHash, "hash-2");
+  });
 });
 
 describe("SPIORA Sign service", () => {
@@ -840,5 +859,39 @@ describe("SPIORA Sign service", () => {
     );
     const version = await setup.store.getVersionById(sign.versionId);
     assert.equal(version?.status, "client_signed");
+  });
+
+  it("serves the source PDF even when concurrent views race the audit chain", async () => {
+    const setup = deps();
+    const sign = await publishClientAgreement({
+      session,
+      questionnaireId: "q-pdf-race",
+      answers,
+      locale: "en",
+      deps: setup.deps,
+    });
+    const [firstPdf, secondPdf, otp] = await Promise.all([
+      readAuthorizedPdf({
+        versionId: sign.versionId,
+        kind: "source",
+        actor: { type: "client", portalUserId: session.id },
+        deps: setup.deps,
+      }),
+      readAuthorizedPdf({
+        versionId: sign.versionId,
+        kind: "source",
+        actor: { type: "client", portalUserId: session.id },
+        deps: setup.deps,
+      }),
+      requestClientOtp({
+        session,
+        versionId: sign.versionId,
+        consent: true,
+        deps: setup.deps,
+      }),
+    ]);
+    assert.equal(firstPdf.hash, sign.sourcePdfHash);
+    assert.equal(secondPdf.hash, sign.sourcePdfHash);
+    assert.ok(otp.otpCooldownSeconds > 0);
   });
 });

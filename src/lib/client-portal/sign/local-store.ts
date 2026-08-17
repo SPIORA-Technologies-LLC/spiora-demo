@@ -9,6 +9,7 @@ import type {
   SignVersionRecord,
 } from "./records";
 import type { SignStore } from "./store";
+import { pickChainTip } from "./event-chain";
 
 type FileShape = {
   contracts: SignContractRecord[];
@@ -239,12 +240,11 @@ function createStoreFromAccessor(
           .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt)),
       ),
     lastEvent: (versionId) =>
-      read((data) => {
-        const events = data.events
-          .filter((row) => row.contractVersionId === versionId)
-          .sort((a, b) => a.occurredAt.localeCompare(b.occurredAt));
-        return events[events.length - 1] ?? null;
-      }),
+      read((data) =>
+        pickChainTip(
+          data.events.filter((row) => row.contractVersionId === versionId),
+        ),
+      ),
   };
 }
 

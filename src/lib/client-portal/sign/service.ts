@@ -172,7 +172,8 @@ async function appendEvent(
 ): Promise<SignEventRecord> {
   const metadata = input.metadata ?? {};
   let lastError: unknown;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    const occurredAt = attempt === 0 ? input.occurredAt : new Date().toISOString();
     const previous = await store.lastEvent(input.version.id);
     const previousEventHash = previous?.eventHash ?? GENESIS_EVENT_HASH;
     const eventHash = hashSignEvent({
@@ -181,7 +182,7 @@ async function appendEvent(
       actorUserId: input.actorUserId,
       actorType: input.actorType,
       documentHash: input.documentHash ?? null,
-      occurredAt: input.occurredAt,
+      occurredAt,
       metadata,
       previousEventHash,
     });
@@ -197,7 +198,7 @@ async function appendEvent(
         ipAddress: input.ipAddress ?? null,
         userAgent: input.userAgent ?? null,
         metadata,
-        occurredAt: input.occurredAt,
+        occurredAt,
         previousEventHash,
         eventHash,
       });
@@ -206,6 +207,9 @@ async function appendEvent(
       if (!(error instanceof Error) || error.message !== "EVENT_CHAIN_CONFLICT") {
         throw error;
       }
+      await new Promise((resolve) => {
+        setTimeout(resolve, 20 * (attempt + 1));
+      });
     }
   }
   throw lastError instanceof Error ? lastError : new Error("EVENT_CHAIN_CONFLICT");
@@ -1397,18 +1401,25 @@ export async function readAuthorizedPdf(input: {
   if (!bytes) throw new SignError("CONTRACT_NOT_FOUND", 404);
   const actual = sha256Hex(bytes);
   if (actual !== expected) throw new SignError("DOCUMENT_HASH_MISMATCH", 409);
-  await appendEvent(store, {
-    version,
-    eventType: input.download ? "pdf_downloaded" : "document_viewed",
-    actorUserId:
-      input.actor.type === "client" ? input.actor.portalUserId : null,
-    actorType: input.actor.type === "client" ? "client" : "provider",
-    documentHash: actual,
-    occurredAt: nowIso(input.deps),
-    metadata: { kind: input.kind },
-    ipAddress: input.meta?.ipAddress ?? null,
-    userAgent: input.meta?.userAgent ?? null,
-  });
+  try {
+    await appendEvent(store, {
+      version,
+      eventType: input.download ? "pdf_downloaded" : "document_viewed",
+      actorUserId:
+        input.actor.type === "client" ? input.actor.portalUserId : null,
+      actorType: input.actor.type === "client" ? "client" : "provider",
+      documentHash: actual,
+      occurredAt: nowIso(input.deps),
+      metadata: { kind: input.kind },
+      ipAddress: input.meta?.ipAddress ?? null,
+      userAgent: input.meta?.userAgent ?? null,
+    });
+  } catch (error) {
+    console.error(
+      "[spiora-sign] pdf audit event failed",
+      error instanceof Error ? error.message : "error",
+    );
+  }
   const safeNumber = contract.agreementNumber.replace(/[^A-Za-z0-9-]/g, "").slice(0, 32);
   const fileName =
     input.kind === "final"

@@ -11,6 +11,7 @@ import type {
 } from "./records";
 import type { SignStore } from "./store";
 import type { FrozenAgreementSnapshot, SignVersionStatus } from "../sign-types";
+import { pickChainTip } from "./event-chain";
 
 function isMissingRelation(error: { code?: string; message?: string }) {
   const code = error.code ?? "";
@@ -427,12 +428,11 @@ export function createSupabaseSignStore(client: SupabaseClient): SignStore {
         .from("consulting_sign_events")
         .select("*")
         .eq("contract_version_id", versionId)
-        .order("occurred_at", { ascending: false })
-        .order("id", { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .order("occurred_at", { ascending: true });
       throwUnlessMissing(error);
-      return data ? eventFrom(data as Record<string, unknown>) : null;
+      return pickChainTip(
+        (data ?? []).map((row) => eventFrom(row as Record<string, unknown>)),
+      );
     },
   };
 }

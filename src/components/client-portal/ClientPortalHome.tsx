@@ -173,23 +173,31 @@ export function ClientPortalHome({
         <h2 id="client-mfa-edu-title" className={styles.mfaEduTitle}>
           {t("mfa.onboarding.title")}
         </h2>
-        <div className={styles.mfaEduBlock}>
-          <h3 className={styles.mfaEduHeading}>{t("mfa.onboarding.whatTitle")}</h3>
-          <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP1")}</p>
-          <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP2")}</p>
-          <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP3")}</p>
-        </div>
-        <div className={styles.mfaEduBlock}>
-          <h3 className={styles.mfaEduHeading}>
-            {t("mfa.onboarding.recommendTitle")}
-          </h3>
-          <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP1")}</p>
-          <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP2")}</p>
-          <ul className={styles.mfaEduList}>
-            <li>{t("mfa.onboarding.recommendBullet1")}</li>
-            <li>{t("mfa.onboarding.recommendBullet2")}</li>
-            <li>{t("mfa.onboarding.recommendBullet3")}</li>
-          </ul>
+        <div className={styles.mfaEduAccordion}>
+          <details className={styles.mfaEduItem}>
+            <summary className={styles.mfaEduSummary}>
+              <span>{t("mfa.onboarding.whatTitle")}</span>
+            </summary>
+            <div className={styles.mfaEduPanel}>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP1")}</p>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP2")}</p>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.whatP3")}</p>
+            </div>
+          </details>
+          <details className={styles.mfaEduItem}>
+            <summary className={styles.mfaEduSummary}>
+              <span>{t("mfa.onboarding.recommendTitle")}</span>
+            </summary>
+            <div className={styles.mfaEduPanel}>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP1")}</p>
+              <p className={styles.mfaEduText}>{t("mfa.onboarding.recommendP2")}</p>
+              <ul className={styles.mfaEduList}>
+                <li>{t("mfa.onboarding.recommendBullet1")}</li>
+                <li>{t("mfa.onboarding.recommendBullet2")}</li>
+                <li>{t("mfa.onboarding.recommendBullet3")}</li>
+              </ul>
+            </div>
+          </details>
         </div>
         <a className={styles.mfaEduCta} href="/client/account/mfa">
           {t("mfa.onboarding.setupCta")}

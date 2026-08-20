@@ -515,6 +515,139 @@
   gap: 0.55rem;
 }
 
+.versionHistory {
+  margin-top: 1.25rem;
+}
+
+.auditLog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.05rem 1.05rem;
+  border-radius: 0.9rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.auditLogHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.auditLogHeader strong {
+  font-size: 0.95rem;
+  font-weight: 650;
+  color: var(--white);
+}
+
+.auditMeta {
+  color: var(--gray-300);
+  font-size: 0.75rem;
+  word-break: break-all;
+}
+
+.auditList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.auditItem {
+  position: relative;
+  padding: 0.85rem 0 0.9rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.auditItem:last-child {
+  border-bottom: none;
+  padding-bottom: 0.2rem;
+}
+
+.auditItem::before {
+  content: "";
+  position: absolute;
+  top: 1.15rem;
+  left: -0.28rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 183, 74, 0.85);
+  box-shadow: 0 0 0 3px rgba(255, 183, 74, 0.12);
+}
+
+.auditEventTitle {
+  margin: 0;
+  color: var(--white);
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.auditEventMeta {
+  margin: 0.35rem 0 0;
+  color: var(--gray-300);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.auditDetails {
+  margin-top: 0.55rem;
+}
+
+.auditDetails summary {
+  cursor: pointer;
+  color: rgba(240, 210, 168, 0.92);
+  font-size: 0.76rem;
+  font-weight: 550;
+  list-style: none;
+}
+
+.auditDetails summary::-webkit-details-marker {
+  display: none;
+}
+
+.auditDetails summary::before {
+  content: "▸ ";
+  color: rgba(255, 183, 74, 0.9);
+}
+
+.auditDetails[open] summary::before {
+  content: "▾ ";
+}
+
+.auditTechList {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0.55rem 0 0;
+}
+
+.auditTechRow {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.auditTechLabel {
+  margin: 0;
+  color: var(--gray-300);
+  font-size: 0.7rem;
+  font-weight: 550;
+}
+
+.auditTechValue {
+  margin: 0;
+  color: rgba(245, 238, 230, 0.88);
+  font-size: 0.72rem;
+  line-height: 1.4;
+  word-break: break-word;
+  font-variant-numeric: tabular-nums;
+}
+
 .historyItem::before {
   content: "";
   position: absolute;

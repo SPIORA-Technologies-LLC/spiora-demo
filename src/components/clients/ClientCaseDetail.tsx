@@ -281,7 +281,9 @@ export function ClientCaseDetail({
       setAuditOpen(false);
       return;
     }
-    if (!audit) {
+    setBusy(true);
+    setMessage(null);
+    try {
       const res = await fetch(`/api/client-cases/${caseId}/agreement/audit`);
       if (!res.ok) {
         setMessage(t("agreementFailed"));
@@ -289,8 +291,26 @@ export function ClientCaseDetail({
       }
       const json = (await res.json()) as AuditPayload;
       setAudit(json);
+      setAuditOpen(true);
+    } finally {
+      setBusy(false);
     }
-    setAuditOpen(true);
+  }
+
+  function auditEventLabel(eventType: string) {
+    try {
+      return t(`sign.auditLog.events.${eventType}` as never);
+    } catch {
+      return eventType;
+    }
+  }
+
+  function auditActorLabel(actor: string) {
+    try {
+      return t(`sign.auditLog.actors.${actor}` as never);
+    } catch {
+      return actor;
+    }
   }
 
   async function deleteDocument(doc: { id: string; fileName: string }) {
@@ -576,7 +596,16 @@ export function ClientCaseDetail({
                               return;
                             }
                             setMessage(t("sign.cancelSuccess"));
+                            setAudit(null);
                             await load();
+                            if (auditOpen) {
+                              const auditRes = await fetch(
+                                `/api/client-cases/${caseId}/agreement/audit`,
+                              );
+                              if (auditRes.ok) {
+                                setAudit((await auditRes.json()) as AuditPayload);
+                              }
+                            }
                           })
                           .finally(() => setBusy(false));
                       }}
@@ -612,7 +641,7 @@ export function ClientCaseDetail({
                     </a>
                   </div>
                   {data.agreement.sign.history && data.agreement.sign.history.length > 1 ? (
-                    <div className={styles.docList}>
+                    <div className={`${styles.docList} ${styles.versionHistory}`}>
                       <strong>{t("sign.previousVersions")}</strong>
                       {data.agreement.sign.history.map((item) => (
                         <div key={item.versionId} className={styles.historyItem}>
@@ -649,18 +678,78 @@ export function ClientCaseDetail({
                     </div>
                   ) : null}
                   {auditOpen && audit ? (
-                    <div className={styles.docList}>
-                      {audit.events.map((event) => (
-                        <div key={event.id} className={styles.historyItem}>
-                          <strong>
-                            {formatDateTime(event.occurredAt, locale)} · {event.eventType}
-                          </strong>
-                          <span>{event.actor}</span>
-                          {event.documentHash ? <span>{event.documentHash}</span> : null}
-                          {event.ipAddress ? <span>{event.ipAddress}</span> : null}
-                          {event.userAgent ? <span>{event.userAgent}</span> : null}
-                        </div>
-                      ))}
+                    <div className={styles.auditLog}>
+                      <div className={styles.auditLogHeader}>
+                        <strong>{t("sign.audit")}</strong>
+                        {audit.transactionId ? (
+                          <span className={styles.auditMeta}>
+                            {t("sign.auditLog.transactionId")}: {audit.transactionId}
+                          </span>
+                        ) : null}
+                      </div>
+                      {audit.events.length === 0 ? (
+                        <p className={styles.message}>{t("sign.auditLog.empty")}</p>
+                      ) : (
+                        <ul className={styles.auditList}>
+                          {audit.events.map((event) => {
+                            const hasTech =
+                              Boolean(event.documentHash) ||
+                              Boolean(event.ipAddress) ||
+                              Boolean(event.userAgent);
+                            return (
+                              <li key={event.id} className={styles.auditItem}>
+                                <p className={styles.auditEventTitle}>
+                                  {auditEventLabel(event.eventType)}
+                                </p>
+                                <p className={styles.auditEventMeta}>
+                                  {formatDateTime(event.occurredAt, locale)}
+                                  {" · "}
+                                  {t("sign.auditLog.by", {
+                                    actor: auditActorLabel(event.actor),
+                                  })}
+                                </p>
+                                {hasTech ? (
+                                  <details className={styles.auditDetails}>
+                                    <summary>{t("sign.auditLog.technicalDetails")}</summary>
+                                    <div className={styles.auditTechList}>
+                                      {event.documentHash ? (
+                                        <div className={styles.auditTechRow}>
+                                          <p className={styles.auditTechLabel}>
+                                            {t("sign.auditLog.documentHash")}
+                                          </p>
+                                          <p className={styles.auditTechValue}>
+                                            {event.documentHash}
+                                          </p>
+                                        </div>
+                                      ) : null}
+                                      {event.ipAddress ? (
+                                        <div className={styles.auditTechRow}>
+                                          <p className={styles.auditTechLabel}>
+                                            {t("sign.auditLog.ipAddress")}
+                                          </p>
+                                          <p className={styles.auditTechValue}>
+                                            {event.ipAddress}
+                                          </p>
+                                        </div>
+                                      ) : null}
+                                      {event.userAgent ? (
+                                        <div className={styles.auditTechRow}>
+                                          <p className={styles.auditTechLabel}>
+                                            {t("sign.auditLog.userAgent")}
+                                          </p>
+                                          <p className={styles.auditTechValue}>
+                                            {event.userAgent}
+                                          </p>
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                  </details>
+                                ) : null}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
                     </div>
                   ) : null}
                 </Card>

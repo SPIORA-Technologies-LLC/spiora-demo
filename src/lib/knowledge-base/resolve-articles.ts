@@ -17,6 +17,7 @@ import type {
   KbTagSummary,
 } from "./types";
 import { alignKbTextToLocale } from "./kb-text-locale";
+import { rankKbArticlesForAi } from "./kb-ai-retrieve";
 
 function formatArticleDate(iso: string, locale: AppLocale): string {
   const intlTag = locale === "ru" ? "ru-RU" : "en-US";
@@ -196,15 +197,23 @@ export function buildDemoAiKnowledgeBaseText(
   locale: AppLocale,
   userQuery: string,
 ): string {
-  const listing = searchDemoArticles(records, locale, { q: userQuery });
+  const candidates = records.map((record) => {
+    const item = resolveArticleListItem(record, locale);
+    return {
+      slug: record.slug,
+      title: item.title,
+      categoryLabel: item.categoryLabel,
+      summary: item.summary,
+      content: translateKnowledgeBaseArticle(locale, record.slug, "content"),
+    };
+  });
+  const ranked = rankKbArticlesForAi(candidates, userQuery, 8);
   const header = translateKnowledgeBaseMessage(locale, "aiContextHeader");
-  const lines = listing.articles.slice(0, 8).map((article) => {
-    const content =
-      records.find((r) => r.slug === article.slug) &&
-      translateKnowledgeBaseArticle(locale, article.slug, "content");
-    const excerpt = content
-      ? content.replace(/\s+/g, " ").trim().slice(0, 600)
-      : article.summary;
+  const lines = ranked.map((article) => {
+    const excerpt = (article.content || article.summary)
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 900);
     return `--- ${article.title} (${article.categoryLabel})\n${excerpt}\nLink: /knowledge-base?article=${article.slug}`;
   });
 

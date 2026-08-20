@@ -108,7 +108,7 @@ export async function getKnowledgeBaseTextForAi(
 ): Promise<string> {
   if (isKnowledgeBasePostgresEnabled()) {
     try {
-      const count = await sbCountKnowledgeBaseArticles();
+      const count = await sbCountKnowledgeBaseArticles(scope);
       if (count > 0) {
         return sbGetKnowledgeBaseTextForAi(locale, userQuery, scope);
       }

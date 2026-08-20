@@ -18,6 +18,7 @@ import {
   resolveArchivedAtForUpsert,
   resolvePublishedAtForUpsert,
 } from "@/lib/knowledge-base/knowledge-base-api";
+import { rankKbArticlesForAi } from "@/lib/knowledge-base/kb-ai-retrieve";
 import type {
   KbArticleDetail,
   KbCategoryId,
@@ -81,10 +82,16 @@ async function fetchArticles(
   return rows;
 }
 
-export async function sbCountKnowledgeBaseArticles(): Promise<number> {
-  const { count, error } = await getSupabaseAdmin()
+export async function sbCountKnowledgeBaseArticles(
+  scope?: KbScope,
+): Promise<number> {
+  let query = getSupabaseAdmin()
     .from("knowledge_base_articles")
     .select("id", { count: "exact", head: true });
+  if (scope) {
+    query = query.eq("scope", scope);
+  }
+  const { count, error } = await query;
   if (error) throw error;
   return count ?? 0;
 }
@@ -268,20 +275,32 @@ export async function sbGetKnowledgeBaseTextForAi(
   userQuery: string,
   scope: KbScope = "corporate",
 ): Promise<string> {
-  const listing = await sbListKnowledgeBase(locale, { q: userQuery, scope });
+  // Load published articles for this scope, then rank by query tokens (OR).
+  // Strict AND-on-every-word search was dropping valid client-KB hits.
+  const listing = await sbListKnowledgeBase(locale, { scope });
+  const candidates = await Promise.all(
+    listing.articles.map(async (article) => {
+      const detail = await sbGetKnowledgeBaseBySlug(article.slug, locale, scope);
+      return {
+        slug: article.slug,
+        title: article.title,
+        categoryLabel: article.categoryLabel,
+        summary: article.summary,
+        content: detail?.content ?? "",
+      };
+    }),
+  );
+  const ranked = rankKbArticlesForAi(candidates, userQuery, 8);
   const header = translateKnowledgeBaseMessage(locale, "aiContextPostgresHeader");
-  const resolved: string[] = [];
   const basePath = scope === "client" ? "/client-knowledge-base" : "/knowledge-base";
 
-  for (const article of listing.articles.slice(0, 8)) {
-    const detail = await sbGetKnowledgeBaseBySlug(article.slug, locale);
-    const excerpt = detail?.content
-      ? detail.content.replace(/\s+/g, " ").trim().slice(0, 600)
-      : article.summary;
-    resolved.push(
-      `--- ${article.title} (${article.categoryLabel})\n${excerpt}\nLink: ${basePath}?article=${article.slug}`,
-    );
-  }
+  const resolved = ranked.map((article) => {
+    const excerpt = (article.content || article.summary)
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 900);
+    return `--- ${article.title} (${article.categoryLabel})\n${excerpt}\nLink: ${basePath}?article=${article.slug}`;
+  });
 
   if (resolved.length === 0) {
     return `${header}\n${translateKnowledgeBaseMessage(locale, "aiContextEmpty")}`;

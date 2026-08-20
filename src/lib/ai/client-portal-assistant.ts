@@ -12,6 +12,7 @@ import {
 import { shouldUseDemoResponsesOnly } from "@/lib/ai/workspace-demo-scenarios";
 import { getWorkspaceAiConfig } from "@/lib/ai/workspace-config";
 import { getKnowledgeBaseTextForAi } from "@/lib/knowledge-base/knowledge-base-service";
+import { isEmptyKbAiContext } from "@/lib/knowledge-base/kb-ai-retrieve";
 
 export type PortalAssistantResult = {
   reply: string;
@@ -141,15 +142,13 @@ async function preparePortalRequest(
     kbText = "";
   }
 
-  const hasUsefulKb =
-    Boolean(kbText.trim()) &&
-    !/unconfigured|не настроена|empty/i.test(kbText.slice(0, 120));
+  const hasUsefulKb = !isEmptyKbAiContext(kbText);
 
   if (!hasUsefulKb) {
     return {
       kind: "direct",
       reply: emptyKbFallback(locale),
-      sources: [sourceLabel(locale)],
+      sources: [],
       demo: true,
     };
   }

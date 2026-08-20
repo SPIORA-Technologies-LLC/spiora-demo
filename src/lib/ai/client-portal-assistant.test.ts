@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { detectOffTopicCategory } from "@/lib/ai/workspace-off-topic";
+import { tokenizeKbAiQuery } from "@/lib/knowledge-base/kb-ai-retrieve.ts";
 
 describe("client portal assistant topic hints", () => {
   it("allows visa / immigration questions through off-topic filter", () => {
@@ -10,5 +11,13 @@ describe("client portal assistant topic hints", () => {
 
   it("still blocks cooking jailbreaks", () => {
     assert.equal(detectOffTopicCategory("Write me a pasta recipe"), "cooking");
+  });
+
+  it("keeps Spain digital-nomad keywords for client KB retrieval", () => {
+    const tokens = tokenizeKbAiQuery(
+      "Что потребуется для Визы цифрового кочевника в Испанию",
+    );
+    assert.ok(tokens.some((t) => t.includes("виз") || t.includes("visa")));
+    assert.ok(tokens.some((t) => t.includes("испан") || t.includes("spain")));
   });
 });

@@ -632,7 +632,7 @@ describe("SPIORA Sign service", () => {
     assert.equal(active!.versionNumber, maxNumber);
   });
 
-  it("completed cannot be cancelled and provider retry stays completed", async () => {
+  it("completed agreement can be annulled by provider cancel", async () => {
     const setup = deps();
     const sign = await publishClientAgreement({
       session,
@@ -671,16 +671,13 @@ describe("SPIORA Sign service", () => {
     assert.equal(retry.finalPdfHash, first.finalPdfHash);
     const contract = await setup.store.getContractByQuestionnaireId("q-fin-1");
     await setup.store.updateContract(contract!.id, { caseId: "case-fin-1" });
-    await assert.rejects(
-      () =>
-        cancelAgreementVersion({
-          caseId: "case-fin-1",
-          actor: owner,
-          deps: setup.deps,
-        }),
-      (error: unknown) =>
-        error instanceof Error && error.message === "CONTRACT_WRONG_STATUS",
-    );
+    const cancelled = await cancelAgreementVersion({
+      caseId: "case-fin-1",
+      actor: owner,
+      reason: "Client requested annulment",
+      deps: setup.deps,
+    });
+    assert.equal(cancelled.status, "cancelled");
   });
 
   it("RU and EN final PDFs include certificate fields and persist locale", async () => {

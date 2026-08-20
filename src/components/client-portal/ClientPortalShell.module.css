@@ -478,6 +478,11 @@
   line-height: 1.45;
 }
 
+.tileStatusCancelled {
+  color: #ffc9c2;
+  font-weight: 650;
+}
+
 .agreementTile {
   gap: 0.95rem;
   padding: 1.4rem 1.25rem 1.35rem;

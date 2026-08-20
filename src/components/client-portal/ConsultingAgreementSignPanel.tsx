@@ -150,13 +150,13 @@ export function ConsultingAgreementSignPanel({
 
   const pdfHref = useMemo(() => {
     if (!localSign?.versionId) return null;
-    const kind = localSign.status === "completed" ? "final" : "source";
+    const kind = localSign.hasFinalPdf ? "final" : "source";
     return `/api/client/agreement/pdf?versionId=${encodeURIComponent(localSign.versionId)}&kind=${kind}&download=1`;
   }, [localSign]);
 
   const viewHref = useMemo(() => {
     if (!localSign?.versionId) return null;
-    const kind = localSign.status === "completed" ? "final" : "source";
+    const kind = localSign.hasFinalPdf ? "final" : "source";
     return `/api/client/agreement/pdf?versionId=${encodeURIComponent(localSign.versionId)}&kind=${kind}`;
   }, [localSign]);
 
@@ -208,7 +208,13 @@ export function ConsultingAgreementSignPanel({
             {t("version")}: {localSign.versionNumber}
           </p>
         ) : null}
-        <p className={styles.status}>{t(`status.${statusKey(status)}`)}</p>
+        <p
+          className={
+            status === "cancelled" ? `${styles.status} ${styles.statusCancelled}` : styles.status
+          }
+        >
+          {t(`status.${statusKey(status)}`)}
+        </p>
       </div>
 
       {pdfObjectUrl ? (
@@ -278,18 +284,24 @@ export function ConsultingAgreementSignPanel({
       {localSign &&
       (localSign.status === "client_signed" ||
         localSign.status === "provider_signed" ||
-        localSign.status === "completed") ? (
+        localSign.status === "completed" ||
+        localSign.status === "cancelled") ? (
         <div className={styles.done}>
-          <p>
-            {t("clientSignedAt")}: {formatSignedAt(localSign.clientSignedAt, locale)}
-          </p>
+          {localSign.status === "cancelled" ? (
+            <p className={styles.cancelledNote}>{t("status.cancelled")}</p>
+          ) : null}
+          {localSign.clientSignedAt ? (
+            <p>
+              {t("clientSignedAt")}: {formatSignedAt(localSign.clientSignedAt, locale)}
+            </p>
+          ) : null}
           {localSign.providerSignedAt ? (
             <p>
               {t("providerSignedAt")}: {formatSignedAt(localSign.providerSignedAt, locale)}
             </p>
-          ) : (
+          ) : localSign.status !== "cancelled" && localSign.clientSignedAt ? (
             <p>{t("awaitingProvider")}</p>
-          )}
+          ) : null}
         </div>
       ) : null}
 

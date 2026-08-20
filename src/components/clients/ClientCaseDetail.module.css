@@ -169,6 +169,13 @@
   line-height: 1.35;
 }
 
+.signStatusCancelled {
+  border-color: rgba(180, 40, 40, 0.55);
+  background: rgba(180, 40, 40, 0.22);
+  color: #ffd4d0;
+  font-size: 0.82rem;
+}
+
 .signVersion {
   margin: -0.35rem 0 0;
   color: var(--gray-300);

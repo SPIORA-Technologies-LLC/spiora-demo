@@ -289,7 +289,13 @@ export function ClientPortalHome({
               <h2>{t("consultingAgreement.homeTitle")}</h2>
               {agreementSign && agreementSign.status !== "draft" ? (
                 <div className={styles.agreementMeta}>
-                  <p className={styles.tileStatus}>
+                  <p
+                    className={
+                      agreementSign.status === "cancelled"
+                        ? `${styles.tileStatus} ${styles.tileStatusCancelled}`
+                        : styles.tileStatus
+                    }
+                  >
                     {t(`consultingAgreement.sign.status.${agreementSign.status}`)}
                   </p>
                   {agreementSign.clientSignedAt ? (

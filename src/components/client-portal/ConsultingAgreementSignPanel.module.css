@@ -19,6 +19,17 @@
   font-weight: 650;
 }
 
+.statusCancelled {
+  color: #9b1c1c;
+  font-size: 1.02rem;
+}
+
+.cancelledNote {
+  margin: 0 0 0.35rem;
+  color: #9b1c1c;
+  font-weight: 650;
+}
+
 .viewerWrap {
   margin: 0 0 1rem;
   border: 1px solid rgba(22, 21, 19, 0.12);

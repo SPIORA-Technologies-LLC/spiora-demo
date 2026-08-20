@@ -854,16 +854,18 @@ export async function cancelAgreementVersion(input: {
     throw new SignError("PROVIDER_PERMISSION_REQUIRED", 403);
   }
   const current = found.version;
-  if (current.status === "completed" || current.status === "provider_signed") {
-    throw new SignError("CONTRACT_WRONG_STATUS");
-  }
   if (current.status === "cancelled") {
     return toSignView(store, found.contract, current, { canProviderSign: true });
+  }
+  if (current.status === "superseded") {
+    throw new SignError("CONTRACT_SUPERSEDED");
   }
   if (
     current.status !== "awaiting_client_signature" &&
     current.status !== "client_signed" &&
-    current.status !== "draft"
+    current.status !== "draft" &&
+    current.status !== "provider_signed" &&
+    current.status !== "completed"
   ) {
     throw new SignError("CONTRACT_WRONG_STATUS");
   }

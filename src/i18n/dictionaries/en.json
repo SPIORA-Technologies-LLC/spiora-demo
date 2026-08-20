@@ -2708,7 +2708,7 @@
           "provider_signed": "Signed by SPIORA",
           "completed": "Signing of the bilateral agreement is complete",
           "expired": "Expired",
-          "cancelled": "Cancelled",
+          "cancelled": "Agreement annulled",
           "superseded": "Superseded"
         },
         "errors": {
@@ -3088,6 +3088,9 @@
         "finalPdf": "Final PDF",
         "newVersion": "New version",
         "cancelContract": "Cancel agreement",
+        "cancelConfirm": "Cancel this agreement? The client will see that it was annulled.",
+        "cancelConfirmCompleted": "This agreement is already signed by both parties. Annul it anyway? The client will see the status “Agreement annulled”.",
+        "cancelSuccess": "Agreement annulled. The client can see this status in their portal.",
         "audit": "Signature log",
         "clientSigner": "Signed by client",
         "clientSignedAt": "Client signed on",
@@ -3100,7 +3103,7 @@
           "provider_signed": "Signed by SPIORA as provider",
           "completed": "The bilateral agreement has been signed by both parties",
           "expired": "Expired",
-          "cancelled": "Cancelled",
+          "cancelled": "Agreement annulled",
           "superseded": "Superseded",
           "draft": "Draft"
         },
@@ -3108,7 +3111,7 @@
           "PROVIDER_PERMISSION_REQUIRED": "You cannot sign as SPIORA",
           "PROVIDER_MFA_REQUIRED": "Complete MFA before signing as SPIORA",
           "DOCUMENT_HASH_MISMATCH": "The agreement file no longer matches the signed version",
-          "CONTRACT_WRONG_STATUS": "Agreement is not in a signable state",
+          "CONTRACT_WRONG_STATUS": "Agreement cannot be cancelled in its current state",
           "CONTRACT_CANCELLED": "Agreement was cancelled",
           "CONTRACT_SUPERSEDED": "This agreement version was replaced"
         }

@@ -17,7 +17,7 @@ import type {
   KbTagSummary,
 } from "./types";
 import { alignKbTextToLocale } from "./kb-text-locale";
-import { rankKbArticlesForAi } from "./kb-ai-retrieve";
+import { excerptKbContentForAi, rankKbArticlesForAi } from "./kb-ai-retrieve";
 
 function formatArticleDate(iso: string, locale: AppLocale): string {
   const intlTag = locale === "ru" ? "ru-RU" : "en-US";
@@ -207,13 +207,15 @@ export function buildDemoAiKnowledgeBaseText(
       content: translateKnowledgeBaseArticle(locale, record.slug, "content"),
     };
   });
-  const ranked = rankKbArticlesForAi(candidates, userQuery, 8);
+  const ranked = rankKbArticlesForAi(candidates, userQuery, 4);
   const header = translateKnowledgeBaseMessage(locale, "aiContextHeader");
-  const lines = ranked.map((article) => {
-    const excerpt = (article.content || article.summary)
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 900);
+  const lines = ranked.map((article, index) => {
+    const maxChars = index === 0 ? 8000 : index === 1 ? 3500 : 1800;
+    const excerpt = excerptKbContentForAi(
+      article.content || article.summary,
+      userQuery,
+      maxChars,
+    );
     return `--- ${article.title} (${article.categoryLabel})\n${excerpt}\nLink: /knowledge-base?article=${article.slug}`;
   });
 

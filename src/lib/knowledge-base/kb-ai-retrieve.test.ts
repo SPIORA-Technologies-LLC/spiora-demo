@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  excerptKbContentForAi,
   isEmptyKbAiContext,
   rankKbArticlesForAi,
   scoreKbTextForAiQuery,
@@ -64,5 +65,29 @@ describe("kb AI retrieve", () => {
       isEmptyKbAiContext("--- Spain nomad\nPassport and insurance required"),
       false,
     );
+  });
+
+  it("excerpt prefers requirement list over long intro for document questions", () => {
+    const intro = "A".repeat(1200);
+    const content = `${intro}
+
+Испания удобна для удалённой работы и цифровых кочевников.
+
+В общих чертах, что потребуется:
+• действующий паспорт страны вне ЕС;
+• справка об отсутствии судимости;
+• медицинская страховка;
+• при подаче через консульство — шенгенская виза (если нужна);
+• готовность подтвердить удалённую работу и доход из-за рубежа.`;
+
+    const excerpt = excerptKbContentForAi(
+      content,
+      "Что потребуется для Визы цифрового кочевника в Испанию",
+      900,
+    );
+    assert.match(excerpt, /паспорт/);
+    assert.match(excerpt, /страховк/);
+    assert.match(excerpt, /справк/);
+    assert.doesNotMatch(excerpt, /A{400}/);
   });
 });

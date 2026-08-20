@@ -18,7 +18,7 @@ import {
   resolveArchivedAtForUpsert,
   resolvePublishedAtForUpsert,
 } from "@/lib/knowledge-base/knowledge-base-api";
-import { rankKbArticlesForAi } from "@/lib/knowledge-base/kb-ai-retrieve";
+import { rankKbArticlesForAi, excerptKbContentForAi } from "@/lib/knowledge-base/kb-ai-retrieve";
 import type {
   KbArticleDetail,
   KbCategoryId,
@@ -290,15 +290,18 @@ export async function sbGetKnowledgeBaseTextForAi(
       };
     }),
   );
-  const ranked = rankKbArticlesForAi(candidates, userQuery, 8);
+  const ranked = rankKbArticlesForAi(candidates, userQuery, 4);
   const header = translateKnowledgeBaseMessage(locale, "aiContextPostgresHeader");
   const basePath = scope === "client" ? "/client-knowledge-base" : "/knowledge-base";
 
-  const resolved = ranked.map((article) => {
-    const excerpt = (article.content || article.summary)
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 900);
+  const resolved = ranked.map((article, index) => {
+    // Top hit gets a large relevant excerpt; others stay shorter.
+    const maxChars = index === 0 ? 8000 : index === 1 ? 3500 : 1800;
+    const excerpt = excerptKbContentForAi(
+      article.content || article.summary,
+      userQuery,
+      maxChars,
+    );
     return `--- ${article.title} (${article.categoryLabel})\n${excerpt}\nLink: ${basePath}?article=${article.slug}`;
   });
 

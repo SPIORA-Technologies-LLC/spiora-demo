@@ -620,25 +620,29 @@ export function ClientCaseDetail({
                             {t("sign.version")} {item.versionNumber} ·{" "}
                             {t(`sign.status.${item.status}`)}
                           </span>
-                          {item.hasSourcePdf ? (
-                            <a
-                              className={styles.docActionBtn}
-                              href={`/api/client-cases/${caseId}/agreement/pdf?kind=source&versionId=${item.versionId}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {t("sign.sourcePdf")}
-                            </a>
-                          ) : null}
-                          {item.hasFinalPdf ? (
-                            <a
-                              className={styles.docActionBtn}
-                              href={`/api/client-cases/${caseId}/agreement/pdf?kind=final&versionId=${item.versionId}`}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              {t("sign.finalPdf")}
-                            </a>
+                          {item.hasSourcePdf || item.hasFinalPdf ? (
+                            <div className={styles.historyActions}>
+                              {item.hasSourcePdf ? (
+                                <a
+                                  className={styles.docActionBtn}
+                                  href={`/api/client-cases/${caseId}/agreement/pdf?kind=source&versionId=${item.versionId}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {t("sign.sourcePdf")}
+                                </a>
+                              ) : null}
+                              {item.hasFinalPdf ? (
+                                <a
+                                  className={styles.docActionBtn}
+                                  href={`/api/client-cases/${caseId}/agreement/pdf?kind=final&versionId=${item.versionId}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {t("sign.finalPdf")}
+                                </a>
+                              ) : null}
+                            </div>
                           ) : null}
                         </div>
                       ))}

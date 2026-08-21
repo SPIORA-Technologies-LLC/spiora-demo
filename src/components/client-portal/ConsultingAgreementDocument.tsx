@@ -30,6 +30,8 @@ type Props = {
   showClientSign?: boolean;
   onClientSigned?: (sign: ConsultingAgreementSignView) => void;
   preferPdfAfterPublish?: boolean;
+  /** Questionnaire step: hide PDF open/download and prompt to submit. */
+  questionnaireFlow?: boolean;
 };
 
 function Fill({ value }: { value?: string | null }) {
@@ -50,6 +52,7 @@ export function ConsultingAgreementDocument({
   showClientSign = false,
   onClientSigned,
   preferPdfAfterPublish = false,
+  questionnaireFlow = false,
 }: Props) {
   const t = useTranslations("clientPortal.consultingAgreement");
   const locale = view.locale;
@@ -210,6 +213,8 @@ export function ConsultingAgreementDocument({
         <ConsultingAgreementSignPanel
           sign={view.sign ?? null}
           disabled={clientDisabled}
+          showPdfActions={!questionnaireFlow}
+          promptSubmitAfterSign={questionnaireFlow}
           onSigned={onClientSigned}
         />
       ) : hideLegacySignatures ? null : (

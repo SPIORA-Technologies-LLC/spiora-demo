@@ -2700,6 +2700,7 @@
         "working": "Please wait…",
         "otpSent": "Verification code sent to your email.",
         "signedSuccess": "Agreement signed.",
+        "signedSuccessSubmit": "Agreement signed. Review and submit your questionnaire.",
         "clientSignedAt": "Signed by you",
         "awaitingProvider": "Awaiting SPIORA confirmation",
         "providerSignedAt": "Signed by SPIORA as provider",

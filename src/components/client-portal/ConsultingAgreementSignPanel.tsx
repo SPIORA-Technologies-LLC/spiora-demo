@@ -10,6 +10,10 @@ import styles from "./ConsultingAgreementSignPanel.module.css";
 type Props = {
   sign: ConsultingAgreementSignView | null;
   disabled?: boolean;
+  /** When false, hide Open/Download PDF links (e.g. questionnaire step). */
+  showPdfActions?: boolean;
+  /** Use the post-sign prompt to review and submit the questionnaire. */
+  promptSubmitAfterSign?: boolean;
   onSigned?: (sign: ConsultingAgreementSignView) => void;
 };
 
@@ -20,6 +24,8 @@ function statusKey(status: ConsultingAgreementSignView["status"] | "none") {
 export function ConsultingAgreementSignPanel({
   sign,
   disabled = false,
+  showPdfActions = true,
+  promptSubmitAfterSign = false,
   onSigned,
 }: Props) {
   const locale = useLocale() as AppLocale;
@@ -141,7 +147,9 @@ export function ConsultingAgreementSignPanel({
         return;
       }
       setLocalSign(json.sign);
-      setMessage(t("signedSuccess"));
+      setMessage(
+        promptSubmitAfterSign ? t("signedSuccessSubmit") : t("signedSuccess"),
+      );
       onSigned?.(json.sign);
     } finally {
       setBusy(false);
@@ -305,7 +313,7 @@ export function ConsultingAgreementSignPanel({
         </div>
       ) : null}
 
-      {viewHref ? (
+      {showPdfActions && viewHref ? (
         <div className={styles.actions}>
           <a className={styles.secondaryBtn} href={viewHref} target="_blank" rel="noreferrer">
             {t("viewPdf")}
@@ -318,7 +326,18 @@ export function ConsultingAgreementSignPanel({
         </div>
       ) : null}
 
-      {message ? <p className={styles.message}>{message}</p> : null}
+      {(() => {
+        const successText =
+          message ??
+          (promptSubmitAfterSign &&
+          localSign &&
+          (localSign.status === "client_signed" ||
+            localSign.status === "provider_signed" ||
+            localSign.status === "completed")
+            ? t("signedSuccessSubmit")
+            : null);
+        return successText ? <p className={styles.message}>{successText}</p> : null;
+      })()}
       {errorCode ? (
         <p className={styles.error} role="alert">
           {(() => {

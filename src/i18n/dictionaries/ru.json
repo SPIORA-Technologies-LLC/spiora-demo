@@ -2700,6 +2700,7 @@
         "working": "Подождите…",
         "otpSent": "Код отправлен на ваш e-mail.",
         "signedSuccess": "Договор подписан.",
+        "signedSuccessSubmit": "Договор подписан. Проверьте и отправьте анкету.",
         "clientSignedAt": "Подписано вами",
         "awaitingProvider": "Ожидается подтверждение SPIORA",
         "providerSignedAt": "Подписан исполнителем SPIORA",

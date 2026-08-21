@@ -113,12 +113,16 @@ export function ConsultingAgreementDocument({
 
   return (
     <article className={styles.sheet}>
-      <div className={styles.logoWrap}>
-        <Logo size="md" />
-      </div>
-      <p className={styles.program}>
-        {pickLocaleText(CONSULTING_AGREEMENT_BRAND.program, locale)}
-      </p>
+      {!publishedForClient ? (
+        <>
+          <div className={styles.logoWrap}>
+            <Logo size="md" />
+          </div>
+          <p className={styles.program}>
+            {pickLocaleText(CONSULTING_AGREEMENT_BRAND.program, locale)}
+          </p>
+        </>
+      ) : null}
       <h1 className={styles.title}>
         {pickLocaleText(CONSULTING_AGREEMENT_BRAND.title, locale)}
       </h1>

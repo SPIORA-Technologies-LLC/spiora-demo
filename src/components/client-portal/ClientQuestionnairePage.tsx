@@ -998,6 +998,21 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 </button>
               </section>
             ) : null}
+            {reviewSections
+              .filter((section) => section.id !== CONSULTING_AGREEMENT_SECTION_ID)
+              .map((section) => (
+              <article key={section.id} className={`${styles.card} ${styles.reviewSection}`}>
+                <h3 className={styles.reviewSectionTitle}>{section.title}</h3>
+                <dl className={styles.reviewList}>
+                  {section.items.map((item) => (
+                    <div key={item.questionId} className={styles.answerRow}>
+                      <dt>{item.label}</dt>
+                      <dd>{item.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              </article>
+            ))}
             <div className={styles.card}>
               <ConsultingAgreementDocument
                 view={{
@@ -1017,21 +1032,6 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 }
               />
             </div>
-            {reviewSections
-              .filter((section) => section.id !== CONSULTING_AGREEMENT_SECTION_ID)
-              .map((section) => (
-              <article key={section.id} className={`${styles.card} ${styles.reviewSection}`}>
-                <h3 className={styles.reviewSectionTitle}>{section.title}</h3>
-                <dl className={styles.reviewList}>
-                  {section.items.map((item) => (
-                    <div key={item.questionId} className={styles.answerRow}>
-                      <dt>{item.label}</dt>
-                      <dd>{item.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              </article>
-            ))}
             <div className={styles.actions}>
               {!isSubmitted ? (
                 <button type="button" className={styles.secondaryBtn} onClick={() => void returnToEditing()}>

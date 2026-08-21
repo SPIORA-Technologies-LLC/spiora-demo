@@ -298,7 +298,7 @@ export function ConsultingAgreementSignPanel({
           {localSign.status === "cancelled" ? (
             <p className={styles.cancelledNote}>{t("status.cancelled")}</p>
           ) : null}
-          {localSign.clientSignedAt ? (
+          {localSign.clientSignedAt && !promptSubmitAfterSign ? (
             <p>
               {t("clientSignedAt")}: {formatSignedAt(localSign.clientSignedAt, locale)}
             </p>

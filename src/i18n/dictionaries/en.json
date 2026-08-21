@@ -2702,7 +2702,7 @@
         "signedSuccess": "Agreement signed by you.",
         "signedSuccessSubmit": "Agreement signed by you. Review and submit your questionnaire.",
         "clientSignedAt": "Signed by you",
-        "awaitingProvider": "Awaiting SPIORA confirmation. Once the other party signs, the agreement will be updated — the latest details will appear in the Agreement section.",
+        "awaitingProvider": "Awaiting SPIORA confirmation. Once the other party signs, the agreement will be updated — you will then be able to open and download the latest version in the Agreement section.",
         "providerSignedAt": "Signed by SPIORA as provider",
         "viewPdf": "View agreement",
         "downloadPdf": "Download agreement",

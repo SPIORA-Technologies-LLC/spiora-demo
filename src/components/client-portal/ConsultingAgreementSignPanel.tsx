@@ -313,7 +313,10 @@ export function ConsultingAgreementSignPanel({
         </div>
       ) : null}
 
-      {showPdfActions && viewHref ? (
+      {showPdfActions &&
+      viewHref &&
+      (localSign?.status === "provider_signed" ||
+        localSign?.status === "completed") ? (
         <div className={styles.actions}>
           <a className={styles.secondaryBtn} href={viewHref} target="_blank" rel="noreferrer">
             {t("viewPdf")}

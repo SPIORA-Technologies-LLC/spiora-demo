@@ -29,6 +29,18 @@ function isValidParts(year: number, month: number, day: number): boolean {
   );
 }
 
+/**
+ * True when the typed value already has a full 4-digit year.
+ * Used while typing so "09.09.19" is not expanded to 2019 before "1985" is finished.
+ */
+export function isCompleteQuestionnaireDateInput(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  if (ISO_RE.test(trimmed)) return true;
+  const match = SLASH_OR_DOT_RE.exec(trimmed);
+  return Boolean(match && match[3].length === 4);
+}
+
 /** Display ISO `YYYY-MM-DD` in the UI locale format. */
 export function formatQuestionnaireDate(
   iso: string,
@@ -48,6 +60,7 @@ export function formatQuestionnaireDate(
  * Parse a typed date into ISO `YYYY-MM-DD`.
  * RU expects day.month.year; EN expects month/day/year.
  * ISO input is always accepted.
+ * Two-digit years are expanded only for complete day/month/year triples (use on blur).
  */
 export function parseQuestionnaireDate(
   value: string,

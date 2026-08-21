@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import type { AppLocale } from "@/i18n/config";
 import {
   formatQuestionnaireDate,
+  isCompleteQuestionnaireDateInput,
   parseQuestionnaireDate,
 } from "@/lib/client-portal/questionnaire-date";
 import styles from "./QuestionnaireDateField.module.css";
@@ -47,6 +48,9 @@ export function QuestionnaireDateField({
       onChange("");
       return;
     }
+    // Wait for a 4-digit year while typing so "09.09.19" does not jump to 2019
+    // when the user is still entering 1985 / 1990 / etc.
+    if (!isCompleteQuestionnaireDateInput(trimmed)) return;
     const iso = parseQuestionnaireDate(trimmed, locale);
     if (iso) onChange(iso);
   }

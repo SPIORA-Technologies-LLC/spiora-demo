@@ -1,4 +1,7 @@
 .sheet {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   background: #f7f1e8;
   color: #161513;
   border-radius: 1rem;

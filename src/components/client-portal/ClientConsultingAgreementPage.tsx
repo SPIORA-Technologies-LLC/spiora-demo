@@ -53,7 +53,7 @@ export function ClientConsultingAgreementPage() {
           </a>
         </div>
       </header>
-      <main className={privacyStyles.main}>
+      <main className={privacyStyles.mainAgreement}>
         {error ? <p>{error}</p> : null}
         {!error && !view ? <p>{t("loading")}</p> : null}
         {view ? (

@@ -41,7 +41,7 @@
 .viewer {
   display: block;
   width: 100%;
-  min-height: 70vh;
+  min-height: min(78vh, 54rem);
   border: 0;
   background: white;
 }

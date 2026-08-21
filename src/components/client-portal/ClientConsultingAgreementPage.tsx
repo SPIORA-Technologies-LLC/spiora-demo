@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
-import { Logo } from "@/components/ui/Logo";
 import { ConsultingAgreementDocument } from "./ConsultingAgreementDocument";
 import type { ConsultingAgreementView } from "@/lib/client-portal/consulting-agreement-fields";
 import privacyStyles from "@/app/client/privacy/privacy.module.css";
@@ -42,17 +40,6 @@ export function ClientConsultingAgreementPage() {
 
   return (
     <div className={privacyStyles.page}>
-      <header className={privacyStyles.header}>
-        <a className={privacyStyles.brand} href="/client">
-          <Logo size="sm" />
-        </a>
-        <div className={privacyStyles.headerActions}>
-          <LanguageSwitcher compact />
-          <a className={privacyStyles.backLink} href="/client">
-            {t("backToPortal")}
-          </a>
-        </div>
-      </header>
       <main className={privacyStyles.mainAgreement}>
         {error ? <p>{error}</p> : null}
         {!error && !view ? <p>{t("loading")}</p> : null}

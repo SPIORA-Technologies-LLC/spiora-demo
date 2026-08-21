@@ -1,0 +1,213 @@
+.wrap {
+  width: 100%;
+}
+
+.control {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(12, 12, 12, 0.5);
+  overflow: hidden;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.control:focus-within {
+  border-color: rgba(var(--brand-orange-rgb), 0.7);
+  background: rgba(12, 12, 12, 0.72);
+  box-shadow: 0 0 0 1px rgba(var(--brand-orange-rgb), 0.18);
+}
+
+.dialBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 0.75rem 0.7rem 0.75rem 0.85rem;
+  border: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.dialBtn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dialBtnOpen {
+  background: rgba(var(--brand-orange-rgb), 0.12);
+}
+
+.dialBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.flag {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.dial {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: rgba(246, 239, 233, 0.95);
+}
+
+.chevron {
+  color: rgba(246, 239, 233, 0.55);
+  font-size: 0.85rem;
+  line-height: 1;
+  transition:
+    transform 0.15s ease,
+    color 0.15s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  color: rgba(var(--brand-orange-rgb), 0.9);
+}
+
+.control .numberInput {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  padding: 0.75rem 0.95rem;
+  outline: none;
+}
+
+.control .numberInput::placeholder {
+  color: rgba(246, 239, 233, 0.45);
+}
+
+.control .numberInput:hover,
+.control .numberInput:focus-visible,
+.control .numberInput:disabled {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.control .numberInput:disabled {
+  cursor: not-allowed;
+  -webkit-text-fill-color: #f6efe9;
+}
+
+.menu {
+  position: fixed;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.45rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: #161210;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+.search {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.35);
+  color: inherit;
+  font: inherit;
+  padding: 0.65rem 0.8rem;
+}
+
+.search:focus-visible {
+  outline: none;
+  border-color: rgba(var(--brand-orange-rgb), 0.65);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  max-height: inherit;
+}
+
+.empty {
+  padding: 0.75rem 0.85rem;
+  color: rgba(246, 239, 233, 0.55);
+  font-size: 0.88rem;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option:hover,
+.optionActive {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.optionSelected {
+  background: rgba(var(--brand-orange-rgb), 0.14);
+}
+
+.optionFlag {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.optionDial {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+  color: rgba(255, 210, 160, 0.95);
+  min-width: 3.2rem;
+}
+
+.optionLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(246, 239, 233, 0.92);
+}
+
+@media (max-width: 640px) {
+  .dialBtn {
+    padding-left: 0.7rem;
+    padding-right: 0.55rem;
+  }
+
+  .control .numberInput {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}

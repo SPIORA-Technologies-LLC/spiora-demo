@@ -41,6 +41,7 @@ import {
 } from "@/lib/client-portal/questionnaire-countries";
 import { resolveClientFirstName } from "@/lib/client-portal/display-name";
 import { CountryCombobox } from "./CountryCombobox";
+import { PhoneField } from "./PhoneField";
 import { QuestionnaireDateField } from "./QuestionnaireDateField";
 import { CLIENT_PRIVACY_POLICY_PATH } from "@/lib/client-portal/personal-data-policy";
 import {
@@ -1379,6 +1380,34 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                         .join(" ") || undefined
                     }
                   />
+                ) : q.type === "phone" ? (
+                  <PhoneField
+                    id={`question-${q.id}`}
+                    value={String(localAnswers[q.id] ?? "")}
+                    locale={locale}
+                    preferredCountryIso={resolveCountryToIso(
+                      localAnswers.country_of_residence,
+                    )}
+                    onChange={(next) => onAnswer(q.id, q.type, next)}
+                    disabled={Boolean(q.readOnly)}
+                    placeholder={t("phonePlaceholder")}
+                    searchPlaceholder={t("phoneSearchPlaceholder")}
+                    noResultsLabel={t("phoneNoResults")}
+                    codeLabel={t("phoneCodeLabel")}
+                    className={q.readOnly ? styles.readOnlyControl : undefined}
+                    aria-invalid={errors.some((err) => err.questionId === q.id)}
+                    aria-describedby={
+                      [
+                        errors.some((err) => err.questionId === q.id)
+                          ? `error-${q.id}`
+                          : null,
+                        `phone-hint-${q.id}`,
+                        q.readOnly ? `hint-${q.id}` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(" ") || undefined
+                    }
+                  />
                 ) : q.type === "boolean" ? (
                   <label
                     htmlFor={`question-${q.id}`}
@@ -1483,6 +1512,11 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 {q.type === "country" ? (
                   <span id={`country-hint-${q.id}`} className={styles.displayDescription}>
                     {t("countryHint")}
+                  </span>
+                ) : null}
+                {q.type === "phone" ? (
+                  <span id={`phone-hint-${q.id}`} className={styles.displayDescription}>
+                    {t("phoneHint")}
                   </span>
                 ) : null}
                 {q.readOnly ? (

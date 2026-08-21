@@ -179,9 +179,6 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
             { value: "other", label: { en: "Other", ru: "Другое" } },
           ],
         },
-        { id: "institution_name", type: "text", order: 20, label: { en: "Institution", ru: "Учебное заведение" }, validation: { maxLength: 200 } },
-        { id: "field_of_study", type: "text", order: 30, label: { en: "Field of study", ru: "Специальность" }, validation: { maxLength: 200 } },
-        { id: "graduation_year", type: "number", order: 40, label: { en: "Graduation year", ru: "Год окончания" }, validation: { min: 1950, max: 2100, integer: true } },
       ],
     },
     {
@@ -196,7 +193,7 @@ export const GENERAL_CLIENT_ONBOARDING_SCHEMA: QuestionnaireSchema = {
           label: { en: "Employment status", ru: "Статус занятости" },
           required: true,
           options: [
-            { value: "employed", label: { en: "Employed", ru: "Работает" } },
+            { value: "employed", label: { en: "Employed", ru: "Работаю" } },
             { value: "self_employed", label: { en: "Self-employed", ru: "Самозанятый" } },
             { value: "unemployed", label: { en: "Unemployed", ru: "Безработный" } },
             { value: "student", label: { en: "Student", ru: "Студент" } },

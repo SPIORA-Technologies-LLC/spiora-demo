@@ -25,7 +25,7 @@ import type {
 } from "./questionnaire-types";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_RE = /^[+]?[\d\s()-]{6,20}$/;
+const PHONE_RE = /^\+[1-9]\d{6,14}$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function labelFor(question: QuestionDefinition, locale: "en" | "ru"): string {

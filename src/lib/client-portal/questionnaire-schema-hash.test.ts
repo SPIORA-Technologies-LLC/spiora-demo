@@ -75,10 +75,20 @@ describe("canonical questionnaire schema hash", () => {
     const hash = hashQuestionnaireSchema(GENERAL_CLIENT_ONBOARDING_SCHEMA);
     assert.equal(
       hash,
-      "f0b51905a8e7a123d56494d9e70c2d5aa8cecb9f88ce70b94320db905191b51a",
+      "6af4b8378e014360c577b010d390a77e2b7cb91cdb59ba825216939b8d186f85",
     );
     assert.equal(hash, GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH);
     assert.equal(hash.length, 64);
+    assert.ok(
+      GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY.includes(
+        "908168e39b0a3bc95fcbd532b12e9dd1ed937609bb929f992c5db780eaa5b538",
+      ),
+    );
+    assert.ok(
+      GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY.includes(
+        "f0b51905a8e7a123d56494d9e70c2d5aa8cecb9f88ce70b94320db905191b51a",
+      ),
+    );
     assert.ok(
       GENERAL_CLIENT_ONBOARDING_SCHEMA_HASH_LEGACY.includes(
         "c8ec967f072ad3f980324c02dbe0121046f5aab6f3ab734014e51737b84187a7",

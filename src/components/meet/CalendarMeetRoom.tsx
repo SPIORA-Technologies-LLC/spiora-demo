@@ -10,7 +10,6 @@ import {
   useParticipants,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
-import { formatEventTimeRange } from "@/lib/calendar/format";
 import {
   postMeetingAudit,
   postMeetingAuditBeacon,
@@ -92,30 +91,36 @@ function MeetingStage({
 
   return (
     <div className={styles.room}>
-      <header className={styles.topBar}>
-        {isDockMode ? (
-          <span className={styles.dockBadge}>Окно звонка</span>
-        ) : (
-          <Link href={`/calendar?event=${encodeURIComponent(event.id)}`} className={styles.backLink}>
-            ← Выйти
-          </Link>
-        )}
-        <div className={styles.topMeta}>
-          <span className={styles.eventTitle}>{event.title}</span>
-          <span className={styles.eventTime}>{formatEventTimeRange(event)}</span>
+      <div className={styles.overlayChrome}>
+        <div className={styles.overlayLeft}>
+          {isDockMode ? (
+            <span className={styles.dockBadge}>Окно звонка</span>
+          ) : (
+            <Link
+              href={`/calendar?event=${encodeURIComponent(event.id)}`}
+              className={styles.overlayBack}
+              title="Выйти"
+              aria-label="Выйти"
+            >
+              ←
+            </Link>
+          )}
         </div>
-        {!isDockMode ? (
-          <button
-            type="button"
-            className={styles.platformButton}
-            onClick={onWorkOnPlatform}
-            title="Открыть звонок в отдельном окне и работать на платформе"
-          >
-            <i className="fa-solid fa-desktop" aria-hidden="true" />
-            Работать на платформе
-          </button>
-        ) : null}
-      </header>
+        <MeetingRecordingNotice eventId={event.id} />
+        <div className={styles.overlayRight}>
+          {!isDockMode ? (
+            <button
+              type="button"
+              className={styles.overlayPlatform}
+              onClick={onWorkOnPlatform}
+              title="Открыть звонок в отдельном окне и работать на платформе"
+              aria-label="Работать на платформе"
+            >
+              <i className="fa-solid fa-desktop" aria-hidden="true" />
+            </button>
+          ) : null}
+        </div>
+      </div>
 
       {isDockMode ? (
         <div className={styles.dockHint}>
@@ -129,8 +134,6 @@ function MeetingStage({
         count={pendingGuestAdmissions.length}
         onOpenParticipants={() => setParticipantsOpen(true)}
       />
-
-      <MeetingRecordingNotice eventId={event.id} />
 
       <div className={styles.stage}>
         <MeetingSpeakerLayout compact={isDockMode} />

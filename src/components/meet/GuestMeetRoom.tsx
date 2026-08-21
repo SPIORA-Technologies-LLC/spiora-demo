@@ -111,18 +111,17 @@ function GuestMeetingStage({
 
   return (
     <div className={styles.room}>
-      <header className={styles.topBar}>
-        <div className={styles.topMeta}>
-          <span className={styles.guestBadge}>Гостевой вход</span>
-          <span className={styles.eventTitle}>{event.title}</span>
-          <span className={styles.eventTime}>
-            {formatEventTimeRange(event, CALENDAR_TIMEZONE)}
+      <div className={styles.overlayChrome}>
+        <div className={styles.overlayLeft}>
+          <span className={styles.guestBadge} title={event.title}>
+            Гость
           </span>
         </div>
-        <span className={styles.guestName}>{displayName}</span>
-      </header>
-
-      <MeetingRecordingNotice inviteToken={inviteToken} />
+        <MeetingRecordingNotice inviteToken={inviteToken} />
+        <div className={styles.overlayRight}>
+          <span className={styles.guestName}>{displayName}</span>
+        </div>
+      </div>
 
       <div className={meetStyles.stage}>
         <MeetingSpeakerLayout />

@@ -126,17 +126,21 @@ export function MeetingRecordingNotice(props: MeetingRecordingNoticeProps) {
     return null;
   }
 
+  const detail = notice.startedByName
+    ? `Идёт запись встречи. Все участники уведомлены. Запись начал(а): ${notice.startedByName}.`
+    : "Идёт запись встречи. Все участники уведомлены.";
+
   return (
-    <div className={styles.banner} role="status" aria-live="polite">
+    <div
+      className={styles.chip}
+      role="status"
+      aria-live="polite"
+      aria-label={detail}
+      title={detail}
+    >
       <span className={styles.dot} aria-hidden />
-      <div className={styles.copy}>
-        <strong className={styles.title}>Идёт запись встречи</strong>
-        <span className={styles.text}>
-          {notice.startedByName
-            ? `Все участники уведомлены. Запись начал(а): ${notice.startedByName}.`
-            : "Все участники уведомлены — эта встреча записывается."}
-        </span>
-      </div>
+      <i className={`fa-solid fa-video ${styles.icon}`} aria-hidden />
+      <span className={styles.label}>REC</span>
     </div>
   );
 }

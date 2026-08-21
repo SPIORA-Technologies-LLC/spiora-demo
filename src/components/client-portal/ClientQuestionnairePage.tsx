@@ -1008,6 +1008,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 }}
                 preferPdfAfterPublish
                 showClientSign
+                showActions={false}
                 onClientSigned={handleAgreementSigned}
                 clientDisabled={
                   data?.questionnaire.status === "submitted" ||
@@ -1085,6 +1086,7 @@ export function ClientQuestionnairePage({ initialSectionId, reviewMode }: Props)
                 }}
                 preferPdfAfterPublish
                 showClientSign
+                showActions={false}
                 onClientSigned={handleAgreementSigned}
                 clientDisabled={
                   data?.questionnaire.status === "submitted" ||

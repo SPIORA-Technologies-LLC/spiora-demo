@@ -59,6 +59,19 @@ async function copyText(text: string) {
   area.remove();
 }
 
+function formatWebsiteLabel(url: string): string {
+  try {
+    const parsed = new URL(url);
+    const path =
+      parsed.pathname && parsed.pathname !== "/"
+        ? parsed.pathname.replace(/\/$/, "")
+        : "";
+    return `${parsed.hostname}${path}`;
+  } catch {
+    return url.replace(/^https?:\/\//i, "");
+  }
+}
+
 export function CompanyDetailsView() {
   const t = useTranslations("companyDetails");
   const [details, setDetails] = useState<CompanyDetailsView | null>(null);
@@ -379,8 +392,17 @@ export function CompanyDetailsView() {
                 <div>
                   <dt>{t("fields.website")}</dt>
                   <dd className={styles.wrap}>
-                    <a href={details.website} target="_blank" rel="noreferrer">
-                      {details.website}
+                    <a
+                      className={styles.websiteLink}
+                      href={details.website}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {formatWebsiteLabel(details.website)}
+                      <i
+                        className={`fa-solid fa-arrow-up-right-from-square ${styles.websiteLinkIcon}`}
+                        aria-hidden
+                      />
                     </a>
                   </dd>
                 </div>

@@ -3335,6 +3335,26 @@
       "confirm": "Confirm"
     }
   },
+  "meetingRecordings": {
+    "title": "Meeting Recordings",
+    "subtitle": "Videos are saved automatically when recording was on and all participants left the meeting. Guests cannot record and do not see this section.",
+    "loading": "Loading…",
+    "loadFailed": "Could not load recordings",
+    "openFailed": "Could not open recording",
+    "deleteFailed": "Could not delete recording",
+    "deleteConfirm": "Delete this meeting recording? The file will be permanently removed.",
+    "empty": "No saved recordings yet. During a video call, tap Record, then end the call — the file will appear here with the save date.",
+    "savedAt": "Saved: {date}",
+    "client": "Client: {name}",
+    "watch": "Watch",
+    "delete": "Delete",
+    "playerView": "Playback: {title}",
+    "playerViewDefault": "Recording playback",
+    "closeView": "Close playback",
+    "close": "Close",
+    "playerLoading": "Loading video…",
+    "fileSizeMb": "{size} MB"
+  },
   "companyDetails": {
     "title": "Company Details",
     "subtitle": "Primary legal, contact, and banking information for the company.",

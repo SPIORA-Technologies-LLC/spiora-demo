@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import type { AppLocale } from "@/i18n/config";
 import type { CalendarMeetingRecordingWithEvent } from "@/lib/calendar/types";
 import styles from "./MeetingRecordingsView.module.css";
 
@@ -14,18 +16,9 @@ function formatDuration(seconds: number | null): string | null {
   return `${minutes}:${String(remainder).padStart(2, "0")}`;
 }
 
-function formatFileSize(bytes: number | null): string | null {
-  if (!bytes || bytes <= 0) {
-    return null;
-  }
-
-  const mb = bytes / (1024 * 1024);
-  return `${mb.toFixed(1)} МБ`;
-}
-
-function formatSavedAt(recording: CalendarMeetingRecordingWithEvent): string {
+function formatSavedAt(recording: CalendarMeetingRecordingWithEvent, locale: AppLocale): string {
   const raw = recording.endedAt || recording.startedAt;
-  return new Date(raw).toLocaleString("ru-RU", {
+  return new Date(raw).toLocaleString(locale === "ru" ? "ru-RU" : "en-GB", {
     day: "2-digit",
     month: "2-digit",
     year: "numeric",
@@ -34,18 +27,9 @@ function formatSavedAt(recording: CalendarMeetingRecordingWithEvent): string {
   });
 }
 
-function buildRecordingMeta(recording: CalendarMeetingRecordingWithEvent): string {
-  return [
-    `Сохранено: ${formatSavedAt(recording)}`,
-    recording.startedByName?.trim() || null,
-    formatDuration(recording.durationSeconds),
-    formatFileSize(recording.fileSizeBytes),
-  ]
-    .filter(Boolean)
-    .join(" · ");
-}
-
 export function MeetingRecordingsView() {
+  const t = useTranslations("meetingRecordings");
+  const locale = useLocale() as AppLocale;
   const [recordings, setRecordings] = useState<
     CalendarMeetingRecordingWithEvent[]
   >([]);
@@ -56,6 +40,31 @@ export function MeetingRecordingsView() {
     null,
   );
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const formatFileSize = useCallback(
+    (bytes: number | null): string | null => {
+      if (!bytes || bytes <= 0) {
+        return null;
+      }
+      const mb = bytes / (1024 * 1024);
+      return t("fileSizeMb", { size: mb.toFixed(1) });
+    },
+    [t],
+  );
+
+  const buildRecordingMeta = useCallback(
+    (recording: CalendarMeetingRecordingWithEvent): string => {
+      return [
+        t("savedAt", { date: formatSavedAt(recording, locale) }),
+        recording.startedByName?.trim() || null,
+        formatDuration(recording.durationSeconds),
+        formatFileSize(recording.fileSizeBytes),
+      ]
+        .filter(Boolean)
+        .join(" · ");
+    },
+    [formatFileSize, locale, t],
+  );
 
   const activeRecording = recordings.find(
     (recording) => recording.id === activeRecordingId,
@@ -79,19 +88,19 @@ export function MeetingRecordingsView() {
       };
 
       if (!response.ok) {
-        setError(payload.error ?? "Не удалось загрузить записи");
+        setError(payload.error ?? t("loadFailed"));
         setRecordings([]);
         return;
       }
 
       setRecordings(payload.recordings ?? []);
     } catch {
-      setError("Не удалось загрузить записи");
+      setError(t("loadFailed"));
       setRecordings([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void loadRecordings();
@@ -126,7 +135,7 @@ export function MeetingRecordingsView() {
       };
 
       if (!response.ok || !payload.playbackUrl) {
-        setError(payload.error ?? "Не удалось открыть запись");
+        setError(payload.error ?? t("openFailed"));
         setActiveRecordingId(null);
         return;
       }
@@ -134,13 +143,13 @@ export function MeetingRecordingsView() {
       setPlaybackUrl(payload.playbackUrl);
       setError(null);
     } catch {
-      setError("Не удалось открыть запись");
+      setError(t("openFailed"));
       setActiveRecordingId(null);
     }
   }
 
   async function handleDelete(recordingId: string) {
-    if (!window.confirm("Удалить эту запись встречи? Файл будет удалён безвозвратно.")) {
+    if (!window.confirm(t("deleteConfirm"))) {
       return;
     }
 
@@ -156,7 +165,7 @@ export function MeetingRecordingsView() {
       } | null;
 
       if (!response.ok) {
-        setError(payload?.error ?? "Не удалось удалить запись");
+        setError(payload?.error ?? t("deleteFailed"));
         return;
       }
 
@@ -165,7 +174,7 @@ export function MeetingRecordingsView() {
       }
       setRecordings((prev) => prev.filter((item) => item.id !== recordingId));
     } catch {
-      setError("Не удалось удалить запись");
+      setError(t("deleteFailed"));
     } finally {
       setDeletingId(null);
     }
@@ -175,24 +184,17 @@ export function MeetingRecordingsView() {
     <div className={styles.page}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Записи встреч</h1>
-          <p className={styles.subtitle}>
-            Видеозаписи сохраняются автоматически, когда запись была включена и
-            все участники покинули встречу. Гости не могут записывать и не видят
-            этот раздел.
-          </p>
+          <h1 className={styles.title}>{t("title")}</h1>
+          <p className={styles.subtitle}>{t("subtitle")}</p>
         </div>
       </header>
 
       {loading ? (
-        <p className={styles.status}>Загрузка…</p>
+        <p className={styles.status}>{t("loading")}</p>
       ) : error && recordings.length === 0 ? (
         <p className={styles.error}>{error}</p>
       ) : recordings.length === 0 ? (
-        <p className={styles.empty}>
-          Пока нет сохранённых записей. Во время видеовстречи нажмите «Запись»,
-          затем завершите звонок — файл появится здесь с датой сохранения.
-        </p>
+        <p className={styles.empty}>{t("empty")}</p>
       ) : (
         <>
           {error ? <p className={styles.inlineError}>{error}</p> : null}
@@ -206,7 +208,7 @@ export function MeetingRecordingsView() {
                   </p>
                   {recording.linkedClientName ? (
                     <p className={styles.clientMeta}>
-                      Клиент: {recording.linkedClientName}
+                      {t("client", { name: recording.linkedClientName })}
                     </p>
                   ) : null}
                 </div>
@@ -216,7 +218,7 @@ export function MeetingRecordingsView() {
                     className={styles.playButton}
                     onClick={() => void handlePlay(recording.id)}
                   >
-                    Смотреть
+                    {t("watch")}
                   </button>
                   <button
                     type="button"
@@ -224,7 +226,7 @@ export function MeetingRecordingsView() {
                     disabled={deletingId === recording.id}
                     onClick={() => void handleDelete(recording.id)}
                   >
-                    {deletingId === recording.id ? "…" : "Удалить"}
+                    {deletingId === recording.id ? "…" : t("delete")}
                   </button>
                 </div>
               </li>
@@ -240,26 +242,26 @@ export function MeetingRecordingsView() {
           aria-modal="true"
           aria-label={
             activeRecording
-              ? `Просмотр: ${activeRecording.eventTitle}`
-              : "Просмотр записи"
+              ? t("playerView", { title: activeRecording.eventTitle })
+              : t("playerViewDefault")
           }
         >
           <button
             type="button"
             className={styles.playerBackdrop}
-            aria-label="Закрыть просмотр"
+            aria-label={t("closeView")}
             onClick={closePlayer}
           />
           <div className={styles.playerModal}>
             <div className={styles.playerHeader}>
               <h2 className={styles.playerTitle}>
-                {activeRecording?.eventTitle ?? "Запись встречи"}
+                {activeRecording?.eventTitle ?? t("playerViewDefault")}
               </h2>
               <button
                 type="button"
                 className={styles.playerClose}
                 onClick={closePlayer}
-                aria-label="Закрыть"
+                aria-label={t("close")}
               >
                 ×
               </button>
@@ -273,7 +275,7 @@ export function MeetingRecordingsView() {
                 autoPlay
               />
             ) : (
-              <div className={styles.playerLoading}>Загрузка видео…</div>
+              <div className={styles.playerLoading}>{t("playerLoading")}</div>
             )}
           </div>
         </div>

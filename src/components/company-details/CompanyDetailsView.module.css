@@ -1,0 +1,179 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.demoBanner {
+  padding: 0.95rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(244, 152, 26, 0.28);
+  background: rgba(244, 152, 26, 0.08);
+}
+
+.demoTitle {
+  margin: 0 0 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 214, 160, 0.95);
+}
+
+.demoText {
+  margin: 0;
+  color: rgba(244, 239, 232, 0.82);
+  line-height: 1.45;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  height: 100%;
+}
+
+.cardTitle {
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.cardHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.cardHeaderRow .cardTitle {
+  margin: 0;
+}
+
+.list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.list dt {
+  margin: 0 0 0.2rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted, rgba(244, 239, 232, 0.58));
+}
+
+.list dd {
+  margin: 0;
+  color: var(--text-primary, #f4efe8);
+  overflow-wrap: anywhere;
+}
+
+.wrap {
+  overflow-wrap: anywhere;
+}
+
+.addressBlock {
+  margin: 0;
+  white-space: pre-line;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.copyRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.inlineCopyBtn {
+  flex-shrink: 0;
+}
+
+.editForm {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.formSection {
+  padding: 1rem 1.1rem;
+  border-radius: 14px;
+  border: 1px solid var(--border-soft, rgba(244, 239, 232, 0.12));
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.formSection h2 {
+  margin: 0 0 0.85rem;
+  font-size: 1rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.field span {
+  font-size: 0.82rem;
+  color: var(--text-muted, rgba(244, 239, 232, 0.62));
+}
+
+.field input {
+  width: 100%;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft, rgba(244, 239, 232, 0.14));
+  background: rgba(0, 0, 0, 0.22);
+  color: inherit;
+  overflow-wrap: anywhere;
+}
+
+.meta,
+.error {
+  margin: 0;
+}
+
+.error {
+  color: #ffb4aa;
+}
+
+@media (max-width: 960px) {
+  .grid,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .headerActions {
+    width: 100%;
+  }
+
+  .headerActions button {
+    flex: 1 1 auto;
+  }
+
+  .copyRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

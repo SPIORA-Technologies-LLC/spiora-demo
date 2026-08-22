@@ -19,6 +19,12 @@ describe("auth permissions", () => {
     assert.equal(canAccessPath("finance_manager", "/finance/analytics"), true);
     assert.equal(canAccessPath("finance_manager", "/settings"), false);
     assert.equal(canAccessPath("finance_manager", "/clients"), true);
+    assert.equal(canAccessPath("finance_manager", "/company-details"), true);
+  });
+
+  it("manager can access company details but not finance", () => {
+    assert.equal(canAccessPath("manager", "/company-details"), true);
+    assert.equal(canAccessPath("manager", "/finance"), false);
   });
 
   it("owner can access finance", () => {
@@ -44,6 +50,8 @@ describe("auth permissions", () => {
     assert.equal(managerNav.includes("/finance"), false);
     assert.equal(financeNav.includes("/finance"), true);
     assert.equal(financeNav.includes("/settings"), false);
+    assert.equal(financeNav.includes("/company-details"), true);
+    assert.equal(managerNav.includes("/company-details"), true);
   });
 
   it("hides retired leads routes from sidebar", () => {

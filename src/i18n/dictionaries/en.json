@@ -20,7 +20,8 @@
     "logout": "Logout",
     "meetingRecordings": "Meeting Recordings",
     "relocation": "Electronic resources",
-    "finance": "Finance"
+    "finance": "Finance",
+    "companyDetails": "Company Details"
   },
   "actions": {
     "save": "Save",
@@ -3332,6 +3333,50 @@
       "reason": "Reason for change",
       "cancel": "Cancel",
       "confirm": "Confirm"
+    }
+  },
+  "companyDetails": {
+    "title": "Company Details",
+    "subtitle": "Primary legal, contact, and banking information for the company.",
+    "copyAll": "Copy details",
+    "edit": "Edit",
+    "cancel": "Cancel",
+    "saveChanges": "Save changes",
+    "saving": "Saving…",
+    "saved": "Changes saved",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copiedAll": "Company details copied",
+    "loading": "Loading company details…",
+    "loadFailed": "Could not load company details",
+    "saveFailed": "Could not save company details",
+    "demoBannerTitle": "Demo data",
+    "demoBannerText": "These details are for the SPIORA demo environment only and must not be used for real legal or financial transactions.",
+    "sections": {
+      "company": "Company",
+      "address": "Legal address",
+      "contact": "Contact information",
+      "bank": "Banking details"
+    },
+    "fields": {
+      "companyName": "Company name",
+      "tradingName": "Trading name",
+      "registrationNumber": "Company registration number",
+      "vatNumber": "VAT number",
+      "country": "Country",
+      "currency": "Currency",
+      "addressLine1": "Address line 1",
+      "addressLine2": "Address line 2",
+      "city": "City",
+      "postalCode": "Postal code",
+      "generalEmail": "General email",
+      "financeEmail": "Finance email",
+      "phone": "Phone",
+      "website": "Website",
+      "bankAccountHolder": "Account holder",
+      "bankName": "Bank",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT / BIC"
     }
   }
 }

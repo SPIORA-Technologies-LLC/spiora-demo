@@ -20,7 +20,8 @@
     "logout": "Выйти",
     "meetingRecordings": "Записи встреч",
     "relocation": "Электронные ресурсы",
-    "finance": "Финансы"
+    "finance": "Финансы",
+    "companyDetails": "Реквизиты компании"
   },
   "actions": {
     "save": "Сохранить",
@@ -3332,6 +3333,50 @@
       "reason": "Причина изменения",
       "cancel": "Отмена",
       "confirm": "Подтвердить"
+    }
+  },
+  "companyDetails": {
+    "title": "Реквизиты компании",
+    "subtitle": "Основная юридическая, контактная и банковская информация компании.",
+    "copyAll": "Скопировать реквизиты",
+    "edit": "Редактировать",
+    "cancel": "Отмена",
+    "saveChanges": "Сохранить изменения",
+    "saving": "Сохранение…",
+    "saved": "Изменения сохранены",
+    "copy": "Скопировать",
+    "copied": "Скопировано",
+    "copiedAll": "Реквизиты скопированы",
+    "loading": "Загрузка реквизитов…",
+    "loadFailed": "Не удалось загрузить реквизиты",
+    "saveFailed": "Не удалось сохранить реквизиты",
+    "demoBannerTitle": "Демонстрационные данные",
+    "demoBannerText": "Эти реквизиты используются только в демоверсии SPIORA и не предназначены для реальных юридических или финансовых операций.",
+    "sections": {
+      "company": "Компания",
+      "address": "Юридический адрес",
+      "contact": "Контактная информация",
+      "bank": "Банковские реквизиты"
+    },
+    "fields": {
+      "companyName": "Название компании",
+      "tradingName": "Торговое название",
+      "registrationNumber": "Регистрационный номер",
+      "vatNumber": "VAT Number",
+      "country": "Страна",
+      "currency": "Валюта",
+      "addressLine1": "Адрес, строка 1",
+      "addressLine2": "Адрес, строка 2",
+      "city": "Город",
+      "postalCode": "Почтовый индекс",
+      "generalEmail": "Общий email",
+      "financeEmail": "Email для финансов",
+      "phone": "Телефон",
+      "website": "Сайт",
+      "bankAccountHolder": "Получатель платежа",
+      "bankName": "Банк",
+      "iban": "IBAN",
+      "swiftBic": "SWIFT / BIC"
     }
   }
 }

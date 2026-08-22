@@ -7,6 +7,10 @@ if (!process.env.FINANCE_STORE_MODE) {
   process.env.FINANCE_STORE_MODE = "demo";
 }
 
+if (!process.env.COMPANY_DETAILS_STORE_MODE) {
+  process.env.COMPANY_DETAILS_STORE_MODE = "demo";
+}
+
 const loader = pathToFileURL(
   path.join(import.meta.dirname, "test-loader.mjs"),
 ).href;

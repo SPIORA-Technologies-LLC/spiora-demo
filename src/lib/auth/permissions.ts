@@ -93,6 +93,13 @@ const NAV_FINANCE: NavItem = {
   icon: "fa-solid fa-euro-sign",
 };
 
+const NAV_COMPANY_DETAILS: NavItem = {
+  href: "/company-details",
+  labelKey: "companyDetails",
+  labelNs: "nav",
+  icon: "fa-solid fa-building",
+};
+
 const NAV_ANALYTICS: NavItem = {
   href: "/analytics",
   labelKey: "analytics",
@@ -135,6 +142,7 @@ const MANAGER_NAV: NavItem[] = [
   NAV_MEETING_RECORDINGS,
   NAV_TEAM_CHAT,
   NAV_RELOCATION,
+  NAV_COMPANY_DETAILS,
   NAV_TEAM,
   NAV_WEBSITE,
 ];
@@ -153,6 +161,7 @@ const FINANCE_MANAGER_NAV: NavItem[] = [
   NAV_TEAM_CHAT,
   NAV_RELOCATION,
   NAV_FINANCE,
+  NAV_COMPANY_DETAILS,
   NAV_TEAM,
   NAV_WEBSITE,
 ];
@@ -171,6 +180,7 @@ const OWNER_NAV: NavItem[] = [
   NAV_TEAM_CHAT,
   NAV_RELOCATION,
   NAV_FINANCE,
+  NAV_COMPANY_DETAILS,
   NAV_ANALYTICS,
   NAV_TEAM,
   NAV_SETTINGS,
@@ -179,6 +189,7 @@ const OWNER_NAV: NavItem[] = [
 
 const OWNER_ONLY_PREFIXES = ["/analytics", "/settings"];
 const FINANCE_PREFIX = "/finance";
+const COMPANY_DETAILS_PREFIX = "/company-details";
 
 export function getNavItemsForRole(role: UserRole): NavItem[] {
   if (role === "owner") return OWNER_NAV;

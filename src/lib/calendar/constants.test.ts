@@ -9,8 +9,8 @@ import {
 } from "./constants";
 
 describe("calendar reminder constants", () => {
-  it("uses 24h and 1h offsets", () => {
-    assert.deepEqual(REMINDER_OFFSETS_MINUTES, [1440, 60]);
+  it("uses 24h, 1h, and 10-minute offsets", () => {
+    assert.deepEqual(REMINDER_OFFSETS_MINUTES, [1440, 60, 10]);
   });
 
   it("defaults send reminders to true", () => {

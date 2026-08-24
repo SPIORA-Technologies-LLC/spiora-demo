@@ -736,6 +736,7 @@
     },
     "notifications": {
       "videoInviteTitle": "Приглашение на видеовстречу",
+      "eventCreatedTitle": "Событие создано",
       "joinAction": "Присоединиться",
       "upcomingMeeting": "Встреча через 1 час",
       "deadlineTomorrow": "Дедлайн завтра",

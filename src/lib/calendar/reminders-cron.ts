@@ -1,8 +1,7 @@
 import "server-only";
 
-import { listTeamUsers } from "@/lib/auth/users";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { getDeletedUserIds } from "@/lib/team/store";
+import { listActiveCalendarUserIds } from "./active-users";
 import * as sbDeliveries from "@/lib/supabase/calendar-reminder-deliveries-repo";
 import {
   REMINDER_OFFSETS_MINUTES,
@@ -65,12 +64,7 @@ export async function deliverCalendarReminderNotification(params: {
 
 export const defaultReminderCronDeps: ReminderCronDeps = {
   listEventsInRange: listEventsInRangeForReminders,
-  listActiveUserIds: async () => {
-    const deleted = new Set(await getDeletedUserIds());
-    return listTeamUsers()
-      .filter((user) => !deleted.has(user.id))
-      .map((user) => user.id);
-  },
+  listActiveUserIds: listActiveCalendarUserIds,
   tryInsertDelivery: sbDeliveries.sbTryInsertReminderDelivery,
   onDelivery: deliverCalendarReminderNotification,
 };

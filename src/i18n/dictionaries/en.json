@@ -736,6 +736,7 @@
     },
     "notifications": {
       "videoInviteTitle": "Video meeting invitation",
+      "eventCreatedTitle": "Event created",
       "joinAction": "Join",
       "upcomingMeeting": "Upcoming meeting in 1 hour",
       "deadlineTomorrow": "Deadline tomorrow",

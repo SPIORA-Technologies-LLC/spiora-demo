@@ -1,7 +1,7 @@
 import "server-only";
 
-import { listTeamUsers } from "@/lib/auth/users";
-import { resolveVideoMeetingReminderRecipientIds } from "@/lib/calendar/participants";
+import { listActiveCalendarUserIds } from "@/lib/calendar/active-users";
+import { resolveReminderRecipientIds } from "@/lib/calendar/reminders";
 import type { CalendarEvent } from "@/lib/calendar/types";
 import { isVideoMeeting } from "@/lib/calendar/meeting";
 import type { ReminderOffsetMinutes } from "@/lib/calendar/constants";
@@ -11,13 +11,16 @@ import {
   translateTaskStatusForNotification,
   translateTeamChatPreview,
 } from "@/i18n/notification-emit-messages";
-import { getDeletedUserIds } from "@/lib/team/store";
 import type { TaskStatus } from "@/lib/tasks/types";
 import {
   buildCalendarReminderNotificationContent,
-  buildVideoMeetingInviteNotificationContent,
+  buildCalendarEventCreatedNotificationContent,
 } from "./calendar-reminder-copy";
-import { createNotificationForUser, createNotificationsForTeam } from "./store";
+import {
+  createNotificationForUser,
+  createNotificationsForTeam,
+  createNotificationsForUserIds,
+} from "./store";
 import type { Notification } from "./types";
 
 function buildTeamChatPreview(
@@ -345,29 +348,25 @@ export async function notifyCalendarReminder(params: {
   });
 }
 
-export function buildVideoMeetingInviteNotificationOptions(recipientIds: string[]): {
-  onlyUserIds: string[];
-} {
-  return {
-    onlyUserIds: recipientIds,
-  };
+export function buildCalendarEventCreatedRecipientIds(
+  event: CalendarEvent,
+  activeUserIds: string[],
+): string[] {
+  const recipientIds = new Set(resolveReminderRecipientIds(event, activeUserIds));
+  recipientIds.add(event.createdByUserId);
+  if (event.ownerUserId) {
+    recipientIds.add(event.ownerUserId);
+  }
+  return [...recipientIds];
 }
 
-export async function notifyVideoMeetingInvite(params: {
+export async function notifyCalendarEventCreated(params: {
   actorId: string;
   actorName: string;
   event: CalendarEvent;
 }): Promise<void> {
-  if (!isVideoMeeting(params.event)) {
-    return;
-  }
-
-  const deleted = new Set(await getDeletedUserIds());
-  const activeUserIds = listTeamUsers()
-    .filter((user) => !deleted.has(user.id))
-    .map((user) => user.id);
-
-  const recipientIds = resolveVideoMeetingReminderRecipientIds(
+  const activeUserIds = await listActiveCalendarUserIds();
+  const recipientIds = buildCalendarEventCreatedRecipientIds(
     params.event,
     activeUserIds,
   );
@@ -377,18 +376,25 @@ export async function notifyVideoMeetingInvite(params: {
   }
 
   const locale = await getRequestLocale();
-  const content = buildVideoMeetingInviteNotificationContent(
+  const content = buildCalendarEventCreatedNotificationContent(
     params.event,
     locale,
   );
 
-  await createNotificationsForTeam(
-    {
-      type: "calendar_video_invite",
-      title: content.title,
-      message: content.message,
-      author_name: params.actorName,
-    },
-    buildVideoMeetingInviteNotificationOptions(recipientIds),
-  );
+  await createNotificationsForUserIds(recipientIds, {
+    type: isVideoMeeting(params.event)
+      ? "calendar_video_invite"
+      : "calendar_reminder",
+    title: content.title,
+    message: content.message,
+    author_name: params.actorName,
+  });
+}
+
+export async function notifyVideoMeetingInvite(params: {
+  actorId: string;
+  actorName: string;
+  event: CalendarEvent;
+}): Promise<void> {
+  await notifyCalendarEventCreated(params);
 }

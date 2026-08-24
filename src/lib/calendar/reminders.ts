@@ -2,6 +2,7 @@ import {
   REMINDER_CRON_WINDOW_MS,
   REMINDER_GRACE_WINDOW_MS,
   REMINDER_OFFSETS_MINUTES,
+  reminderWindowsForOffset,
   type ReminderOffsetMinutes,
 } from "./constants";
 import { getZonedDayStartFromIso } from "./range";
@@ -68,8 +69,9 @@ export function getReminderDeliveryCandidate(
     return "event_started";
   }
 
-  const graceWindowMs = opts.graceWindowMs ?? REMINDER_GRACE_WINDOW_MS;
-  const cronWindowMs = opts.cronWindowMs ?? REMINDER_CRON_WINDOW_MS;
+  const defaults = reminderWindowsForOffset(offsetMinutes);
+  const graceWindowMs = opts.graceWindowMs ?? defaults.graceWindowMs;
+  const cronWindowMs = opts.cronWindowMs ?? defaults.cronWindowMs;
   const fireTargetMs = computeFireTargetMs(effectiveStartMs, offsetMinutes);
 
   if (isFireTargetInWindow(fireTargetMs, nowMs, { graceWindowMs, cronWindowMs })) {
@@ -106,7 +108,7 @@ function getCatchUpReminderCandidate(
     return null;
   }
 
-  if (offsetMinutes === 60) {
+  if (offsetMinutes <= 60) {
     return { offsetMinutes, effectiveStartMs, fireTargetMs };
   }
 
@@ -128,20 +130,20 @@ export function getEventScanRangeIso(
   nowMs: number,
   opts: ReminderWindowOptions = {},
 ): { from: string; to: string } {
-  const graceWindowMs = opts.graceWindowMs ?? REMINDER_GRACE_WINDOW_MS;
-  const cronWindowMs = opts.cronWindowMs ?? REMINDER_CRON_WINDOW_MS;
-
   let minStartMs = Number.POSITIVE_INFINITY;
   let maxStartMs = Number.NEGATIVE_INFINITY;
 
   for (const offsetMinutes of REMINDER_OFFSETS_MINUTES) {
+    const windows = reminderWindowsForOffset(offsetMinutes);
+    const offsetGrace = opts.graceWindowMs ?? windows.graceWindowMs;
+    const offsetCron = opts.cronWindowMs ?? windows.cronWindowMs;
     minStartMs = Math.min(
       minStartMs,
-      nowMs - graceWindowMs + offsetMinutes * 60_000,
+      nowMs - offsetGrace + offsetMinutes * 60_000,
     );
     maxStartMs = Math.max(
       maxStartMs,
-      nowMs + cronWindowMs + offsetMinutes * 60_000,
+      nowMs + offsetCron + offsetMinutes * 60_000,
     );
   }
 

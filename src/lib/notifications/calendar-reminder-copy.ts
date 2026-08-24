@@ -87,15 +87,25 @@ export function buildCalendarReminderNotificationContent(
   };
 }
 
-export function buildVideoMeetingInviteNotificationContent(
+export function buildCalendarEventCreatedNotificationContent(
   event: CalendarEvent,
   locale: AppLocale = "en",
 ): { title: string; message: string } {
   const displayMessage = formatCalendarReminderDisplayMessage(event, locale);
+  const titleKey = isVideoMeeting(event)
+    ? "calendar.notifications.videoInviteTitle"
+    : "calendar.notifications.eventCreatedTitle";
   return {
-    title: translateCalendarMessage(locale, "calendar.notifications.videoInviteTitle"),
+    title: translateCalendarMessage(locale, titleKey),
     message: encodeCalendarReminderMessage(displayMessage, event.id, {
-      isVideoMeeting: true,
+      isVideoMeeting: isVideoMeeting(event),
     }),
   };
+}
+
+export function buildVideoMeetingInviteNotificationContent(
+  event: CalendarEvent,
+  locale: AppLocale = "en",
+): { title: string; message: string } {
+  return buildCalendarEventCreatedNotificationContent(event, locale);
 }

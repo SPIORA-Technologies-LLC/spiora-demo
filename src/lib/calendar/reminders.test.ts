@@ -167,6 +167,32 @@ describe("getReminderDeliveryCandidate", () => {
     }
   });
 
+  it("does not pre-deliver the 10-minute reminder an hour early", () => {
+    const startAt = "2026-06-25T08:00:00.000Z";
+    const nowMs = Date.parse("2026-06-25T07:00:00.000Z");
+    assert.equal(
+      getReminderDeliveryCandidate(event({ startAt }), 10, nowMs),
+      "fire_target_too_early",
+    );
+  });
+
+  it("catch-up delivers 10-minute reminder when the meeting was created after fire time", () => {
+    const startAt = "2026-06-25T08:00:00.000Z";
+    const nowMs = Date.parse("2026-06-25T07:52:00.000Z");
+    const candidate = getReminderDeliveryCandidate(
+      event({
+        startAt,
+        createdAt: "2026-06-25T07:51:00.000Z",
+      }),
+      10,
+      nowMs,
+    );
+    assert.notEqual(typeof candidate, "string");
+    if (typeof candidate !== "string") {
+      assert.equal(candidate.offsetMinutes, 10);
+    }
+  });
+
   it("catch-up delivers 1h reminder after a late cron tick", () => {
     const startAt = "2026-06-23T16:00:00.000Z";
     const nowMs = Date.parse("2026-06-23T15:28:00.000Z");
@@ -272,11 +298,11 @@ describe("resolveReminderRecipientIds", () => {
 });
 
 describe("listReminderOffsetsForEvent", () => {
-  it("returns both upcoming offsets inside the fire window", () => {
+  it("returns the 1-hour offset one hour before start", () => {
     const startAt = "2026-06-25T08:00:00.000Z";
     const nowMs = Date.parse("2026-06-25T07:00:00.000Z");
     const offsets = listReminderOffsetsForEvent(event({ startAt }), nowMs);
-    assert.deepEqual(offsets.map((item) => item.offsetMinutes), [60, 10]);
+    assert.deepEqual(offsets.map((item) => item.offsetMinutes), [60]);
   });
 
   it("keeps 1-hour catch-up and 10-minute live offset close to start", () => {

@@ -149,6 +149,18 @@ export async function createNotificationsForTeam(
   return created;
 }
 
+export async function createNotificationsForUserIds(
+  userIds: string[],
+  input: CreateNotificationInput,
+): Promise<Notification[]> {
+  const uniqueIds = [...new Set(userIds.filter(Boolean))];
+  const created: Notification[] = [];
+  for (const userId of uniqueIds) {
+    created.push(await createNotificationForUser(userId, input));
+  }
+  return created;
+}
+
 export async function markNotificationRead(
   id: string,
   userId: string,

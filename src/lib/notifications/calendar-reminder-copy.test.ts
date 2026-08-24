@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import type { CalendarEvent } from "@/lib/calendar/types";
 import {
   buildCalendarReminderNotificationContent,
+  buildCalendarEventCreatedNotificationContent,
   buildVideoMeetingInviteNotificationContent,
   decodeCalendarReminderMessage,
   encodeCalendarReminderMessage,
@@ -123,5 +124,10 @@ describe("calendar reminder notification copy", () => {
     assert.equal(decoded.eventId, "evt-42");
     assert.equal(decoded.isVideoMeeting, true);
     assert.match(decoded.display, /Синк команды$/);
+  });
+
+  it("builds event-created copy for general meetings", () => {
+    const { title } = buildCalendarEventCreatedNotificationContent(event(), "en");
+    assert.equal(title, "Event created");
   });
 });

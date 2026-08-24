@@ -65,14 +65,14 @@ describe("runCalendarReminderCron", () => {
     };
 
     const first = await runCalendarReminderCron({ now, deps });
-    assert.equal(first.sent, 4);
+    assert.equal(first.sent, 2);
     assert.equal(first.duplicates, 0);
-    assert.equal(first.skipped, 1);
-    assert.equal(deliveries.size, 4);
+    assert.equal(first.skipped, 2);
+    assert.equal(deliveries.size, 2);
 
     const second = await runCalendarReminderCron({ now, deps });
     assert.equal(second.sent, 0);
-    assert.equal(second.duplicates, 4);
+    assert.equal(second.duplicates, 2);
   });
 
   it("skips events with reminders disabled", async () => {
@@ -129,10 +129,9 @@ describe("runCalendarReminderCron", () => {
       },
     });
 
-    assert.equal(onDeliveryCalls.length, 2);
+    assert.equal(onDeliveryCalls.length, 1);
     assert.equal(onDeliveryCalls[0]?.userId, "olivia-bennett");
     assert.equal(onDeliveryCalls[0]?.offsetMinutes, 60);
-    assert.equal(onDeliveryCalls[1]?.offsetMinutes, 10);
   });
 
   it("delivers 10-minute reminders to each recipient", async () => {

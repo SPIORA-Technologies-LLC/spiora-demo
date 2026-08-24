@@ -652,7 +652,7 @@
       "end": "End *",
       "location": "Location",
       "locationPlaceholder": "Office, online, address…",
-      "reminders": "Reminders 24 hours and 1 hour before",
+      "reminders": "Reminders 24 hours, 1 hour, and 10 minutes before",
       "remindersHint": "Bell notification. Platform only.",
       "saving": "Saving…"
     },
@@ -727,7 +727,8 @@
     },
     "reminders": {
       "dayBefore": "24 hours before",
-      "hourBefore": "1 hour before"
+      "hourBefore": "1 hour before",
+      "tenMinutesBefore": "10 minutes before"
     },
     "participants": {
       "allTeam": "Whole team",

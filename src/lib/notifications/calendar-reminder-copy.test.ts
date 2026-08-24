@@ -46,11 +46,13 @@ describe("calendar reminder notification copy", () => {
   it("builds titles for fixed offsets in ru", () => {
     assert.equal(getCalendarReminderTitle(1440, "ru"), "За 24 часа");
     assert.equal(getCalendarReminderTitle(60, "ru"), "За 1 час");
+    assert.equal(getCalendarReminderTitle(10, "ru"), "За 10 минут");
   });
 
   it("builds titles for fixed offsets in en", () => {
     assert.equal(getCalendarReminderTitle(1440, "en"), "24 hours before");
     assert.equal(getCalendarReminderTitle(60, "en"), "1 hour before");
+    assert.equal(getCalendarReminderTitle(10, "en"), "10 minutes before");
   });
 
   it("formats timed and all-day messages", () => {

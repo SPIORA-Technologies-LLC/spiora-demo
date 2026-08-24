@@ -652,7 +652,7 @@
       "end": "Окончание *",
       "location": "Место",
       "locationPlaceholder": "Офис, онлайн, адрес…",
-      "reminders": "Напоминания за 24 часа и за 1 час",
+      "reminders": "Напоминания за 24 часа, за 1 час и за 10 минут",
       "remindersHint": "Уведомление в колокольчике. Только на платформе.",
       "saving": "Сохранение…"
     },
@@ -727,7 +727,8 @@
     },
     "reminders": {
       "dayBefore": "За 24 часа",
-      "hourBefore": "За 1 час"
+      "hourBefore": "За 1 час",
+      "tenMinutesBefore": "За 10 минут"
     },
     "participants": {
       "allTeam": "Вся команда",

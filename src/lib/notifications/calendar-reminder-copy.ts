@@ -18,7 +18,12 @@ function translateReminderOffset(
   locale: AppLocale,
   offsetMinutes: ReminderOffsetMinutes,
 ): string {
-  const key = offsetMinutes === 1440 ? "dayBefore" : "hourBefore";
+  const key =
+    offsetMinutes === 1440
+      ? "dayBefore"
+      : offsetMinutes === 60
+        ? "hourBefore"
+        : "tenMinutesBefore";
   return translateCalendarMessage(locale, `calendar.reminders.${key}`);
 }
 

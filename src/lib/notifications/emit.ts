@@ -345,6 +345,14 @@ export async function notifyCalendarReminder(params: {
   });
 }
 
+export function buildVideoMeetingInviteNotificationOptions(recipientIds: string[]): {
+  onlyUserIds: string[];
+} {
+  return {
+    onlyUserIds: recipientIds,
+  };
+}
+
 export async function notifyVideoMeetingInvite(params: {
   actorId: string;
   actorName: string;
@@ -381,9 +389,6 @@ export async function notifyVideoMeetingInvite(params: {
       message: content.message,
       author_name: params.actorName,
     },
-    {
-      excludeUserId: params.actorId,
-      onlyUserIds: recipientIds,
-    },
+    buildVideoMeetingInviteNotificationOptions(recipientIds),
   );
 }

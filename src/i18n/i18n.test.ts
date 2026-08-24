@@ -312,18 +312,29 @@ describe("calendar i18n — Event Modal & Form", () => {
 
   it("возвращает русские create/edit/delete labels", () => {
     assert.equal(translateMessage("ru", "calendar.dialogs.newEvent"), "Новое событие");
-    assert.equal(translateMessage("ru", "calendar.form.reminders"), "Напоминания за 24 часа и за 1 час");
+    assert.equal(
+      translateMessage("ru", "calendar.form.reminders"),
+      "Напоминания за 24 часа, за 1 час и за 10 минут",
+    );
   });
 });
 
 describe("calendar i18n — Reminders & Toasts", () => {
   it("локализует reminders EN", () => {
     assert.equal(translateMessage("en", "calendar.reminders.dayBefore"), "24 hours before");
+    assert.equal(
+      translateMessage("en", "calendar.reminders.tenMinutesBefore"),
+      "10 minutes before",
+    );
     assert.equal(translateMessage("en", "calendar.toasts.created"), "Event created");
   });
 
   it("локализует reminders RU", () => {
     assert.equal(translateMessage("ru", "calendar.reminders.hourBefore"), "За 1 час");
+    assert.equal(
+      translateMessage("ru", "calendar.reminders.tenMinutesBefore"),
+      "За 10 минут",
+    );
     assert.equal(translateMessage("ru", "calendar.toasts.deleted"), "Событие удалено");
   });
 });

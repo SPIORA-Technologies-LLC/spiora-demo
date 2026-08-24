@@ -86,9 +86,14 @@ export function translateFormValidation(
 
 export function translateReminderOffset(
   locale: AppLocale,
-  offsetMinutes: 1440 | 60,
+  offsetMinutes: 1440 | 60 | 10,
 ): string {
-  const key = offsetMinutes === 1440 ? "dayBefore" : "hourBefore";
+  const key =
+    offsetMinutes === 1440
+      ? "dayBefore"
+      : offsetMinutes === 60
+        ? "hourBefore"
+        : "tenMinutesBefore";
   return translate(locale, `calendar.reminders.${key}`);
 }
 

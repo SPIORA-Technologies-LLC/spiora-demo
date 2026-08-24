@@ -17,7 +17,7 @@ export const CALENDAR_EVENT_TYPE_LABELS = {
 export const CALENDAR_DEFAULT_SEND_REMINDERS = true;
 
 /** Fixed reminder offsets (minutes before effective event start). */
-export const REMINDER_OFFSETS_MINUTES = [1440, 60] as const;
+export const REMINDER_OFFSETS_MINUTES = [1440, 60, 10] as const;
 
 export type ReminderOffsetMinutes = (typeof REMINDER_OFFSETS_MINUTES)[number];
 

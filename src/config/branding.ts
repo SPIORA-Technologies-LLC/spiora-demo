@@ -71,7 +71,7 @@ export function getProductTagline(
 }
 
 export function getDemoCompanySiteLabel(): string {
-  return `Сайт ${branding.companyName}`;
+  return `Сайт ${branding.productName}`;
 }
 
 export function getMeetingRoomName(eventId: string): string {

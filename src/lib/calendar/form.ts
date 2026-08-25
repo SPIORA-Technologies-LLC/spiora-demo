@@ -120,7 +120,12 @@ export function formValuesToTimestamps(
   if (!/^\d{4}-\d{2}-\d{2}$/.test(values.startDate)) {
     throw new Error("Invalid start date");
   }
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(values.endDate)) {
+
+  // Video meetings are always same-day: end date follows start date.
+  const endDate =
+    values.eventType === "video_meeting" ? values.startDate : values.endDate;
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(endDate)) {
     throw new Error("Invalid end date");
   }
 
@@ -132,7 +137,7 @@ export function formValuesToTimestamps(
         timeZone,
       ).toISOString(),
       endAt: zonedDateTimeToUtc(
-        values.endDate,
+        endDate,
         { hours: 23, minutes: 59, seconds: 59 },
         timeZone,
       ).toISOString(),
@@ -152,7 +157,7 @@ export function formValuesToTimestamps(
       timeZone,
     ).toISOString(),
     endAt: zonedDateTimeToUtc(
-      values.endDate,
+      endDate,
       { hours: endTime.hours, minutes: endTime.minutes, seconds: 0 },
       timeZone,
     ).toISOString(),

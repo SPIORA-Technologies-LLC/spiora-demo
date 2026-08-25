@@ -150,6 +150,9 @@ export function CalendarEventForm({
       ...current,
       eventType,
       allDay: eventType === "video_meeting" ? false : current.allDay,
+      // Video calls stay on one calendar day — end date follows start.
+      endDate:
+        eventType === "video_meeting" ? current.startDate : current.endDate,
       videoInviteMode:
         eventType === "video_meeting"
           ? current.scope === "personal"
@@ -160,6 +163,15 @@ export function CalendarEventForm({
         eventType === "video_meeting" ? current.participantUserIds : [],
       externalInvitees:
         eventType === "video_meeting" ? current.externalInvitees : [],
+    }));
+  }
+
+  function setStartDate(startDate: string) {
+    setValues((current) => ({
+      ...current,
+      startDate,
+      endDate:
+        current.eventType === "video_meeting" ? startDate : current.endDate,
     }));
   }
 
@@ -505,17 +517,18 @@ export function CalendarEventForm({
         />
       </label>
 
-      <label className={styles.checkboxField}>
-        <input
-          type="checkbox"
-          checked={values.allDay}
-          disabled={values.eventType === "video_meeting"}
-          onChange={(changeEvent) =>
-            setValues({ ...values, allDay: changeEvent.target.checked })
-          }
-        />
-        <span>{t("allDay")}</span>
-      </label>
+      {values.eventType !== "video_meeting" ? (
+        <label className={styles.checkboxField}>
+          <input
+            type="checkbox"
+            checked={values.allDay}
+            onChange={(changeEvent) =>
+              setValues({ ...values, allDay: changeEvent.target.checked })
+            }
+          />
+          <span>{t("allDay")}</span>
+        </label>
+      ) : null}
 
       <section className={styles.dateTimeSection} aria-labelledby="calendar-datetime-heading">
         <h3 id="calendar-datetime-heading" className={styles.sectionTitle}>
@@ -527,7 +540,7 @@ export function CalendarEventForm({
             <span className={styles.label}>{t("start")}</span>
             <CalendarDateSelect
               value={values.startDate}
-              onChange={(startDate) => setValues({ ...values, startDate })}
+              onChange={setStartDate}
             />
             {!values.allDay ? (
               <CalendarTimeSelect
@@ -539,10 +552,12 @@ export function CalendarEventForm({
 
           <div className={styles.field}>
             <span className={styles.label}>{t("end")}</span>
-            <CalendarDateSelect
-              value={values.endDate}
-              onChange={(endDate) => setValues({ ...values, endDate })}
-            />
+            {values.eventType !== "video_meeting" ? (
+              <CalendarDateSelect
+                value={values.endDate}
+                onChange={(endDate) => setValues({ ...values, endDate })}
+              />
+            ) : null}
             {!values.allDay ? (
               <CalendarTimeSelect
                 value={values.endTime}

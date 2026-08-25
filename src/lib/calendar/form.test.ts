@@ -147,6 +147,23 @@ describe("formValuesToCreatePayload", () => {
     values.allDay = true;
     assert.equal(validateFormValues(values), "videoAllDay");
   });
+
+  it("forces video meeting end date to match start date", () => {
+    const values = defaultFormValues(new Date("2026-06-20T12:00:00.000Z"));
+    values.title = "Синк";
+    values.eventType = "video_meeting";
+    values.startDate = "2026-06-20";
+    values.endDate = "2026-06-21";
+    values.startTime = "10:00";
+    values.endTime = "11:00";
+
+    const payload = formValuesToCreatePayload(values);
+    // If endDate 21st were used, span would be ~25h; same-day force keeps 1h.
+    assert.equal(
+      new Date(payload.endAt).getTime() - new Date(payload.startAt).getTime(),
+      60 * 60 * 1000,
+    );
+  });
 });
 
 describe("formValuesToUpdatePayload", () => {

@@ -88,7 +88,7 @@ export function buildGuestMeetingInviteText(
     "",
     translateCalendarMessage(locale, "calendar.meet.inviteMessage.closing"),
     translateCalendarMessage(locale, "calendar.meet.inviteMessage.team", {
-      company: branding.companyName,
+      company: branding.productName,
     }),
   ].join("\n");
 }

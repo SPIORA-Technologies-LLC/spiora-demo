@@ -44,7 +44,7 @@ describe("buildGuestMeetingInviteText", () => {
     assert.match(text, /Relocation consultation/);
     assert.match(text, /Когда:/);
     assert.match(text, /https:\/\/example\.com\/join\/abc123/);
-    assert.match(text, /Команда Northstar Mobility/);
+    assert.match(text, /Команда Spiora/);
   });
 
   it("builds a full EN invite without Cyrillic UI strings", () => {
@@ -58,5 +58,6 @@ describe("buildGuestMeetingInviteText", () => {
     assert.match(text, /Good (morning|afternoon|evening), Anna!/);
     assert.match(text, /When:/);
     assert.match(text, /https:\/\/example\.com\/join\/abc123/);
+    assert.match(text, /The Spiora team/);
   });
 });

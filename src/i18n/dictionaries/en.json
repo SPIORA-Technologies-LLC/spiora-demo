@@ -105,6 +105,7 @@
       "consultation_assigned": "Consultation",
       "calendar_reminder": "Calendar reminder",
       "calendar_video_invite": "Video meeting",
+      "meeting_recording_ready": "Meeting recording",
       "system": "System"
     },
     "openSection": "Open section →",
@@ -136,6 +137,10 @@
       },
       "consultationAssigned": {
         "title": "Consultation assigned"
+      },
+      "meetingRecordingSaved": {
+        "title": "Meeting recording saved",
+        "message": "Recording \"{fileName}\" from \"{meetingTitle}\" is available in Meeting Recordings."
       },
       "teamChatPreview": {
         "voice": "🎤 Voice message",

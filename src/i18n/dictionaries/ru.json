@@ -105,6 +105,7 @@
       "consultation_assigned": "Консультация",
       "calendar_reminder": "Напоминание календаря",
       "calendar_video_invite": "Видеовстреча",
+      "meeting_recording_ready": "Запись встречи",
       "system": "Системное"
     },
     "openSection": "Открыть раздел →",
@@ -136,6 +137,10 @@
       },
       "consultationAssigned": {
         "title": "Назначена консультация"
+      },
+      "meetingRecordingSaved": {
+        "title": "Запись встречи сохранена",
+        "message": "Запись «{fileName}» встречи «{meetingTitle}» сохранена в разделе «Записи встреч»."
       },
       "teamChatPreview": {
         "voice": "🎤 Голосовое сообщение",

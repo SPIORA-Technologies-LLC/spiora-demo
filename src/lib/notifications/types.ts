@@ -9,6 +9,7 @@ export const NOTIFICATION_TYPES = [
   "consultation_assigned",
   "calendar_reminder",
   "calendar_video_invite",
+  "meeting_recording_ready",
   "system",
 ] as const;
 

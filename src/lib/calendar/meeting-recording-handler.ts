@@ -34,6 +34,7 @@ import type {
   CalendarMeetingRecording,
   CalendarMeetingRecordingWithEvent,
 } from "./types";
+import { notifyMeetingRecordingSaved } from "@/lib/notifications/emit";
 
 export type MeetingRecordingHandlerError = {
   status: 400 | 403 | 404 | 409 | 422 | 503;
@@ -49,6 +50,7 @@ export type MeetingRecordingDeps = {
   listRecordings: typeof sbRecordings.sbListMeetingRecordings;
   deleteRecording: typeof sbRecordings.sbDeleteMeetingRecording;
   isConfigured?: () => boolean;
+  notifyRecordingSaved?: typeof notifyMeetingRecordingSaved;
 };
 
 export const defaultMeetingRecordingDeps: MeetingRecordingDeps = {
@@ -60,7 +62,62 @@ export const defaultMeetingRecordingDeps: MeetingRecordingDeps = {
   listRecordings: sbRecordings.sbListMeetingRecordings,
   deleteRecording: sbRecordings.sbDeleteMeetingRecording,
   isConfigured: isSupabaseConfigured,
+  notifyRecordingSaved: notifyMeetingRecordingSaved,
 };
+
+async function markRecordingCompleteAndNotify(
+  recording: CalendarMeetingRecording,
+  patch: {
+    storagePath?: string | null;
+    fileName?: string | null;
+    durationSeconds?: number | null;
+    fileSizeBytes?: number | null;
+    endedAt?: string | null;
+    errorMessage?: string | null;
+  },
+  deps: MeetingRecordingDeps,
+): Promise<CalendarMeetingRecording> {
+  if (recording.status === "complete") {
+    return recording;
+  }
+
+  const updated = await deps.updateRecording(recording.id, {
+    status: "complete",
+    storagePath:
+      patch.storagePath !== undefined
+        ? patch.storagePath
+        : recording.storagePath,
+    fileName:
+      patch.fileName !== undefined ? patch.fileName : recording.fileName,
+    durationSeconds:
+      patch.durationSeconds !== undefined
+        ? patch.durationSeconds
+        : recording.durationSeconds,
+    fileSizeBytes:
+      patch.fileSizeBytes !== undefined
+        ? patch.fileSizeBytes
+        : recording.fileSizeBytes,
+    endedAt: patch.endedAt ?? new Date().toISOString(),
+    errorMessage: patch.errorMessage ?? null,
+  });
+
+  const finalRecording =
+    updated ??
+    ({
+      ...recording,
+      ...patch,
+      status: "complete" as const,
+      endedAt: patch.endedAt ?? new Date().toISOString(),
+      errorMessage: patch.errorMessage ?? null,
+    } satisfies CalendarMeetingRecording);
+
+  const notify = deps.notifyRecordingSaved ?? notifyMeetingRecordingSaved;
+  void notify({ recording: finalRecording }).catch((error) => {
+    console.error("[meeting-recording] notify saved failed", error);
+  });
+
+  return finalRecording;
+}
 
 function createEgressClient(env: NonNullable<ReturnType<typeof getLiveKitEnv>>) {
   return new EgressClient(
@@ -281,13 +338,15 @@ async function finalizeRecordingAfterStop(
   }
 
   // Fallback when webhook/poll unavailable: trust planned S3 path from start.
-  const updated = await deps.updateRecording(recording.id, {
-    status: "complete",
-    storagePath: recording.storagePath,
-    endedAt: new Date().toISOString(),
-    errorMessage: null,
-  });
-  return updated ?? recording;
+  return markRecordingCompleteAndNotify(
+    recording,
+    {
+      storagePath: recording.storagePath,
+      endedAt: new Date().toISOString(),
+      errorMessage: null,
+    },
+    deps,
+  );
 }
 
 export async function handleStopMeetingRecording(
@@ -503,17 +562,20 @@ export async function handleLiveKitEgressWebhook(
     const storagePath =
       file?.filename?.trim() || recording.storagePath || null;
 
-    await deps.updateRecording(recording.id, {
-      status: "complete",
-      storagePath,
-      fileName: recording.fileName,
-      durationSeconds: file?.duration
-        ? Number(file.duration)
-        : recording.durationSeconds,
-      fileSizeBytes: file?.size ? Number(file.size) : recording.fileSizeBytes,
-      endedAt: new Date().toISOString(),
-      errorMessage: null,
-    });
+    await markRecordingCompleteAndNotify(
+      recording,
+      {
+        storagePath,
+        fileName: recording.fileName,
+        durationSeconds: file?.duration
+          ? Number(file.duration)
+          : recording.durationSeconds,
+        fileSizeBytes: file?.size ? Number(file.size) : recording.fileSizeBytes,
+        endedAt: new Date().toISOString(),
+        errorMessage: null,
+      },
+      deps,
+    );
     return;
   }
 

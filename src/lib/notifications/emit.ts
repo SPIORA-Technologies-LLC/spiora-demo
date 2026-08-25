@@ -398,3 +398,94 @@ export async function notifyVideoMeetingInvite(params: {
 }): Promise<void> {
   await notifyCalendarEventCreated(params);
 }
+
+export function buildMeetingRecordingSavedRecipientIds(
+  teamJoinerUserIds: string[],
+  startedByUserId?: string | null,
+): string[] {
+  const ids = new Set(
+    teamJoinerUserIds.filter(
+      (userId) => Boolean(userId) && !userId.startsWith("guest-"),
+    ),
+  );
+  if (startedByUserId && !startedByUserId.startsWith("guest-")) {
+    ids.add(startedByUserId);
+  }
+  return [...ids];
+}
+
+export async function notifyMeetingRecordingSaved(params: {
+  recording: {
+    id: string;
+    eventId: string;
+    fileName: string | null;
+    startedByUserId: string;
+    startedByName: string;
+  };
+  meetingTitle?: string;
+  listTeamJoiners?: (eventId: string) => Promise<string[]>;
+  getEvent?: (eventId: string) => Promise<CalendarEvent | null>;
+}): Promise<void> {
+  const listTeamJoiners =
+    params.listTeamJoiners ??
+    (await import("@/lib/supabase/calendar-meeting-audit-repo"))
+      .sbListDistinctTeamJoinerUserIds;
+  const getEvent =
+    params.getEvent ??
+    (await import("@/lib/calendar/store")).getEvent;
+
+  let joinerIds: string[] = [];
+  try {
+    joinerIds = await listTeamJoiners(params.recording.eventId);
+  } catch (error) {
+    console.error("[notifications] meeting recording joiners", error);
+  }
+
+  const recipientIds = buildMeetingRecordingSavedRecipientIds(
+    joinerIds,
+    params.recording.startedByUserId,
+  );
+  if (!recipientIds.length) {
+    return;
+  }
+
+  let meetingTitle = params.meetingTitle?.trim() || "";
+  if (!meetingTitle) {
+    try {
+      const event = await getEvent(params.recording.eventId);
+      if (event) {
+        const { resolveCalendarEventTitle } = await import(
+          "@/lib/calendar/demo-event-title"
+        );
+        const locale = await getRequestLocale().catch(() => "en" as const);
+        meetingTitle = resolveCalendarEventTitle(event.title, locale);
+      }
+    } catch (error) {
+      console.error("[notifications] meeting recording event", error);
+    }
+  }
+  if (!meetingTitle) {
+    meetingTitle = "Meeting";
+  }
+
+  const locale = await getRequestLocale().catch(() => "en" as const);
+  const fileName =
+    params.recording.fileName?.trim() || `${meetingTitle}.mp4`;
+  const title = translateNotificationEmit(
+    locale,
+    "meetingRecordingSaved.title",
+  );
+  const message = translateNotificationEmit(
+    locale,
+    "meetingRecordingSaved.message",
+  )
+    .replace("{fileName}", fileName)
+    .replace("{meetingTitle}", meetingTitle);
+
+  await createNotificationsForUserIds(recipientIds, {
+    type: "meeting_recording_ready",
+    title,
+    message,
+    author_name: params.recording.startedByName || null,
+  });
+}

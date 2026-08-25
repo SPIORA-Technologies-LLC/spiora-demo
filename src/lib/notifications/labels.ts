@@ -11,6 +11,7 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   consultation_assigned: "Консультация",
   calendar_reminder: "Напоминание календаря",
   calendar_video_invite: "Видеовстреча",
+  meeting_recording_ready: "Запись встречи",
   system: "Системное",
 };
 
@@ -25,5 +26,6 @@ export const NOTIFICATION_TYPE_ICONS: Record<NotificationType, string> = {
   consultation_assigned: "📅",
   calendar_reminder: "📅",
   calendar_video_invite: "📹",
+  meeting_recording_ready: "🎥",
   system: "🔔",
 };

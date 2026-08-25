@@ -12,6 +12,7 @@ export type NotificationTypeKey =
   | "consultation_assigned"
   | "calendar_reminder"
   | "calendar_video_invite"
+  | "meeting_recording_ready"
   | "system";
 
 export function translateNotificationType(

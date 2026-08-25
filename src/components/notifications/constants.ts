@@ -12,6 +12,7 @@ export const NOTIFICATION_TYPE_ICONS: Record<NotificationItem["type"], string> =
     consultation_assigned: "📅",
     calendar_reminder: "📅",
     calendar_video_invite: "📹",
+    meeting_recording_ready: "🎥",
     system: "🔔",
   };
 

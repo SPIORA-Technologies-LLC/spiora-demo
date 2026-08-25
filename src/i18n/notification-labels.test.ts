@@ -17,6 +17,10 @@ describe("notification labels", () => {
       translateNotificationType("ru", "calendar_video_invite"),
       "Видеовстреча",
     );
+    assert.equal(
+      translateNotificationType("ru", "meeting_recording_ready"),
+      "Запись встречи",
+    );
   });
 
   it("formats notification time per locale", () => {

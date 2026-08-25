@@ -100,4 +100,23 @@ describe("notification navigation", () => {
       false,
     );
   });
+
+  it("routes meeting recording notifications to recordings page", () => {
+    assert.equal(
+      getNotificationHref("meeting_recording_ready", "Recording saved"),
+      "/meeting-recordings",
+    );
+    assert.equal(
+      getNotificationSection("meeting_recording_ready"),
+      "meeting-recordings",
+    );
+    assert.equal(shouldShowNotificationToast("meeting_recording_ready"), true);
+    assert.equal(
+      pathnameMatchesNotificationSection(
+        "/meeting-recordings",
+        "meeting-recordings",
+      ),
+      true,
+    );
+  });
 });

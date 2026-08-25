@@ -53,3 +53,29 @@ export async function sbInsertCalendarMeetingAudit(
   if (error) throw error;
   return mapRow(data as CalendarMeetingAuditRow);
 }
+
+/** Distinct team user IDs who joined the meeting (guests excluded). */
+export async function sbListDistinctTeamJoinerUserIds(
+  eventId: string,
+): Promise<string[]> {
+  const { data, error } = await getSupabaseAdmin()
+    .from("calendar_meeting_audit")
+    .select("user_id")
+    .eq("event_id", eventId)
+    .eq("action", "joined")
+    .eq("participant_type", "team");
+
+  if (error) throw error;
+
+  const ids = new Set<string>();
+  for (const row of data ?? []) {
+    const userId =
+      typeof (row as { user_id?: unknown }).user_id === "string"
+        ? (row as { user_id: string }).user_id.trim()
+        : "";
+    if (userId) {
+      ids.add(userId);
+    }
+  }
+  return [...ids];
+}

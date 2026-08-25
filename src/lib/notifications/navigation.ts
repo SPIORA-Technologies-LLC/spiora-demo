@@ -10,6 +10,7 @@ export type NotificationSection =
   | "team-chat"
   | "tasks"
   | "calendar"
+  | "meeting-recordings"
   | "ai-workspace"
   | "clients";
 
@@ -22,6 +23,7 @@ const TOAST_NOTIFICATION_TYPES = new Set<NotificationType>([
   "consultation_assigned",
   "calendar_reminder",
   "calendar_video_invite",
+  "meeting_recording_ready",
   "system",
 ]);
 
@@ -64,6 +66,7 @@ export function getNotificationSection(
     if (demoHref.startsWith("/clients/")) return "clients";
     if (demoHref.startsWith("/team-chat")) return "team-chat";
     if (demoHref.startsWith("/tasks")) return "tasks";
+    if (demoHref.startsWith("/meeting-recordings")) return "meeting-recordings";
     if (demoHref.startsWith("/calendar")) return "calendar";
   }
 
@@ -80,6 +83,8 @@ export function getNotificationSection(
     case "calendar_reminder":
     case "calendar_video_invite":
       return "calendar";
+    case "meeting_recording_ready":
+      return "meeting-recordings";
     case "system":
       return demoHref?.startsWith("/ai-workspace") ? "ai-workspace" : null;
     default:
@@ -118,6 +123,8 @@ export function getNotificationHref(
         ? `/calendar?event=${encodeURIComponent(eventId)}`
         : "/calendar";
     }
+    case "meeting_recording_ready":
+      return "/meeting-recordings";
     default:
       return null;
   }
@@ -154,6 +161,11 @@ export function pathnameMatchesNotificationSection(
       return pathname === "/tasks" || pathname.startsWith("/tasks/");
     case "calendar":
       return pathname === "/calendar" || pathname.startsWith("/calendar/");
+    case "meeting-recordings":
+      return (
+        pathname === "/meeting-recordings" ||
+        pathname.startsWith("/meeting-recordings/")
+      );
     case "ai-workspace":
       return (
         pathname === "/ai-workspace" ||

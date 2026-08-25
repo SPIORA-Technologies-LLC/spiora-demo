@@ -32,6 +32,11 @@ export const branding = {
   faviconPath: "/icons/favicon-32x32.png",
   supportEmail: "support@spiora.demo",
   websiteUrl: "https://spiora.demo",
+  /** Locale-specific Spiora presentation (sidebar «Сайт Spiora»). */
+  productPresentationUrl: {
+    en: "https://gamma.app/docs/Spiora-presentation-in-English-z3irgedui9m9fgs",
+    ru: "https://gamma.app/docs/-msbuylfh7da9te1",
+  },
   demoCompanyWebsiteUrl: "https://example.com/northstar-mobility",
   defaultLocale: "en" as BrandingLocale,
   availableLocales: ["en", "ru"] as const satisfies readonly BrandingLocale[],
@@ -72,6 +77,12 @@ export function getProductTagline(
 
 export function getDemoCompanySiteLabel(): string {
   return `Сайт ${branding.productName}`;
+}
+
+export function getProductPresentationUrl(
+  locale: BrandingLocale = branding.defaultLocale,
+): string {
+  return branding.productPresentationUrl[locale];
 }
 
 export function getMeetingRoomName(eventId: string): string {

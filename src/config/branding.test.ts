@@ -8,6 +8,7 @@ import {
   getManifestConfig,
   getMeetingRoomName,
   getProductDescription,
+  getProductPresentationUrl,
   getSiteMetadata,
 } from "./branding.ts";
 
@@ -70,6 +71,17 @@ describe("branding config", () => {
     assert.equal(
       getBrandSlogan("ru"),
       "ONE PLATFORM. INFINITE SOLUTIONS.",
+    );
+  });
+
+  it("exposes locale-specific Spiora presentation URLs", () => {
+    assert.equal(
+      getProductPresentationUrl("en"),
+      "https://gamma.app/docs/Spiora-presentation-in-English-z3irgedui9m9fgs",
+    );
+    assert.equal(
+      getProductPresentationUrl("ru"),
+      "https://gamma.app/docs/-msbuylfh7da9te1",
     );
   });
 

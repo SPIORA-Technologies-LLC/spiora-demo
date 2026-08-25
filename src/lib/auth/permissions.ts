@@ -122,7 +122,7 @@ const NAV_SETTINGS: NavItem = {
 };
 
 const NAV_WEBSITE: NavItem = {
-  href: branding.websiteUrl,
+  href: branding.productPresentationUrl.en,
   labelKey: "demoCompanySite",
   labelNs: "shell",
   icon: "fa-solid fa-globe",

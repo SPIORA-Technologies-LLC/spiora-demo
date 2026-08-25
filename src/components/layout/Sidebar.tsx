@@ -2,13 +2,17 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/login/actions";
 import { Logo } from "@/components/ui/Logo";
 import { PwaInstallSidebarButton } from "@/components/pwa/PwaInstallSidebarButton";
 import { getNavItemsForRole } from "@/lib/auth/permissions";
 import type { UserRole } from "@/lib/auth/types";
+import {
+  getProductPresentationUrl,
+  type BrandingLocale,
+} from "@/config/branding";
 import styles from "./Sidebar.module.css";
 
 export type NavItem = {
@@ -50,11 +54,20 @@ export function Sidebar({
   onNavItemClick?: (href: string) => void;
 }) {
   const pathname = usePathname();
+  const locale = useLocale();
   const navItems = getNavItemsForRole(role);
   const tNav = useTranslations("nav");
   const tShell = useTranslations("shell");
   const t = useTranslations("shell");
   const [teamChatUnread, setTeamChatUnread] = useState(0);
+
+  function resolveNavHref(item: NavItem): string {
+    if (item.labelKey === "demoCompanySite") {
+      const brandingLocale: BrandingLocale = locale === "ru" ? "ru" : "en";
+      return getProductPresentationUrl(brandingLocale);
+    }
+    return item.href;
+  }
 
   useEffect(() => {
     if (pathname === "/team-chat" || pathname.startsWith("/team-chat/")) {
@@ -134,7 +147,8 @@ export function Sidebar({
       <nav className={styles.nav} aria-label={t("mainNavAria")}>
         <ul className={styles.navList}>
           {navItems.map((item) => {
-            const active = !item.external && isActive(pathname, item.href);
+            const href = resolveNavHref(item);
+            const active = !item.external && isActive(pathname, href);
             const className = [
               styles.navLink,
               item.external ? styles.navLinkExternal : "",
@@ -150,7 +164,7 @@ export function Sidebar({
                 <i className={[item.icon, styles.icon].join(" ")} aria-hidden />
                 <span className={styles.navLabel}>
                   {label}
-                  {item.href === "/team-chat" && teamChatUnread > 0 ? (
+                  {href === "/team-chat" && teamChatUnread > 0 ? (
                     <span className={styles.unreadBadge}> ({teamChatUnread})</span>
                   ) : null}
                 </span>
@@ -165,12 +179,12 @@ export function Sidebar({
 
             return (
               <li
-                key={item.href}
+                key={item.labelKey ?? href}
                 className={item.external ? styles.navItemExternal : undefined}
               >
                 {item.external ? (
                   <a
-                    href={item.href}
+                    href={href}
                     className={className}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -179,10 +193,10 @@ export function Sidebar({
                   </a>
                 ) : (
                   <Link
-                    href={item.href}
+                    href={href}
                     className={className}
                     aria-current={active ? "page" : undefined}
-                    onClick={(event) => handleInternalNavClick(event, item.href)}
+                    onClick={(event) => handleInternalNavClick(event, href)}
                   >
                     {content}
                   </Link>

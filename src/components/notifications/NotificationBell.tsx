@@ -126,31 +126,6 @@ export function NotificationBell() {
                 type="button"
                 className={styles.soundToggle}
                 onClick={() => {
-                  void (async () => {
-                    void unlockNotificationAudio();
-                    if (desktopPermission === "granted") return;
-                    const next = await requestBrowserNotificationPermission();
-                    setDesktopPermission(next);
-                  })();
-                }}
-                title={
-                  desktopPermission === "granted"
-                    ? t("desktopOnTitle")
-                    : desktopPermission === "denied"
-                      ? t("desktopBlockedTitle")
-                      : t("desktopOffTitle")
-                }
-              >
-                {desktopPermission === "granted"
-                  ? t("desktopOn")
-                  : desktopPermission === "denied"
-                    ? t("desktopBlocked")
-                    : t("desktopOff")}
-              </button>
-              <button
-                type="button"
-                className={styles.soundToggle}
-                onClick={() => {
                   const next = !soundEnabled;
                   setSoundEnabled(next);
                   setNotificationSoundEnabled(next);
@@ -180,6 +155,32 @@ export function NotificationBell() {
               ) : null}
             </div>
           </header>
+
+          {desktopPermission !== "granted" &&
+          desktopPermission !== "unsupported" ? (
+            <div className={styles.desktopCallout}>
+              <p className={styles.desktopCalloutText}>
+                {desktopPermission === "denied"
+                  ? t("desktopBannerBlocked")
+                  : t("desktopBanner")}
+              </p>
+              {desktopPermission !== "denied" ? (
+                <button
+                  type="button"
+                  className={styles.desktopCalloutBtn}
+                  onClick={() => {
+                    void (async () => {
+                      void unlockNotificationAudio();
+                      const next = await requestBrowserNotificationPermission();
+                      setDesktopPermission(next);
+                    })();
+                  }}
+                >
+                  {t("desktopBannerEnable")}
+                </button>
+              ) : null}
+            </div>
+          ) : null}
 
           <div className={styles.list}>
             {loading && unreadNotifications.length === 0 ? (

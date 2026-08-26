@@ -114,6 +114,40 @@
   color: var(--white);
 }
 
+.desktopCallout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--brand-red, #c45c26) 16%, transparent);
+}
+
+.desktopCalloutText {
+  margin: 0;
+  color: var(--gray-100);
+  font-family: Inter, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+}
+
+.desktopCalloutBtn {
+  align-self: flex-start;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 0.95rem;
+  background: var(--gradient-brand);
+  color: var(--white);
+  font-family: Inter, sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.desktopCalloutBtn:hover {
+  filter: brightness(1.06);
+}
+
 .markAll {
   border: none;
   background: transparent;

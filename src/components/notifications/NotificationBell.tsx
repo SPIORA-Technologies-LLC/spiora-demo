@@ -26,6 +26,7 @@ import {
 import {
   getBrowserNotificationPermission,
   requestBrowserNotificationPermission,
+  showSystemNotification,
 } from "@/lib/notifications/system-notify";
 import { useNotificationsOptional } from "./notification-context";
 import styles from "./NotificationBell.module.css";
@@ -42,6 +43,7 @@ export function NotificationBell() {
   const [desktopPermission, setDesktopPermission] = useState<
     NotificationPermission | "unsupported"
   >("default");
+  const [testBusy, setTestBusy] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -156,29 +158,64 @@ export function NotificationBell() {
             </div>
           </header>
 
-          {desktopPermission !== "granted" &&
-          desktopPermission !== "unsupported" ? (
+          {mounted ? (
             <div className={styles.desktopCallout}>
               <p className={styles.desktopCalloutText}>
-                {desktopPermission === "denied"
-                  ? t("desktopBannerBlocked")
-                  : t("desktopBanner")}
+                {desktopPermission === "granted"
+                  ? t("desktopStatusOn")
+                  : desktopPermission === "denied"
+                    ? t("desktopBannerBlocked")
+                    : desktopPermission === "unsupported"
+                      ? t("desktopUnsupported")
+                      : t("desktopBanner")}
               </p>
-              {desktopPermission !== "denied" ? (
-                <button
-                  type="button"
-                  className={styles.desktopCalloutBtn}
-                  onClick={() => {
-                    void (async () => {
-                      void unlockNotificationAudio();
-                      const next = await requestBrowserNotificationPermission();
-                      setDesktopPermission(next);
-                    })();
-                  }}
-                >
-                  {t("desktopBannerEnable")}
-                </button>
-              ) : null}
+              <div className={styles.desktopCalloutActions}>
+                {desktopPermission !== "granted" &&
+                desktopPermission !== "unsupported" &&
+                desktopPermission !== "denied" ? (
+                  <button
+                    type="button"
+                    className={styles.desktopCalloutBtn}
+                    onClick={() => {
+                      void (async () => {
+                        void unlockNotificationAudio();
+                        const next =
+                          await requestBrowserNotificationPermission();
+                        setDesktopPermission(next);
+                      })();
+                    }}
+                  >
+                    {t("desktopBannerEnable")}
+                  </button>
+                ) : null}
+                {desktopPermission === "granted" ? (
+                  <button
+                    type="button"
+                    className={styles.desktopCalloutBtn}
+                    disabled={testBusy}
+                    onClick={() => {
+                      void (async () => {
+                        setTestBusy(true);
+                        try {
+                          void unlockNotificationAudio();
+                          await showSystemNotification({
+                            id: `test-${Date.now()}`,
+                            title: "Spiora",
+                            body: t("desktopTestBody"),
+                            href: "/",
+                            tag: `spiora-test-${Date.now()}`,
+                            autoCloseMs: 8_000,
+                          });
+                        } finally {
+                          setTestBusy(false);
+                        }
+                      })();
+                    }}
+                  >
+                    {t("desktopTest")}
+                  </button>
+                ) : null}
+              </div>
             </div>
           ) : null}
 

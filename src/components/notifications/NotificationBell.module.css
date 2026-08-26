@@ -148,6 +148,17 @@
   filter: brightness(1.06);
 }
 
+.desktopCalloutBtn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.desktopCalloutActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .markAll {
   border: none;
   background: transparent;

@@ -20,6 +20,7 @@ import {
 } from "@/lib/notifications/navigation";
 import {
   isNotificationSoundEnabled,
+  playNotificationSound,
   setNotificationSoundEnabled,
   unlockNotificationAudio,
 } from "@/lib/notifications/play-sound";
@@ -44,6 +45,7 @@ export function NotificationBell() {
     NotificationPermission | "unsupported"
   >("default");
   const [testBusy, setTestBusy] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -169,6 +171,7 @@ export function NotificationBell() {
                       ? t("desktopUnsupported")
                       : t("desktopBanner")}
               </p>
+              <p className={styles.desktopCalloutHint}>{t("desktopWindowsHint")}</p>
               <div className={styles.desktopCalloutActions}>
                 {desktopPermission !== "granted" &&
                 desktopPermission !== "unsupported" &&
@@ -196,16 +199,25 @@ export function NotificationBell() {
                     onClick={() => {
                       void (async () => {
                         setTestBusy(true);
+                        setTestResult(null);
                         try {
                           void unlockNotificationAudio();
-                          await showSystemNotification({
+                          playNotificationSound({ allowHidden: true });
+                          const shown = await showSystemNotification({
                             id: `test-${Date.now()}`,
                             title: "Spiora",
                             body: t("desktopTestBody"),
                             href: "/",
                             tag: `spiora-test-${Date.now()}`,
-                            autoCloseMs: 8_000,
+                            autoCloseMs: 12_000,
+                            requireInteraction: true,
+                            force: true,
                           });
+                          setTestResult(
+                            shown
+                              ? t("desktopTestSent")
+                              : t("desktopTestFailed"),
+                          );
                         } finally {
                           setTestBusy(false);
                         }
@@ -216,6 +228,9 @@ export function NotificationBell() {
                   </button>
                 ) : null}
               </div>
+              {testResult ? (
+                <p className={styles.desktopCalloutResult}>{testResult}</p>
+              ) : null}
             </div>
           ) : null}
 

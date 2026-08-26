@@ -89,6 +89,10 @@ export type SystemNotifyPayload = {
   tag?: string;
   /** Auto-close the toast; 0 = leave until user dismisses (Telegram-style). */
   autoCloseMs?: number;
+  /** Keep banner until dismissed (helps Windows actually show a toast). */
+  requireInteraction?: boolean;
+  /** Skip dedupe — used by the manual test button. */
+  force?: boolean;
 };
 
 async function getServiceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
@@ -131,9 +135,8 @@ function buildNotificationOptions(
     icon: "/icons/icon-192x192.png",
     badge: "/icons/icon-192x192.png",
     tag,
-    // Chromium-only; triggers OS sound again for same tag.
     renotify: true,
-    requireInteraction: false,
+    requireInteraction: Boolean(payload.requireInteraction),
     silent: false,
     data,
   };
@@ -146,16 +149,18 @@ export async function showSystemNotification(
   if (Notification.permission !== "granted") return false;
 
   const tag = payload.tag ?? `spiora-${payload.id}`;
-  if (!claimNotificationTag(tag)) {
-    return true;
-  }
-  if (
-    !claimNotificationTag(
-      `content:${payload.title}\u0000${payload.body}`,
-      20_000,
-    )
-  ) {
-    return true;
+  if (!payload.force) {
+    if (!claimNotificationTag(tag)) {
+      return true;
+    }
+    if (
+      !claimNotificationTag(
+        `content:${payload.title}\u0000${payload.body}`,
+        20_000,
+      )
+    ) {
+      return true;
+    }
   }
   const data = {
     url: payload.href || "/",
@@ -167,23 +172,19 @@ export async function showSystemNotification(
       : payload.autoCloseMs;
   const options = buildNotificationOptions(payload, tag, data);
 
-  const registration = await getServiceWorkerRegistration();
-  if (registration) {
-    try {
-      await registration.showNotification(payload.title, options);
-      if (autoCloseMs > 0) {
-        window.setTimeout(() => {
-          void closeNotificationByTag(tag);
-        }, autoCloseMs);
-      }
-      return true;
-    } catch {
-      // fall through to window Notification
-    }
-  }
-
+  // Prefer the page Notification API first — more reliable for an immediate
+  // toast while Spiora is open. Fall back to the service worker.
   try {
-    const n = new Notification(payload.title, options);
+    const pageOptions: NotificationOptions = {
+      body: options.body,
+      icon: options.icon,
+      badge: options.badge,
+      tag: options.tag,
+      requireInteraction: options.requireInteraction,
+      silent: false,
+      data: options.data,
+    };
+    const n = new Notification(payload.title, pageOptions);
     n.onclick = () => {
       window.focus();
       if (payload.href) {
@@ -196,8 +197,25 @@ export async function showSystemNotification(
     }
     return true;
   } catch {
-    return false;
+    // fall through to SW
   }
+
+  const registration = await getServiceWorkerRegistration();
+  if (registration) {
+    try {
+      await registration.showNotification(payload.title, options);
+      if (autoCloseMs > 0) {
+        window.setTimeout(() => {
+          void closeNotificationByTag(tag);
+        }, autoCloseMs);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
 }
 
 export function buildSystemNotifyFromItem(

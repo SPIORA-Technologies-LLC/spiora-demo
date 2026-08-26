@@ -106,6 +106,8 @@
       "calendar_reminder": "Напоминание календаря",
       "calendar_video_invite": "Видеовстреча",
       "meeting_recording_ready": "Запись встречи",
+      "client_case_status": "Статус заявки",
+      "client_agreement_update": "Договор",
       "system": "Системное"
     },
     "openSection": "Открыть раздел →",

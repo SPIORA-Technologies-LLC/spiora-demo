@@ -24,6 +24,8 @@ const TOAST_NOTIFICATION_TYPES = new Set<NotificationType>([
   "calendar_reminder",
   "calendar_video_invite",
   "meeting_recording_ready",
+  "client_case_status",
+  "client_agreement_update",
   "system",
 ]);
 
@@ -85,6 +87,9 @@ export function getNotificationSection(
       return "calendar";
     case "meeting_recording_ready":
       return "meeting-recordings";
+    case "client_case_status":
+    case "client_agreement_update":
+      return "clients";
     case "system":
       return demoHref?.startsWith("/ai-workspace") ? "ai-workspace" : null;
     default:
@@ -125,6 +130,9 @@ export function getNotificationHref(
     }
     case "meeting_recording_ready":
       return "/meeting-recordings";
+    case "client_case_status":
+    case "client_agreement_update":
+      return "/client";
     default:
       return null;
   }

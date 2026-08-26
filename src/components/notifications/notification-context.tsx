@@ -17,6 +17,8 @@ export type NotificationItem = {
     | "calendar_reminder"
     | "calendar_video_invite"
     | "meeting_recording_ready"
+    | "client_case_status"
+    | "client_agreement_update"
     | "system";
   title: string;
   message: string;

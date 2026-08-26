@@ -106,6 +106,8 @@
       "calendar_reminder": "Calendar reminder",
       "calendar_video_invite": "Video meeting",
       "meeting_recording_ready": "Meeting recording",
+      "client_case_status": "Case status",
+      "client_agreement_update": "Agreement",
       "system": "System"
     },
     "openSection": "Open section →",

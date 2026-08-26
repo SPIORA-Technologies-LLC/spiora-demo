@@ -478,6 +478,19 @@ export async function changeCaseStatus(input: {
     note: input.note ?? null,
   });
   if (!updated) return { ok: false as const, code: "NOT_FOUND" };
+
+  void import("@/lib/notifications/emit")
+    .then(({ notifyClientCaseStatusChanged }) =>
+      notifyClientCaseStatusChanged({
+        portalUserId: updated.clientPortalUserId,
+        statusLabel: input.toStatus,
+        actorName: input.actorName,
+      }),
+    )
+    .catch((error) => {
+      console.error("[client-case] notify status failed", error);
+    });
+
   return { ok: true as const, case: updated };
 }
 

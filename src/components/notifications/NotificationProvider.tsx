@@ -22,6 +22,12 @@ import {
   playNotificationSound,
   unlockNotificationAudio,
 } from "@/lib/notifications/play-sound";
+import { setAppUnreadBadge } from "@/lib/notifications/app-badge";
+import {
+  buildSystemNotifyFromItem,
+  ensureBrowserNotificationPermission,
+  showSystemNotification,
+} from "@/lib/notifications/system-notify";
 import {
   NotificationContext,
   type NotificationItem,
@@ -140,13 +146,40 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   const showToast = useCallback(
     (notification: NotificationItem) => {
       if (!shouldShowNotificationToast(notification.type)) return;
-      if (
-        isOnNotificationSection(
-          pathname,
-          notification.type,
-          notification.message,
-        )
-      ) {
+
+      const href = getNotificationHref(
+        notification.type,
+        notification.message,
+      );
+      const onSection = isOnNotificationSection(
+        pathname,
+        notification.type,
+        notification.message,
+      );
+
+      const pageHidden =
+        typeof document !== "undefined" && document.visibilityState === "hidden";
+
+      // When the app is in background (or another tab), show OS / PWA notification.
+      if (pageHidden || !onSection) {
+        void (async () => {
+          const permission = await ensureBrowserNotificationPermission();
+          if (permission === "granted" && (pageHidden || document.hasFocus?.() === false)) {
+            await showSystemNotification(
+              buildSystemNotifyFromItem(notification, href),
+            );
+          }
+        })();
+      }
+
+      if (onSection && !pageHidden) {
+        return;
+      }
+
+      if (pageHidden) {
+        if (isNotificationSoundEnabled()) {
+          playNotificationSound({ allowHidden: true });
+        }
         return;
       }
 
@@ -192,6 +225,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         );
       });
       setUnread(unreadCount);
+      void setAppUnreadBadge(unreadCount);
 
       if (!initializedRef.current) {
         for (const item of items) {
@@ -264,7 +298,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setNotifications((prev) =>
       prev.map((item) => (item.id === id ? data.notification : item)),
     );
-    setUnread((prev) => Math.max(0, prev - 1));
+    setUnread((prev) => {
+      const next = Math.max(0, prev - 1);
+      void setAppUnreadBadge(next);
+      return next;
+    });
   }, []);
 
   markReadRef.current = markRead;
@@ -277,6 +315,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       prev.map((item) => ({ ...item, is_read: true })),
     );
     setUnread(0);
+    void setAppUnreadBadge(0);
   }, []);
 
   const removeNotification = useCallback(async (id: string) => {
@@ -299,6 +338,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unlock = () => {
       void unlockNotificationAudio();
+      void ensureBrowserNotificationPermission();
     };
     window.addEventListener("pointerdown", unlock, { passive: true });
     window.addEventListener("keydown", unlock);
@@ -307,6 +347,20 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("keydown", unlock);
     };
   }, []);
+
+  useEffect(() => {
+    void setAppUnreadBadge(unread);
+  }, [unread]);
+
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") {
+        void setAppUnreadBadge(unread);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => document.removeEventListener("visibilitychange", onVisibility);
+  }, [unread]);
 
   useEffect(() => {
     let cancelled = false;

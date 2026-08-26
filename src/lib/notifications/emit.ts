@@ -489,3 +489,46 @@ export async function notifyMeetingRecordingSaved(params: {
     author_name: params.recording.startedByName || null,
   });
 }
+
+export async function notifyClientCaseStatusChanged(params: {
+  portalUserId: string;
+  statusLabel: string;
+  actorName?: string | null;
+}): Promise<void> {
+  if (!params.portalUserId) return;
+  const locale = await getRequestLocale().catch(() => "en" as const);
+  const title =
+    locale === "ru" ? "Статус заявки обновлён" : "Case status updated";
+  const message =
+    locale === "ru"
+      ? `Новый статус: ${params.statusLabel}`
+      : `New status: ${params.statusLabel}`;
+
+  await createNotificationForUser(params.portalUserId, {
+    type: "client_case_status",
+    title,
+    message,
+    author_name: params.actorName ?? null,
+  });
+}
+
+export async function notifyClientAgreementCompleted(params: {
+  portalUserId: string;
+  actorName?: string | null;
+}): Promise<void> {
+  if (!params.portalUserId) return;
+  const locale = await getRequestLocale().catch(() => "en" as const);
+  const title =
+    locale === "ru" ? "Договор подписан" : "Agreement signed";
+  const message =
+    locale === "ru"
+      ? "Компания подписала договор. Документ доступен в портале."
+      : "The company signed the agreement. The document is available in your portal.";
+
+  await createNotificationForUser(params.portalUserId, {
+    type: "client_agreement_update",
+    title,
+    message,
+    author_name: params.actorName ?? null,
+  });
+}

@@ -1390,6 +1390,17 @@ async function finalizeAgreement(input: {
     occurredAt: completedAt,
     metadata: { contractNumber: input.contract.agreementNumber },
   });
+
+  void import("@/lib/notifications/emit")
+    .then(({ notifyClientAgreementCompleted }) =>
+      notifyClientAgreementCompleted({
+        portalUserId: input.contract.portalUserId,
+        actorName: input.providerReq.signerName,
+      }),
+    )
+    .catch((error) => {
+      console.error("[sign] notify client agreement failed", error);
+    });
 }
 
 export async function readAuthorizedPdf(input: {

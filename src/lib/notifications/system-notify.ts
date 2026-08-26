@@ -2,6 +2,7 @@ import { getNotificationDisplayMessage } from "@/lib/notifications/navigation";
 import type { NotificationItem } from "@/components/notifications/notification-context";
 
 const PERMISSION_PROMPTED_KEY = "spiora.notification-permission-prompted.v1";
+const DEFAULT_AUTO_CLOSE_MS = 8_000;
 
 export function isBrowserNotificationSupported(): boolean {
   return typeof window !== "undefined" && "Notification" in window;
@@ -13,7 +14,9 @@ export function getBrowserNotificationPermission(): NotificationPermission | "un
 }
 
 /** Soft-ask once after user gesture / first unread while app is open. */
-export async function ensureBrowserNotificationPermission(): Promise<NotificationPermission | "unsupported"> {
+export async function ensureBrowserNotificationPermission(): Promise<
+  NotificationPermission | "unsupported"
+> {
   if (!isBrowserNotificationSupported()) return "unsupported";
   if (Notification.permission === "granted") return "granted";
   if (Notification.permission === "denied") return "denied";
@@ -36,13 +39,41 @@ export async function ensureBrowserNotificationPermission(): Promise<Notificatio
   }
 }
 
+/** App covered by another window, minimized, or tab in background. */
+export function isAppInBackground(): boolean {
+  if (typeof document === "undefined") return false;
+  if (document.visibilityState === "hidden") return true;
+  try {
+    return typeof document.hasFocus === "function" ? !document.hasFocus() : false;
+  } catch {
+    return false;
+  }
+}
+
 export type SystemNotifyPayload = {
   id: string;
   title: string;
   body: string;
   href?: string | null;
   tag?: string;
+  /** Auto-close the toast; badge count is not cleared. */
+  autoCloseMs?: number;
 };
+
+async function closeNotificationByTag(tag: string): Promise<void> {
+  try {
+    if ("serviceWorker" in navigator) {
+      const registration = await navigator.serviceWorker.ready;
+      const notes = await registration.getNotifications({ tag });
+      for (const note of notes) {
+        note.close();
+      }
+      return;
+    }
+  } catch {
+    // ignore
+  }
+}
 
 export async function showSystemNotification(
   payload: SystemNotifyPayload,
@@ -55,6 +86,7 @@ export async function showSystemNotification(
     url: payload.href || "/",
     notificationId: payload.id,
   };
+  const autoCloseMs = payload.autoCloseMs ?? DEFAULT_AUTO_CLOSE_MS;
 
   try {
     if ("serviceWorker" in navigator) {
@@ -65,8 +97,15 @@ export async function showSystemNotification(
         badge: "/icons/icon-192x192.png",
         tag,
         renotify: true,
+        requireInteraction: false,
+        silent: false,
         data,
       });
+      if (autoCloseMs > 0) {
+        window.setTimeout(() => {
+          void closeNotificationByTag(tag);
+        }, autoCloseMs);
+      }
       return true;
     }
   } catch {
@@ -78,6 +117,8 @@ export async function showSystemNotification(
       body: payload.body,
       icon: "/icons/icon-192x192.png",
       tag,
+      requireInteraction: false,
+      silent: false,
       data,
     });
     n.onclick = () => {
@@ -87,6 +128,9 @@ export async function showSystemNotification(
       }
       n.close();
     };
+    if (autoCloseMs > 0) {
+      window.setTimeout(() => n.close(), autoCloseMs);
+    }
     return true;
   } catch {
     return false;
@@ -97,11 +141,21 @@ export function buildSystemNotifyFromItem(
   item: NotificationItem,
   href: string | null,
 ): SystemNotifyPayload {
+  const display = getNotificationDisplayMessage(item.type, item.message);
+  const isChat = item.type === "team_chat";
+
   return {
     id: item.id,
-    title: item.title,
-    body: getNotificationDisplayMessage(item.type, item.message),
+    title: isChat
+      ? item.author_name?.trim() || item.title
+      : item.title,
+    body: isChat
+      ? display
+      : item.author_name
+        ? `${item.author_name}: ${display}`
+        : display,
     href,
     tag: `spiora-notif-${item.id}`,
+    autoCloseMs: DEFAULT_AUTO_CLOSE_MS,
   };
 }

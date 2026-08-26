@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { setAppUnreadBadge } from "@/lib/notifications/app-badge";
 import {
   ensureBrowserNotificationPermission,
+  isAppInBackground,
   showSystemNotification,
 } from "@/lib/notifications/system-notify";
 import {
@@ -60,15 +61,7 @@ export function ClientNotificationHost() {
         knownIdsRef.current.add(item.id);
         if (item.is_read) continue;
 
-        const pageHidden =
-          typeof document !== "undefined" &&
-          document.visibilityState === "hidden";
-
-        if (isNotificationSoundEnabled()) {
-          playNotificationSound({ allowHidden: pageHidden });
-        }
-
-        if (pageHidden) {
+        if (isAppInBackground()) {
           const permission = await ensureBrowserNotificationPermission();
           if (permission === "granted") {
             await showSystemNotification({
@@ -77,8 +70,14 @@ export function ClientNotificationHost() {
               body: item.message,
               href: "/client",
               tag: `spiora-client-${item.id}`,
+              autoCloseMs: 8_000,
             });
           }
+          if (isNotificationSoundEnabled()) {
+            playNotificationSound({ allowHidden: true });
+          }
+        } else if (isNotificationSoundEnabled()) {
+          playNotificationSound();
         }
       }
 
@@ -112,8 +111,22 @@ export function ClientNotificationHost() {
       if (!pollSinceRef.current) return;
       void fetchNotifications({ since: pollSinceRef.current });
     }, 5000);
-    return () => window.clearInterval(timer);
-  }, [fetchNotifications]);
+
+    const onWake = () => {
+      void setAppUnreadBadge(unread);
+      if (pollSinceRef.current) {
+        void fetchNotifications({ since: pollSinceRef.current });
+      }
+    };
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener("focus", onWake);
+
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener("focus", onWake);
+    };
+  }, [fetchNotifications, unread]);
 
   useEffect(() => {
     void setAppUnreadBadge(unread);

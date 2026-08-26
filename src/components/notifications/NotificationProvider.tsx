@@ -26,6 +26,7 @@ import { setAppUnreadBadge } from "@/lib/notifications/app-badge";
 import {
   buildSystemNotifyFromItem,
   ensureBrowserNotificationPermission,
+  isAppInBackground,
   showSystemNotification,
 } from "@/lib/notifications/system-notify";
 import {
@@ -157,29 +158,26 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         notification.message,
       );
 
-      const pageHidden =
-        typeof document !== "undefined" && document.visibilityState === "hidden";
+      const inBackground = isAppInBackground();
 
-      // When the app is in background (or another tab), show OS / PWA notification.
-      if (pageHidden || !onSection) {
+      // Covered / minimized / other window: OS toast + sound, then auto-hide.
+      // Unread badge stays until the user opens and reads notifications.
+      if (inBackground) {
         void (async () => {
           const permission = await ensureBrowserNotificationPermission();
-          if (permission === "granted" && (pageHidden || document.hasFocus?.() === false)) {
+          if (permission === "granted") {
             await showSystemNotification(
               buildSystemNotifyFromItem(notification, href),
             );
           }
+          if (isNotificationSoundEnabled()) {
+            playNotificationSound({ allowHidden: true });
+          }
         })();
-      }
-
-      if (onSection && !pageHidden) {
         return;
       }
 
-      if (pageHidden) {
-        if (isNotificationSoundEnabled()) {
-          playNotificationSound({ allowHidden: true });
-        }
+      if (onSection) {
         return;
       }
 
@@ -382,8 +380,21 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       void fetchNotifications({ since: pollSinceRef.current });
     }, 5000);
 
-    return () => clearInterval(timer);
-  }, [fetchNotifications]);
+    const onWake = () => {
+      void setAppUnreadBadge(unread);
+      if (pollSinceRef.current) {
+        void fetchNotifications({ since: pollSinceRef.current });
+      }
+    };
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener("focus", onWake);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener("focus", onWake);
+    };
+  }, [fetchNotifications, unread]);
 
   useEffect(() => {
     const idsToMark: string[] = [];

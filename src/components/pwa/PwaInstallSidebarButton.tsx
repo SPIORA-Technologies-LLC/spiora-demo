@@ -18,9 +18,11 @@ export function PwaInstallSidebarButton() {
   const helpText =
     platform === "ios"
       ? t("installIos", { productName: branding.productName })
-      : canPrompt
-        ? t("installHint", { productName: branding.productName })
-        : t("installAndroidManual", { productName: branding.productName });
+      : platform === "desktop"
+        ? t("installDesktop", { productName: branding.productName })
+        : canPrompt
+          ? t("installHint", { productName: branding.productName })
+          : t("installAndroidManual", { productName: branding.productName });
 
   return (
     <div className={styles.wrap}>

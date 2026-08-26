@@ -17,13 +17,18 @@ export function PwaInstallHint() {
   const hint =
     platform === "ios"
       ? t("installIos", { productName: branding.productName })
-      : platform === "android" && !canPrompt
-        ? t("installAndroidManual", { productName: branding.productName })
-        : t("installHint", { productName: branding.productName });
+      : platform === "desktop"
+        ? t("installDesktop", { productName: branding.productName })
+        : platform === "android" && !canPrompt
+          ? t("installAndroidManual", { productName: branding.productName })
+          : t("installHint", { productName: branding.productName });
 
   return (
     <div className={styles.banner} role="status">
       <p className={styles.text}>{hint}</p>
+      {canPrompt ? (
+        <p className={styles.note}>{t("browserDialogNote")}</p>
+      ) : null}
       <div className={styles.actions}>
         {canPrompt ? (
           <button

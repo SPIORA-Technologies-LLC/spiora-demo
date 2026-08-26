@@ -19,6 +19,14 @@
   color: var(--gray-100);
 }
 
+.note {
+  margin: -0.35rem 0 0.875rem;
+  font-family: Inter, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--gray-400);
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;

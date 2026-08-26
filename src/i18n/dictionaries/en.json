@@ -217,11 +217,13 @@
   },
   "pwa": {
     "installHint": "Install {productName} as an app on your phone — quick access from the home screen.",
+    "installDesktop": "Install {productName} as an app on your computer — opens in its own window and can be pinned to the taskbar.",
     "installIos": "On iPhone/iPad: tap Share, then “Add to Home Screen”.",
     "installAndroidManual": "In your browser menu choose “Install app” or “Add to Home screen”.",
     "installNav": "Download demo app",
     "install": "Install",
-    "dismiss": "Not now"
+    "dismiss": "Not now",
+    "browserDialogNote": "The next confirmation window is from your browser and may follow the browser language."
   },
   "dashboard": {
     "pageTitle": "Dashboard",

@@ -91,7 +91,8 @@ export async function showSystemNotification(
   try {
     if ("serviceWorker" in navigator) {
       const registration = await navigator.serviceWorker.ready;
-      await registration.showNotification(payload.title, {
+      // `renotify` is Chromium-only; not in lib.dom NotificationOptions yet.
+      const options: NotificationOptions & { renotify?: boolean } = {
         body: payload.body,
         icon: "/icons/icon-192x192.png",
         badge: "/icons/icon-192x192.png",
@@ -100,7 +101,8 @@ export async function showSystemNotification(
         requireInteraction: false,
         silent: false,
         data,
-      });
+      };
+      await registration.showNotification(payload.title, options);
       if (autoCloseMs > 0) {
         window.setTimeout(() => {
           void closeNotificationByTag(tag);

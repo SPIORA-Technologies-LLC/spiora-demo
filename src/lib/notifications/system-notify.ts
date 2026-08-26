@@ -4,6 +4,18 @@ import type { NotificationItem } from "@/components/notifications/notification-c
 const PERMISSION_PROMPTED_KEY = "spiora.notification-permission-prompted.v1";
 const DEFAULT_AUTO_CLOSE_MS = 8_000;
 const SW_READY_TIMEOUT_MS = 700;
+const recentTags = new Map<string, number>();
+
+function claimNotificationTag(tag: string, ttlMs = 20_000): boolean {
+  const now = Date.now();
+  for (const [key, expires] of recentTags) {
+    if (expires <= now) recentTags.delete(key);
+  }
+  const existing = recentTags.get(tag);
+  if (existing && existing > now) return false;
+  recentTags.set(tag, now + ttlMs);
+  return true;
+}
 
 export function isBrowserNotificationSupported(): boolean {
   return typeof window !== "undefined" && "Notification" in window;
@@ -134,6 +146,17 @@ export async function showSystemNotification(
   if (Notification.permission !== "granted") return false;
 
   const tag = payload.tag ?? `spiora-${payload.id}`;
+  if (!claimNotificationTag(tag)) {
+    return true;
+  }
+  if (
+    !claimNotificationTag(
+      `content:${payload.title}\u0000${payload.body}`,
+      20_000,
+    )
+  ) {
+    return true;
+  }
   const data = {
     url: payload.href || "/",
     notificationId: payload.id,

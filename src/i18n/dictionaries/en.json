@@ -99,6 +99,12 @@
     "desktopOnTitle": "System notifications are enabled (Telegram-style)",
     "desktopOffTitle": "Allow desktop pop-up notifications",
     "desktopBlockedTitle": "Allow Spiora notifications in your browser settings",
+    "desktopBanner": "To get chat pop-ups with sound on your desktop (like Telegram), allow Spiora notifications.",
+    "desktopBannerBlocked": "Notifications are blocked. In Chrome/Edge site settings for Spiora, turn Notifications on.",
+    "desktopBannerEnable": "Allow",
+    "desktopBannerDismiss": "Later",
+    "chatDesktopTitle": "Team chat",
+    "chatPreviewFallback": "New message",
     "closeItem": "Close notification",
     "types": {
       "team_chat": "Team chat message",

@@ -26,6 +26,7 @@ import { setAppUnreadBadge } from "@/lib/notifications/app-badge";
 import {
   buildSystemNotifyFromItem,
   ensureBrowserNotificationPermission,
+  getBrowserNotificationPermission,
   isAppInBackground,
   showSystemNotification,
 } from "@/lib/notifications/system-notify";
@@ -159,10 +160,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       );
 
       const inBackground = isAppInBackground();
+      const isChat = notification.type === "team_chat";
 
-      // Covered / minimized / other tab: Windows/macOS toast + system sound
-      // (same pattern as Telegram Desktop). Badge stays until read.
-      if (inBackground) {
+      // Chat off the chat page: always prefer Windows/macOS toast (Telegram-style),
+      // even if the Spiora window still reports focus incorrectly as a PWA.
+      const preferDesktop = inBackground || (isChat && !onSection);
+
+      if (preferDesktop) {
         void (async () => {
           const permission = await ensureBrowserNotificationPermission();
           let shown = false;
@@ -171,12 +175,20 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
               buildSystemNotifyFromItem(notification, href),
             );
           }
-          // OS notification already plays the system sound when silent:false.
           if (!shown && isNotificationSoundEnabled()) {
-            playNotificationSound({ allowHidden: true });
+            playNotificationSound({
+              allowHidden:
+                inBackground || document.visibilityState === "hidden",
+            });
           }
         })();
-        return;
+        // Still show in-app toast when focused and permission was missing.
+        if (inBackground || onSection) return;
+        if (
+          getBrowserNotificationPermission() === "granted"
+        ) {
+          return;
+        }
       }
 
       if (onSection) {

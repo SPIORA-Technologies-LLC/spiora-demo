@@ -1,4 +1,4 @@
-const CACHE_VERSION = "spiora-pwa-v7";
+const CACHE_VERSION = "spiora-pwa-v8";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
 const PRECACHE_URLS = [

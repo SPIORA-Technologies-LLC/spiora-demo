@@ -99,6 +99,12 @@
     "desktopOnTitle": "Системные уведомления включены (как в Telegram)",
     "desktopOffTitle": "Разрешить всплывающие уведомления на рабочем столе",
     "desktopBlockedTitle": "Разрешите уведомления Spiora в настройках браузера",
+    "desktopBanner": "Чтобы сообщения чата всплывали на рабочем столе со звуком (как в Telegram), разрешите уведомления Spiora.",
+    "desktopBannerBlocked": "Уведомления заблокированы. В настройках Chrome/Edge для сайта Spiora включите «Уведомления».",
+    "desktopBannerEnable": "Разрешить",
+    "desktopBannerDismiss": "Позже",
+    "chatDesktopTitle": "Командный чат",
+    "chatPreviewFallback": "Новое сообщение",
     "closeItem": "Закрыть уведомление",
     "types": {
       "team_chat": "Сообщение в чате",

@@ -93,6 +93,12 @@
     "soundOff": "Sound off",
     "soundOnTitle": "Disable notification sound",
     "soundOffTitle": "Enable notification sound",
+    "desktopOn": "Desktop on",
+    "desktopOff": "Desktop alerts",
+    "desktopBlocked": "Desktop blocked",
+    "desktopOnTitle": "System notifications are enabled (Telegram-style)",
+    "desktopOffTitle": "Allow desktop pop-up notifications",
+    "desktopBlockedTitle": "Allow Spiora notifications in your browser settings",
     "closeItem": "Close notification",
     "types": {
       "team_chat": "Team chat message",

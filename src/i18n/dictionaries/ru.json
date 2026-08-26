@@ -93,6 +93,12 @@
     "soundOff": "🔕 Звук выкл.",
     "soundOnTitle": "Отключить звук уведомлений",
     "soundOffTitle": "Включить звук уведомлений",
+    "desktopOn": "🖥 Рабочий стол вкл.",
+    "desktopOff": "🖥 Рабочий стол",
+    "desktopBlocked": "🖥 Заблокировано",
+    "desktopOnTitle": "Системные уведомления включены (как в Telegram)",
+    "desktopOffTitle": "Разрешить всплывающие уведомления на рабочем столе",
+    "desktopBlockedTitle": "Разрешите уведомления Spiora в настройках браузера",
     "closeItem": "Закрыть уведомление",
     "types": {
       "team_chat": "Сообщение в чате",

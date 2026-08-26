@@ -23,6 +23,10 @@ import {
   setNotificationSoundEnabled,
   unlockNotificationAudio,
 } from "@/lib/notifications/play-sound";
+import {
+  getBrowserNotificationPermission,
+  requestBrowserNotificationPermission,
+} from "@/lib/notifications/system-notify";
 import { useNotificationsOptional } from "./notification-context";
 import styles from "./NotificationBell.module.css";
 
@@ -35,12 +39,21 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [desktopPermission, setDesktopPermission] = useState<
+    NotificationPermission | "unsupported"
+  >("default");
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
     setSoundEnabled(isNotificationSoundEnabled());
+    setDesktopPermission(getBrowserNotificationPermission());
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    setDesktopPermission(getBrowserNotificationPermission());
+  }, [open]);
 
   useEffect(() => {
     function onDocClick(event: MouseEvent) {
@@ -109,6 +122,31 @@ export function NotificationBell() {
           <header className={styles.panelHeader}>
             <h3 className={styles.panelTitle}>{t("panelTitle")}</h3>
             <div className={styles.panelActions}>
+              <button
+                type="button"
+                className={styles.soundToggle}
+                onClick={() => {
+                  void (async () => {
+                    void unlockNotificationAudio();
+                    if (desktopPermission === "granted") return;
+                    const next = await requestBrowserNotificationPermission();
+                    setDesktopPermission(next);
+                  })();
+                }}
+                title={
+                  desktopPermission === "granted"
+                    ? t("desktopOnTitle")
+                    : desktopPermission === "denied"
+                      ? t("desktopBlockedTitle")
+                      : t("desktopOffTitle")
+                }
+              >
+                {desktopPermission === "granted"
+                  ? t("desktopOn")
+                  : desktopPermission === "denied"
+                    ? t("desktopBlocked")
+                    : t("desktopOff")}
+              </button>
               <button
                 type="button"
                 className={styles.soundToggle}

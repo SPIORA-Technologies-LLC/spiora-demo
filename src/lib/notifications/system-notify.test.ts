@@ -21,6 +21,6 @@ describe("buildSystemNotifyFromItem", () => {
     assert.equal(payload.title, "Emma Wilson");
     assert.equal(payload.body, "Can someone cover the follow-up?");
     assert.equal(payload.href, "/team-chat");
-    assert.ok((payload.autoCloseMs ?? 0) > 0);
+    assert.equal(payload.autoCloseMs, 0);
   });
 });

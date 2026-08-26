@@ -160,17 +160,19 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
 
       const inBackground = isAppInBackground();
 
-      // Covered / minimized / other window: OS toast + sound, then auto-hide.
-      // Unread badge stays until the user opens and reads notifications.
+      // Covered / minimized / other tab: Windows/macOS toast + system sound
+      // (same pattern as Telegram Desktop). Badge stays until read.
       if (inBackground) {
         void (async () => {
           const permission = await ensureBrowserNotificationPermission();
+          let shown = false;
           if (permission === "granted") {
-            await showSystemNotification(
+            shown = await showSystemNotification(
               buildSystemNotifyFromItem(notification, href),
             );
           }
-          if (isNotificationSoundEnabled()) {
+          // OS notification already plays the system sound when silent:false.
+          if (!shown && isNotificationSoundEnabled()) {
             playNotificationSound({ allowHidden: true });
           }
         })();
@@ -375,24 +377,41 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, [fetchNotifications]);
 
   useEffect(() => {
-    const timer = setInterval(() => {
+    let timer: number | null = null;
+
+    const poll = () => {
       if (!pollSinceRef.current) return;
       void fetchNotifications({ since: pollSinceRef.current });
-    }, 5000);
+    };
+
+    const schedule = () => {
+      if (timer != null) window.clearInterval(timer);
+      // Hidden tabs are throttled by Chrome; poll more often while we still can.
+      const ms =
+        typeof document !== "undefined" &&
+        document.visibilityState === "hidden"
+          ? 2500
+          : 4000;
+      timer = window.setInterval(poll, ms);
+    };
+
+    schedule();
+    poll();
 
     const onWake = () => {
       void setAppUnreadBadge(unread);
-      if (pollSinceRef.current) {
-        void fetchNotifications({ since: pollSinceRef.current });
-      }
+      schedule();
+      poll();
     };
     document.addEventListener("visibilitychange", onWake);
     window.addEventListener("focus", onWake);
+    window.addEventListener("blur", poll);
 
     return () => {
-      clearInterval(timer);
+      if (timer != null) window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onWake);
       window.removeEventListener("focus", onWake);
+      window.removeEventListener("blur", poll);
     };
   }, [fetchNotifications, unread]);
 

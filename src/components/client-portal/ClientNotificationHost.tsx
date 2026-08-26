@@ -63,8 +63,9 @@ export function ClientNotificationHost() {
 
         if (isAppInBackground()) {
           const permission = await ensureBrowserNotificationPermission();
+          let shown = false;
           if (permission === "granted") {
-            await showSystemNotification({
+            shown = await showSystemNotification({
               id: item.id,
               title: item.title,
               body: item.message,
@@ -73,7 +74,7 @@ export function ClientNotificationHost() {
               autoCloseMs: 8_000,
             });
           }
-          if (isNotificationSoundEnabled()) {
+          if (!shown && isNotificationSoundEnabled()) {
             playNotificationSound({ allowHidden: true });
           }
         } else if (isNotificationSoundEnabled()) {
@@ -106,25 +107,38 @@ export function ClientNotificationHost() {
   }, []);
 
   useEffect(() => {
-    void fetchNotifications();
-    const timer = window.setInterval(() => {
+    let timer: number | null = null;
+    const poll = () => {
       if (!pollSinceRef.current) return;
       void fetchNotifications({ since: pollSinceRef.current });
-    }, 5000);
+    };
+    const schedule = () => {
+      if (timer != null) window.clearInterval(timer);
+      const ms =
+        typeof document !== "undefined" &&
+        document.visibilityState === "hidden"
+          ? 2500
+          : 4000;
+      timer = window.setInterval(poll, ms);
+    };
+
+    void fetchNotifications();
+    schedule();
 
     const onWake = () => {
       void setAppUnreadBadge(unread);
-      if (pollSinceRef.current) {
-        void fetchNotifications({ since: pollSinceRef.current });
-      }
+      schedule();
+      poll();
     };
     document.addEventListener("visibilitychange", onWake);
     window.addEventListener("focus", onWake);
+    window.addEventListener("blur", poll);
 
     return () => {
-      window.clearInterval(timer);
+      if (timer != null) window.clearInterval(timer);
       document.removeEventListener("visibilitychange", onWake);
       window.removeEventListener("focus", onWake);
+      window.removeEventListener("blur", poll);
     };
   }, [fetchNotifications, unread]);
 

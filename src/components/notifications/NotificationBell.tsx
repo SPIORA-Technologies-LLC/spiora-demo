@@ -49,6 +49,7 @@ export function NotificationBell() {
   >("default");
   const [testBusy, setTestBusy] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -165,101 +166,125 @@ export function NotificationBell() {
 
           {mounted ? (
             <div className={styles.desktopCallout}>
-              <p className={styles.desktopCalloutText}>
-                {desktopPermission === "granted"
-                  ? t("desktopStatusOn")
-                  : desktopPermission === "denied"
-                    ? t("desktopBannerBlocked")
-                    : desktopPermission === "unsupported"
-                      ? t("desktopUnsupported")
+              {desktopPermission !== "granted" &&
+              desktopPermission !== "unsupported" ? (
+                <>
+                  <p className={styles.desktopCalloutText}>
+                    {desktopPermission === "denied"
+                      ? t("desktopBannerBlocked")
                       : t("desktopBanner")}
-              </p>
-              <p className={styles.desktopCalloutHint}>{t("desktopWindowsHint")}</p>
-              <p className={styles.desktopCalloutHint}>{t("desktopBadgeHint")}</p>
-              <div className={styles.desktopCalloutActions}>
-                {desktopPermission !== "granted" &&
-                desktopPermission !== "unsupported" &&
-                desktopPermission !== "denied" ? (
-                  <button
-                    type="button"
-                    className={styles.desktopCalloutBtn}
-                    onClick={() => {
-                      void (async () => {
-                        void unlockNotificationAudio();
-                        const next =
-                          await requestBrowserNotificationPermission();
-                        setDesktopPermission(next);
-                      })();
-                    }}
-                  >
-                    {t("desktopBannerEnable")}
-                  </button>
-                ) : null}
-                {desktopPermission === "granted" ? (
-                  <button
-                    type="button"
-                    className={styles.desktopCalloutBtn}
-                    disabled={testBusy}
-                    onClick={() => {
-                      void (async () => {
-                        setTestBusy(true);
-                        setTestResult(null);
-                        try {
-                          void unlockNotificationAudio();
-                          playNotificationSound({ allowHidden: true });
-                          const shown = await showSystemNotification({
-                            id: `test-${Date.now()}`,
-                            title: "Spiora",
-                            body: t("desktopTestBody"),
-                            href: "/",
-                            tag: `spiora-test-${Date.now()}`,
-                            autoCloseMs: 12_000,
-                            requireInteraction: true,
-                            force: true,
-                          });
-                          setTestResult(
-                            shown
-                              ? t("desktopTestSent")
-                              : t("desktopTestFailed"),
-                          );
-                        } finally {
-                          setTestBusy(false);
-                        }
-                      })();
-                    }}
-                  >
-                    {t("desktopTest")}
-                  </button>
-                ) : null}
-                <button
-                  type="button"
-                  className={styles.desktopCalloutBtn}
-                  disabled={testBusy}
-                  onClick={() => {
-                    void (async () => {
-                      setTestBusy(true);
-                      try {
-                        const result = await forceAppBadgeForTest(3);
-                        if (!result.apiSupported) {
-                          setTestResult(t("desktopBadgeTestUnsupported"));
-                        } else if (!result.standalone) {
-                          setTestResult(t("desktopBadgeTestNotStandalone"));
-                        } else {
-                          setTestResult(
-                            t("desktopBadgeTestSent", { title: result.title }),
-                          );
-                        }
-                      } finally {
-                        setTestBusy(false);
-                      }
-                    })();
-                  }}
-                >
-                  {t("desktopBadgeTest")}
-                </button>
-              </div>
-              {testResult ? (
-                <p className={styles.desktopCalloutResult}>{testResult}</p>
+                  </p>
+                  {desktopPermission !== "denied" ? (
+                    <div className={styles.desktopCalloutActions}>
+                      <button
+                        type="button"
+                        className={styles.desktopCalloutBtn}
+                        onClick={() => {
+                          void (async () => {
+                            void unlockNotificationAudio();
+                            const next =
+                              await requestBrowserNotificationPermission();
+                            setDesktopPermission(next);
+                          })();
+                        }}
+                      >
+                        {t("desktopBannerEnable")}
+                      </button>
+                    </div>
+                  ) : null}
+                </>
+              ) : null}
+
+              <button
+                type="button"
+                className={styles.helpToggle}
+                aria-expanded={helpOpen}
+                onClick={() => setHelpOpen((open) => !open)}
+              >
+                {t("desktopHelpToggle")}
+                <span className={styles.helpChevron} aria-hidden>
+                  {helpOpen ? "▴" : "▾"}
+                </span>
+              </button>
+
+              {helpOpen ? (
+                <div className={styles.helpBody}>
+                  <p className={styles.desktopCalloutHint}>
+                    {t("desktopWindowsHint")}
+                  </p>
+                  <p className={styles.desktopCalloutHint}>
+                    {t("desktopBadgeHint")}
+                  </p>
+                  <div className={styles.desktopCalloutActions}>
+                    {desktopPermission === "granted" ? (
+                      <button
+                        type="button"
+                        className={styles.desktopCalloutBtn}
+                        disabled={testBusy}
+                        onClick={() => {
+                          void (async () => {
+                            setTestBusy(true);
+                            setTestResult(null);
+                            try {
+                              void unlockNotificationAudio();
+                              playNotificationSound({ allowHidden: true });
+                              const shown = await showSystemNotification({
+                                id: `test-${Date.now()}`,
+                                title: "Spiora",
+                                body: t("desktopTestBody"),
+                                href: "/",
+                                tag: `spiora-test-${Date.now()}`,
+                                autoCloseMs: 12_000,
+                                requireInteraction: true,
+                                force: true,
+                              });
+                              setTestResult(
+                                shown
+                                  ? t("desktopTestSent")
+                                  : t("desktopTestFailed"),
+                              );
+                            } finally {
+                              setTestBusy(false);
+                            }
+                          })();
+                        }}
+                      >
+                        {t("desktopTest")}
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      className={styles.desktopCalloutBtn}
+                      disabled={testBusy}
+                      onClick={() => {
+                        void (async () => {
+                          setTestBusy(true);
+                          try {
+                            const result = await forceAppBadgeForTest(3);
+                            if (!result.apiSupported) {
+                              setTestResult(t("desktopBadgeTestUnsupported"));
+                            } else if (!result.standalone) {
+                              setTestResult(t("desktopBadgeTestNotStandalone"));
+                            } else {
+                              setTestResult(
+                                t("desktopBadgeTestSent", {
+                                  title: result.title,
+                                }),
+                              );
+                            }
+                          } finally {
+                            setTestBusy(false);
+                          }
+                        })();
+                      }}
+                    >
+                      {t("desktopBadgeTest")}
+                    </button>
+                  </div>
+                  {testResult ? (
+                    <p className={styles.desktopCalloutResult}>{testResult}</p>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           ) : null}

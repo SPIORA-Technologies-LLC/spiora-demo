@@ -1,4 +1,4 @@
-const CACHE_VERSION = "spiora-pwa-v12";
+const CACHE_VERSION = "spiora-pwa-v13";
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 
 const PRECACHE_URLS = [
@@ -185,6 +185,8 @@ self.addEventListener("push", (event) => {
         badge: "/icons/icon-192x192.png",
         tag: payload.tag,
         renotify: true,
+        silent: false,
+        requireInteraction: false,
         data: { url: payload.url },
       });
     })(),

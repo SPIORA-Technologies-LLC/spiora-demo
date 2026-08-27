@@ -30,6 +30,7 @@ import {
   isAppInBackground,
   showSystemNotification,
 } from "@/lib/notifications/system-notify";
+import { subscribeToWebPush } from "@/lib/notifications/web-push-client";
 import {
   NotificationContext,
   type NotificationItem,
@@ -347,7 +348,12 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const unlock = () => {
       void unlockNotificationAudio();
-      void ensureBrowserNotificationPermission();
+      void (async () => {
+        const permission = await ensureBrowserNotificationPermission();
+        if (permission === "granted") {
+          void subscribeToWebPush();
+        }
+      })();
     };
     window.addEventListener("pointerdown", unlock, { passive: true });
     window.addEventListener("keydown", unlock);
@@ -355,6 +361,11 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("pointerdown", unlock);
       window.removeEventListener("keydown", unlock);
     };
+  }, []);
+
+  useEffect(() => {
+    if (getBrowserNotificationPermission() !== "granted") return;
+    void subscribeToWebPush();
   }, []);
 
   useEffect(() => {

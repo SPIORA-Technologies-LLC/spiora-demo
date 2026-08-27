@@ -117,7 +117,13 @@ export async function createNotificationForUser(
 
   if (isSupabaseConfigured()) {
     try {
-      return await sbNotifications.sbInsertNotification(notification);
+      const created = await sbNotifications.sbInsertNotification(notification);
+      void import("./web-push-send")
+        .then(({ sendWebPushForNotification }) =>
+          sendWebPushForNotification(created),
+        )
+        .catch((error) => console.error("[web-push] notify", error));
+      return created;
     } catch (error) {
       console.error("[notifications] supabase create", error);
       throw error;
@@ -127,6 +133,11 @@ export async function createNotificationForUser(
   const store = await readStore();
   store.notifications.unshift(notification);
   await writeStore(store);
+  void import("./web-push-send")
+    .then(({ sendWebPushForNotification }) =>
+      sendWebPushForNotification(notification),
+    )
+    .catch((error) => console.error("[web-push] notify", error));
   return notification;
 }
 

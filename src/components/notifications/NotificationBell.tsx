@@ -24,9 +24,7 @@ import {
   setNotificationSoundEnabled,
   unlockNotificationAudio,
 } from "@/lib/notifications/play-sound";
-import {
-  forceAppBadgeForTest,
-} from "@/lib/notifications/app-badge";
+import { subscribeToWebPush } from "@/lib/notifications/web-push-client";
 import {
   getBrowserNotificationPermission,
   requestBrowserNotificationPermission,
@@ -185,6 +183,9 @@ export function NotificationBell() {
                             const next =
                               await requestBrowserNotificationPermission();
                             setDesktopPermission(next);
+                            if (next === "granted") {
+                              void subscribeToWebPush();
+                            }
                           })();
                         }}
                       >
@@ -211,9 +212,6 @@ export function NotificationBell() {
                 <div className={styles.helpBody}>
                   <p className={styles.desktopCalloutHint}>
                     {t("desktopWindowsHint")}
-                  </p>
-                  <p className={styles.desktopCalloutHint}>
-                    {t("desktopBadgeHint")}
                   </p>
                   <div className={styles.desktopCalloutActions}>
                     {desktopPermission === "granted" ? (
@@ -252,34 +250,6 @@ export function NotificationBell() {
                         {t("desktopTest")}
                       </button>
                     ) : null}
-                    <button
-                      type="button"
-                      className={styles.desktopCalloutBtn}
-                      disabled={testBusy}
-                      onClick={() => {
-                        void (async () => {
-                          setTestBusy(true);
-                          try {
-                            const result = await forceAppBadgeForTest(3);
-                            if (!result.apiSupported) {
-                              setTestResult(t("desktopBadgeTestUnsupported"));
-                            } else if (!result.standalone) {
-                              setTestResult(t("desktopBadgeTestNotStandalone"));
-                            } else {
-                              setTestResult(
-                                t("desktopBadgeTestSent", {
-                                  title: result.title,
-                                }),
-                              );
-                            }
-                          } finally {
-                            setTestBusy(false);
-                          }
-                        })();
-                      }}
-                    >
-                      {t("desktopBadgeTest")}
-                    </button>
                   </div>
                   {testResult ? (
                     <p className={styles.desktopCalloutResult}>{testResult}</p>

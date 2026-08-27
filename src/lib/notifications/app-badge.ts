@@ -99,11 +99,16 @@ async function applyBadge(count: number): Promise<void> {
         type: "SPIORA_SET_BADGE",
         count: safe,
       });
-      if (typeof registration.setAppBadge === "function") {
+      // Badging on ServiceWorkerRegistration is Chromium/Edge; not in lib.dom yet.
+      const badging = registration as ServiceWorkerRegistration & {
+        setAppBadge?: (count?: number) => Promise<void>;
+        clearAppBadge?: () => Promise<void>;
+      };
+      if (typeof badging.setAppBadge === "function") {
         if (safe <= 0) {
-          await registration.clearAppBadge?.();
+          await badging.clearAppBadge?.();
         } else {
-          await registration.setAppBadge(safe);
+          await badging.setAppBadge(safe);
         }
       }
     } catch (error) {

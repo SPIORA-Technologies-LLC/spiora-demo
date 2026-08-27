@@ -45,6 +45,7 @@ import {
 } from "./attachment-storage";
 import { taskNeedsApprovalWorkflow } from "./workflow";
 import { listTeamMembers } from "@/lib/team/store";
+import { listTeamUsers } from "@/lib/auth/users";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isDemoMode } from "@/lib/demo/demo-mode";
 import { buildDemoTasks } from "./demo-tasks-builder";
@@ -212,10 +213,28 @@ async function resolveAssignees(ids?: string[]): Promise<TaskAssignee[]> {
   const uniqueIds = [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
   const members = await listTeamMembers();
   const byId = new Map(members.map((member) => [member.id, member]));
-  return uniqueIds
-    .map((id) => byId.get(id))
-    .filter((member): member is NonNullable<typeof member> => Boolean(member))
-    .map((member) => ({ id: member.id, name: member.name }));
+  const demoById = new Map(listTeamUsers().map((user) => [user.id, user]));
+
+  const resolved: TaskAssignee[] = [];
+  for (const id of uniqueIds) {
+    const direct = byId.get(id);
+    if (direct) {
+      resolved.push({ id: direct.id, name: direct.name });
+      continue;
+    }
+
+    // Form may still send demo roster ids while members are Supabase profile UUIDs.
+    const demo = demoById.get(id);
+    if (demo) {
+      const byEmail = members.find(
+        (member) => member.email.toLowerCase() === demo.email.toLowerCase(),
+      );
+      if (byEmail) {
+        resolved.push({ id: byEmail.id, name: byEmail.name });
+      }
+    }
+  }
+  return resolved;
 }
 
 function appendReviewEvent(

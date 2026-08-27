@@ -135,10 +135,31 @@ export async function createNotificationsForTeam(
   opts?: { excludeUserId?: string; onlyUserIds?: string[] },
 ): Promise<Notification[]> {
   const deleted = new Set(await getDeletedUserIds());
-  const users = listTeamUsers().filter((user) => {
+  const { listTeamMembers } = await import("@/lib/team/store");
+  const members = await listTeamMembers();
+  const roster =
+    members.length > 0
+      ? members
+      : listTeamUsers().map((user) => ({
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        }));
+
+  const users = roster.filter((user) => {
     if (deleted.has(user.id)) return false;
     if (opts?.excludeUserId && user.id === opts.excludeUserId) return false;
-    if (opts?.onlyUserIds && !opts.onlyUserIds.includes(user.id)) return false;
+    if (opts?.onlyUserIds && !opts.onlyUserIds.includes(user.id)) {
+      // Also accept demo roster ids that map to this member by email.
+      const demoIds = listTeamUsers()
+        .filter(
+          (demo) => demo.email.toLowerCase() === user.email.toLowerCase(),
+        )
+        .map((demo) => demo.id);
+      if (!opts.onlyUserIds.some((id) => demoIds.includes(id))) {
+        return false;
+      }
+    }
     return true;
   });
 

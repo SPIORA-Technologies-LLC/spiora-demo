@@ -107,6 +107,45 @@ export async function findTeamUserById(
 
 export async function listTeamMembers(): Promise<TeamMember[]> {
   const deleted = new Set(await getDeletedUserIds());
+
+  if (isSupabaseConfigured()) {
+    try {
+      const { sbListActiveUserProfiles } = await import(
+        "@/lib/supabase/user-profiles-repo"
+      );
+      const profiles = await sbListActiveUserProfiles();
+      const employeeRoles = new Set(["owner", "manager", "finance_manager"]);
+      const fromProfiles = profiles
+        .filter(
+          (profile) =>
+            employeeRoles.has(profile.role) && !deleted.has(profile.id),
+        )
+        .map((profile) => ({
+          id: profile.id,
+          email: profile.email,
+          name: profile.displayName,
+          role: profile.role as TeamMember["role"],
+        }));
+
+      if (fromProfiles.length > 0) {
+        const profileEmails = new Set(
+          fromProfiles.map((member) => member.email.toLowerCase()),
+        );
+        const custom = await listCustomTeamUsers();
+        const extras = custom
+          .filter(
+            (user) =>
+              !deleted.has(user.id) &&
+              !profileEmails.has(user.email.toLowerCase()),
+          )
+          .map(({ id, email, name, role }) => ({ id, email, name, role }));
+        return [...fromProfiles, ...extras];
+      }
+    } catch (error) {
+      console.error("[team] list members from profiles", error);
+    }
+  }
+
   const users = await listAllTeamUsers();
   return users
     .filter((user) => !deleted.has(user.id))

@@ -55,7 +55,7 @@ export function TaskCard({
   const isNeedsRevision = task.status === "needs_revision";
   const overdue = isTaskOverdue(task);
   const createdByMe = isTaskCreator(task, user);
-  const assignedToMe = isTaskAssignee(task, user.id);
+  const assignedToMe = isTaskAssignee(task, user);
   const canEdit = canEditTask(task, user);
   const canDelete = canDeleteTask(task, user);
   const canStart = canStartTask(task, user);

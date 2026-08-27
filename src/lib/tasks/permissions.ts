@@ -1,15 +1,35 @@
 import type { SessionUser } from "@/lib/auth/types";
+import { listTeamUsers } from "@/lib/auth/users";
 import type { Task, TaskAttachment, TaskStatus } from "./types";
 import { taskNeedsApprovalWorkflow } from "./workflow";
 
-export function isTaskAssignee(task: Task, userId: string): boolean {
-  return task.assignees.some((assignee) => assignee.id === userId);
+export function isTaskAssignee(task: Task, user: SessionUser): boolean {
+  if (task.assignees.some((assignee) => assignee.id === user.id)) {
+    return true;
+  }
+
+  // Demo roster ids (olivia-bennett) vs Supabase profile UUIDs for the same person.
+  const email = user.email.trim().toLowerCase();
+  const demoUser = listTeamUsers().find(
+    (member) => member.email.toLowerCase() === email,
+  );
+  if (
+    demoUser &&
+    task.assignees.some((assignee) => assignee.id === demoUser.id)
+  ) {
+    return true;
+  }
+
+  const name = user.name.trim().toLowerCase();
+  return task.assignees.some(
+    (assignee) => assignee.name.trim().toLowerCase() === name,
+  );
 }
 
 /** Задачу видят только автор и назначенные исполнители. */
 export function canViewTask(task: Task, user: SessionUser): boolean {
   if (isTaskCreator(task, user)) return true;
-  return isTaskAssignee(task, user.id);
+  return isTaskAssignee(task, user);
 }
 
 /** Кто создал и назначил задачу (автор). */
@@ -20,6 +40,12 @@ export function isTaskCreator(task: Task, user: SessionUser): boolean {
     if (creatorId.toLowerCase() === user.email.toLowerCase()) return true;
   }
 
+  // Demo slug creator id vs Supabase profile UUID for the same email.
+  const demoUser = listTeamUsers().find(
+    (member) => member.email.toLowerCase() === user.email.toLowerCase(),
+  );
+  if (demoUser && creatorId === demoUser.id) return true;
+
   return task.createdByName.trim() === user.name.trim();
 }
 
@@ -27,14 +53,14 @@ export function canChangeTaskStatus(task: Task, user: SessionUser): boolean {
   return (
     user.role === "owner" ||
     isTaskCreator(task, user) ||
-    isTaskAssignee(task, user.id)
+    isTaskAssignee(task, user)
   );
 }
 
 /** Исполнитель может сдать задачу на проверку. */
 export function canSubmitForApproval(task: Task, user: SessionUser): boolean {
   if (!taskNeedsApprovalWorkflow(task)) return false;
-  if (!isTaskAssignee(task, user.id)) return false;
+  if (!isTaskAssignee(task, user)) return false;
   if (task.status === "pending_approval" || task.status === "completed") {
     return false;
   }
@@ -81,14 +107,14 @@ export function canManageTaskAttachments(task: Task, user: SessionUser): boolean
   return (
     user.role === "owner" ||
     isTaskCreator(task, user) ||
-    isTaskAssignee(task, user.id)
+    isTaskAssignee(task, user)
   );
 }
 
 /** Исполнитель может оставить отчёт о проделанной работе. */
 export function canAddTaskProgressReport(task: Task, user: SessionUser): boolean {
   if (task.status === "completed") return false;
-  return isTaskAssignee(task, user.id);
+  return isTaskAssignee(task, user);
 }
 
 /** Удалить свой отчёт может автор; автор задачи или владелец — любой. */

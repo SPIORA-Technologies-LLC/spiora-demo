@@ -141,7 +141,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
   const needsMyRevision = useMemo(
     () =>
       tasks.filter(
-        (task) => isTaskAssignee(task, user.id) && task.status === "needs_revision",
+        (task) => isTaskAssignee(task, user) && task.status === "needs_revision",
       ),
     [tasks, user.id],
   );
@@ -219,7 +219,7 @@ export function TasksView({ user, teamMembers }: TasksViewProps) {
       }
       if (
         quickFilter === "needs_my_revision" &&
-        !(isTaskAssignee(task, user.id) && task.status === "needs_revision")
+        !(isTaskAssignee(task, user) && task.status === "needs_revision")
       ) {
         return false;
       }

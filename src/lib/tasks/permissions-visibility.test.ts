@@ -53,4 +53,24 @@ assert.equal(
   "non-creator cannot view unassigned task",
 );
 
+const oliviaProfile: SessionUser = {
+  id: "uuid-olivia-profile",
+  name: "Olivia Bennett",
+  email: "olivia@spiora.demo",
+  role: "owner",
+};
+
+assert.equal(
+  canViewTask(
+    task({
+      createdByUserId: "daniel-cooper",
+      createdByName: "Daniel Cooper",
+      assignees: [{ id: "olivia-bennett", name: "Olivia Bennett" }],
+    }),
+    oliviaProfile,
+  ),
+  true,
+  "assignee with demo roster id is visible to Supabase profile session",
+);
+
 console.log("task visibility permissions: ok");

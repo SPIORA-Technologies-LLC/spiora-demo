@@ -79,7 +79,7 @@ export function TaskDetailModal({
   const isPendingApproval = task.status === "pending_approval";
   const isNeedsRevision = task.status === "needs_revision";
   const createdByMe = isTaskCreator(task, user);
-  const assignedToMe = isTaskAssignee(task, user.id);
+  const assignedToMe = isTaskAssignee(task, user);
   const canEdit = canEditTask(task, user);
   const canDelete = canDeleteTask(task, user);
   const canStart = canStartTask(task, user);

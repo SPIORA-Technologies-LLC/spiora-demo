@@ -239,12 +239,16 @@ export function NotificationBell() {
                     void (async () => {
                       setTestBusy(true);
                       try {
-                        const supported = await forceAppBadgeForTest(3);
-                        setTestResult(
-                          supported
-                            ? t("desktopBadgeTestSent")
-                            : t("desktopBadgeTestUnsupported"),
-                        );
+                        const result = await forceAppBadgeForTest(3);
+                        if (!result.apiSupported) {
+                          setTestResult(t("desktopBadgeTestUnsupported"));
+                        } else if (!result.standalone) {
+                          setTestResult(t("desktopBadgeTestNotStandalone"));
+                        } else {
+                          setTestResult(
+                            t("desktopBadgeTestSent", { title: result.title }),
+                          );
+                        }
                       } finally {
                         setTestBusy(false);
                       }

@@ -21,6 +21,18 @@ export function canUseAppBadge(): boolean {
   );
 }
 
+export function isRunningAsInstalledPwa(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    if (window.matchMedia("(display-mode: standalone)").matches) return true;
+    if (window.matchMedia("(display-mode: minimal-ui)").matches) return true;
+  } catch {
+    // ignore
+  }
+  const nav = window.navigator as Navigator & { standalone?: boolean };
+  return nav.standalone === true;
+}
+
 function combinedUnread(): number {
   return Math.max(
     Math.max(0, Math.floor(notificationsUnread)),
@@ -44,19 +56,20 @@ function ensureTitleWatch(): void {
 
   const attach = () => {
     const titleEl = document.querySelector("title");
-    if (!titleEl || titleObserver) return;
-    titleObserver = new MutationObserver(() => {
-      syncDocumentTitleBadge(combinedUnread());
-    });
-    titleObserver.observe(titleEl, {
-      childList: true,
-      characterData: true,
-      subtree: true,
-    });
+    if (!titleEl) return;
+    if (!titleObserver) {
+      titleObserver = new MutationObserver(() => {
+        syncDocumentTitleBadge(combinedUnread());
+      });
+      titleObserver.observe(titleEl, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      });
+    }
   };
 
   attach();
-  // Title node can be replaced by the framework after navigation.
   window.setInterval(attach, 2000);
 }
 
@@ -65,6 +78,8 @@ async function applyBadge(count: number): Promise<void> {
   ensureTitleWatch();
   syncDocumentTitleBadge(safe);
 
+  const errors: unknown[] = [];
+
   if (canUseAppBadge()) {
     try {
       if (safe <= 0) {
@@ -72,22 +87,18 @@ async function applyBadge(count: number): Promise<void> {
       } else {
         await navigator.setAppBadge(safe);
       }
-    } catch {
-      // Unsupported or permission denied — ignore.
+    } catch (error) {
+      errors.push(error);
     }
   }
 
   if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
     try {
       const registration = await navigator.serviceWorker.ready;
-      // Keep SW alive until Windows/Edge receives the badge update.
-      const active = registration.active;
-      if (active) {
-        active.postMessage({
-          type: "SPIORA_SET_BADGE",
-          count: safe,
-        });
-      }
+      registration.active?.postMessage({
+        type: "SPIORA_SET_BADGE",
+        count: safe,
+      });
       if (typeof registration.setAppBadge === "function") {
         if (safe <= 0) {
           await registration.clearAppBadge?.();
@@ -95,9 +106,13 @@ async function applyBadge(count: number): Promise<void> {
           await registration.setAppBadge(safe);
         }
       }
-    } catch {
-      // ignore
+    } catch (error) {
+      errors.push(error);
     }
+  }
+
+  if (errors.length > 0) {
+    console.warn("[spiora] app badge update failed", errors);
   }
 }
 
@@ -126,12 +141,41 @@ export async function clearAppUnreadBadge(): Promise<void> {
   await applyBadge(0);
 }
 
+export type BadgeTestResult = {
+  apiSupported: boolean;
+  standalone: boolean;
+  title: string;
+  error?: string;
+};
+
 /** Manual QA from the bell panel. */
-export async function forceAppBadgeForTest(count: number): Promise<boolean> {
+export async function forceAppBadgeForTest(
+  count: number,
+): Promise<BadgeTestResult> {
+  const standalone = isRunningAsInstalledPwa();
+  const apiSupported = canUseAppBadge();
   try {
     await applyBadge(count);
-    return canUseAppBadge();
-  } catch {
-    return false;
+    // Empty badge (dot) as a second signal — some Edge builds show this more reliably.
+    if (apiSupported && count > 0) {
+      try {
+        await navigator.setAppBadge();
+        await navigator.setAppBadge(count);
+      } catch {
+        // ignore
+      }
+    }
+    return {
+      apiSupported,
+      standalone,
+      title: typeof document !== "undefined" ? document.title : "",
+    };
+  } catch (error) {
+    return {
+      apiSupported,
+      standalone,
+      title: typeof document !== "undefined" ? document.title : "",
+      error: error instanceof Error ? error.message : "unknown",
+    };
   }
 }

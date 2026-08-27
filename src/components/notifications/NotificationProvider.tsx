@@ -22,7 +22,7 @@ import {
   playNotificationSound,
   unlockNotificationAudio,
 } from "@/lib/notifications/play-sound";
-import { setAppUnreadBadge } from "@/lib/notifications/app-badge";
+import { setNotificationsUnreadForBadge } from "@/lib/notifications/app-badge";
 import {
   buildSystemNotifyFromItem,
   ensureBrowserNotificationPermission,
@@ -234,7 +234,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         );
       });
       setUnread(unreadCount);
-      void setAppUnreadBadge(unreadCount);
+      void setNotificationsUnreadForBadge(unreadCount);
 
       if (!initializedRef.current) {
         for (const item of items) {
@@ -309,7 +309,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     );
     setUnread((prev) => {
       const next = Math.max(0, prev - 1);
-      void setAppUnreadBadge(next);
+      void setNotificationsUnreadForBadge(next);
       return next;
     });
   }, []);
@@ -324,7 +324,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       prev.map((item) => ({ ...item, is_read: true })),
     );
     setUnread(0);
-    void setAppUnreadBadge(0);
+    void setNotificationsUnreadForBadge(0);
   }, []);
 
   const removeNotification = useCallback(async (id: string) => {
@@ -358,13 +358,13 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    void setAppUnreadBadge(unread);
+    void setNotificationsUnreadForBadge(unread);
   }, [unread]);
 
   useEffect(() => {
     const onVisibility = () => {
       if (document.visibilityState === "visible") {
-        void setAppUnreadBadge(unread);
+        void setNotificationsUnreadForBadge(unread);
       }
     };
     document.addEventListener("visibilitychange", onVisibility);
@@ -408,7 +408,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     poll();
 
     const onWake = () => {
-      void setAppUnreadBadge(unread);
+      void setNotificationsUnreadForBadge(unread);
       schedule();
       poll();
     };

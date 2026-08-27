@@ -25,6 +25,9 @@ import {
   unlockNotificationAudio,
 } from "@/lib/notifications/play-sound";
 import {
+  forceAppBadgeForTest,
+} from "@/lib/notifications/app-badge";
+import {
   getBrowserNotificationPermission,
   requestBrowserNotificationPermission,
   showSystemNotification,
@@ -228,6 +231,28 @@ export function NotificationBell() {
                     {t("desktopTest")}
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  className={styles.desktopCalloutBtn}
+                  disabled={testBusy}
+                  onClick={() => {
+                    void (async () => {
+                      setTestBusy(true);
+                      try {
+                        const supported = await forceAppBadgeForTest(3);
+                        setTestResult(
+                          supported
+                            ? t("desktopBadgeTestSent")
+                            : t("desktopBadgeTestUnsupported"),
+                        );
+                      } finally {
+                        setTestBusy(false);
+                      }
+                    })();
+                  }}
+                >
+                  {t("desktopBadgeTest")}
+                </button>
               </div>
               {testResult ? (
                 <p className={styles.desktopCalloutResult}>{testResult}</p>

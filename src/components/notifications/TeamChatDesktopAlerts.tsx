@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import type { TeamChatMessage } from "@/lib/team-chat/types";
+import { setTeamChatUnreadForBadge } from "@/lib/notifications/app-badge";
 import {
   getBrowserNotificationPermission,
   isAppInBackground,
@@ -63,6 +64,7 @@ export function TeamChatDesktopAlerts() {
   useEffect(() => {
     if (onTeamChat) {
       prevUnreadRef.current = 0;
+      void setTeamChatUnreadForBadge(0);
       return;
     }
 
@@ -115,6 +117,7 @@ export function TeamChatDesktopAlerts() {
         const unread = Math.max(0, data.unread ?? 0);
         const prev = prevUnreadRef.current;
         prevUnreadRef.current = unread;
+        void setTeamChatUnreadForBadge(unread);
 
         // Skip the first sample so we don't alert on page load for old unread.
         if (prev === null) return;

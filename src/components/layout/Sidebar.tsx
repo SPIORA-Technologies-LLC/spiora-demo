@@ -13,6 +13,7 @@ import {
   getProductPresentationUrl,
   type BrandingLocale,
 } from "@/config/branding";
+import { setTeamChatUnreadForBadge } from "@/lib/notifications/app-badge";
 import styles from "./Sidebar.module.css";
 
 export type NavItem = {
@@ -72,6 +73,7 @@ export function Sidebar({
   useEffect(() => {
     if (pathname === "/team-chat" || pathname.startsWith("/team-chat/")) {
       setTeamChatUnread(0);
+      void setTeamChatUnreadForBadge(0);
       return;
     }
 
@@ -83,7 +85,9 @@ export function Sidebar({
         if (!res.ok) return;
         const data = (await res.json()) as { unread?: number };
         if (!cancelled) {
-          setTeamChatUnread(Math.max(0, data.unread ?? 0));
+          const next = Math.max(0, data.unread ?? 0);
+          setTeamChatUnread(next);
+          void setTeamChatUnreadForBadge(next);
         }
       } catch {
         // ignore

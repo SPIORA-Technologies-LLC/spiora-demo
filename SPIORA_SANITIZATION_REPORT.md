@@ -10,7 +10,7 @@
 
 Remove real PII, production identifiers, and original-company branding from the demo codebase so the project is safe for GitHub publication and client demonstrations.
 
-**Temporary demo company name:** Northstar Mobility (Spiora rebrand planned in PR #2).
+**Temporary demo company name:** Spiora (Spiora rebrand planned in PR #2).
 
 ---
 
@@ -46,7 +46,7 @@ Remove real PII, production identifiers, and original-company branding from the 
 
 | Before | After |
 |--------|-------|
-| Sharp & Spice | Northstar Mobility (UI, manifest, login, AI prompts) |
+| Sharp & Spice | Spiora (UI, manifest, login, AI prompts) |
 | `sharp-spice` company ID | `northstar-mobility` |
 | `sharp-spice-cal-*` rooms | `northstar-cal-*` |
 | Production Netlify marketing URL | `https://example.com/northstar-mobility` |

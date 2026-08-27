@@ -228,7 +228,7 @@
     },
     "monthly-pipeline-summary": {
       "title": "Подготовить месячную сводку по pipeline",
-      "description": "Собрать активные кейсы, просроченные этапы и загрузку консультациями для руководства Northstar Mobility. Включить Sofia Martins и Marco Rossi как приоритетные примеры."
+      "description": "Собрать активные кейсы, просроченные этапы и загрузку консультациями для руководства Spiora. Включить Sofia Martins и Marco Rossi как приоритетные примеры."
     },
     "update-croatia-checklist": {
       "title": "Обновить чек-лист по Хорватии",
@@ -256,7 +256,7 @@
     },
     "demo-data-security-quiz": {
       "title": "Пройти квиз по безопасности демо-данных",
-      "description": "Завершить ежеквартальный квиз по безопасности: работа с PII клиентов, правила демо-среды и безопасный обмен файлами в Northstar Mobility."
+      "description": "Завершить ежеквартальный квиз по безопасности: работа с PII клиентов, правила демо-среды и безопасный обмен файлами в Spiora."
     },
     "portugal-d7-questionnaire": {
       "title": "Отправить анкету Portugal D7 John Carter",
@@ -268,11 +268,11 @@
     },
     "ai-workspace-prompt-audit": {
       "title": "Аудит промптов AI Workspace для клиентских кейсов",
-      "description": "Проверить стандартные AI-промпты для сводок по клиентам и убедиться, что они корректно ссылаются на программы Northstar Mobility. Протестировать на кейсах Sofia Martins и Marco Rossi."
+      "description": "Проверить стандартные AI-промпты для сводок по клиентам и убедиться, что они корректно ссылаются на программы Spiora. Протестировать на кейсах Sofia Martins и Marco Rossi."
     },
     "client-welcome-email-template": {
       "title": "Обновить шаблон welcome-письма клиенту",
-      "description": "Актуализировать welcome-письмо: вход в портал, советы по загрузке документов и контакты Northstar Mobility. Использовать онбординг John Carter как проверочный пример."
+      "description": "Актуализировать welcome-письмо: вход в портал, советы по загрузке документов и контакты Spiora. Использовать онбординг John Carter как проверочный пример."
     },
     "spain-remote-work-file": {
       "title": "Открыть дело Spain remote work для Sofia Martins",

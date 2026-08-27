@@ -20,7 +20,7 @@ Estimated total effort: **~55–70 developer-days** (1 FTE ≈ 11–14 weeks; pa
 |----------|---------|
 | `SPIORA_ISOLATION_AUDIT.md` | Production linkage, env risk, safe-to-start verdict |
 | `SPIORA_I18N_ARCHITECTURE.md` | Locale strategy, next-intl, string inventory |
-| `SPIORA_DEMO_DATA_PLAN.md` | Northstar Mobility seed spec |
+| `SPIORA_DEMO_DATA_PLAN.md` | Spiora seed spec |
 | `SPIORA_IMPLEMENTATION_PLAN.md` | PR breakdown, timeline, acceptance |
 
 **Phase A rules honored:** no code/env/git remote changes, no commit/push/deploy.
@@ -249,7 +249,7 @@ Supabase (prod), Emigrant Desk, Google Sheets/Drive, production OpenRouter, prod
 - [ ] `SPIORA_DEMO_MODE=true` blocks all production integrations  
 - [ ] Brand fully Spiora; no Sharp & Spice in UI  
 - [ ] EN default + RU switch with persistence  
-- [ ] Fictional Northstar Mobility data in all modules  
+- [ ] Fictional Spiora data in all modules  
 - [ ] Demo auth (Owner/Manager) without secrets in source  
 - [ ] Reset demo data works for owner  
 - [ ] Security audit document complete  

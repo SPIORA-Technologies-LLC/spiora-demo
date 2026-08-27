@@ -91,7 +91,7 @@ const DEMO_TEMPLATES: DemoEventTemplate[] = [
   { weekOffset: 0, weekday: 4, startHour: 13, startMinute: 0, endHour: 14, endMinute: 0, titleKey: "personalPlanningBlock", scope: "personal", ownerUserId: "olivia-bennett", createdByUserId: "olivia-bennett" },
   { weekOffset: 0, weekday: 4, startHour: 15, startMinute: 0, endHour: 16, endMinute: 0, titleKey: "teamRetrospective", scope: "company", createdByUserId: "emma-wilson" },
   { weekOffset: 0, weekday: 5, startHour: 11, startMinute: 0, endHour: 12, endMinute: 0, titleKey: "demoEnvironmentReview", scope: "company", createdByUserId: "lucas-martin" },
-  { weekOffset: 0, weekday: 6, startHour: 0, startMinute: 0, endHour: 23, endMinute: 59, titleKey: "companyOffsiteDay", scope: "company", allDay: true, createdByUserId: "olivia-bennett", location: "Northstar Mobility HQ" },
+  { weekOffset: 0, weekday: 6, startHour: 0, startMinute: 0, endHour: 23, endMinute: 59, titleKey: "companyOffsiteDay", scope: "company", allDay: true, createdByUserId: "olivia-bennett", location: "Spiora HQ" },
   { weekOffset: 1, weekday: 0, startHour: 9, startMinute: 0, endHour: 10, endMinute: 0, titleKey: "nextWeekKickoff", scope: "company", createdByUserId: "olivia-bennett" },
   { weekOffset: 1, weekday: 1, startHour: 10, startMinute: 30, endHour: 11, endMinute: 30, titleKey: "clientPortfolioReview", scope: "company", createdByUserId: "daniel-cooper" },
   { weekOffset: 1, weekday: 2, startHour: 14, startMinute: 0, endHour: 15, endMinute: 0, titleKey: "complianceDeadlinePrep", scope: "personal", ownerUserId: "emma-wilson", createdByUserId: "emma-wilson", sendReminders: true },

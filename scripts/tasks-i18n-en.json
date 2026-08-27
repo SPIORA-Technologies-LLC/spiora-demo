@@ -228,7 +228,7 @@
     },
     "monthly-pipeline-summary": {
       "title": "Draft monthly pipeline summary",
-      "description": "Compile active cases, overdue milestones, and consultation load for Northstar Mobility leadership. Include Sofia Martins and Marco Rossi as priority examples."
+      "description": "Compile active cases, overdue milestones, and consultation load for Spiora leadership. Include Sofia Martins and Marco Rossi as priority examples."
     },
     "update-croatia-checklist": {
       "title": "Update Croatia relocation checklist",
@@ -256,7 +256,7 @@
     },
     "demo-data-security-quiz": {
       "title": "Complete demo data security quiz",
-      "description": "Finish the quarterly security awareness quiz covering client PII handling, demo environment rules, and secure file sharing for Northstar Mobility."
+      "description": "Finish the quarterly security awareness quiz covering client PII handling, demo environment rules, and secure file sharing for Spiora."
     },
     "portugal-d7-questionnaire": {
       "title": "Send Portugal D7 questionnaire to John Carter",
@@ -268,11 +268,11 @@
     },
     "ai-workspace-prompt-audit": {
       "title": "Audit AI Workspace prompts for client cases",
-      "description": "Review default AI prompts used for client summaries and ensure they reference Northstar Mobility programs correctly. Test with Sofia Martins and Marco Rossi cases."
+      "description": "Review default AI prompts used for client summaries and ensure they reference Spiora programs correctly. Test with Sofia Martins and Marco Rossi cases."
     },
     "client-welcome-email-template": {
       "title": "Refresh client welcome email template",
-      "description": "Update the welcome email template with portal login steps, document upload tips, and Northstar Mobility contact details. Use John Carter onboarding as QA example."
+      "description": "Update the welcome email template with portal login steps, document upload tips, and Spiora contact details. Use John Carter onboarding as QA example."
     },
     "spain-remote-work-file": {
       "title": "Open Spain remote work file for Sofia Martins",

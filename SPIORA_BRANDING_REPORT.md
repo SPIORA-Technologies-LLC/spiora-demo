@@ -21,7 +21,7 @@
 | `productShortName` | Spiora |
 | `productDescription.en` | Corporate Digital Workspace |
 | `productDescription.ru` | Корпоративное цифровое пространство |
-| `companyName` | Northstar Mobility *(demo tenant, не продукт)* |
+| `companyName` | Spiora *(demo tenant, не продукт)* |
 | `logoPath` | `/spiora-logo.svg` |
 | `iconPath` / `faviconPath` | `/spiora-mark.svg` |
 | `theme` | dark |
@@ -101,11 +101,11 @@
 |---|---|
 | `branding.companyName` | Demo tenant, не продукт |
 | `users.ts` comment | Demo company note |
-| `meeting-guest-invite-message.test.ts` | Подпись «Команда Northstar Mobility» |
+| `meeting-guest-invite-message.test.ts` | Подпись «Команда Spiora» |
 | `environment-guard.ts` | Blocklist production URL (не брендинг UI) |
 | `CALENDAR_COMPANY_ID = northstar-mobility` | Demo data ID (не менялся) |
 
-**Не найдено** в UI/metadata/manifest: `Sharp & Spice`, `Northstar Mobility` как название продукта.
+**Не найдено** в UI/metadata/manifest: `Sharp & Spice`, `Spiora` как название продукта.
 
 ### `public/` — чисто
 
@@ -121,7 +121,7 @@
 
 ## Что осталось временно
 
-1. **Northstar Mobility** — только как `companyName` (fictional demo tenant)
+1. **Spiora** — только как `companyName` (fictional demo tenant)
 2. **Placeholder SVG-логотипы** — геометрический mark + текст; финальный brand design в будущем
 3. **Двуязычные подписи** — только в `branding.ts`, без `next-intl`
 4. **`company_id: northstar-mobility`** — demo data (PR #5)

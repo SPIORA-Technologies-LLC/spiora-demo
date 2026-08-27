@@ -4,7 +4,7 @@ export type TeamUser = SessionUser & {
   passwordEnvKey: string;
 };
 
-/** Demo team roster — fictional accounts only (Northstar Mobility). */
+/** Demo team roster — fictional accounts only (Spiora). */
 const TEAM_USERS: TeamUser[] = [
   {
     id: "olivia-bennett",

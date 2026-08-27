@@ -69,7 +69,7 @@ comment on column user_profiles.auth_user_id is
   'References auth.users.id. Must be created via Supabase Auth Dashboard/Admin API, not SQL insert.';
 
 comment on column user_profiles.is_demo is
-  'True for fictional Northstar Mobility demo accounts only.';
+  'True for fictional Spiora demo accounts only.';
 
 -- -----------------------------------------------------------------------------
 -- auth_login_rate_limits — persistent server-side limiter (Vercel-safe)

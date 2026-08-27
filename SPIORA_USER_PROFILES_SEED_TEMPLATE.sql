@@ -1,6 +1,6 @@
 -- =============================================================================
 -- SPIORA_USER_PROFILES_SEED_TEMPLATE.sql
--- PR #17.1 — Fictional Northstar Mobility profiles (TEMPLATE ONLY)
+-- PR #17.1 — Fictional Spiora profiles (TEMPLATE ONLY)
 --
 -- DO NOT run this file as-is.
 -- 1) Create Auth users in Supabase Dashboard (never INSERT into auth.users).

@@ -36,7 +36,7 @@ on conflict (slug) do update set
 insert into public.knowledge_base_article_translations (
   article_id, locale, title, summary, content
 ) values
-  ((select id from public.knowledge_base_articles where slug = 'client-onboarding-checklist'), 'en', $kb_client_onboarding_checklist_en_title$Client onboarding checklist$kb_client_onboarding_checklist_en_title$, $kb_client_onboarding_checklist_en_summary$Step-by-step checklist for welcoming new mobility clients at Northstar Mobility.$kb_client_onboarding_checklist_en_summary$, $kb_client_onboarding_checklist_en_content$## Overview
+  ((select id from public.knowledge_base_articles where slug = 'client-onboarding-checklist'), 'en', $kb_client_onboarding_checklist_en_title$Client onboarding checklist$kb_client_onboarding_checklist_en_title$, $kb_client_onboarding_checklist_en_summary$Step-by-step checklist for welcoming new mobility clients at Spiora.$kb_client_onboarding_checklist_en_summary$, $kb_client_onboarding_checklist_en_content$## Overview
 
 Use this checklist during the first 72 hours after a client is assigned. The goal is consistent intake, clear expectations, and a complete CRM profile.
 
@@ -51,7 +51,7 @@ Use this checklist during the first 72 hours after a client is assigned. The goa
 ## Handoff
 
 After intake, assign a primary manager and note any family members or dependents in the client file. Escalate missing identity documents within 24 hours.$kb_client_onboarding_checklist_en_content$),
-  ((select id from public.knowledge_base_articles where slug = 'client-onboarding-checklist'), 'ru', $kb_client_onboarding_checklist_ru_title$Чек-лист онбординга клиента$kb_client_onboarding_checklist_ru_title$, $kb_client_onboarding_checklist_ru_summary$Пошаговый чек-лист для приёма новых клиентов Northstar Mobility.$kb_client_onboarding_checklist_ru_summary$, $kb_client_onboarding_checklist_ru_content$## Обзор
+  ((select id from public.knowledge_base_articles where slug = 'client-onboarding-checklist'), 'ru', $kb_client_onboarding_checklist_ru_title$Чек-лист онбординга клиента$kb_client_onboarding_checklist_ru_title$, $kb_client_onboarding_checklist_ru_summary$Пошаговый чек-лист для приёма новых клиентов Spiora.$kb_client_onboarding_checklist_ru_summary$, $kb_client_onboarding_checklist_ru_content$## Обзор
 
 Используйте этот чек-лист в первые 72 часа после назначения клиента. Цель — единообразный intake, понятные ожидания и полный профиль в CRM.
 
@@ -102,7 +102,7 @@ Client folders follow `ClientLastName_FirstName_DEMO-ID`. Shared templates live 
 ## Папки
 
 Папки клиентов: `Фамилия_Имя_DEMO-ID`. Общие шаблоны — в `/Templates`, без переименования.$kb_document_naming_rules_ru_content$),
-  ((select id from public.knowledge_base_articles where slug = 'internal-communication-guidelines'), 'en', $kb_internal_communication_guidelines_en_title$Internal communication guidelines$kb_internal_communication_guidelines_en_title$, $kb_internal_communication_guidelines_en_summary$How the Northstar Mobility team communicates about clients and cases.$kb_internal_communication_guidelines_en_summary$, $kb_internal_communication_guidelines_en_content$## Channels
+  ((select id from public.knowledge_base_articles where slug = 'internal-communication-guidelines'), 'en', $kb_internal_communication_guidelines_en_title$Internal communication guidelines$kb_internal_communication_guidelines_en_title$, $kb_internal_communication_guidelines_en_summary$How the Spiora team communicates about clients and cases.$kb_internal_communication_guidelines_en_summary$, $kb_internal_communication_guidelines_en_content$## Channels
 
 - **Team Chat** — day-to-day coordination, quick updates.
 - **CRM notes** — official case history; always log decisions here.
@@ -115,7 +115,7 @@ Do not share passport numbers, full addresses, or financial details in chat. Use
 ## Response times
 
 Managers should acknowledge @mentions within 4 business hours. Urgent escalations use the escalation procedure article.$kb_internal_communication_guidelines_en_content$),
-  ((select id from public.knowledge_base_articles where slug = 'internal-communication-guidelines'), 'ru', $kb_internal_communication_guidelines_ru_title$Правила внутренней коммуникации$kb_internal_communication_guidelines_ru_title$, $kb_internal_communication_guidelines_ru_summary$Как команда Northstar Mobility обсуждает клиентов и кейсы.$kb_internal_communication_guidelines_ru_summary$, $kb_internal_communication_guidelines_ru_content$## Каналы
+  ((select id from public.knowledge_base_articles where slug = 'internal-communication-guidelines'), 'ru', $kb_internal_communication_guidelines_ru_title$Правила внутренней коммуникации$kb_internal_communication_guidelines_ru_title$, $kb_internal_communication_guidelines_ru_summary$Как команда Spiora обсуждает клиентов и кейсы.$kb_internal_communication_guidelines_ru_summary$, $kb_internal_communication_guidelines_ru_content$## Каналы
 
 - **Team Chat** — ежедневная координация и быстрые обновления.
 - **Заметки CRM** — официальная история кейса; фиксируйте решения здесь.
@@ -322,7 +322,7 @@ Level 1: same business day. Level 2: within 4 hours.$kb_escalation_procedure_en_
 ## SLA
 
 Уровень 1: в тот же рабочий день. Уровень 2: в течение 4 часов.$kb_escalation_procedure_ru_content$),
-  ((select id from public.knowledge_base_articles where slug = 'team-member-onboarding'), 'en', $kb_team_member_onboarding_en_title$Team member onboarding$kb_team_member_onboarding_en_title$, $kb_team_member_onboarding_en_summary$First-week guide for new managers joining Northstar Mobility.$kb_team_member_onboarding_en_summary$, $kb_team_member_onboarding_en_content$## Day 1
+  ((select id from public.knowledge_base_articles where slug = 'team-member-onboarding'), 'en', $kb_team_member_onboarding_en_title$Team member onboarding$kb_team_member_onboarding_en_title$, $kb_team_member_onboarding_en_summary$First-week guide for new managers joining Spiora.$kb_team_member_onboarding_en_summary$, $kb_team_member_onboarding_en_content$## Day 1
 
 Platform tour: CRM, Tasks, Calendar, Team Chat, Knowledge Base, AI Workspace.
 
@@ -337,7 +337,7 @@ Take a demo client case end-to-end with a buddy manager.
 ## Certification
 
 Complete the data security quiz and confirm understanding of communication guidelines.$kb_team_member_onboarding_en_content$),
-  ((select id from public.knowledge_base_articles where slug = 'team-member-onboarding'), 'ru', $kb_team_member_onboarding_ru_title$Адаптация нового сотрудника$kb_team_member_onboarding_ru_title$, $kb_team_member_onboarding_ru_summary$Руководство на первую неделю для новых менеджеров Northstar Mobility.$kb_team_member_onboarding_ru_summary$, $kb_team_member_onboarding_ru_content$## День 1
+  ((select id from public.knowledge_base_articles where slug = 'team-member-onboarding'), 'ru', $kb_team_member_onboarding_ru_title$Адаптация нового сотрудника$kb_team_member_onboarding_ru_title$, $kb_team_member_onboarding_ru_summary$Руководство на первую неделю для новых менеджеров Spiora.$kb_team_member_onboarding_ru_summary$, $kb_team_member_onboarding_ru_content$## День 1
 
 Тур по платформе: CRM, Tasks, Calendar, Team Chat, база знаний, AI Workspace.
 

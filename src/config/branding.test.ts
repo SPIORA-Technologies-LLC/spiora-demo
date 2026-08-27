@@ -17,7 +17,7 @@ const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const FORBIDDEN_PRODUCT_PATTERNS = [
   /Sharp\s*&\s*Spice/i,
   /Sharp-Spice/i,
-  /Northstar Mobility Demo/i,
+  /Northstar Mobility/i,
 ];
 
 const BRANDING_SURFACE_FILES = [
@@ -29,21 +29,11 @@ const BRANDING_SURFACE_FILES = [
   "src/components/meet/GuestMeetRoom.tsx",
   "src/components/dashboard/FirstImpressionView.tsx",
   "public/sw.js",
-];
-
-const ALLOWED_NORTHSTAR_CONTEXTS = [
-  "companyName",
-  "demoCompanyWebsiteUrl",
-  "northstar-mobility",
-  "Команда ${branding.companyName}",
+  "src/config/branding.ts",
 ];
 
 function readRepoFile(relativePath: string): string {
   return fs.readFileSync(path.join(ROOT, relativePath), "utf8");
-}
-
-function isAllowedNorthstarLine(line: string): boolean {
-  return ALLOWED_NORTHSTAR_CONTEXTS.some((token) => line.includes(token));
 }
 
 describe("branding config", () => {
@@ -118,10 +108,14 @@ describe("branding config", () => {
     assert.equal(branding.iconPath, "/icons/icon-512x512.png");
     assert.equal(branding.faviconPath, "/icons/favicon-32x32.png");
   });
+
+  it("uses Spiora as demo company name in workspace UI", () => {
+    assert.equal(branding.companyName, "Spiora");
+  });
 });
 
 describe("legacy product branding scan", () => {
-  it("does not contain forbidden product names in branding surfaces", () => {
+  it("does not contain forbidden legacy product names in branding surfaces", () => {
     for (const relativePath of BRANDING_SURFACE_FILES) {
       const content = readRepoFile(relativePath);
       for (const pattern of FORBIDDEN_PRODUCT_PATTERNS) {
@@ -132,25 +126,5 @@ describe("legacy product branding scan", () => {
         );
       }
     }
-  });
-
-  it("does not use Northstar Mobility as product name in src/public UI surfaces", () => {
-    const targets = [...BRANDING_SURFACE_FILES, "src/config/branding.ts"];
-
-    for (const relativePath of targets) {
-      const lines = readRepoFile(relativePath).split(/\r?\n/);
-      for (const line of lines) {
-        if (!line.includes("Northstar Mobility")) continue;
-        assert.ok(
-          isAllowedNorthstarLine(line),
-          `${relativePath} has legacy product branding: ${line.trim()}`,
-        );
-      }
-    }
-  });
-
-  it("keeps demo company name separate from product name", () => {
-    assert.notEqual(branding.companyName, branding.productName);
-    assert.equal(branding.companyName, "Northstar Mobility");
   });
 });

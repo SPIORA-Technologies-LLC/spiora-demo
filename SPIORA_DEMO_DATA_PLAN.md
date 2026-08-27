@@ -1,7 +1,7 @@
 # SPIORA Demo Data Plan — Phase A
 
 **Date:** 2026-07-10  
-**Demo company (proposed):** **Northstar Mobility**  
+**Demo company (proposed):** **Spiora**  
 **Tagline EN:** Corporate Digital Workspace  
 **Tagline RU:** Корпоративное цифровое пространство  
 
@@ -189,7 +189,7 @@ Stored in Supabase `app_state` or new `kb_articles` table if needed:
 | consultation-prep | Preparing for consultations |
 | internal-communication | Team communication guidelines |
 
-Content: 3–8 paragraphs markdown, fictional procedures referencing Northstar Mobility.
+Content: 3–8 paragraphs markdown, fictional procedures referencing Spiora.
 
 **Disable Google Drive KB** in demo mode.
 

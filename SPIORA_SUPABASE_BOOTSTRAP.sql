@@ -14,7 +14,7 @@
 -- -----------------------------------------------------------------------------
 -- 001_platform.sql
 -- -----------------------------------------------------------------------------
--- Northstar Mobility demo — initial schema
+-- Spiora demo — initial schema
 
 create extension if not exists "pgcrypto";
 

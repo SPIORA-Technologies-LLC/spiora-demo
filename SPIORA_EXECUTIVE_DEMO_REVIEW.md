@@ -2,7 +2,7 @@
 
 **Дата:** 11 июля 2026  
 **Роль реviewer:** CEO компании ~80 сотрудников, впервые видит Spiora, не знает разработчика  
-**Контекст демо:** Northstar Mobility — иммиграционное/relocation-агентство, ~12 клиентов в CRM, команда 4 человека  
+**Контекст демо:** Spiora — иммиграционное/relocation-агентство, ~12 клиентов в CRM, команда 4 человека  
 **Метод:** прохождение buyer journey глазами покупателя — без кода, без тестов, без поиска багов  
 **Язык демо:** English (default)
 
@@ -156,7 +156,7 @@
 |----------|--------|
 | **WOW** | Integrations matrix: Google Drive, Sheets, Supabase, LiveKit — «это платформа, не одна фича». |
 | **Дорого** | Структура admin panel правильная — 9 tabs, hint-тексты, status badges. |
-| **Enterprise** | Password reset для команды, integration statuses, Company profile (Northstar Mobility, Prague). |
+| **Enterprise** | Password reset для команды, integration statuses, Company profile (Spiora, Prague). |
 | **Незаконченно** | Badge «Demo mode — Preview only»; ~80% полей read-only. |
 | **Дёшево** | Много tabs с 2–3 disabled полями — ширина без глубины. |
 | **Переделал бы** | Buyer-demo: 3 tabs (Company · Integrations · Security); остальное — collapsed «Advanced». |

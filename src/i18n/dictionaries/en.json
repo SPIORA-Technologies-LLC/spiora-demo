@@ -2090,7 +2090,7 @@
     "articles": {
       "client-onboarding-checklist": {
         "title": "Client onboarding checklist",
-        "summary": "Step-by-step checklist for welcoming new mobility clients at Northstar Mobility.",
+        "summary": "Step-by-step checklist for welcoming new mobility clients at Spiora.",
         "content": "## Overview\n\nUse this checklist during the first 72 hours after a client is assigned. The goal is consistent intake, clear expectations, and a complete CRM profile.\n\n## Checklist\n\n1. Confirm contact details and preferred language in CRM.\n2. Send the welcome email with portal access instructions.\n3. Schedule an intake call within 5 business days.\n4. Create a task bundle: document collection, consultation prep, and follow-up.\n5. Tag the case with direction (country/program) and urgency.\n\n## Handoff\n\nAfter intake, assign a primary manager and note any family members or dependents in the client file. Escalate missing identity documents within 24 hours."
       },
       "document-naming-rules": {
@@ -2100,7 +2100,7 @@
       },
       "internal-communication-guidelines": {
         "title": "Internal communication guidelines",
-        "summary": "How the Northstar Mobility team communicates about clients and cases.",
+        "summary": "How the Spiora team communicates about clients and cases.",
         "content": "## Channels\n\n- **Team Chat** — day-to-day coordination, quick updates.\n- **CRM notes** — official case history; always log decisions here.\n- **Email** — client-facing only; copy summaries to CRM.\n\n## Client privacy\n\nDo not share passport numbers, full addresses, or financial details in chat. Use client IDs and last names only.\n\n## Response times\n\nManagers should acknowledge @mentions within 4 business hours. Urgent escalations use the escalation procedure material."
       },
       "consultation-prep": {
@@ -2140,7 +2140,7 @@
       },
       "team-member-onboarding": {
         "title": "Team member onboarding",
-        "summary": "First-week guide for new managers joining Northstar Mobility.",
+        "summary": "First-week guide for new managers joining Spiora.",
         "content": "## Day 1\n\nPlatform tour: CRM, Tasks, Calendar, Team Chat, Database, AI Workspace.\n\n## Week 1\n\nShadow two client consultations. Read Company Policies and Client Workflow categories.\n\n## Week 2\n\nTake a demo client case end-to-end with a buddy manager.\n\n## Certification\n\nComplete the data security quiz and confirm understanding of communication guidelines."
       },
       "monthly-reporting-guide": {
@@ -2396,7 +2396,7 @@
       },
       "monthly-pipeline-summary": {
         "title": "Draft monthly pipeline summary",
-        "description": "Compile active cases, overdue milestones, and consultation load for Northstar Mobility leadership. Include Sofia Martins and Marco Rossi as priority examples."
+        "description": "Compile active cases, overdue milestones, and consultation load for Spiora leadership. Include Sofia Martins and Marco Rossi as priority examples."
       },
       "update-croatia-checklist": {
         "title": "Update Croatia relocation checklist",
@@ -2424,7 +2424,7 @@
       },
       "demo-data-security-quiz": {
         "title": "Complete demo data security quiz",
-        "description": "Finish the quarterly security awareness quiz covering client PII handling, demo environment rules, and secure file sharing for Northstar Mobility."
+        "description": "Finish the quarterly security awareness quiz covering client PII handling, demo environment rules, and secure file sharing for Spiora."
       },
       "portugal-d7-questionnaire": {
         "title": "Send Portugal D7 questionnaire to John Carter",
@@ -2436,11 +2436,11 @@
       },
       "ai-workspace-prompt-audit": {
         "title": "Audit AI Workspace prompts for client cases",
-        "description": "Review default AI prompts used for client summaries and ensure they reference Northstar Mobility programs correctly. Test with Sofia Martins and Marco Rossi cases."
+        "description": "Review default AI prompts used for client summaries and ensure they reference Spiora programs correctly. Test with Sofia Martins and Marco Rossi cases."
       },
       "client-welcome-email-template": {
         "title": "Refresh client welcome email template",
-        "description": "Update the welcome email template with portal login steps, document upload tips, and Northstar Mobility contact details. Use John Carter onboarding as QA example."
+        "description": "Update the welcome email template with portal login steps, document upload tips, and Spiora contact details. Use John Carter onboarding as QA example."
       },
       "spain-remote-work-file": {
         "title": "Open Spain remote work file for Sofia Martins",

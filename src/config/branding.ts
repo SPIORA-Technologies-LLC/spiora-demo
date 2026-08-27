@@ -24,8 +24,8 @@ export const branding = {
     en: "ONE PLATFORM. INFINITE SOLUTIONS.",
     ru: "ONE PLATFORM. INFINITE SOLUTIONS.",
   },
-  /** Fictional demo tenant — not the product name. */
-  companyName: "Northstar Mobility",
+  /** Demo company shown in workspace UI (team chat, tasks, AI prompts). */
+  companyName: "Spiora",
   logoPath: "/logo3.png",
   logoCompactPath: "/logo3-compact.png",
   iconPath: "/icons/icon-512x512.png",
@@ -37,7 +37,7 @@ export const branding = {
     en: "https://gamma.app/docs/Spiora-presentation-in-English-z3irgedui9m9fgs",
     ru: "https://gamma.app/docs/-msbuylfh7da9te1",
   },
-  demoCompanyWebsiteUrl: "https://example.com/northstar-mobility",
+  demoCompanyWebsiteUrl: "https://example.com/spiora",
   defaultLocale: "en" as BrandingLocale,
   availableLocales: ["en", "ru"] as const satisfies readonly BrandingLocale[],
   demoMode:

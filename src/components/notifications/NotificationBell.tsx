@@ -172,6 +172,7 @@ export function NotificationBell() {
                       : t("desktopBanner")}
               </p>
               <p className={styles.desktopCalloutHint}>{t("desktopWindowsHint")}</p>
+              <p className={styles.desktopCalloutHint}>{t("desktopBadgeHint")}</p>
               <div className={styles.desktopCalloutActions}>
                 {desktopPermission !== "granted" &&
                 desktopPermission !== "unsupported" &&

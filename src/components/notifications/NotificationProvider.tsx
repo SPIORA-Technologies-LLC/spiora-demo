@@ -160,11 +160,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       );
 
       const inBackground = isAppInBackground();
-      const isChat = notification.type === "team_chat";
 
-      // Chat off the chat page: always prefer Windows/macOS toast (Telegram-style),
-      // even if the Spiora window still reports focus incorrectly as a PWA.
-      const preferDesktop = inBackground || (isChat && !onSection);
+      // Off the relevant section (or app covered): Windows/macOS toast + sound
+      // for chat, tasks, meetings, and other wired notification types.
+      const preferDesktop = inBackground || !onSection;
 
       if (preferDesktop) {
         void (async () => {
@@ -184,9 +183,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
         })();
         // Still show in-app toast when focused and permission was missing.
         if (inBackground || onSection) return;
-        if (
-          getBrowserNotificationPermission() === "granted"
-        ) {
+        if (getBrowserNotificationPermission() === "granted") {
           return;
         }
       }

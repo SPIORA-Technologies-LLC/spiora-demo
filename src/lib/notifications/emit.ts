@@ -104,8 +104,15 @@ export async function notifyTaskStatusChanged(params: {
   actorName: string;
   taskTitle: string;
   status: TaskStatus;
+  assigneeIds?: string[];
+  creatorUserId?: string;
 }) {
   const locale = await getRequestLocale();
+  const recipientIds = [
+    ...(params.assigneeIds ?? []),
+    ...(params.creatorUserId ? [params.creatorUserId] : []),
+  ].filter((id) => id && id !== params.actorId);
+  const uniqueRecipients = [...new Set(recipientIds)];
 
   await createNotificationsForTeam(
     {
@@ -114,7 +121,12 @@ export async function notifyTaskStatusChanged(params: {
       author_name: params.actorName,
       message: `${params.taskTitle} — ${translateTaskStatusForNotification(locale, params.status)}`,
     },
-    { excludeUserId: params.actorId },
+    uniqueRecipients.length
+      ? {
+          excludeUserId: params.actorId,
+          onlyUserIds: uniqueRecipients,
+        }
+      : { excludeUserId: params.actorId },
   );
 }
 
@@ -276,6 +288,8 @@ export async function notifyTaskStatusUpdate(params: {
     actorName: params.actorName,
     taskTitle: params.taskTitle,
     status: params.newStatus,
+    assigneeIds: params.assigneeIds,
+    creatorUserId: params.creatorUserId,
   });
 }
 

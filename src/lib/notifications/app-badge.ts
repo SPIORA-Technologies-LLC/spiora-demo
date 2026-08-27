@@ -1,8 +1,14 @@
 /**
  * PWA / installed-app icon badge (Badging API).
  * Works for installed PWAs on Chromium (desktop + Android).
- * Does not work for plain .lnk browser shortcuts.
+ * Does not work for plain .lnk browser shortcuts — install via Chrome/Edge
+ * “Install Spiora” / “Install app”.
+ *
+ * Also mirrors unread into the document title so taskbar/dock labels show a count
+ * when Badging API is unavailable.
  */
+
+const TITLE_BADGE_RE = /^\(\d+\)\s+/;
 
 export function canUseAppBadge(): boolean {
   return (
@@ -11,8 +17,16 @@ export function canUseAppBadge(): boolean {
   );
 }
 
+function syncDocumentTitleBadge(count: number): void {
+  if (typeof document === "undefined") return;
+  const base = document.title.replace(TITLE_BADGE_RE, "");
+  document.title = count > 0 ? `(${count}) ${base}` : base;
+}
+
 export async function setAppUnreadBadge(count: number): Promise<void> {
   const safe = Math.max(0, Math.floor(count));
+
+  syncDocumentTitleBadge(safe);
 
   if (canUseAppBadge()) {
     try {

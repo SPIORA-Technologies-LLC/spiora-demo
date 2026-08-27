@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { usePathname } from "next/navigation";
 import { signOutAction } from "@/app/login/actions";
 import { Logo } from "@/components/ui/Logo";
 import { PwaInstallSidebarButton } from "@/components/pwa/PwaInstallSidebarButton";
+import { useNotificationsOptional } from "@/components/notifications/notification-context";
 import { getNavItemsForRole } from "@/lib/auth/permissions";
 import type { UserRole } from "@/lib/auth/types";
 import {
@@ -14,6 +15,8 @@ import {
   type BrandingLocale,
 } from "@/config/branding";
 import { setTeamChatUnreadForBadge } from "@/lib/notifications/app-badge";
+import { getNotificationSection } from "@/lib/notifications/navigation";
+import type { NotificationType } from "@/lib/notifications/types";
 import styles from "./Sidebar.module.css";
 
 export type NavItem = {
@@ -47,6 +50,19 @@ function resolveNavLabel(
   return item.label ?? item.href;
 }
 
+function countUnreadForSection(
+  notifications: { type: string; message: string; is_read: boolean }[],
+  section: "tasks" | "calendar",
+): number {
+  return notifications.reduce((count, item) => {
+    if (item.is_read) return count;
+    return getNotificationSection(item.type as NotificationType, item.message) ===
+      section
+      ? count + 1
+      : count;
+  }, 0);
+}
+
 export function Sidebar({
   role,
   onNavItemClick,
@@ -60,7 +76,28 @@ export function Sidebar({
   const tNav = useTranslations("nav");
   const tShell = useTranslations("shell");
   const t = useTranslations("shell");
+  const notificationsCtx = useNotificationsOptional();
   const [teamChatUnread, setTeamChatUnread] = useState(0);
+
+  const onTasks = pathname === "/tasks" || pathname.startsWith("/tasks/");
+  const onCalendar =
+    pathname === "/calendar" || pathname.startsWith("/calendar/");
+
+  const tasksUnread = useMemo(() => {
+    if (onTasks) return 0;
+    return countUnreadForSection(
+      notificationsCtx?.notifications ?? [],
+      "tasks",
+    );
+  }, [notificationsCtx?.notifications, onTasks]);
+
+  const calendarUnread = useMemo(() => {
+    if (onCalendar) return 0;
+    return countUnreadForSection(
+      notificationsCtx?.notifications ?? [],
+      "calendar",
+    );
+  }, [notificationsCtx?.notifications, onCalendar]);
 
   function resolveNavHref(item: NavItem): string {
     if (item.labelKey === "demoCompanySite") {
@@ -121,6 +158,13 @@ export function Sidebar({
     onNavItemClick(href);
   };
 
+  function navUnreadBadge(href: string): number {
+    if (href === "/team-chat") return teamChatUnread;
+    if (href === "/tasks") return tasksUnread;
+    if (href === "/calendar") return calendarUnread;
+    return 0;
+  }
+
   return (
     <aside className={styles.sidebar}>
       <Logo
@@ -162,14 +206,15 @@ export function Sidebar({
               .join(" ");
 
             const label = resolveNavLabel(item, tNav, tShell);
+            const unreadCount = navUnreadBadge(href);
 
             const content = (
               <>
                 <i className={[item.icon, styles.icon].join(" ")} aria-hidden />
                 <span className={styles.navLabel}>
                   {label}
-                  {href === "/team-chat" && teamChatUnread > 0 ? (
-                    <span className={styles.unreadBadge}> ({teamChatUnread})</span>
+                  {unreadCount > 0 ? (
+                    <span className={styles.unreadBadge}> ({unreadCount})</span>
                   ) : null}
                 </span>
                 {item.external ? (

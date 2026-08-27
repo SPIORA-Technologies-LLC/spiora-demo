@@ -78,6 +78,8 @@ export function getNotificationSection(
     case "task_new":
     case "task_status":
     case "task_completed":
+    case "task_pending_approval":
+    case "task_revision":
       return "tasks";
     case "client_new":
     case "consultation_assigned":
@@ -112,6 +114,8 @@ export function getNotificationHref(
     case "task_new":
     case "task_status":
     case "task_completed":
+    case "task_pending_approval":
+    case "task_revision":
       return "/tasks";
     case "client_new":
     case "consultation_assigned":

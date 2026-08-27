@@ -105,7 +105,7 @@
     "desktopBannerDismiss": "Later",
     "desktopStatusOn": "Desktop notifications are on.",
     "desktopUnsupported": "This browser does not support system notifications.",
-    "desktopHelpToggle": "What to do if notifications don’t work?",
+    "desktopHelpToggle": "What to do if pop-up notifications don’t work when the app is inactive?",
     "desktopWindowsHint": "If a pop-up notification doesn’t appear: Windows Settings → System → Notifications — enable for Google Chrome (or Edge) and Spiora. In the same place, turn off Do Not Disturb (or press Win+A and turn off Do Not Disturb in Quick Settings). After the test, press Win+N — the alert may be in Notification Center.",
     "desktopTest": "Test notification",
     "desktopTestBody": "If you can see this, Spiora desktop alerts are working.",

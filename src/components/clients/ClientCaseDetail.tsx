@@ -882,12 +882,18 @@ export function ClientCaseDetail({
         <Card className={styles.panel}>
           <div className={styles.commentForm}>
             <textarea
+              className={styles.commentInput}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               rows={4}
               placeholder={t("comments.placeholder")}
             />
-            <button type="button" disabled={busy} onClick={() => void submitComment()}>
+            <button
+              type="button"
+              className={styles.commentSubmit}
+              disabled={busy}
+              onClick={() => void submitComment()}
+            >
               {t("comments.add")}
             </button>
           </div>

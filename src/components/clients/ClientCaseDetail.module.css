@@ -235,6 +235,9 @@
   flex-direction: column;
   gap: 0.75rem;
   margin-top: 0.85rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .signActionGroup {
@@ -242,6 +245,18 @@
   flex-wrap: wrap;
   align-items: stretch;
   gap: 0.55rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.signToolbar .docActionBtn {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .signPrimaryBtn {
@@ -459,9 +474,10 @@
     gap: 0.65rem;
   }
 
-  .signActionGroup .docActionBtn,
+  .signToolbar .docActionBtn,
   .signPrimaryBtn {
     width: 100%;
+    max-width: 100%;
     min-height: 2.75rem;
     padding: 0.65rem 1rem;
     font-size: 0.8125rem;

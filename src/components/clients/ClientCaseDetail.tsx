@@ -520,125 +520,129 @@ export function ClientCaseDetail({
                     />
                   ) : null}
                   {data.agreement.sign.canProviderSign ? (
-                    <button
-                      type="button"
-                      className={styles.docActionBtn}
-                      disabled={busy}
-                      onClick={() => void acceptAgreement(true)}
-                    >
-                      {t("sign.providerSign")}
-                    </button>
+                    <div className={styles.signToolbar}>
+                      <button
+                        type="button"
+                        className={`${styles.docActionBtn} ${styles.signPrimaryBtn}`}
+                        disabled={busy}
+                        onClick={() => void acceptAgreement(true)}
+                      >
+                        {t("sign.providerSign")}
+                      </button>
+                    </div>
                   ) : null}
-                  <div className={styles.docActions}>
-                    <button
-                      type="button"
-                      className={styles.docActionBtn}
-                      disabled={busy}
-                      onClick={() =>
-                        void fetch(`/api/client-cases/${caseId}/agreement/new-version`, {
-                          method: "POST",
-                        }).then(async (res) => {
-                          if (!res.ok) {
-                            setMessage(t("agreementFailed"));
-                            return;
-                          }
-                          await load();
-                        })
-                      }
-                    >
-                      {t("sign.newVersion")}
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.docActionBtn}
-                      disabled={
-                        busy ||
-                        data.agreement.sign.status === "cancelled" ||
-                        data.agreement.sign.status === "superseded"
-                      }
-                      onClick={() => {
-                        const signed =
-                          data.agreement?.sign?.status === "completed" ||
-                          data.agreement?.sign?.status === "provider_signed";
-                        const confirmed = window.confirm(
-                          signed
-                            ? t("sign.cancelConfirmCompleted")
-                            : t("sign.cancelConfirm"),
-                        );
-                        if (!confirmed) return;
-                        setBusy(true);
-                        setMessage(null);
-                        void fetch(`/api/client-cases/${caseId}/agreement/cancel`, {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({}),
-                        })
-                          .then(async (res) => {
-                            const json = (await res.json().catch(() => null)) as {
-                              error?: string;
-                              code?: string;
-                            } | null;
+                  <div className={styles.signToolbar}>
+                    <div className={styles.signActionGroup}>
+                      <button
+                        type="button"
+                        className={styles.docActionBtn}
+                        disabled={busy}
+                        onClick={() =>
+                          void fetch(`/api/client-cases/${caseId}/agreement/new-version`, {
+                            method: "POST",
+                          }).then(async (res) => {
                             if (!res.ok) {
-                              const code = json?.code ?? json?.error;
-                              if (
-                                code === "CONTRACT_WRONG_STATUS" ||
-                                code === "CONTRACT_SUPERSEDED" ||
-                                code === "CONTRACT_CANCELLED"
-                              ) {
-                                try {
-                                  setMessage(t(`sign.errors.${code}` as never));
-                                } catch {
-                                  setMessage(t("agreementFailed"));
-                                }
-                                return;
-                              }
                               setMessage(t("agreementFailed"));
                               return;
                             }
-                            setMessage(t("sign.cancelSuccess"));
-                            setAudit(null);
                             await load();
-                            if (auditOpen) {
-                              const auditRes = await fetch(
-                                `/api/client-cases/${caseId}/agreement/audit`,
-                              );
-                              if (auditRes.ok) {
-                                setAudit((await auditRes.json()) as AuditPayload);
-                              }
-                            }
                           })
-                          .finally(() => setBusy(false));
-                      }}
-                    >
-                      {t("sign.cancelContract")}
-                    </button>
-                    <button
-                      type="button"
-                      className={styles.docActionBtn}
-                      onClick={() => void toggleAudit()}
-                    >
-                      {t("sign.audit")}
-                    </button>
-                  </div>
-                  <div className={styles.docActions}>
-                    <a
-                      className={styles.docActionBtn}
-                      href={`/api/client-cases/${caseId}/agreement/pdf?kind=${
-                        data.agreement.sign.hasFinalPdf ? "final" : "source"
-                      }`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {t("sign.viewPdf")}
-                    </a>
-                    <a
-                      className={styles.docActionBtn}
-                      href={`/api/client-cases/${caseId}/agreement/pdf?kind=${
-                        data.agreement.sign.hasFinalPdf ? "final" : "source"
-                      }&download=1`}
-                    >
-                      {t("sign.downloadPdf")}
-                    </a>
+                        }
+                      >
+                        {t("sign.newVersion")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.docActionBtn}
+                        disabled={
+                          busy ||
+                          data.agreement.sign.status === "cancelled" ||
+                          data.agreement.sign.status === "superseded"
+                        }
+                        onClick={() => {
+                          const signed =
+                            data.agreement?.sign?.status === "completed" ||
+                            data.agreement?.sign?.status === "provider_signed";
+                          const confirmed = window.confirm(
+                            signed
+                              ? t("sign.cancelConfirmCompleted")
+                              : t("sign.cancelConfirm"),
+                          );
+                          if (!confirmed) return;
+                          setBusy(true);
+                          setMessage(null);
+                          void fetch(`/api/client-cases/${caseId}/agreement/cancel`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({}),
+                          })
+                            .then(async (res) => {
+                              const json = (await res.json().catch(() => null)) as {
+                                error?: string;
+                                code?: string;
+                              } | null;
+                              if (!res.ok) {
+                                const code = json?.code ?? json?.error;
+                                if (
+                                  code === "CONTRACT_WRONG_STATUS" ||
+                                  code === "CONTRACT_SUPERSEDED" ||
+                                  code === "CONTRACT_CANCELLED"
+                                ) {
+                                  try {
+                                    setMessage(t(`sign.errors.${code}` as never));
+                                  } catch {
+                                    setMessage(t("agreementFailed"));
+                                  }
+                                  return;
+                                }
+                                setMessage(t("agreementFailed"));
+                                return;
+                              }
+                              setMessage(t("sign.cancelSuccess"));
+                              setAudit(null);
+                              await load();
+                              if (auditOpen) {
+                                const auditRes = await fetch(
+                                  `/api/client-cases/${caseId}/agreement/audit`,
+                                );
+                                if (auditRes.ok) {
+                                  setAudit((await auditRes.json()) as AuditPayload);
+                                }
+                              }
+                            })
+                            .finally(() => setBusy(false));
+                        }}
+                      >
+                        {t("sign.cancelContract")}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.docActionBtn}
+                        onClick={() => void toggleAudit()}
+                      >
+                        {t("sign.audit")}
+                      </button>
+                    </div>
+                    <div className={styles.signActionGroup}>
+                      <a
+                        className={styles.docActionBtn}
+                        href={`/api/client-cases/${caseId}/agreement/pdf?kind=${
+                          data.agreement.sign.hasFinalPdf ? "final" : "source"
+                        }`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {t("sign.viewPdf")}
+                      </a>
+                      <a
+                        className={styles.docActionBtn}
+                        href={`/api/client-cases/${caseId}/agreement/pdf?kind=${
+                          data.agreement.sign.hasFinalPdf ? "final" : "source"
+                        }&download=1`}
+                      >
+                        {t("sign.downloadPdf")}
+                      </a>
+                    </div>
                   </div>
                   {data.agreement.sign.history && data.agreement.sign.history.length > 1 ? (
                     <div className={`${styles.docList} ${styles.versionHistory}`}>

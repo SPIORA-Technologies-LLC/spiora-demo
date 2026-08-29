@@ -230,6 +230,26 @@
   font-variant-numeric: tabular-nums;
 }
 
+.signToolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.signActionGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.55rem;
+}
+
+.signPrimaryBtn {
+  width: 100%;
+  min-height: 2.75rem;
+  font-size: 0.8125rem;
+}
+
 .docActionBtn,
 .docDeleteBtn {
   display: inline-flex;
@@ -427,6 +447,32 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .signToolbar {
+    gap: 0.85rem;
+    margin-top: 1rem;
+  }
+
+  .signActionGroup {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .signActionGroup .docActionBtn,
+  .signPrimaryBtn {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.65rem 1rem;
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .pdfFrame {
+    min-height: 42vh;
+    margin-bottom: 0.75rem;
   }
 }
 

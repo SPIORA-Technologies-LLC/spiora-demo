@@ -477,6 +477,138 @@
   flex-wrap: wrap;
 }
 
+.messageCardTappable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.messageCardSelected {
+  border-color: rgba(var(--brand-red-rgb), 0.55);
+  box-shadow: 0 0 0 1px rgba(var(--brand-red-rgb), 0.35);
+}
+
+.actionSheetOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.actionSheetBackdrop {
+  position: absolute;
+  inset: 0;
+  border: none;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+  cursor: pointer;
+}
+
+.actionSheetPanel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 520px;
+  padding: 0.75rem;
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.actionSheetPreview {
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--gray-700);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.actionSheetAuthor {
+  font-family: Inter, sans-serif;
+  font-weight: 700;
+  color: var(--white);
+  font-size: 0.875rem;
+}
+
+.actionSheetPreviewText {
+  font-family: Inter, sans-serif;
+  color: var(--gray-300);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.actionSheetActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.35rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--gray-700);
+}
+
+.actionSheetItem {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.85rem 0.95rem;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--white);
+  font-family: Inter, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.actionSheetItem:hover,
+.actionSheetItem:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.actionSheetItemDanger {
+  color: #fca5a5;
+}
+
+.actionSheetIcon {
+  width: 1rem;
+  text-align: center;
+  color: var(--gray-300);
+}
+
+.actionSheetItemDanger .actionSheetIcon {
+  color: #fca5a5;
+}
+
+.actionSheetCancel {
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--gray-700);
+  color: var(--white);
+  font-family: Inter, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.actionSheetCancel:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .actionBtn {
   padding: 0.3rem 0.55rem;
   border-radius: 999px;
@@ -800,27 +932,17 @@
   }
 
   .messageTop {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
     gap: 0.5rem;
   }
 
   .messageActions {
-    width: 100%;
-    justify-content: flex-start;
-    gap: 0.35rem;
+    display: none;
   }
 
-  .actionBtn {
-    flex: 1 1 auto;
-    justify-content: center;
-    min-width: 2.5rem;
-    font-size: 0;
-    padding: 0.45rem 0.55rem;
-  }
-
-  .actionIcon {
-    font-size: 0.85rem;
+  .messageCardTappable:active {
+    transform: scale(0.995);
   }
 
   .deleteBtn {
@@ -971,15 +1093,6 @@
 @media (max-width: 480px) {
   .messageCard {
     padding: 0.75rem 0.875rem;
-  }
-
-  .messageActions {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .deleteBtn {
-    grid-column: 1 / -1;
   }
 
   .sharedMediaGrid {

@@ -1041,6 +1041,7 @@
       "unpin": "Unpin",
       "delete": "Delete",
       "deleteWithIcon": "🗑 Delete",
+      "messageMenu": "Message actions",
       "send": "Send",
       "cancel": "Cancel",
       "close": "Close"

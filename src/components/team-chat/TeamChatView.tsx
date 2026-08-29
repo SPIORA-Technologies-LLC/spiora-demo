@@ -7,6 +7,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type MouseEvent,
   type ReactNode,
 } from "react";
 import { useLocale, useTranslations } from "next-intl";
@@ -117,6 +118,9 @@ export function TeamChatView({
   const [viewMode, setViewMode] = useState<"chat" | "shared">("chat");
   const [sharedTab, setSharedTab] = useState<TeamChatSharedMediaType>("image");
   const [composing, setComposing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [messageActionTarget, setMessageActionTarget] =
+    useState<TeamChatMessage | null>(null);
 
   const isOwner = user.role === "owner";
 
@@ -129,6 +133,67 @@ export function TeamChatView({
     prevScrollHeight: number;
     prevScrollTop: number;
   } | null>(null);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 768px)");
+    const sync = () => setIsMobile(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    if (!isMobile) setMessageActionTarget(null);
+  }, [isMobile]);
+
+  useEffect(() => {
+    if (viewMode !== "chat") setMessageActionTarget(null);
+  }, [viewMode]);
+
+  useEffect(() => {
+    if (!messageActionTarget) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMessageActionTarget(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [messageActionTarget]);
+
+  function closeMessageActions() {
+    setMessageActionTarget(null);
+  }
+
+  function handleMessageTap(
+    message: TeamChatMessage,
+    event: MouseEvent<HTMLElement>,
+  ) {
+    if (!isMobile) return;
+    const target = event.target as HTMLElement;
+    if (
+      target.closest(
+        "a, button, audio, video, input, textarea, select, [data-no-message-select]",
+      )
+    ) {
+      return;
+    }
+    setMessageActionTarget(message);
+  }
+
+  function handleReplyFromActions(message: TeamChatMessage) {
+    closeMessageActions();
+    startReply(message);
+    setComposing(true);
+  }
+
+  function handlePinFromActions(message: TeamChatMessage) {
+    closeMessageActions();
+    void togglePin(message);
+  }
+
+  function handleDeleteFromActions(message: TeamChatMessage) {
+    closeMessageActions();
+    setDeleteTarget(message);
+  }
 
   useLayoutEffect(() => {
     if (!pendingPrependAdjustment.current) return;
@@ -807,13 +872,24 @@ export function TeamChatView({
 
         {messages.map((message) => {
           const showDelete = canDeleteMessage(message);
+          const isSelected =
+            isMobile && messageActionTarget?.id === message.id;
           return (
             <div
               key={message.id}
               id={`message-${message.id}`}
               className={styles.messageWrap}
             >
-              <Card className={styles.messageCard}>
+              <Card
+                className={[
+                  styles.messageCard,
+                  isMobile ? styles.messageCardTappable : "",
+                  isSelected ? styles.messageCardSelected : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={(event) => handleMessageTap(message, event)}
+              >
                 <div className={styles.messageTop}>
                   <div className={styles.messageUser}>
                     <span className={styles.messageUserRow}>
@@ -823,7 +899,10 @@ export function TeamChatView({
                       />
                     </span>
                   </div>
-                  <div className={styles.messageActions}>
+                  <div
+                    className={styles.messageActions}
+                    data-no-message-select
+                  >
                     <button
                       type="button"
                       className={styles.actionBtn}
@@ -1111,6 +1190,20 @@ export function TeamChatView({
         </Modal>
       ) : null}
 
+      {messageActionTarget ? (
+        <MessageActionSheet
+          message={messageActionTarget}
+          locale={locale}
+          showDelete={canDeleteMessage(messageActionTarget)}
+          closeLabel={t("aria.close")}
+          onClose={closeMessageActions}
+          onReply={() => handleReplyFromActions(messageActionTarget)}
+          onPin={() => handlePinFromActions(messageActionTarget)}
+          onDelete={() => handleDeleteFromActions(messageActionTarget)}
+          t={t}
+        />
+      ) : null}
+
       {clearOpen ? (
         <Modal
           title={t("modals.confirmClear")}
@@ -1138,6 +1231,87 @@ export function TeamChatView({
       ) : null}
 
       <Toast message={toast} onClose={() => setToast(null)} />
+    </div>
+  );
+}
+
+function MessageActionSheet({
+  message,
+  locale,
+  showDelete,
+  closeLabel,
+  onClose,
+  onReply,
+  onPin,
+  onDelete,
+  t,
+}: {
+  message: TeamChatMessage;
+  locale: AppLocale;
+  showDelete: boolean;
+  closeLabel: string;
+  onClose: () => void;
+  onReply: () => void;
+  onPin: () => void;
+  onDelete: () => void;
+  t: ReturnType<typeof useTranslations<"teamChat">>;
+}) {
+  return (
+    <div
+      className={styles.actionSheetOverlay}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("actions.messageMenu")}
+    >
+      <button
+        type="button"
+        className={styles.actionSheetBackdrop}
+        onClick={onClose}
+        aria-label={closeLabel}
+      />
+      <div className={styles.actionSheetPanel}>
+        <div className={styles.actionSheetPreview}>
+          <span className={styles.actionSheetAuthor}>{message.user_name}</span>
+          <span className={styles.actionSheetPreviewText}>
+            {buildLocalizedMessagePreview(locale, message)}
+          </span>
+        </div>
+        <div className={styles.actionSheetActions}>
+          <button
+            type="button"
+            className={styles.actionSheetItem}
+            onClick={onReply}
+          >
+            <UiIcon icon="reply" className={styles.actionSheetIcon} />
+            {t("actions.reply")}
+          </button>
+          <button
+            type="button"
+            className={styles.actionSheetItem}
+            onClick={onPin}
+          >
+            <UiIcon icon="thumbtack" className={styles.actionSheetIcon} />
+            {message.is_pinned ? t("actions.unpin") : t("actions.pin")}
+          </button>
+          {showDelete ? (
+            <button
+              type="button"
+              className={`${styles.actionSheetItem} ${styles.actionSheetItemDanger}`}
+              onClick={onDelete}
+            >
+              <UiIcon icon="trash" className={styles.actionSheetIcon} />
+              {t("actions.delete")}
+            </button>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          className={styles.actionSheetCancel}
+          onClick={onClose}
+        >
+          {t("actions.cancel")}
+        </button>
+      </div>
     </div>
   );
 }

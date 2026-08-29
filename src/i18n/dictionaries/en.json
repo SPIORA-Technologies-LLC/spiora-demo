@@ -84,6 +84,7 @@
   "notifications": {
     "ariaLabel": "Notifications",
     "centerAria": "Notification center",
+    "closePanel": "Close notifications",
     "panelTitle": "Notifications",
     "loading": "Loading…",
     "empty": "No new notifications",

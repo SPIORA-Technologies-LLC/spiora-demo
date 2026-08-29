@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import type { AppLocale } from "@/i18n/config";
@@ -48,12 +49,22 @@ export function NotificationBell() {
   const [testBusy, setTestBusy] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const wrapRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setMounted(true);
     setSoundEnabled(isNotificationSoundEnabled());
     setDesktopPermission(getBrowserNotificationPermission());
+  }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 900px)");
+    const sync = () => setIsMobile(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
   }, []);
 
   useEffect(() => {
@@ -63,10 +74,10 @@ export function NotificationBell() {
 
   useEffect(() => {
     function onDocClick(event: MouseEvent) {
-      if (!wrapRef.current) return;
-      if (!wrapRef.current.contains(event.target as Node)) {
-        setOpen(false);
-      }
+      const target = event.target as Node;
+      if (wrapRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setOpen(false);
     }
 
     if (open) {
@@ -119,12 +130,38 @@ export function NotificationBell() {
         ) : null}
       </button>
 
-      {open && ctx ? (
-        <div
-          className={styles.panel}
-          role="dialog"
-          aria-label={t("centerAria")}
-        >
+      {open && ctx
+        ? isMobile
+          ? createPortal(
+              <>
+                <button
+                  type="button"
+                  className={styles.panelBackdrop}
+                  aria-label={t("closePanel")}
+                  onClick={() => setOpen(false)}
+                />
+                <div
+                  ref={panelRef}
+                  className={[styles.panel, styles.panelMobile]
+                    .filter(Boolean)
+                    .join(" ")}
+                  role="dialog"
+                  aria-label={t("centerAria")}
+                >
+                  {renderPanelContent()}
+                </div>
+              </>,
+              document.body,
+            )
+          : renderPanel()
+        : null}
+    </div>
+  );
+
+  function renderPanelContent() {
+    if (!ctx) return null;
+    return (
+      <>
           <header className={styles.panelHeader}>
             <h3 className={styles.panelTitle}>{t("panelTitle")}</h3>
             <div className={styles.panelActions}>
@@ -360,8 +397,20 @@ export function NotificationBell() {
               })
             )}
           </div>
-        </div>
-      ) : null}
-    </div>
-  );
+      </>
+    );
+  }
+
+  function renderPanel() {
+    return (
+      <div
+        ref={panelRef}
+        className={styles.panel}
+        role="dialog"
+        aria-label={t("centerAria")}
+      >
+        {renderPanelContent()}
+      </div>
+    );
+  }
 }

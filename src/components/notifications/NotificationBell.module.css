@@ -391,3 +391,58 @@
 .joinButton:hover {
   opacity: 0.92;
 }
+
+.panelBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 399;
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .panelMobile {
+    position: fixed;
+    top: calc(60px + 0.5rem);
+    left: max(0.75rem, env(safe-area-inset-left));
+    right: max(0.75rem, env(safe-area-inset-right));
+    width: auto;
+    max-width: none;
+    max-height: min(72vh, calc(100dvh - 4.75rem));
+    z-index: 400;
+  }
+
+  .panelHeader {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .panelTitle {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .panelActions {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.65rem;
+  }
+
+  .desktopCalloutBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .panelMobile {
+    top: calc(56px + 0.5rem);
+    left: max(0.65rem, env(safe-area-inset-left));
+    right: max(0.65rem, env(safe-area-inset-right));
+    max-height: min(76vh, calc(100dvh - 4.25rem));
+  }
+}

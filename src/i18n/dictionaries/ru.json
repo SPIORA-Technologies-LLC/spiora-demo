@@ -84,6 +84,7 @@
   "notifications": {
     "ariaLabel": "Уведомления",
     "centerAria": "Центр уведомлений",
+    "closePanel": "Закрыть уведомления",
     "panelTitle": "Уведомления",
     "loading": "Загрузка…",
     "empty": "Новых уведомлений нет.",

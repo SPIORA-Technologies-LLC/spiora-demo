@@ -65,9 +65,13 @@ import {
   sanitizeClientContextsForTransport,
 } from "@/lib/ai/context-redaction";
 import {
+  lookupIntakeClientFactReply,
   lookupIntakePersonalDataReply,
   asksIntakeBirthDate,
+  asksIntakeClientFact,
+  asksCitizenshipQuery,
 } from "@/lib/ai/intake-client-lookup";
+import { normalizeComparable } from "@/lib/ai/search-normalize";
 import { buildWorkspaceSystemPrompt } from "@/lib/ai/workspace-prompt";
 import { buildWorkspaceContext } from "@/lib/ai/workspace-context";
 import { listClients } from "@/lib/clients/store";
@@ -330,7 +334,7 @@ async function resolvePassportLookupReply(
     return crmReply;
   }
 
-  const intakeReply = await lookupIntakePersonalDataReply(query, locale);
+  const intakeReply = await lookupIntakeClientFactReply(query, locale);
   return intakeReply?.reply ?? crmReply;
 }
 
@@ -462,9 +466,19 @@ async function prepareWorkspaceRequest(
     asksIntakeBirthDate(trimmed) &&
     extractPersonNameTokens(trimmed).length > 0
   ) {
-    const intakeReply = await lookupIntakePersonalDataReply(trimmed, locale);
+    const intakeReply = await lookupIntakeClientFactReply(trimmed, locale);
     if (intakeReply) {
       return buildIntakeLookupDirectResult(intakeReply.reply, locale);
+    }
+  }
+
+  if (
+    asksIntakeClientFact(trimmed) &&
+    extractPersonNameTokens(trimmed).length > 0
+  ) {
+    const directFact = await tryDirectClientFactAnswer(trimmed, locale);
+    if (directFact) {
+      return buildPersonalDataDirectResult(directFact, locale);
     }
   }
 
@@ -518,6 +532,18 @@ async function prepareWorkspaceRequest(
         );
       }
     } else if (clientLookup.kind === "not_found") {
+      const intakeFact = await lookupIntakeClientFactReply(trimmed, locale);
+      if (intakeFact?.found && intakeFact.caseId) {
+        return buildIntakeLookupDirectResult(intakeFact.reply, locale);
+      }
+      if (
+        intakeFact?.found &&
+        !intakeFact.caseId &&
+        asksIntakeClientFact(trimmed)
+      ) {
+        return buildIntakeLookupDirectResult(intakeFact.reply, locale);
+      }
+
       const fuzzy = await lookupFuzzyClientCandidates(trimmed, 10);
       if (fuzzy.length > 0 && aiSearch.intentType !== "list") {
         clientCandidates = fuzzy;
@@ -805,15 +831,64 @@ async function tryDirectEmigrantStatusAnswer(
   return parts.join(" ");
 }
 
+async function findCrmClientByNameTokens(
+  tokens: string[],
+): Promise<Awaited<ReturnType<typeof listClients>>["items"][number] | null> {
+  if (tokens.length === 0) return null;
+
+  const { items } = await listClients(1, 500);
+  return (
+    items.find((entry) => {
+      const hay = `${entry.name} ${entry.citizenship ?? ""}`.toLowerCase();
+      const comparable = normalizeComparable(`${entry.name} ${entry.citizenship ?? ""}`);
+      return tokens.every(
+        (token) =>
+          hay.includes(token.toLowerCase()) ||
+          comparable.includes(normalizeComparable(token)),
+      );
+    }) ?? null
+  );
+}
+
+async function tryDirectClientFactAnswer(
+  message: string,
+  locale: AppLocale,
+): Promise<string | null> {
+  const tokens = extractPersonNameTokens(message);
+  if (tokens.length === 0) return null;
+
+  if (asksCitizenshipQuery(message)) {
+    const client = await findCrmClientByNameTokens(tokens);
+    if (client?.citizenship && client.citizenship !== "—") {
+      return locale === "ru"
+        ? `Гражданство **${client.name}**: ${client.citizenship} · таблица «Клиенты».`
+        : `Citizenship for **${client.name}**: ${client.citizenship} · Clients table.`;
+    }
+
+    const intake = await lookupIntakeClientFactReply(message, locale);
+    if (intake?.found) return intake.reply;
+
+    if (client) {
+      return locale === "ru"
+        ? `У **${client.name}** в таблице «Клиенты» гражданство не указано.`
+        : `Citizenship is empty in Clients table for **${client.name}**.`;
+    }
+    return null;
+  }
+
+  const intake = await lookupIntakeClientFactReply(message, locale);
+  if (intake?.found && intake.caseId) {
+    return intake.reply;
+  }
+
+  return null;
+}
+
 async function tryDirectPassportAnswer(message: string): Promise<string | null> {
   const tokens = extractPersonNameTokens(message);
   if (tokens.length === 0) return null;
 
-  const { items } = await listClients(1, 500);
-  const client = items.find((entry) => {
-    const nameLower = entry.name.toLowerCase();
-    return tokens.every((token) => nameLower.includes(token.toLowerCase()));
-  });
+  const client = await findCrmClientByNameTokens(tokens);
   if (!client) return null;
 
   const passport = client.passportNumber?.trim();

@@ -55,7 +55,7 @@ describe("detectWorkspaceIntent — Emigrant Desk decoupled from CRM", () => {
     assert.equal(intent.needsClients, true);
     assert.equal(intent.fastClientLookup, true);
     assert.equal(intent.needsEmigrantDesk, false);
-    assert.equal(intent.needsIntake, false);
+    assert.equal(intent.needsIntake, true);
   });
 
   it("loads intake for passport and birth date questions about a named client", () => {
@@ -64,5 +64,12 @@ describe("detectWorkspaceIntent — Emigrant Desk decoupled from CRM", () => {
     assert.equal(intent.needsIntake, true);
     assert.equal(intent.fastClientLookup, true);
     assert.equal(isPassportNumberLookupQuery(query), true);
+  });
+
+  it("loads intake for citizenship questions about a named client", () => {
+    const query = "У Лиам Морган какое гражданство?";
+    const intent = detectWorkspaceIntent(query);
+    assert.equal(intent.needsIntake, true);
+    assert.equal(intent.needsClients, true);
   });
 });

@@ -285,7 +285,7 @@ const SERVICE_VERBS = new Set([
 ]);
 
 function isNameLikeToken(token: string): boolean {
-  return token.length >= 2 && /^[\p{L}][\p{L}\p{N}'-]*$/u.test(token);
+  return token.length >= 3 && /^[\p{L}][\p{L}\p{N}'-]*$/u.test(token);
 }
 
 /** Имя в начале запроса до первого служебного слова. */
@@ -300,6 +300,7 @@ export function extractLeadingCandidateName(query: string): string[] {
     for (const word of capitalized[1].split(/\s+/)) {
       const normalized = normalizeText(word);
       if (SERVICE_VERBS.has(normalized) || QUERY_STOP_WORDS.has(normalized)) {
+        if (tokens.length === 0) continue;
         break;
       }
       if (isNameLikeToken(normalized)) tokens.push(normalized);
@@ -311,7 +312,10 @@ export function extractLeadingCandidateName(query: string): string[] {
   const parts = lower.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   const tokens: string[] = [];
   for (const part of parts) {
-    if (SERVICE_VERBS.has(part) || QUERY_STOP_WORDS.has(part)) break;
+    if (SERVICE_VERBS.has(part) || QUERY_STOP_WORDS.has(part)) {
+      if (tokens.length === 0) continue;
+      break;
+    }
     if (isNameLikeToken(part)) tokens.push(part);
     if (tokens.length >= 3) break;
   }

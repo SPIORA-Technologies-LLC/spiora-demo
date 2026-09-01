@@ -7,6 +7,7 @@ import {
   scorePersonName,
   tokenizeSearchQuery,
 } from "@/lib/ai/name-matching";
+import { normalizeComparable } from "@/lib/ai/search-normalize";
 import {
   getEmployeeCaseDetail,
   listIntakeCases,
@@ -16,7 +17,11 @@ import type { ClientCaseIntakeItem } from "@/lib/client-portal/case-types";
 const INTAKE_FIELD_ALIASES: Record<string, RegExp[]> = {
   passport_number: [/passport/i, /паспорт/i, /номер паспорта/i],
   date_of_birth: [/date of birth/i, /дата рождения/i, /рожден/i],
+  citizenship: [/citizenship/i, /гражданств/i],
 };
+
+const NAME_NOISE_TOKENS =
+  /^(?:паспорт(?:а|у|ом)?|когда|родилась|номер|гражданств(?:о|а|e)?|citizenship)$/iu;
 
 function intakeFullName(item: ClientCaseIntakeItem): string {
   return [item.firstName, item.lastName]
@@ -24,6 +29,14 @@ function intakeFullName(item: ClientCaseIntakeItem): string {
     .filter((part) => part && part !== "—")
     .join(" ")
     .trim();
+}
+
+function tokenMatchesText(token: string, text: string): boolean {
+  const lower = text.toLowerCase();
+  if (token.length >= 2 && lower.includes(token)) return true;
+  const comparable = normalizeComparable(text);
+  const tokenComparable = normalizeComparable(token);
+  return tokenComparable.length >= 2 && comparable.includes(tokenComparable);
 }
 
 function scoreIntakeItem(item: ClientCaseIntakeItem, tokens: string[]): number {
@@ -45,10 +58,8 @@ function scoreIntakeItem(item: ClientCaseIntakeItem, tokens: string[]): number {
     .join(" ")
     .toLowerCase();
 
-  return tokens.reduce((score, token) => {
-    if (token.length >= 3 && hay.includes(token)) return score + 2;
-    return score;
-  }, 0);
+  const matched = tokens.filter((token) => tokenMatchesText(token, hay));
+  return matched.length * 12;
 }
 
 function findReviewValue(
@@ -73,17 +84,30 @@ export function asksIntakeBirthDate(query: string): boolean {
   return /родил|рожден|date of birth|дата рожд/iu.test(query);
 }
 
-export function asksIntakePersonalData(query: string): boolean {
+export function asksCitizenshipQuery(query: string): boolean {
+  return /гражданств|citizenship/iu.test(query);
+}
+
+export function asksIntakeClientFact(query: string): boolean {
   return (
     /паспорт/iu.test(query) ||
     asksIntakeBirthDate(query) ||
+    asksCitizenshipQuery(query) ||
+    /(?:email|почт|e-mail)/iu.test(query) ||
+    /(?:телефон|phone)/iu.test(query) ||
     /личн(?:ые|ая)\s+данн/iu.test(query)
   );
 }
 
-export type IntakePersonalDataReply = {
+/** @deprecated use asksIntakeClientFact */
+export function asksIntakePersonalData(query: string): boolean {
+  return asksIntakeClientFact(query);
+}
+
+export type IntakeClientFactReply = {
   reply: string;
   caseId: string;
+  found: boolean;
 };
 
 async function loadIntakeCasesForTokens(tokens: string[]) {
@@ -109,40 +133,62 @@ async function loadIntakeCasesForTokens(tokens: string[]) {
   return listed;
 }
 
-export async function lookupIntakePersonalDataReply(
+function nameTokensFromQuery(query: string): string[] {
+  return tokenizeSearchQuery(query).filter((token) => !NAME_NOISE_TOKENS.test(token));
+}
+
+export async function rankIntakeClientsByQuery(
   query: string,
-  locale: AppLocale = "ru",
-): Promise<IntakePersonalDataReply | null> {
-  const tokens = tokenizeSearchQuery(query).filter(
-    (token) => !/^(?:паспорт(?:а|у|ом)?|когда|родилась|номер)$/iu.test(token),
-  );
-  if (tokens.length === 0) return null;
+): Promise<ClientCaseIntakeItem[]> {
+  const tokens = nameTokensFromQuery(query);
+  if (tokens.length === 0) return [];
 
   const listed = await loadIntakeCasesForTokens(tokens);
-
-  const ranked = [...listed.items]
+  return [...listed.items]
     .filter((item) => scoreIntakeItem(item, tokens) > 0)
     .sort((a, b) => scoreIntakeItem(b, tokens) - scoreIntakeItem(a, tokens));
+}
+
+function buildNotFoundReply(
+  tokens: string[],
+  locale: AppLocale,
+): IntakeClientFactReply {
+  const nameHint = tokens.slice(0, 2).join(" ");
+  return {
+    caseId: "",
+    found: false,
+    reply:
+      locale === "ru"
+        ? `Клиента **${nameHint}** не нашёл в новых заявках из анкеты (/clients/intake). Проверьте написание или откройте раздел «Новые клиенты из анкеты».`
+        : `No intake application found for **${nameHint}** (/clients/intake). Check the spelling or open New clients from questionnaire.`,
+  };
+}
+
+export async function lookupIntakeClientFactReply(
+  query: string,
+  locale: AppLocale = "ru",
+): Promise<IntakeClientFactReply | null> {
+  const tokens = nameTokensFromQuery(query);
+  if (tokens.length === 0) return null;
+
+  const ranked = await rankIntakeClientsByQuery(query);
 
   if (ranked.length === 0) {
-    if (!asksIntakePersonalData(query)) return null;
-    const nameHint = tokens.slice(0, 2).join(" ");
-    return {
-      caseId: "",
-      reply:
-        locale === "ru"
-          ? `Клиента **${nameHint}** не нашёл в новых заявках из анкеты (/clients/intake). Проверьте написание или откройте раздел «Новые клиенты из анкеты».`
-          : `No intake application found for **${nameHint}** (/clients/intake). Check the spelling or open New clients from questionnaire.`,
-    };
+    if (!asksIntakeClientFact(query)) return null;
+    return buildNotFoundReply(tokens, locale);
   }
 
-  if (ranked.length > 1 && scoreIntakeItem(ranked[0], tokens) === scoreIntakeItem(ranked[1], tokens)) {
+  if (
+    ranked.length > 1 &&
+    scoreIntakeItem(ranked[0], tokens) === scoreIntakeItem(ranked[1], tokens)
+  ) {
     const options = ranked
       .slice(0, 5)
       .map((item) => `- ${intakeFullName(item)} (${item.email || "—"})`)
       .join("\n");
     return {
       caseId: "",
+      found: true,
       reply:
         locale === "ru"
           ? `Нашёл несколько заявок из анкеты. Уточните клиента:\n${options}`
@@ -160,11 +206,11 @@ export async function lookupIntakePersonalDataReply(
   const name = intakeFullName(match) || "—";
   const wantsPassport = /паспорт/iu.test(query);
   const wantsBirth = asksIntakeBirthDate(query);
+  const wantsCitizenship = asksCitizenshipQuery(query);
   const parts: string[] = [];
 
   if (wantsPassport) {
-    const passport =
-      findReviewValue(detail, "passport_number");
+    const passport = findReviewValue(detail, "passport_number");
     if (passport && looksLikePassportNumber(passport)) {
       parts.push(
         formatPassportLookupReply(name, passport).replace(
@@ -194,6 +240,19 @@ export async function lookupIntakePersonalDataReply(
     );
   }
 
+  if (wantsCitizenship) {
+    const citizenship = findReviewValue(detail, "citizenship");
+    parts.push(
+      citizenship
+        ? locale === "ru"
+          ? `Гражданство **${name}**: ${citizenship} · из анкеты (/clients/intake).`
+          : `Citizenship for **${name}**: ${citizenship} · from intake (/clients/intake).`
+        : locale === "ru"
+          ? `У **${name}** в анкете не указано гражданство.`
+          : `Citizenship is missing in the intake form for **${name}**.`,
+    );
+  }
+
   if (parts.length === 0) {
     parts.push(
       locale === "ru"
@@ -204,6 +263,17 @@ export async function lookupIntakePersonalDataReply(
 
   return {
     caseId: match.id,
+    found: true,
     reply: parts.join("\n\n"),
   };
+}
+
+/** @deprecated use lookupIntakeClientFactReply */
+export async function lookupIntakePersonalDataReply(
+  query: string,
+  locale: AppLocale = "ru",
+): Promise<{ reply: string; caseId: string } | null> {
+  const result = await lookupIntakeClientFactReply(query, locale);
+  if (!result) return null;
+  return { reply: result.reply, caseId: result.caseId };
 }

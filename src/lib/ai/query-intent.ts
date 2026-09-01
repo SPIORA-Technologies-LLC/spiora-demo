@@ -31,7 +31,7 @@ export function isPassportNumberLookupQuery(query: string): boolean {
   }
   const hasClientName =
     extractPersonNameTokens(query).length > 0 ||
-    /(?:клиент[а-я]*|у)\s+[а-яё\-]{3,}/iu.test(query);
+    /(?:клиент[а-я]*|у)\s+[\p{L}][\p{L}'-]{2,}/iu.test(query);
   return (
     hasClientName ||
     lower.includes("какой") ||
@@ -47,7 +47,7 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
 
   const hasClientName =
     extractPersonNameTokens(query).length > 0 ||
-    /(?:клиент[а-я]*|у)\s+[а-яё\-]{3,}/iu.test(query);
+    /(?:клиент[а-я]*|у)\s+[\p{L}][\p{L}'-]{2,}/iu.test(query);
   const fastClientLookup =
     hasClientName &&
     (lower.includes("букинг") ||
@@ -115,9 +115,7 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
     fastClientLookup,
     needsKb: needsKb && !fastClientLookup,
     needsClients,
-    needsIntake:
-      needsIntake &&
-      (!fastClientLookup || asksPassportFromTable || asksBirthDate),
+    needsIntake: needsIntake || hasClientName,
     needsEmigrantDesk,
   };
 }

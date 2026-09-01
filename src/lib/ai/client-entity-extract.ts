@@ -117,12 +117,9 @@ const NAME_CHUNK =
   String.raw`([\p{L}][\p{L}'\u2019-]*(?:\s+[\p{L}][\p{L}'\u2019-]*){0,2})`;
 
 const ENTITY_PATTERNS: RegExp[] = [
+  new RegExp(`(?:^|[?.!\\s])у\\s+${NAME_CHUNK}`, "iu"),
   new RegExp(
     `по\\s+клиент(?:ка|ки|ку|ке|ом|у|а|ов)?\\s+${NAME_CHUNK}`,
-    "iu",
-  ),
-  new RegExp(
-    `(?:профиль|данны(?:е|х)|информаци(?:я|ю|и))\\s+(?:у\\s+нас\\s+)?(?:есть\\s+)?(?:по\\s+)?клиент(?:а|у|ке|ом|ка|ки|ов)?\\s+${NAME_CHUNK}`,
     "iu",
   ),
   new RegExp(

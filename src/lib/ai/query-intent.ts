@@ -65,6 +65,9 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
     lower.includes("immigration") ||
     lower.includes("иммиграц");
 
+  const asksBirthDate =
+    /родил|рожден|date of birth|дата рожд/iu.test(query);
+
   const needsIntake =
     lower.includes("анкет") ||
     lower.includes("intake") ||
@@ -74,7 +77,8 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
     (lower.includes("заявк") &&
       (lower.includes("анкет") ||
         lower.includes("intake") ||
-        lower.includes("questionnaire")));
+        lower.includes("questionnaire"))) ||
+    (hasClientName && (asksPassportFromTable || asksBirthDate));
 
   const needsEmigrantDesk =
     lower.includes("emigrant") ||
@@ -111,7 +115,9 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
     fastClientLookup,
     needsKb: needsKb && !fastClientLookup,
     needsClients,
-    needsIntake: needsIntake && !fastClientLookup,
+    needsIntake:
+      needsIntake &&
+      (!fastClientLookup || asksPassportFromTable || asksBirthDate),
     needsEmigrantDesk,
   };
 }

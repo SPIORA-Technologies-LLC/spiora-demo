@@ -57,4 +57,12 @@ describe("detectWorkspaceIntent — Emigrant Desk decoupled from CRM", () => {
     assert.equal(intent.needsEmigrantDesk, false);
     assert.equal(intent.needsIntake, false);
   });
+
+  it("loads intake for passport and birth date questions about a named client", () => {
+    const query = "номер паспорта Майя Петрова и когда она родилась";
+    const intent = detectWorkspaceIntent(query);
+    assert.equal(intent.needsIntake, true);
+    assert.equal(intent.fastClientLookup, true);
+    assert.equal(isPassportNumberLookupQuery(query), true);
+  });
 });

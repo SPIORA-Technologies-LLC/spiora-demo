@@ -32,6 +32,10 @@ describe("AI Workspace off-topic guardrails", () => {
   it("allows work-related client queries", () => {
     assert.equal(detectOffTopicCategory("Find client Sofia Martins"), null);
     assert.equal(detectOffTopicCategory("Покажи просроченные задачи"), null);
+    assert.equal(
+      detectOffTopicCategory("номер паспорта Майя Петрова и когда она родилась"),
+      null,
+    );
   });
 
   it("blocks jailbreak attempts", () => {

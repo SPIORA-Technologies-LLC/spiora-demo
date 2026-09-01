@@ -75,8 +75,9 @@ const OFF_TOPIC_RULES: OffTopicRule[] = [
   },
 ];
 
+/** ASCII terms use word boundaries; Cyrillic stems match inflected forms (паспорта, клиента, …). */
 const WORK_TOPIC_HINTS =
-  /\b(client|crm|task|calendar|document|meeting|booking|emigrant|intake|questionnaire|visa|immigration|nomad|passport|клиент|задач|календар|документ|встреч|букинг|анкет|эмигрант|заявк|виза|внж|паспорт|релокац|переезд|программ)\b/iu;
+  /\b(client|crm|task|calendar|document|meeting|booking|emigrant|intake|questionnaire|visa|immigration|nomad|passport)\b|(?:клиент|задач|календар|документ|встреч|букинг|анкет|эмигрант|заявк|виз|внж|паспорт|релокац|переезд|программ)/iu;
 
 export function detectOffTopicCategory(query: string): OffTopicCategory | null {
   const trimmed = query.trim();

@@ -64,6 +64,10 @@ import {
   redactSensitiveText,
   sanitizeClientContextsForTransport,
 } from "@/lib/ai/context-redaction";
+import {
+  lookupIntakePersonalDataReply,
+  asksIntakeBirthDate,
+} from "@/lib/ai/intake-client-lookup";
 import { buildWorkspaceSystemPrompt } from "@/lib/ai/workspace-prompt";
 import { buildWorkspaceContext } from "@/lib/ai/workspace-context";
 import { listClients } from "@/lib/clients/store";
@@ -272,6 +276,19 @@ function passportReplyFromResolvedContext(
   return passportReplyFromClientContext(crm);
 }
 
+function buildIntakeLookupDirectResult(
+  reply: string,
+  locale: AppLocale = "en",
+) {
+  return {
+    kind: "direct" as const,
+    reply,
+    sources: [translateWorkspaceSource(locale, "intake")],
+    pendingClientCandidates: [] as ClientContext[],
+    needsClientSelection: false,
+  };
+}
+
 function buildPassportLookupDirectResult(reply: string, locale: AppLocale = "en") {
   return {
     kind: "direct" as const,
@@ -282,11 +299,19 @@ function buildPassportLookupDirectResult(reply: string, locale: AppLocale = "en"
   };
 }
 
+function buildPersonalDataDirectResult(reply: string, locale: AppLocale = "en") {
+  if (reply.includes("/clients/intake") || /анкет/iu.test(reply)) {
+    return buildIntakeLookupDirectResult(reply, locale);
+  }
+  return buildPassportLookupDirectResult(reply, locale);
+}
+
 async function resolvePassportLookupReply(
   query: string,
   clientContext: ResolvedClientContext | null,
   clientCandidates: ResolvedClientContext[] | null,
   pendingForUi: ClientContext[] | undefined,
+  locale: AppLocale = "en",
 ): Promise<string | null> {
   if (clientContext) {
     const fromContext = passportReplyFromResolvedContext(clientContext);
@@ -300,7 +325,13 @@ async function resolvePassportLookupReply(
     const fromPending = passportReplyFromClientContext(pendingForUi[0]);
     if (fromPending) return fromPending;
   }
-  return tryDirectPassportAnswer(query);
+  const crmReply = await tryDirectPassportAnswer(query);
+  if (crmReply && !crmReply.includes("пуста") && !crmReply.includes("empty")) {
+    return crmReply;
+  }
+
+  const intakeReply = await lookupIntakePersonalDataReply(query, locale);
+  return intakeReply?.reply ?? crmReply;
 }
 
 async function prepareWorkspaceRequest(
@@ -415,9 +446,25 @@ async function prepareWorkspaceRequest(
   const intent = detectWorkspaceIntent(trimmed);
 
   if (isPassportNumberLookupQuery(trimmed)) {
-    const early = await tryDirectPassportAnswer(trimmed);
+    const early = await resolvePassportLookupReply(
+      trimmed,
+      null,
+      null,
+      undefined,
+      locale,
+    );
     if (early) {
-      return buildPassportLookupDirectResult(early, locale);
+      return buildPersonalDataDirectResult(early, locale);
+    }
+  }
+
+  if (
+    asksIntakeBirthDate(trimmed) &&
+    extractPersonNameTokens(trimmed).length > 0
+  ) {
+    const intakeReply = await lookupIntakePersonalDataReply(trimmed, locale);
+    if (intakeReply) {
+      return buildIntakeLookupDirectResult(intakeReply.reply, locale);
     }
   }
 
@@ -488,9 +535,10 @@ async function prepareWorkspaceRequest(
       clientContext,
       clientCandidates,
       pendingForUi,
+      locale,
     );
     if (passportReply) {
-      return buildPassportLookupDirectResult(passportReply, locale);
+      return buildPersonalDataDirectResult(passportReply, locale);
     }
     needsClientSelection = false;
     pendingForUi = undefined;

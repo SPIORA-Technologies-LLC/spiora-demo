@@ -1,18 +1,15 @@
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import type { SessionUser } from "@/lib/auth/types";
 import type { CompanyHealthMetrics } from "@/lib/dashboard/company-health";
-import {
-  AI_INSIGHTS,
-  PRIORITY_CARDS,
-  TEAM_ACTIVITY,
-} from "@/lib/dashboard/first-impression-seed";
+import type { CommandCenterDailyBriefing } from "@/lib/dashboard/daily-briefing";
 import { AskSpioraPanel } from "./AskSpioraPanel";
 import styles from "./FirstImpressionView.module.css";
 
 type FirstImpressionViewProps = {
   user: SessionUser;
   health: CompanyHealthMetrics;
+  briefing: CommandCenterDailyBriefing;
 };
 
 function toneClass(tone: "good" | "attention" | "critical"): string {
@@ -27,9 +24,15 @@ function toneIcon(tone: "good" | "attention" | "critical"): string {
   return "🔴";
 }
 
-export async function FirstImpressionView({ user, health }: FirstImpressionViewProps) {
+export async function FirstImpressionView({
+  user,
+  health,
+  briefing,
+}: FirstImpressionViewProps) {
   const t = await getTranslations("commandCenter");
+  const locale = await getLocale();
   const firstName = user.name.trim().split(/\s+/)[0] ?? user.name;
+  const numberLocale = locale === "ru" ? "ru-RU" : "en-US";
 
   return (
     <div className={styles.page}>
@@ -39,7 +42,9 @@ export async function FirstImpressionView({ user, health }: FirstImpressionViewP
           {t("greeting", { name: firstName })}
         </p>
         <h1 className={styles.calmHeadline}>{t("calmHeadline")}</h1>
-        <p className={styles.heroLead}>{t("heroLead")}</p>
+        <p className={styles.heroLead}>
+          {t("daily.heroLead", { dayKey: briefing.dayKey })}
+        </p>
       </header>
 
       <section
@@ -51,10 +56,14 @@ export async function FirstImpressionView({ user, health }: FirstImpressionViewP
           {t("executiveSummary.title")}
         </h2>
         <div className={styles.summaryBody}>
-          <p>{t("executiveSummary.line1")}</p>
-          <p>{t("executiveSummary.line2")}</p>
-          <p>{t("executiveSummary.line3")}</p>
-          <p className={styles.summaryAccent}>{t("executiveSummary.line4")}</p>
+          {briefing.summary.map((line) => (
+            <p
+              key={line.key}
+              className={line.accent ? styles.summaryAccent : undefined}
+            >
+              {t(line.key, line.values ?? {})}
+            </p>
+          ))}
         </div>
       </section>
 
@@ -67,18 +76,37 @@ export async function FirstImpressionView({ user, health }: FirstImpressionViewP
           {t("priorities.title")}
         </h2>
         <ul className={styles.priorityGrid}>
-          {PRIORITY_CARDS.map((card) => (
+          {briefing.priorities.map((card) => (
             <li key={card.id}>
-              <article
-                className={[styles.priorityCard, toneClass(card.tone)].join(
-                  " ",
-                )}
-              >
-                <span className={styles.priorityIcon} aria-hidden>
-                  {toneIcon(card.tone)}
-                </span>
-                <p className={styles.priorityText}>{t(card.textKey)}</p>
-              </article>
+              {card.href ? (
+                <Link href={card.href} className={styles.priorityLink}>
+                  <article
+                    className={[styles.priorityCard, toneClass(card.tone)].join(
+                      " ",
+                    )}
+                  >
+                    <span className={styles.priorityIcon} aria-hidden>
+                      {toneIcon(card.tone)}
+                    </span>
+                    <p className={styles.priorityText}>
+                      {t(card.key, card.values ?? {})}
+                    </p>
+                  </article>
+                </Link>
+              ) : (
+                <article
+                  className={[styles.priorityCard, toneClass(card.tone)].join(
+                    " ",
+                  )}
+                >
+                  <span className={styles.priorityIcon} aria-hidden>
+                    {toneIcon(card.tone)}
+                  </span>
+                  <p className={styles.priorityText}>
+                    {t(card.key, card.values ?? {})}
+                  </p>
+                </article>
+              )}
             </li>
           ))}
         </ul>
@@ -90,21 +118,25 @@ export async function FirstImpressionView({ user, health }: FirstImpressionViewP
         aria-labelledby="ai-insights-title"
       >
         <h2 id="ai-insights-title" className={styles.panelTitle}>
-          {t("insights.title")}
+          {t("daily.insightsTitle")}
         </h2>
-        <ul className={styles.insightsList}>
-          {AI_INSIGHTS.map((insight) => (
-            <li key={insight.id}>
-              {insight.href ? (
-                <Link href={insight.href} className={styles.insightLink}>
-                  {t(insight.textKey)}
-                </Link>
-              ) : (
-                <span>{t(insight.textKey)}</span>
-              )}
-            </li>
-          ))}
-        </ul>
+        {briefing.insights.length > 0 ? (
+          <ul className={styles.insightsList}>
+            {briefing.insights.map((insight) => (
+              <li key={insight.id}>
+                {insight.href ? (
+                  <Link href={insight.href} className={styles.insightLink}>
+                    {t(insight.key, insight.values ?? {})}
+                  </Link>
+                ) : (
+                  <span>{t(insight.key, insight.values ?? {})}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.summaryBody}>{t("daily.noInsights")}</p>
+        )}
       </section>
 
       <AskSpioraPanel />
@@ -126,15 +158,15 @@ export async function FirstImpressionView({ user, health }: FirstImpressionViewP
         <dl className={styles.healthGrid}>
           <div>
             <dt>{t("companyHealth.clients")}</dt>
-            <dd>{health.clients.toLocaleString("en-US")}</dd>
+            <dd>{health.clients.toLocaleString(numberLocale)}</dd>
           </div>
           <div>
             <dt>{t("companyHealth.documents")}</dt>
-            <dd>{health.documents.toLocaleString("en-US")}</dd>
+            <dd>{health.documents.toLocaleString(numberLocale)}</dd>
           </div>
           <div>
             <dt>{t("companyHealth.meetings")}</dt>
-            <dd>{health.meetings}</dd>
+            <dd>{health.meetings.toLocaleString(numberLocale)}</dd>
           </div>
           <div>
             <dt>{t("companyHealth.tasksCompleted")}</dt>
@@ -142,7 +174,7 @@ export async function FirstImpressionView({ user, health }: FirstImpressionViewP
           </div>
           <div>
             <dt>{t("companyHealth.aiConversations")}</dt>
-            <dd>{health.aiConversations}</dd>
+            <dd>{health.aiConversations.toLocaleString(numberLocale)}</dd>
           </div>
         </dl>
         {health.statusKey === "empty" ? (
@@ -158,14 +190,24 @@ export async function FirstImpressionView({ user, health }: FirstImpressionViewP
         <h2 id="team-activity-title" className={styles.panelTitle}>
           {t("activity.title")}
         </h2>
-        <ul className={styles.activityList}>
-          {TEAM_ACTIVITY.map((item) => (
-            <li key={item.id} className={styles.activityItem}>
-              <span className={styles.activityDot} aria-hidden />
-              <span>{t(item.textKey)}</span>
-            </li>
-          ))}
-        </ul>
+        {briefing.activity.length > 0 ? (
+          <ul className={styles.activityList}>
+            {briefing.activity.map((item) => (
+              <li key={item.id} className={styles.activityItem}>
+                <span className={styles.activityDot} aria-hidden />
+                {item.href ? (
+                  <Link href={item.href} className={styles.activityLink}>
+                    {t(item.key, item.values ?? {})}
+                  </Link>
+                ) : (
+                  <span>{t(item.key, item.values ?? {})}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className={styles.summaryBody}>{t("daily.activity.empty")}</p>
+        )}
       </section>
     </div>
   );

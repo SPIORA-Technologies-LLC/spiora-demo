@@ -304,7 +304,7 @@
     "pageTitle": "Command Center",
     "greeting": "Good morning, {name} 👋",
     "calmHeadline": "Everything is under control.",
-    "heroLead": "AI analyzed overnight activity and prepared today's executive briefing.",
+    "heroLead": "Live summary from team and client activity for today (MSK).",
     "executiveSummary": {
       "title": "Today's Executive Summary",
       "line1": "Your company is operating normally.",
@@ -355,6 +355,43 @@
       "lucasChecklist": "Lucas completed a checklist",
       "aiSummarized": "AI summarized 12 documents",
       "oliviaAssigned": "Olivia assigned a new case"
+    },
+    "daily": {
+      "heroLead": "Live summary from team and client activity for today ({dayKey}, MSK).",
+      "insightsTitle": "Needs attention",
+      "noInsights": "No alerts — metrics look normal.",
+      "summary": {
+        "empty": "No recorded activity yet today.",
+        "eventsToday": "{count, plural, =0 {No meetings on today's calendar} one {# meeting on today's calendar} other {# meetings on today's calendar}}.",
+        "tasksProgress": "{completed, plural, =0 {No tasks completed today} one {# task completed today} other {# tasks completed today}}{overdue, plural, =0 {} one {; # overdue} other {; # overdue}}.",
+        "tasksAllClear": "No overdue tasks.",
+        "portalActivity": "{submitted, plural, =0 {} one {# application submitted} other {# applications submitted}}{invites, plural, =0 {} one {; # invitation accepted} other {; # invitations accepted}}{clients, plural, =0 {} one {; # new CRM client} other {; # new CRM clients}}.",
+        "portalQuiet": "No new portal or CRM activity today.",
+        "accentOverdue": "{count, plural, one {Review # overdue task first.} other {Review # overdue tasks first.}}",
+        "accentPendingApproval": "{count, plural, one {# task is waiting for your approval.} other {# tasks are waiting for approval.}}",
+        "accentAllClear": "Nothing urgent — keep the day on schedule."
+      },
+      "priorities": {
+        "meetingsToday": "{count, plural, =0 {No meetings today} one {# meeting today} other {# meetings today}} · {week} this week",
+        "overdueTasks": "{count, plural, =0 {No overdue tasks} one {# overdue task} other {# overdue tasks}}",
+        "pendingApproval": "{count, plural, =0 {Nothing pending approval} one {# task pending approval} other {# tasks pending approval}}",
+        "portal": "{pendingInvites, plural, =0 {No pending invitations} one {# pending invitation} other {# pending invitations}} · {submitted, plural, =0 {no submissions today} one {# submission today} other {# submissions today}} · {intakeTotal} intake cases"
+      },
+      "insights": {
+        "overdueTasks": "{count, plural, one {# overdue task — open task list} other {# overdue tasks — open task list}}",
+        "pendingApproval": "{count, plural, one {# task pending approval} other {# tasks pending approval}}",
+        "pendingInvites": "{count, plural, one {# invitation not yet accepted} other {# invitations not yet accepted}}",
+        "meetingsToday": "{count, plural, one {# meeting on today's calendar} other {# meetings on today's calendar}}",
+        "newClientsToday": "{count, plural, one {# new CRM client today} other {# new CRM clients today}}",
+        "intakeSubmitted": "{count, plural, one {# application submitted today} other {# applications submitted today}}"
+      },
+      "activity": {
+        "chatMessage": "{name} sent a team chat message",
+        "taskCompleted": "{name} completed «{title}»",
+        "inviteAccepted": "Invitation accepted: {email}",
+        "caseSubmitted": "Application submitted: {name}",
+        "empty": "No team activity recorded today yet."
+      }
     }
   },
   "clients": {

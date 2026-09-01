@@ -26,7 +26,7 @@ export type CompanyHealthMetrics = {
     meetings: "postgresql" | "file" | "unavailable";
     tasks: "postgresql" | "file" | "unavailable";
     ai: "postgresql" | "file" | "unavailable";
-    documents: "unavailable";
+    documents: "postgresql" | "unavailable";
   };
 };
 
@@ -77,14 +77,31 @@ function deriveStatusKey(metrics: {
   return "stable";
 }
 
+async function countStoredDocuments(): Promise<number> {
+  if (!isSupabaseConfigured()) return 0;
+  try {
+    const { getSupabaseAdmin } = await import("@/lib/supabase/server");
+    const { count, error } = await getSupabaseAdmin()
+      .from("client_documents")
+      .select("id", { count: "exact", head: true })
+      .is("archived_at", null);
+    if (error) return 0;
+    return count ?? 0;
+  } catch {
+    return 0;
+  }
+}
+
 export async function getCompanyHealthMetrics(
   user: SessionUser,
 ): Promise<CompanyHealthMetrics> {
-  const [clientsResult, taskStats, aiCount, calendarToday] = await Promise.all([
+  const [clientsResult, taskStats, aiCount, calendarToday, documents] =
+    await Promise.all([
     listAllClients(),
     getTaskStats(user),
     countAiUserMessagesLastDaysForDashboard(AI_REQUEST_STATS_DAYS),
     countCalendarEventsToday(),
+    countStoredDocuments(),
   ]);
 
   const tasksCompletedPercent =
@@ -110,7 +127,7 @@ export async function getCompanyHealthMetrics(
   return {
     statusKey,
     clients,
-    documents: 0,
+    documents: documents,
     meetings,
     tasksCompletedPercent,
     aiConversations: aiCount,
@@ -120,7 +137,7 @@ export async function getCompanyHealthMetrics(
       meetings: calendarToday.source,
       tasks: tasksSource,
       ai: aiSource,
-      documents: "unavailable",
+      documents: documents > 0 ? "postgresql" : "unavailable",
     },
   };
 }

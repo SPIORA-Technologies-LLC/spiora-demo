@@ -168,6 +168,12 @@
   border-color: rgba(255, 255, 255, 0.12);
 }
 
+.priorityLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
 .priorityIcon {
   flex-shrink: 0;
   font-size: 0.85rem;
@@ -367,6 +373,16 @@
   font-size: 0.98rem;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.88);
+}
+
+.activityLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.activityLink:hover {
+  color: var(--brand-orange);
 }
 
 .activityDot {

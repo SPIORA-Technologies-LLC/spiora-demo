@@ -72,4 +72,11 @@ describe("detectWorkspaceIntent — Emigrant Desk decoupled from CRM", () => {
     assert.equal(intent.needsIntake, true);
     assert.equal(intent.needsClients, true);
   });
+
+  it("loads intake for address questions about a named client", () => {
+    const query = "Какой адрес у Новак Матео";
+    const intent = detectWorkspaceIntent(query);
+    assert.equal(intent.needsIntake, true);
+    assert.equal(intent.fastClientLookup, true);
+  });
 });

@@ -18,10 +18,12 @@ const INTAKE_FIELD_ALIASES: Record<string, RegExp[]> = {
   passport_number: [/passport/i, /паспорт/i, /номер паспорта/i],
   date_of_birth: [/date of birth/i, /дата рождения/i, /рожден/i],
   citizenship: [/citizenship/i, /гражданств/i],
+  address: [/^address$/i, /^адрес$/i],
+  country_of_residence: [/country of residence/i, /страна проживания/i],
 };
 
 const NAME_NOISE_TOKENS =
-  /^(?:паспорт(?:а|у|ом)?|когда|родилась|номер|гражданств(?:о|а|e)?|citizenship)$/iu;
+  /^(?:паспорт(?:а|у|ом)?|когда|родилась|номер|гражданств(?:о|а|e)?|citizenship|адрес(?:а|у|ом)?|address)$/iu;
 
 function intakeFullName(item: ClientCaseIntakeItem): string {
   return [item.firstName, item.lastName]
@@ -88,11 +90,19 @@ export function asksCitizenshipQuery(query: string): boolean {
   return /гражданств|citizenship/iu.test(query);
 }
 
+export function asksAddressQuery(query: string): boolean {
+  return (
+    /(?:^|[^\p{L}])адрес|address|прожива|residence address/iu.test(query) &&
+    !/(?:email|e-mail|почт)/iu.test(query)
+  );
+}
+
 export function asksIntakeClientFact(query: string): boolean {
   return (
     /паспорт/iu.test(query) ||
     asksIntakeBirthDate(query) ||
     asksCitizenshipQuery(query) ||
+    asksAddressQuery(query) ||
     /(?:email|почт|e-mail)/iu.test(query) ||
     /(?:телефон|phone)/iu.test(query) ||
     /личн(?:ые|ая)\s+данн/iu.test(query)
@@ -207,6 +217,7 @@ export async function lookupIntakeClientFactReply(
   const wantsPassport = /паспорт/iu.test(query);
   const wantsBirth = asksIntakeBirthDate(query);
   const wantsCitizenship = asksCitizenshipQuery(query);
+  const wantsAddress = asksAddressQuery(query);
   const parts: string[] = [];
 
   if (wantsPassport) {
@@ -253,7 +264,27 @@ export async function lookupIntakeClientFactReply(
     );
   }
 
+  if (wantsAddress) {
+    const address = findReviewValue(detail, "address");
+    const country = findReviewValue(detail, "country_of_residence");
+    const addressLine = [address, country ? `(${country})` : null]
+      .filter(Boolean)
+      .join(" ");
+    parts.push(
+      addressLine
+        ? locale === "ru"
+          ? `Адрес **${name}**: ${addressLine} · из анкеты (/clients/intake).`
+          : `Address for **${name}**: ${addressLine} · from intake (/clients/intake).`
+        : locale === "ru"
+          ? `У **${name}** в анкете адрес не указан.`
+          : `Address is missing in the intake form for **${name}**.`,
+    );
+  }
+
   if (parts.length === 0) {
+    if (asksIntakeClientFact(query)) {
+      return null;
+    }
     parts.push(
       locale === "ru"
         ? `Заявка **${name}** есть в анкете (/clients/intake), статус: ${match.currentStatus}.`

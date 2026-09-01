@@ -70,6 +70,7 @@ import {
   asksIntakeBirthDate,
   asksIntakeClientFact,
   asksCitizenshipQuery,
+  asksAddressQuery,
 } from "@/lib/ai/intake-client-lookup";
 import { normalizeComparable } from "@/lib/ai/search-normalize";
 import { buildWorkspaceSystemPrompt } from "@/lib/ai/workspace-prompt";
@@ -876,6 +877,26 @@ async function tryDirectClientFactAnswer(
     return null;
   }
 
+  if (asksAddressQuery(message)) {
+    const client = await findCrmClientByNameTokens(tokens);
+    const bookingAddress = client?.bookingAddress?.trim();
+    if (bookingAddress && bookingAddress !== "—") {
+      return locale === "ru"
+        ? `Адрес букинга **${client!.name}**: ${bookingAddress} · таблица «Клиенты».`
+        : `Booking address for **${client!.name}**: ${bookingAddress} · Clients table.`;
+    }
+
+    const intake = await lookupIntakeClientFactReply(message, locale);
+    if (intake?.found) return intake.reply;
+
+    if (client) {
+      return locale === "ru"
+        ? `У **${client.name}** в таблице «Клиенты» адрес букинга не указан.`
+        : `Booking address is empty in Clients table for **${client.name}**.`;
+    }
+    return null;
+  }
+
   const intake = await lookupIntakeClientFactReply(message, locale);
   if (intake?.found && intake.caseId) {
     return intake.reply;
@@ -909,12 +930,10 @@ async function tryDirectBookingAnswer(message: string): Promise<string | null> {
     return null;
   }
 
-  const { items } = await listClients(1, 300);
-  const nameMatch = lower.match(/(?:клиент[а-я]*|у)\s+([а-яё\-]+)/iu);
-  const needle = nameMatch?.[1]?.toLowerCase();
-  if (!needle) return null;
+  const tokens = extractPersonNameTokens(message);
+  if (tokens.length === 0) return null;
 
-  const client = items.find((c) => c.name.toLowerCase().includes(needle));
+  const client = await findCrmClientByNameTokens(tokens);
   if (!client) return null;
 
   const hasAddress =
@@ -924,16 +943,20 @@ async function tryDirectBookingAnswer(message: string): Promise<string | null> {
   if (!hasAddress && !hasDates) return null;
 
   const parts = [
-    `По **${client.name}** в таблице есть букинг.`,
+    lower.includes("букинг")
+      ? `По **${client.name}** в таблице есть букинг.`
+      : `По **${client.name}** в таблице «Клиенты»:`,
   ];
   if (hasAddress) parts.push(`Адрес: **${client.bookingAddress}**.`);
   if (hasDates) parts.push(`Даты: ${client.bookingRange}.`);
-  if (client.passportNumber && client.passportNumber !== "—") {
+  if (lower.includes("букинг") && client.passportNumber && client.passportNumber !== "—") {
     parts.push(`Паспорт в базе: ${client.passportNumber}.`);
   }
-  parts.push(
-    "\n**Что дальше:** сверьте даты с клиентом и проверьте, всё ли готово к заезду.",
-  );
+  if (lower.includes("букинг")) {
+    parts.push(
+      "\n**Что дальше:** сверьте даты с клиентом и проверьте, всё ли готово к заезду.",
+    );
+  }
   return parts.join(" ");
 }
 

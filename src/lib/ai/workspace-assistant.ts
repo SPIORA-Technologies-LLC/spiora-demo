@@ -898,7 +898,7 @@ async function tryDirectClientFactAnswer(
   }
 
   const intake = await lookupIntakeClientFactReply(message, locale);
-  if (intake?.found && intake.caseId) {
+  if (intake?.found) {
     return intake.reply;
   }
 

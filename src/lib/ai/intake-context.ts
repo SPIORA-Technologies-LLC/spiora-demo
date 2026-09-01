@@ -1,4 +1,5 @@
 import type { AppLocale } from "@/i18n/config";
+import { asksIntakeFieldLookup } from "@/lib/ai/intake-field-match";
 import {
   scorePersonName,
   tokenizeSearchQuery,
@@ -125,7 +126,9 @@ function formatIntakeDetail(
 
 function wantsIntakeDetails(userQuery: string, selectedCount: number): boolean {
   if (selectedCount <= 2) return true;
-  return /анкет|questionnaire|суммир|подроб|что\s+в|ответы|review|паспорт|passport|родил|рожден|date of birth|дата рожд|гражданств|citizenship|адрес|address|прожива|телефон|phone|email|почт|семейн| marital|пол\b|граждан|внж|услуг/iu.test(
+  const tokens = tokenizeSearchQuery(userQuery);
+  if (asksIntakeFieldLookup(userQuery, tokens)) return true;
+  return /анкет|questionnaire|суммир|подроб|что\s+в|ответы|review|паспорт|passport|родил|рожден|date of birth|дата рожд|гражданств|citizenship|адрес|address|прожива|телефон|phone|email|почт|семейн| marital|пол\b|граждан|внж|услуг|отчество|город|индекс/iu.test(
     userQuery,
   );
 }

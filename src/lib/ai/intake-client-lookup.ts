@@ -171,6 +171,7 @@ export function asksPhoneQuery(query: string): boolean {
 }
 
 export function asksIntakeClientFact(query: string): boolean {
+  const tokens = nameTokensFromQuery(query);
   return (
     /паспорт/iu.test(query) ||
     asksIntakeBirthDate(query) ||
@@ -179,7 +180,7 @@ export function asksIntakeClientFact(query: string): boolean {
     asksEmailQuery(query) ||
     asksPhoneQuery(query) ||
     /личн(?:ые|ая)\s+данн/iu.test(query) ||
-    asksIntakeFieldLookup(query)
+    asksIntakeFieldLookup(query, tokens)
   );
 }
 

@@ -115,14 +115,24 @@ function scoreFieldAgainstHint(
   if (hint.length >= 3 && queryLower.includes(label)) score += 18;
 
   const hintTokens = hint.split(/\s+/).filter((token) => token.length >= 3);
+  const questionId = field.questionId.toLowerCase().replace(/_/g, " ");
+  const questionIdComparable = normalizeComparable(questionId);
+
   for (const token of hintTokens) {
     if (label.includes(token)) score += 10;
+    if (questionId.includes(token)) score += 12;
     const tokenComparable = normalizeComparable(token);
     if (
       tokenComparable.length >= 3 &&
       labelComparable.includes(tokenComparable)
     ) {
       score += 8;
+    }
+    if (
+      tokenComparable.length >= 3 &&
+      questionIdComparable.includes(tokenComparable)
+    ) {
+      score += 10;
     }
     if (field.questionId.toLowerCase().includes(token)) score += 6;
   }
@@ -145,8 +155,16 @@ export function rankIntakeFieldsForQuery(
     .sort((a, b) => b.score - a.score);
 }
 
-export function asksIntakeFieldLookup(query: string): boolean {
-  return /(?:какой|какая|какие|какое|сколько|когда|где|что|как|скажи|дай|покажи|напиши|what|which|when|where|how)/iu.test(
-    query,
-  );
+export function asksIntakeFieldLookup(
+  query: string,
+  nameTokens: string[] = [],
+): boolean {
+  if (
+    /(?:какой|какая|какие|какое|сколько|когда|где|что|как|скажи|дай|покажи|напиши|what|which|when|where|how)/iu.test(
+      query,
+    )
+  ) {
+    return true;
+  }
+  return extractFieldHint(query, nameTokens).length >= 3;
 }

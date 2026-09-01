@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  asksIntakeFieldLookup,
   extractFieldHint,
   rankIntakeFieldsForQuery,
 } from "@/lib/ai/intake-field-match";
@@ -47,5 +48,31 @@ describe("intake-field-match", () => {
       ["ivan"],
     );
     assert.equal(ranked[0]?.questionId, "marital_status");
+  });
+
+  it("detects field lookup without question word", () => {
+    assert.equal(asksIntakeFieldLookup("отчество у Петрова", ["петрова"]), true);
+  });
+
+  it("ranks patronymic field", () => {
+    const extended = [
+      ...fields,
+      {
+        questionId: "patronymic",
+        label: "Отчество",
+        value: "Иванович",
+      },
+      {
+        questionId: "city",
+        label: "Город",
+        value: "Zagreb",
+      },
+    ];
+    const ranked = rankIntakeFieldsForQuery(
+      "отчество у Петрова",
+      extended,
+      ["петрова"],
+    );
+    assert.equal(ranked[0]?.questionId, "patronymic");
   });
 });

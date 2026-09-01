@@ -7,7 +7,53 @@ import {
 import { getEmployeeCaseDetail } from "@/lib/client-portal/case-service";
 import type { ClientCaseIntakeItem } from "@/lib/client-portal/case-types";
 import type { ConsultingAgreementSignView } from "@/lib/client-portal/sign-types";
+import { listPendingContractSignatures } from "@/lib/dashboard/command-center-pending-signatures";
 import { listClients } from "@/lib/clients/store";
+
+const CONTRACT_LIST_NOISE = new Set([
+  "каких",
+  "какие",
+  "какой",
+  "какая",
+  "какое",
+  "еще",
+  "ещё",
+  "других",
+  "другие",
+  "другой",
+  "всех",
+  "все",
+  "проблема",
+  "проблемы",
+  "проблему",
+  "договор",
+  "договора",
+  "договором",
+  "договорами",
+  "договоров",
+  "подпис",
+  "подписать",
+  "подписан",
+  "подписание",
+  "нужно",
+  "надо",
+  "осталось",
+  "есть",
+  "клиент",
+  "клиента",
+  "клиентов",
+  "клиентом",
+  "contract",
+  "contracts",
+  "agreement",
+  "agreements",
+  "signature",
+  "signed",
+  "signing",
+  "pending",
+  "awaiting",
+  "проблем",
+]);
 
 const SIGN_STATUS_LABELS_RU: Record<ConsultingAgreementSignView["status"], string> = {
   draft: "Черновик",
@@ -42,6 +88,36 @@ export function asksContractQuery(query: string): boolean {
   return (
     /(?:стади|stage|этап|статус)/iu.test(query) &&
     /(?:договор|contract|подпис)/iu.test(query)
+  );
+}
+
+/** Список клиентов с договорами на подписании («у каких клиентов…»). */
+export function asksContractListQuery(query: string): boolean {
+  if (!asksContractQuery(query)) return false;
+
+  if (
+    /(?:у\s+)?(?:каких|какие|какой|какая)\s+(?:ещ[её]|еще|других|другие|всех|все)?\s*(?:клиент|client)/iu.test(
+      query,
+    ) ||
+    /(?:какие|каких|кто)\s+(?:ещ[её]|еще|другие|других|еще\s+есть)/iu.test(
+      query,
+    ) ||
+    (/(?:список|перечисли|покажи)\s+(?:всех|клиент)/iu.test(query) &&
+      /(?:договор|подпис|contract)/iu.test(query)) ||
+    /(?:где|кому)\s+(?:нужно|надо|осталось)\s+подпис/iu.test(query) ||
+    /проблем(?:а|ы)\s+с\s+договор/iu.test(query) ||
+    /договор(?:а|ов)?\s+(?:на\s+)?подпис/iu.test(query) ||
+    /(?:pending|awaiting)\s+(?:client\s+)?(?:signature|sign)/iu.test(query)
+  ) {
+    return true;
+  }
+
+  return extractContractClientNameTokens(query).length === 0;
+}
+
+export function extractContractClientNameTokens(query: string): string[] {
+  return extractPersonNameTokens(query).filter(
+    (token) => !CONTRACT_LIST_NOISE.has(token.toLowerCase()),
   );
 }
 
@@ -170,13 +246,71 @@ function formatCrmContractReply(
     : `**Agreement** (${clientName}) in Clients table: ${contract}. For e-signing status, open the intake case if the client completed onboarding.`;
 }
 
+function pendingStatusLabel(
+  status: "awaiting_client_signature" | "client_signed",
+  locale: AppLocale,
+): string {
+  if (locale === "ru") {
+    return status === "awaiting_client_signature"
+      ? "ожидается подпись клиента"
+      : "клиент подписал, ожидается подпись SPIORA";
+  }
+  return status === "awaiting_client_signature"
+    ? "awaiting client signature"
+    : "client signed, awaiting SPIORA";
+}
+
+async function lookupContractListReply(
+  locale: AppLocale,
+): Promise<ContractLookupReply> {
+  const pending = await listPendingContractSignatures();
+
+  if (pending.length === 0) {
+    return {
+      found: true,
+      reply:
+        locale === "ru"
+          ? "Сейчас **нет договоров на подписании** — все актуальные договоры либо подписаны, либо ещё не созданы в карточках заявок."
+          : "There are **no agreements awaiting signature** right now — active agreements are either fully signed or not created yet.",
+    };
+  }
+
+  const lines = pending.slice(0, 20).map((item, index) => {
+    const status = pendingStatusLabel(item.status, locale);
+    return `${index + 1}. **${item.clientName}** — ${status} · [открыть заявку](${item.href})`;
+  });
+
+  const header =
+    locale === "ru"
+      ? `**Договоры на подписании** (${pending.length}):`
+      : `**Agreements awaiting signature** (${pending.length}):`;
+
+  const footer =
+    pending.length > 20
+      ? locale === "ru"
+        ? `\n\nПоказано 20 из ${pending.length}. Полный список — в Центре управления → «Договоры на подписании».`
+        : `\n\nShowing 20 of ${pending.length}. See Command Center → Pending contracts for the full list.`
+      : locale === "ru"
+        ? "\n\nРаздел: Центр управления → «Договоры на подписании» или карточка заявки → «Договор»."
+        : "\n\nCommand Center → Pending contracts, or intake case → Agreement tab.";
+
+  return {
+    found: true,
+    reply: `${header}\n${lines.join("\n")}${footer}`,
+  };
+}
+
 export async function lookupContractReply(
   query: string,
   locale: AppLocale = "ru",
 ): Promise<ContractLookupReply | null> {
   if (!asksContractQuery(query)) return null;
 
-  const tokens = extractPersonNameTokens(query);
+  if (asksContractListQuery(query)) {
+    return lookupContractListReply(locale);
+  }
+
+  const tokens = extractContractClientNameTokens(query);
   if (tokens.length === 0) return null;
 
   const ranked = await rankIntakeClientsByQuery(query);

@@ -87,4 +87,12 @@ describe("detectWorkspaceIntent — Emigrant Desk decoupled from CRM", () => {
     assert.equal(intent.needsClients, true);
     assert.equal(intent.fastClientLookup, true);
   });
+
+  it("loads clients for plural contract list queries", () => {
+    const query =
+      "У каких еще клиентов есть проблема с договорами, где нужно подписать";
+    const intent = detectWorkspaceIntent(query);
+    assert.equal(intent.needsClients, true);
+    assert.equal(intent.fastClientLookup, true);
+  });
 });

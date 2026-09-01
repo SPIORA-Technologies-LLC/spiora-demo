@@ -1,10 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  asksContractListQuery,
   asksContractQuery,
+  extractContractClientNameTokens,
 } from "@/lib/ai/contract-lookup";
 import { asksIntakeClientFact } from "@/lib/ai/intake-client-lookup";
 import { extractFieldHint } from "@/lib/ai/intake-field-match";
+import { extractPersonNameTokens } from "@/lib/ai/name-matching";
 
 describe("contract-lookup", () => {
   it("detects contract signing status questions", () => {
@@ -39,5 +42,25 @@ describe("contract-lookup", () => {
       asksContractQuery("Какой статус дела в кабинете у Белова?"),
       false,
     );
+  });
+
+  it("detects plural contract list queries", () => {
+    const query =
+      "У каких еще клиентов есть проблема с договорами, где нужно подписать";
+    assert.equal(asksContractListQuery(query), true);
+  });
+
+  it("does not treat list query words as client name", () => {
+    const query =
+      "У каких еще клиентов есть проблема с договорами, где нужно подписать";
+    assert.deepEqual(extractContractClientNameTokens(query), []);
+    assert.deepEqual(extractPersonNameTokens(query), []);
+  });
+
+  it("still extracts named client for single contract lookup", () => {
+    assert.deepEqual(extractContractClientNameTokens("договор у Zlata Moroz"), [
+      "zlata",
+      "moroz",
+    ]);
   });
 });

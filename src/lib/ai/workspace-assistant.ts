@@ -481,8 +481,7 @@ async function prepareWorkspaceRequest(
   }
 
   if (
-    asksContractQuery(trimmed) &&
-    extractPersonNameTokens(trimmed).length > 0
+    asksContractQuery(trimmed)
   ) {
     const contractReply = await lookupContractReply(trimmed, locale);
     if (contractReply) {

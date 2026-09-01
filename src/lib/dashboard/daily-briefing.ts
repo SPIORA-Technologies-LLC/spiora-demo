@@ -6,11 +6,15 @@ import { CALENDAR_COMPANY_ID } from "@/lib/calendar/constants";
 import { listClientInvitations } from "@/lib/client-portal/invitations";
 import { listIntakeCases } from "@/lib/client-portal/case-service";
 import { listAllClients } from "@/lib/clients/store";
-import { countAiUserMessagesLastDaysForDashboard } from "@/lib/dashboard/ai-request-stats";
-import { getActivityDayKey } from "@/lib/presence/daily-activity-logic";
+import { countAiUserMessagesForDashboardDay } from "@/lib/dashboard/ai-request-stats";
+import {
+  clampActivityAnchor,
+  getActivityDayKey,
+  isValidActivityDayKey,
+} from "@/lib/presence/daily-activity-logic";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { listLatestTeamChatForDashboard } from "@/lib/team-chat/store";
-import { isTaskOverdue } from "@/lib/tasks/overdue";
+import { isTaskOverdue, isTaskOverdueOnDay } from "@/lib/tasks/overdue";
 import { listTasksForUser } from "@/lib/tasks/store";
 import type { Task } from "@/lib/tasks/types";
 
@@ -67,6 +71,28 @@ export type CommandCenterDailyBriefing = {
   hasActivityToday: boolean;
 };
 
+export type CommandCenterDailyBriefingOptions = {
+  /** Moscow calendar day (YYYY-MM-DD). Defaults to today; clamped to retention window. */
+  dayKey?: string;
+};
+
+/** Parse optional `date` query value; returns null when invalid. */
+export function parseCommandCenterDayKey(
+  value: string | null | undefined,
+): string | null {
+  if (value == null || value.trim() === "") return null;
+  const trimmed = value.trim();
+  return isValidActivityDayKey(trimmed) ? trimmed : null;
+}
+
+export function resolveCommandCenterDayKey(
+  value: string | null | undefined,
+  now = new Date(),
+): string {
+  const parsed = parseCommandCenterDayKey(value);
+  return clampActivityAnchor(parsed ?? getActivityDayKey(now), now);
+}
+
 function isSameMoscowDay(iso: string | null | undefined, dayKey: string): boolean {
   if (!iso) return false;
   const parsed = parseFlexibleDate(iso) ?? (Date.parse(iso) ? new Date(iso) : null);
@@ -100,7 +126,7 @@ async function countCalendarEventsBetween(
   }
 }
 
-async function countDocuments(): Promise<{
+async function countDocuments(dayKey: string): Promise<{
   total: number;
   uploadedToday: number;
 }> {
@@ -110,10 +136,10 @@ async function countDocuments(): Promise<{
   try {
     const { getSupabaseAdmin } = await import("@/lib/supabase/server");
     const client = getSupabaseAdmin();
-    const dayKey = getActivityDayKey();
     const from = moscowDayStartIso(dayKey);
+    const to = moscowDayEndIso(dayKey);
 
-    const [totalRes, todayRes] = await Promise.all([
+    const [totalRes, dayRes] = await Promise.all([
       client
         .from("client_documents")
         .select("id", { count: "exact", head: true })
@@ -122,12 +148,13 @@ async function countDocuments(): Promise<{
         .from("client_documents")
         .select("id", { count: "exact", head: true })
         .is("archived_at", null)
-        .gte("uploaded_at", from),
+        .gte("uploaded_at", from)
+        .lt("uploaded_at", to),
     ]);
 
     return {
       total: totalRes.count ?? 0,
-      uploadedToday: todayRes.count ?? 0,
+      uploadedToday: dayRes.count ?? 0,
     };
   } catch {
     return { total: 0, uploadedToday: 0 };
@@ -377,8 +404,11 @@ async function collectChatActivity(
 
 export async function getCommandCenterDailyBriefing(
   user: SessionUser,
+  options?: CommandCenterDailyBriefingOptions,
 ): Promise<CommandCenterDailyBriefing> {
-  const dayKey = getActivityDayKey();
+  const dayKey = clampActivityAnchor(options?.dayKey ?? getActivityDayKey());
+  const todayKey = getActivityDayKey();
+  const isToday = dayKey === todayKey;
   const dayStart = moscowDayStartIso(dayKey);
   const dayEnd = moscowDayEndIso(dayKey);
   const weekEnd = new Date(`${dayKey}T12:00:00+03:00`);
@@ -401,9 +431,9 @@ export async function getCommandCenterDailyBriefing(
     listIntakeCases({ page: 1, pageSize: 200 }),
     countCalendarEventsBetween(dayStart, dayEnd),
     countCalendarEventsBetween(dayStart, weekEnd.toISOString()),
-    countDocuments(),
+    countDocuments(dayKey),
     collectChatActivity(dayKey),
-    countAiUserMessagesLastDaysForDashboard(1),
+    countAiUserMessagesForDashboardDay(dayKey),
   ]);
 
   const clients = clientsResult.items;
@@ -411,10 +441,12 @@ export async function getCommandCenterDailyBriefing(
     isSameMoscowDay(c.createdAt ?? c.submittedAt, dayKey),
   ).length;
 
-  const tasksOverdue = tasks.filter((t) => isTaskOverdue(t)).length;
-  const tasksPendingApproval = tasks.filter(
-    (t) => t.status === "pending_approval",
-  ).length;
+  const tasksOverdue = isToday
+    ? tasks.filter((t) => isTaskOverdue(t)).length
+    : tasks.filter((t) => isTaskOverdueOnDay(t, dayKey)).length;
+  const tasksPendingApproval = isToday
+    ? tasks.filter((t) => t.status === "pending_approval").length
+    : 0;
   const tasksCompletedToday = tasks.filter((t) =>
     isSameMoscowDay(t.completedAt, dayKey),
   ).length;
@@ -422,9 +454,9 @@ export async function getCommandCenterDailyBriefing(
     isSameMoscowDay(t.createdAt, dayKey),
   ).length;
 
-  const invitationsPending = invitations.filter(
-    (i) => !i.acceptedAt && !i.revokedAt,
-  ).length;
+  const invitationsPending = isToday
+    ? invitations.filter((i) => !i.acceptedAt && !i.revokedAt).length
+    : 0;
   const invitationsAcceptedToday = invitations.filter((i) =>
     isSameMoscowDay(i.acceptedAt, dayKey),
   ).length;

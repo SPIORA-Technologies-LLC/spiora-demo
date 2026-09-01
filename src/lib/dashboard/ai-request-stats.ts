@@ -203,3 +203,94 @@ export async function countAiUserMessagesLastDaysForDashboard(
 ): Promise<number> {
   return countAiUserMessagesLastDaysLegacyTotal(days);
 }
+
+function moscowDayStart(dayKey: string): Date {
+  return new Date(`${dayKey}T00:00:00+03:00`);
+}
+
+function moscowDayEndExclusive(dayKey: string): Date {
+  const end = new Date(`${dayKey}T12:00:00+03:00`);
+  end.setTime(end.getTime() + 86_400_000);
+  return end;
+}
+
+function isUpdatedInMoscowDay(updatedAt: Date, dayKey: string): boolean {
+  const start = moscowDayStart(dayKey);
+  const end = moscowDayEndExclusive(dayKey);
+  return updatedAt >= start && updatedAt < end;
+}
+
+async function countAiUserMessagesForDashboardDayFromSupabase(
+  dayKey: string,
+): Promise<number> {
+  try {
+    const { getSupabaseAdmin } = await import("@/lib/supabase/server");
+    const { data, error } = await getSupabaseAdmin()
+      .from("ai_workspace_chats")
+      .select("messages, updated_at");
+
+    if (error) throw error;
+
+    let total = 0;
+    for (const row of data ?? []) {
+      const updatedAt = new Date(String(row.updated_at));
+      if (
+        Number.isNaN(updatedAt.getTime()) ||
+        !isUpdatedInMoscowDay(updatedAt, dayKey)
+      ) {
+        continue;
+      }
+      const messages = Array.isArray(row.messages) ? row.messages : [];
+      total += countUserRoleMessages(messages);
+    }
+    return total;
+  } catch (error) {
+    console.error("[ai-request-stats] supabase day count", error);
+    return 0;
+  }
+}
+
+async function countAiUserMessagesForDashboardDayFromFiles(
+  dayKey: string,
+): Promise<number> {
+  const dir = path.join(process.cwd(), ".data", "ai-workspace-chats");
+  let files: string[];
+  try {
+    files = await readdir(dir);
+  } catch {
+    return 0;
+  }
+
+  let total = 0;
+  for (const file of files) {
+    if (!file.endsWith(".json")) continue;
+    try {
+      const raw = await readFile(path.join(dir, file), "utf8");
+      const data = JSON.parse(raw) as { sessions?: WorkspaceChatSession[] };
+      for (const session of data.sessions ?? []) {
+        const updated =
+          parseFlexibleDate(session.updatedAt) ?? new Date(session.updatedAt);
+        if (
+          Number.isNaN(updated.getTime()) ||
+          !isUpdatedInMoscowDay(updated, dayKey)
+        ) {
+          continue;
+        }
+        total += countUserRoleMessages(session.messages);
+      }
+    } catch {
+      continue;
+    }
+  }
+  return total;
+}
+
+/** User AI messages in chats updated during one Moscow calendar day. */
+export async function countAiUserMessagesForDashboardDay(
+  dayKey: string,
+): Promise<number> {
+  if (isSupabaseConfigured()) {
+    return countAiUserMessagesForDashboardDayFromSupabase(dayKey);
+  }
+  return countAiUserMessagesForDashboardDayFromFiles(dayKey);
+}

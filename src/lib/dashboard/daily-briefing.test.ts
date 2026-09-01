@@ -14,12 +14,14 @@ describe("Command Center daily briefing (Phase 1)", () => {
     const page = read("src/app/(app)/dashboard/page.tsx");
     assert.match(page, /getCommandCenterDailyBriefing/);
     assert.match(page, /getCompanyHealthMetrics/);
-    assert.match(page, /briefing={briefing}/);
+    assert.match(page, /CommandCenterDashboard/);
   });
 
   it("FirstImpressionView renders briefing lines, not static seed cards", () => {
     const view = read("src/components/dashboard/FirstImpressionView.tsx");
+    assert.match(view, /"use client"/);
     assert.match(view, /briefing\.summary\.map/);
+    assert.match(view, /CommandCenterDatePicker/);
     assert.match(view, /briefing\.priorities\.map/);
     assert.match(view, /briefing\.activity\.map/);
     assert.doesNotMatch(view, /PRIORITY_CARDS|AI_INSIGHTS|TEAM_ACTIVITY/);

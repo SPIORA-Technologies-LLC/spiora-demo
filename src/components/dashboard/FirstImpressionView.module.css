@@ -75,6 +75,84 @@
   color: rgba(255, 255, 255, 0.78);
 }
 
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.datePicker {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  min-width: min(100%, 20rem);
+}
+
+.datePickerLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.datePickerControls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.datePickerNav {
+  min-width: 2.25rem;
+  padding-inline: 0.65rem;
+}
+
+.datePickerInput {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-md);
+  background: rgba(0, 0, 0, 0.35);
+  color: var(--foreground);
+  font: inherit;
+  padding: 0.45rem 0.65rem;
+  min-height: 2.25rem;
+}
+
+.datePickerInput:focus-visible {
+  outline: 2px solid rgba(var(--brand-orange-rgb), 0.65);
+  outline-offset: 2px;
+}
+
+.datePickerInput:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.datePickerToday {
+  white-space: nowrap;
+}
+
+.datePickerStatus {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.datePickerError {
+  margin: 0.75rem 0 0;
+  color: #ffb4b4;
+  font-size: 0.9375rem;
+}
+
+.contentLoading {
+  opacity: 0.72;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
 .sectionTitle {
   margin: 0 0 1rem;
   font-family: var(--font-display);

@@ -358,8 +358,17 @@
     },
     "daily": {
       "heroLead": "Live summary from team and client activity for today ({dayKey}, MSK).",
+      "heroLeadPast": "Live summary from team and client activity for {date} ({dayKey}, MSK).",
       "insightsTitle": "Needs attention",
       "noInsights": "No alerts — metrics look normal.",
+      "datePicker": {
+        "label": "Day",
+        "today": "Today",
+        "prevDay": "Previous day",
+        "nextDay": "Next day",
+        "loading": "Loading…",
+        "error": "Could not load that day. Try again."
+      },
       "summary": {
         "empty": "No recorded activity yet today.",
         "eventsToday": "{count, plural, =0 {No meetings on today's calendar} one {# meeting on today's calendar} other {# meetings on today's calendar}}.",
@@ -394,7 +403,8 @@
         "clientCreated": "New CRM client: {name}",
         "documentUploaded": "{name} uploaded {fileName}",
         "calendarEvent": "{name} scheduled «{title}»",
-        "empty": "No team activity recorded today yet."
+        "empty": "No team activity recorded today yet.",
+        "emptyForDay": "No team activity recorded for this day."
       }
     }
   },

@@ -77,6 +77,24 @@ const SIGN_STATUS_LABELS_EN: Record<ConsultingAgreementSignView["status"], strin
   superseded: "Superseded",
 };
 
+function intakeContractNavPath(locale: AppLocale): string {
+  return locale === "ru"
+    ? "Новые клиенты из анкеты → **Заявка клиента** → вкладка **«Договор»**"
+    : "New clients from questionnaire → **Client application** → **Agreement** tab";
+}
+
+function intakeContractLinkLabel(locale: AppLocale): string {
+  return locale === "ru"
+    ? "Заявка клиента → Договор"
+    : "Client application → Agreement";
+}
+
+function intakeContractCardHint(locale: AppLocale): string {
+  return locale === "ru"
+    ? "Полная карточка по отправленной анкете, вкладка «Договор»"
+    : "Full card for the submitted questionnaire, Agreement tab";
+}
+
 export function asksContractQuery(query: string): boolean {
   if (
     /(?:договор|contract|agreement|консультационн(?:ый|ого)\s+договор|подпис(?:ан|ание|ать)|signature)/iu.test(
@@ -205,7 +223,9 @@ function formatSignContractReply(
     if (sign.providerSignedAt) {
       parts.push(`Подпись SPIORA: ${sign.providerSignedAt.slice(0, 10)}.`);
     }
-    parts.push(`Подробнее: ${href} → раздел «Договор».`);
+    parts.push(
+      `Подробнее: [${intakeContractLinkLabel("ru")}](${href}) (${intakeContractCardHint("ru")}).`,
+    );
     return parts.join(" ");
   }
 
@@ -232,7 +252,9 @@ function formatSignContractReply(
   if (sign.providerSignedAt) {
     parts.push(`SPIORA signed: ${sign.providerSignedAt.slice(0, 10)}.`);
   }
-  parts.push(`Details: ${href} → Agreement tab.`);
+  parts.push(
+    `Details: [${intakeContractLinkLabel("en")}](${href}) (${intakeContractCardHint("en")}).`,
+  );
   return parts.join(" ");
 }
 
@@ -242,8 +264,8 @@ function formatCrmContractReply(
   locale: AppLocale,
 ): string {
   return locale === "ru"
-    ? `**Договор** (${clientName}) в таблице «Клиенты»: ${contract}. Электронное подписание смотрите в карточке заявки из анкеты, если клиент проходил онбординг.`
-    : `**Agreement** (${clientName}) in Clients table: ${contract}. For e-signing status, open the intake case if the client completed onboarding.`;
+    ? `**Договор** (${clientName}) в таблице «Клиенты»: ${contract}. Электронное подписание — в ${intakeContractNavPath("ru").toLowerCase()}.`
+    : `**Agreement** (${clientName}) in Clients table: ${contract}. E-signing status: ${intakeContractNavPath("en").toLowerCase()}.`;
 }
 
 function pendingStatusLabel(
@@ -270,29 +292,30 @@ async function lookupContractListReply(
       found: true,
       reply:
         locale === "ru"
-          ? "Сейчас **нет договоров на подписании** — все актуальные договоры либо подписаны, либо ещё не созданы в карточках заявок."
-          : "There are **no agreements awaiting signature** right now — active agreements are either fully signed or not created yet.",
+          ? "Сейчас **нет клиентов с незавершённым подписанием договора** — все актуальные договоры либо подписаны, либо ещё не созданы в карточках заявок."
+          : "There are **no clients with agreements still awaiting signature** — active agreements are either fully signed or not created yet.",
     };
   }
 
   const lines = pending.slice(0, 20).map((item, index) => {
     const status = pendingStatusLabel(item.status, locale);
-    return `${index + 1}. **${item.clientName}** — ${status} · [открыть заявку](${item.href})`;
+    const linkLabel = intakeContractLinkLabel(locale);
+    return `${index + 1}. **${item.clientName}** — ${status} · [${linkLabel}](${item.href})`;
   });
 
   const header =
     locale === "ru"
-      ? `**Договоры на подписании** (${pending.length}):`
-      : `**Agreements awaiting signature** (${pending.length}):`;
+      ? `**Клиенты с незавершённым подписанием договора** (${pending.length}):`
+      : `**Clients with agreements awaiting signature** (${pending.length}):`;
 
   const footer =
     pending.length > 20
       ? locale === "ru"
-        ? `\n\nПоказано 20 из ${pending.length}. Полный список — в Центре управления → «Договоры на подписании».`
-        : `\n\nShowing 20 of ${pending.length}. See Command Center → Pending contracts for the full list.`
+        ? `\n\nПоказано 20 из ${pending.length}. Откройте карточку: ${intakeContractNavPath("ru")}.`
+        : `\n\nShowing 20 of ${pending.length}. Open each card: ${intakeContractNavPath("en")}.`
       : locale === "ru"
-        ? "\n\nРаздел: Центр управления → «Договоры на подписании» или карточка заявки → «Договор»."
-        : "\n\nCommand Center → Pending contracts, or intake case → Agreement tab.";
+        ? `\n\nПуть в интерфейсе: ${intakeContractNavPath("ru")}.`
+        : `\n\nNavigation: ${intakeContractNavPath("en")}.`;
 
   return {
     found: true,
@@ -364,8 +387,8 @@ export async function lookupContractReply(
       caseId: match.id,
       reply:
         locale === "ru"
-          ? `У **${name}** заявка есть (/clients/intake/${match.id}), но электронный договор ещё не создан. Откройте карточку → раздел «Договор».`
-          : `Intake case exists for **${name}** (/clients/intake/${match.id}), but no e-sign agreement yet. Open the case → Agreement tab.`,
+          ? `У **${name}** заявка есть — откройте [${intakeContractLinkLabel("ru")}](/clients/intake/${match.id}) (${intakeContractCardHint("ru")}). Электронный договор ещё не создан.`
+          : `Intake case exists for **${name}** — open [${intakeContractLinkLabel("en")}](/clients/intake/${match.id}) (${intakeContractCardHint("en")}). No e-sign agreement yet.`,
     };
   }
 
@@ -381,7 +404,7 @@ export async function lookupContractReply(
     found: false,
     reply:
       locale === "ru"
-        ? `Клиента **${nameHint}** не нашёл ни в «Клиентах», ни в заявках из анкеты. Проверьте написание или откройте раздел «Договор» в карточке заявки.`
-        : `No client **${nameHint}** in Clients or intake. Check spelling or open the Agreement tab on the intake case.`,
+        ? `Клиента **${nameHint}** не нашёл ни в «Клиентах», ни в заявках из анкеты. Проверьте написание или откройте ${intakeContractNavPath("ru").toLowerCase()}.`
+        : `No client **${nameHint}** in Clients or intake. Check spelling or open ${intakeContractNavPath("en").toLowerCase()}.`,
   };
 }

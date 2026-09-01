@@ -388,8 +388,12 @@
       "activity": {
         "chatMessage": "{name} отправил(а) сообщение в командный чат",
         "taskCompleted": "{name} завершил(а) «{title}»",
+        "taskCreated": "{name} создал(а) «{title}»",
         "inviteAccepted": "Принято приглашение: {email}",
         "caseSubmitted": "Подана заявка: {name}",
+        "clientCreated": "Новый клиент в CRM: {name}",
+        "documentUploaded": "{name} загрузил(а) {fileName}",
+        "calendarEvent": "{name} запланировал(а) «{title}»",
         "empty": "Активность команды за сегодня пока не зафиксирована."
       }
     }

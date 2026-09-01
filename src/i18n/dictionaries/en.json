@@ -388,8 +388,12 @@
       "activity": {
         "chatMessage": "{name} sent a team chat message",
         "taskCompleted": "{name} completed «{title}»",
+        "taskCreated": "{name} created «{title}»",
         "inviteAccepted": "Invitation accepted: {email}",
         "caseSubmitted": "Application submitted: {name}",
+        "clientCreated": "New CRM client: {name}",
+        "documentUploaded": "{name} uploaded {fileName}",
+        "calendarEvent": "{name} scheduled «{title}»",
         "empty": "No team activity recorded today yet."
       }
     }

@@ -1,6 +1,5 @@
 import "server-only";
 
-import { parseFlexibleDate } from "@/lib/analytics/dates";
 import type { SessionUser } from "@/lib/auth/types";
 import { CALENDAR_COMPANY_ID } from "@/lib/calendar/constants";
 import { listClientInvitations } from "@/lib/client-portal/invitations";
@@ -8,15 +7,19 @@ import { listIntakeCases } from "@/lib/client-portal/case-service";
 import { listAllClients } from "@/lib/clients/store";
 import { countAiUserMessagesForDashboardDay } from "@/lib/dashboard/ai-request-stats";
 import {
+  isSameMoscowDay,
+  moscowDayEndIso,
+  moscowDayStartIso,
+} from "@/lib/dashboard/activity-day";
+import { collectPlatformActivityEvents } from "@/lib/dashboard/platform-activity-feed";
+import {
   clampActivityAnchor,
   getActivityDayKey,
   isValidActivityDayKey,
 } from "@/lib/presence/daily-activity-logic";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
-import { listLatestTeamChatForDashboard } from "@/lib/team-chat/store";
 import { isTaskOverdue, isTaskOverdueOnDay } from "@/lib/tasks/overdue";
 import { listTasksForUser } from "@/lib/tasks/store";
-import type { Task } from "@/lib/tasks/types";
 
 export type BriefingTone = "good" | "attention" | "critical";
 
@@ -36,9 +39,11 @@ export type BriefingCard = {
 
 export type BriefingActivityItem = {
   id: string;
+  type: string;
+  at: string;
+  actor: string | null;
   key: string;
   values?: Record<string, string | number>;
-  at: string;
   href?: string;
 };
 
@@ -93,22 +98,7 @@ export function resolveCommandCenterDayKey(
   return clampActivityAnchor(parsed ?? getActivityDayKey(now), now);
 }
 
-function isSameMoscowDay(iso: string | null | undefined, dayKey: string): boolean {
-  if (!iso) return false;
-  const parsed = parseFlexibleDate(iso) ?? (Date.parse(iso) ? new Date(iso) : null);
-  if (!parsed || Number.isNaN(parsed.getTime())) return false;
-  return getActivityDayKey(parsed) === dayKey;
-}
-
-function moscowDayStartIso(dayKey: string): string {
-  return `${dayKey}T00:00:00+03:00`;
-}
-
-function moscowDayEndIso(dayKey: string): string {
-  const start = new Date(`${dayKey}T12:00:00+03:00`);
-  start.setTime(start.getTime() + 86_400_000);
-  return start.toISOString();
-}
+const BRIEFING_ACTIVITY_PREVIEW = 8;
 
 async function countCalendarEventsBetween(
   fromIso: string,
@@ -332,76 +322,6 @@ function buildInsights(metrics: DailyBriefingMetrics): BriefingCard[] {
   return items.slice(0, 3);
 }
 
-function buildActivityFeed(input: {
-  dayKey: string;
-  tasks: Task[];
-  invitations: Awaited<ReturnType<typeof listClientInvitations>>;
-  intakeSubmittedToday: Array<{
-    id: string;
-    firstName: string;
-    lastName: string;
-    submittedAt: string;
-  }>;
-}): BriefingActivityItem[] {
-  const items: BriefingActivityItem[] = [];
-
-  for (const task of input.tasks) {
-    if (!isSameMoscowDay(task.completedAt, input.dayKey)) continue;
-    const name =
-      task.assignees[0]?.name ??
-      task.createdByName ??
-      task.assignees.map((a) => a.name).join(", ") ??
-      "—";
-    items.push({
-      id: `task-${task.id}`,
-      key: "daily.activity.taskCompleted",
-      values: { name, title: task.title },
-      at: task.completedAt ?? task.updatedAt,
-      href: `/tasks`,
-    });
-  }
-
-  for (const invite of input.invitations) {
-    if (!isSameMoscowDay(invite.acceptedAt, input.dayKey)) continue;
-    items.push({
-      id: `invite-${invite.id}`,
-      key: "daily.activity.inviteAccepted",
-      values: { email: invite.email },
-      at: invite.acceptedAt ?? "",
-      href: "/client-invitations",
-    });
-  }
-
-  for (const intake of input.intakeSubmittedToday) {
-    items.push({
-      id: `intake-${intake.id}`,
-      key: "daily.activity.caseSubmitted",
-      values: { name: `${intake.firstName} ${intake.lastName}`.trim() },
-      at: intake.submittedAt,
-      href: `/clients/intake/${intake.id}`,
-    });
-  }
-
-  return items
-    .sort((a, b) => b.at.localeCompare(a.at))
-    .slice(0, 8);
-}
-
-async function collectChatActivity(
-  dayKey: string,
-): Promise<{ count: number; items: BriefingActivityItem[] }> {
-  const messages = await listLatestTeamChatForDashboard(50);
-  const today = messages.filter((m) => isSameMoscowDay(m.created_at, dayKey));
-  const items = today.slice(0, 5).map((message) => ({
-    id: `chat-${message.id}`,
-    key: "daily.activity.chatMessage",
-    values: { name: message.user_name },
-    at: message.created_at,
-    href: "/team-chat",
-  }));
-  return { count: today.length, items };
-}
-
 export async function getCommandCenterDailyBriefing(
   user: SessionUser,
   options?: CommandCenterDailyBriefingOptions,
@@ -422,8 +342,8 @@ export async function getCommandCenterDailyBriefing(
     eventsToday,
     eventsThisWeek,
     documents,
-    chatActivity,
     aiMessagesToday,
+    activityEvents,
   ] = await Promise.all([
     listAllClients(),
     listTasksForUser(user),
@@ -432,8 +352,8 @@ export async function getCommandCenterDailyBriefing(
     countCalendarEventsBetween(dayStart, dayEnd),
     countCalendarEventsBetween(dayStart, weekEnd.toISOString()),
     countDocuments(dayKey),
-    collectChatActivity(dayKey),
     countAiUserMessagesForDashboardDay(dayKey),
+    collectPlatformActivityEvents(user, dayKey),
   ]);
 
   const clients = clientsResult.items;
@@ -478,28 +398,24 @@ export async function getCommandCenterDailyBriefing(
     invitationsAcceptedToday,
     intakeCasesTotal: intakePage.total,
     intakeSubmittedToday: intakeSubmittedToday.length,
-    chatMessagesToday: chatActivity.count,
+    chatMessagesToday: activityEvents.filter((event) => event.type === "chat_message")
+      .length,
     aiMessagesToday,
     documentsTotal: documents.total,
     documentsUploadedToday: documents.uploadedToday,
   };
 
-  const activity = [
-    ...buildActivityFeed({
-      dayKey,
-      tasks,
-      invitations,
-      intakeSubmittedToday: intakeSubmittedToday.map((item) => ({
-        id: item.id,
-        firstName: item.firstName,
-        lastName: item.lastName,
-        submittedAt: item.submittedAt ?? "",
-      })),
-    }),
-    ...chatActivity.items,
-  ]
-    .sort((a, b) => b.at.localeCompare(a.at))
-    .slice(0, 8);
+  const activity: BriefingActivityItem[] = activityEvents
+    .slice(0, BRIEFING_ACTIVITY_PREVIEW)
+    .map((event) => ({
+      id: event.id,
+      type: event.type,
+      at: event.at,
+      actor: event.actor,
+      key: event.key,
+      values: event.values,
+      href: event.href,
+    }));
 
   const hasActivityToday =
     activity.length > 0 ||

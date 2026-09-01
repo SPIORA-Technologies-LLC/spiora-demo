@@ -32,8 +32,7 @@ describe("Command Center daily briefing (Phase 1)", () => {
     assert.match(mod, /listTasksForUser/);
     assert.match(mod, /listClientInvitations/);
     assert.match(mod, /listIntakeCases/);
-    assert.match(mod, /listLatestTeamChatForDashboard/);
-    assert.match(mod, /getActivityDayKey/);
+    assert.match(mod, /collectPlatformActivityEvents/);
     assert.doesNotMatch(mod, /first-impression-seed|buildDemoOverviewAnalytics/);
   });
 

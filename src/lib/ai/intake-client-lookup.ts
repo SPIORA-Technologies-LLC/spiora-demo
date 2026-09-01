@@ -4,6 +4,12 @@ import {
   looksLikePassportNumber,
 } from "@/lib/ai/format-client";
 import {
+  asksIntakeFieldLookup,
+  collectIntakeReviewFields,
+  extractFieldHint,
+  rankIntakeFieldsForQuery,
+} from "@/lib/ai/intake-field-match";
+import {
   scorePersonName,
   tokenizeSearchQuery,
 } from "@/lib/ai/name-matching";
@@ -20,10 +26,12 @@ const INTAKE_FIELD_ALIASES: Record<string, RegExp[]> = {
   citizenship: [/citizenship/i, /гражданств/i],
   address: [/^address$/i, /^адрес$/i],
   country_of_residence: [/country of residence/i, /страна проживания/i],
+  email: [/email/i, /e-mail/i, /почт/i],
+  phone: [/phone/i, /телефон/i],
 };
 
 const NAME_NOISE_TOKENS =
-  /^(?:паспорт(?:а|у|ом)?|когда|родилась|номер|гражданств(?:о|а|e)?|citizenship|адрес(?:а|у|ом)?|address)$/iu;
+  /^(?:паспорт(?:а|у|ом)?|когда|родилась|номер|гражданств(?:о|а|e)?|citizenship|адрес(?:а|у|ом)?|address|email|e-mail|почт(?:а|у|e)?|телефон(?:а|у|ом)?|phone)$/iu;
 
 function intakeFullName(item: ClientCaseIntakeItem): string {
   return [item.firstName, item.lastName]
@@ -79,7 +87,64 @@ function findReviewValue(
     }
   }
 
+  if (fieldKey === "email" && detail.record.email?.trim()) {
+    return detail.record.email.trim();
+  }
+  if (fieldKey === "phone" && detail.record.phone?.trim()) {
+    return detail.record.phone.trim();
+  }
+
   return null;
+}
+
+function formatIntakeFieldReply(
+  clientName: string,
+  label: string,
+  value: string,
+  locale: AppLocale,
+): string {
+  return locale === "ru"
+    ? `**${label}** (${clientName}): ${value} · из анкеты (/clients/intake).`
+    : `**${label}** (${clientName}): ${value} · from intake (/clients/intake).`;
+}
+
+function formatIntakeFieldMissingReply(
+  clientName: string,
+  label: string,
+  locale: AppLocale,
+): string {
+  return locale === "ru"
+    ? `У **${clientName}** в анкете поле «${label}» не заполнено.`
+    : `Field "${label}" is empty in the intake form for **${clientName}**.`;
+}
+
+function buildGenericIntakeFieldReply(
+  query: string,
+  detail: NonNullable<Awaited<ReturnType<typeof getEmployeeCaseDetail>>>,
+  clientName: string,
+  nameTokens: string[],
+  locale: AppLocale,
+): string | null {
+  const fields = collectIntakeReviewFields(detail);
+  const ranked = rankIntakeFieldsForQuery(query, fields, nameTokens);
+  if (ranked.length === 0) return null;
+
+  if (
+    ranked.length > 1 &&
+    ranked[0].score === ranked[1].score &&
+    ranked[0].score < 20
+  ) {
+    const options = ranked
+      .slice(0, 5)
+      .map((field) => `- ${field.label}: ${field.value}`)
+      .join("\n");
+    return locale === "ru"
+      ? `По **${clientName}** нашёл несколько полей анкеты. Уточните запрос:\n${options}`
+      : `Multiple intake fields match for **${clientName}**. Please clarify:\n${options}`;
+  }
+
+  const best = ranked[0];
+  return formatIntakeFieldReply(clientName, best.label, best.value, locale);
 }
 
 export function asksIntakeBirthDate(query: string): boolean {
@@ -97,15 +162,24 @@ export function asksAddressQuery(query: string): boolean {
   );
 }
 
+export function asksEmailQuery(query: string): boolean {
+  return /(?:email|e-mail|почт)/iu.test(query);
+}
+
+export function asksPhoneQuery(query: string): boolean {
+  return /(?:телефон|phone)/iu.test(query);
+}
+
 export function asksIntakeClientFact(query: string): boolean {
   return (
     /паспорт/iu.test(query) ||
     asksIntakeBirthDate(query) ||
     asksCitizenshipQuery(query) ||
     asksAddressQuery(query) ||
-    /(?:email|почт|e-mail)/iu.test(query) ||
-    /(?:телефон|phone)/iu.test(query) ||
-    /личн(?:ые|ая)\s+данн/iu.test(query)
+    asksEmailQuery(query) ||
+    asksPhoneQuery(query) ||
+    /личн(?:ые|ая)\s+данн/iu.test(query) ||
+    asksIntakeFieldLookup(query)
   );
 }
 
@@ -174,6 +248,80 @@ function buildNotFoundReply(
   };
 }
 
+function appendKnownFieldReplies(
+  query: string,
+  detail: NonNullable<Awaited<ReturnType<typeof getEmployeeCaseDetail>>>,
+  name: string,
+  locale: AppLocale,
+): string[] {
+  const parts: string[] = [];
+
+  if (/паспорт/iu.test(query)) {
+    const passport = findReviewValue(detail, "passport_number");
+    if (passport && looksLikePassportNumber(passport)) {
+      parts.push(
+        formatPassportLookupReply(name, passport).replace(
+          "таблица «Клиенты»",
+          "анкета (/clients/intake)",
+        ),
+      );
+    } else {
+      parts.push(formatIntakeFieldMissingReply(name, "Номер паспорта", locale));
+    }
+  }
+
+  if (asksIntakeBirthDate(query)) {
+    const birth = findReviewValue(detail, "date_of_birth");
+    parts.push(
+      birth
+        ? formatIntakeFieldReply(name, "Дата рождения", birth, locale)
+        : formatIntakeFieldMissingReply(name, "Дата рождения", locale),
+    );
+  }
+
+  if (asksCitizenshipQuery(query)) {
+    const citizenship = findReviewValue(detail, "citizenship");
+    parts.push(
+      citizenship
+        ? formatIntakeFieldReply(name, "Гражданство", citizenship, locale)
+        : formatIntakeFieldMissingReply(name, "Гражданство", locale),
+    );
+  }
+
+  if (asksAddressQuery(query)) {
+    const address = findReviewValue(detail, "address");
+    const country = findReviewValue(detail, "country_of_residence");
+    const addressLine = [address, country ? `(${country})` : null]
+      .filter(Boolean)
+      .join(" ");
+    parts.push(
+      addressLine
+        ? formatIntakeFieldReply(name, "Адрес", addressLine, locale)
+        : formatIntakeFieldMissingReply(name, "Адрес", locale),
+    );
+  }
+
+  if (asksEmailQuery(query)) {
+    const email = findReviewValue(detail, "email");
+    parts.push(
+      email
+        ? formatIntakeFieldReply(name, "Email", email, locale)
+        : formatIntakeFieldMissingReply(name, "Email", locale),
+    );
+  }
+
+  if (asksPhoneQuery(query)) {
+    const phone = findReviewValue(detail, "phone");
+    parts.push(
+      phone
+        ? formatIntakeFieldReply(name, "Телефон", phone, locale)
+        : formatIntakeFieldMissingReply(name, "Телефон", locale),
+    );
+  }
+
+  return parts;
+}
+
 export async function lookupIntakeClientFactReply(
   query: string,
   locale: AppLocale = "ru",
@@ -214,82 +362,32 @@ export async function lookupIntakeClientFactReply(
   if (!detail) return null;
 
   const name = intakeFullName(match) || "—";
-  const wantsPassport = /паспорт/iu.test(query);
-  const wantsBirth = asksIntakeBirthDate(query);
-  const wantsCitizenship = asksCitizenshipQuery(query);
-  const wantsAddress = asksAddressQuery(query);
-  const parts: string[] = [];
+  const parts = appendKnownFieldReplies(query, detail, name, locale);
 
-  if (wantsPassport) {
-    const passport = findReviewValue(detail, "passport_number");
-    if (passport && looksLikePassportNumber(passport)) {
+  if (parts.length === 0) {
+    const generic = buildGenericIntakeFieldReply(
+      query,
+      detail,
+      name,
+      tokens,
+      locale,
+    );
+    if (generic) {
+      parts.push(generic);
+    } else if (asksIntakeClientFact(query)) {
+      const hint = extractFieldHint(query, tokens);
       parts.push(
-        formatPassportLookupReply(name, passport).replace(
-          "таблица «Клиенты»",
-          "анкета (/clients/intake)",
-        ),
+        locale === "ru"
+          ? `У **${name}** в анкете не нашёл поле «${hint || "запрошенное"}».`
+          : `Could not find field "${hint || "requested"}" in the intake form for **${name}**.`,
       );
     } else {
       parts.push(
         locale === "ru"
-          ? `У **${name}** в анкете поле «Номер паспорта» не заполнено.`
-          : `Passport number is empty in the intake form for **${name}**.`,
+          ? `Заявка **${name}** есть в анкете (/clients/intake), статус: ${match.currentStatus}.`
+          : `Intake application for **${name}** exists (/clients/intake), status: ${match.currentStatus}.`,
       );
     }
-  }
-
-  if (wantsBirth) {
-    const birth = findReviewValue(detail, "date_of_birth");
-    parts.push(
-      birth
-        ? locale === "ru"
-          ? `Дата рождения **${name}**: ${birth} · из анкеты (/clients/intake).`
-          : `Date of birth for **${name}**: ${birth} · from intake (/clients/intake).`
-        : locale === "ru"
-          ? `У **${name}** в анкете не указана дата рождения.`
-          : `Date of birth is missing in the intake form for **${name}**.`,
-    );
-  }
-
-  if (wantsCitizenship) {
-    const citizenship = findReviewValue(detail, "citizenship");
-    parts.push(
-      citizenship
-        ? locale === "ru"
-          ? `Гражданство **${name}**: ${citizenship} · из анкеты (/clients/intake).`
-          : `Citizenship for **${name}**: ${citizenship} · from intake (/clients/intake).`
-        : locale === "ru"
-          ? `У **${name}** в анкете не указано гражданство.`
-          : `Citizenship is missing in the intake form for **${name}**.`,
-    );
-  }
-
-  if (wantsAddress) {
-    const address = findReviewValue(detail, "address");
-    const country = findReviewValue(detail, "country_of_residence");
-    const addressLine = [address, country ? `(${country})` : null]
-      .filter(Boolean)
-      .join(" ");
-    parts.push(
-      addressLine
-        ? locale === "ru"
-          ? `Адрес **${name}**: ${addressLine} · из анкеты (/clients/intake).`
-          : `Address for **${name}**: ${addressLine} · from intake (/clients/intake).`
-        : locale === "ru"
-          ? `У **${name}** в анкете адрес не указан.`
-          : `Address is missing in the intake form for **${name}**.`,
-    );
-  }
-
-  if (parts.length === 0) {
-    if (asksIntakeClientFact(query)) {
-      return null;
-    }
-    parts.push(
-      locale === "ru"
-        ? `Заявка **${name}** есть в анкете (/clients/intake), статус: ${match.currentStatus}.`
-        : `Intake application for **${name}** exists (/clients/intake), status: ${match.currentStatus}.`,
-    );
   }
 
   return {
@@ -308,3 +406,5 @@ export async function lookupIntakePersonalDataReply(
   if (!result) return null;
   return { reply: result.reply, caseId: result.caseId };
 }
+
+export { asksIntakeFieldLookup, extractFieldHint };

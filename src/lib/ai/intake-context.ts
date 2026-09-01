@@ -125,7 +125,7 @@ function formatIntakeDetail(
 
 function wantsIntakeDetails(userQuery: string, selectedCount: number): boolean {
   if (selectedCount <= 2) return true;
-  return /анкет|questionnaire|суммир|подроб|что\s+в|ответы|review|паспорт|passport|родил|рожден|date of birth|дата рожд|гражданств|citizenship|адрес|address|прожива/iu.test(
+  return /анкет|questionnaire|суммир|подроб|что\s+в|ответы|review|паспорт|passport|родил|рожден|date of birth|дата рожд|гражданств|citizenship|адрес|address|прожива|телефон|phone|email|почт|семейн| marital|пол\b|граждан|внж|услуг/iu.test(
     userQuery,
   );
 }

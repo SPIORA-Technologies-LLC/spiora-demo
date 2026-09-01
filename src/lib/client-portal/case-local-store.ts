@@ -15,6 +15,11 @@ import type {
   SubmitCaseAtomicallyInput,
   SubmitCaseAtomicallyResult,
 } from "./case-store";
+import {
+  intakeRecordSearchHay,
+  matchesIntakeSearch,
+  splitIntakeSearchTokens,
+} from "./case-intake-search";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
 const CASES_FILE = path.join(DATA_DIR, "client-cases.json");
@@ -84,23 +89,13 @@ export async function createLocalCaseStore(): Promise<CaseStore> {
 
     async listIntake(input) {
       const store = await readStore();
-      const q = input.search?.trim().toLowerCase() ?? "";
+      const tokens = splitIntakeSearchTokens(input.search?.trim() ?? "");
       const filtered = store.cases
         .filter((item) => !item.archivedAt)
         .filter((item) => {
-          if (!q) return true;
-          const hay = [
-            item.firstName,
-            item.lastName,
-            item.email,
-            item.serviceType,
-            item.assignedName,
-            item.currentStatus,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-          return hay.includes(q);
+          if (tokens.length === 0) return true;
+          const hay = intakeRecordSearchHay(item);
+          return matchesIntakeSearch(hay, tokens);
         })
         .sort((a, b) => b.submittedAt.localeCompare(a.submittedAt));
       const pageSize = Math.min(Math.max(input.pageSize ?? 25, 1), 100);

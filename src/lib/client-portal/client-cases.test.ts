@@ -285,6 +285,9 @@ describe("client case submit lifecycle", () => {
     assert.ok(intake.items.some((item) => item.id === caseResult.case.id));
     assert.ok(intake.pageSize <= 100);
 
+    const intakeFullName = await listIntakeCases({ search: "Ivan Ivanov" });
+    assert.ok(intakeFullName.items.some((item) => item.id === caseResult.case.id));
+
     const comment = await addCaseComment({
       caseId: caseResult.case.id,
       authorUserId: "emp-1",

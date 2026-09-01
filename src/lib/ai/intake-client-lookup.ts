@@ -86,6 +86,29 @@ export type IntakePersonalDataReply = {
   caseId: string;
 };
 
+async function loadIntakeCasesForTokens(tokens: string[]) {
+  const search = tokens.slice(0, 3).join(" ");
+  let listed = await listIntakeCases({
+    search,
+    page: 1,
+    pageSize: 80,
+  });
+
+  if (listed.items.length === 0 && tokens.length > 1) {
+    listed = await listIntakeCases({
+      search: tokens[0],
+      page: 1,
+      pageSize: 80,
+    });
+  }
+
+  if (listed.items.length === 0) {
+    listed = await listIntakeCases({ page: 1, pageSize: 80 });
+  }
+
+  return listed;
+}
+
 export async function lookupIntakePersonalDataReply(
   query: string,
   locale: AppLocale = "ru",
@@ -95,11 +118,7 @@ export async function lookupIntakePersonalDataReply(
   );
   if (tokens.length === 0) return null;
 
-  const listed = await listIntakeCases({
-    search: tokens.slice(0, 3).join(" "),
-    page: 1,
-    pageSize: 80,
-  });
+  const listed = await loadIntakeCasesForTokens(tokens);
 
   const ranked = [...listed.items]
     .filter((item) => scoreIntakeItem(item, tokens) > 0)

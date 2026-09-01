@@ -15,6 +15,13 @@ import type {
   SubmitCaseAtomicallyInput,
   SubmitCaseAtomicallyResult,
 } from "./case-store";
+import {
+  intakeRecordSearchHay,
+  intakeSingleTokenOrFilter,
+  intakeTwoTokenNameOrFilter,
+  matchesIntakeSearch,
+  splitIntakeSearchTokens,
+} from "./case-intake-search";
 
 type DbCase = {
   id: string;
@@ -229,27 +236,35 @@ export function createSupabaseCaseStore(client: SupabaseClient): CaseStore {
       const page = Math.max(input.page ?? 1, 1);
       const from = (page - 1) * pageSize;
       const to = from + pageSize - 1;
-      const search = input.search?.trim() ?? "";
+      const tokens = splitIntakeSearchTokens(input.search?.trim() ?? "");
 
       let query = client
         .from("client_cases")
         .select(CASE_SELECT, { count: "exact" })
         .is("archived_at", null)
-        .order("submitted_at", { ascending: false })
-        .range(from, to);
+        .order("submitted_at", { ascending: false });
 
-      if (search) {
-        const pattern = `%${search.replace(/[%_]/g, "")}%`;
-        query = query.or(
-          `first_name.ilike.${pattern},last_name.ilike.${pattern},email.ilike.${pattern},service_type.ilike.${pattern}`,
-        );
+      if (tokens.length === 1) {
+        query = query.or(intakeSingleTokenOrFilter(tokens[0]));
+      } else if (tokens.length >= 2) {
+        query = query.or(intakeTwoTokenNameOrFilter(tokens[0], tokens[1]));
       }
+
+      query = query.range(from, to);
 
       const { data, error, count } = await query;
       if (error) throw error;
+
+      let items = (data ?? []).map((row) => mapCase(row as unknown as DbCase));
+      if (tokens.length > 2) {
+        items = items.filter((item) =>
+          matchesIntakeSearch(intakeRecordSearchHay(item), tokens),
+        );
+      }
+
       return {
-        items: (data ?? []).map((row) => mapCase(row as unknown as DbCase)),
-        total: count ?? 0,
+        items,
+        total: tokens.length > 2 ? items.length : (count ?? 0),
         page,
         pageSize,
       };

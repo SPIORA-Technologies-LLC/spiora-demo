@@ -3,6 +3,7 @@ import {
   formatPassportLookupReply,
   looksLikePassportNumber,
 } from "@/lib/ai/format-client";
+import { asksContractQuery } from "@/lib/ai/contract-lookup";
 import {
   asksIntakeFieldLookup,
   collectIntakeReviewFields,
@@ -31,7 +32,7 @@ const INTAKE_FIELD_ALIASES: Record<string, RegExp[]> = {
 };
 
 const NAME_NOISE_TOKENS =
-  /^(?:паспорт(?:а|у|ом)?|когда|родилась|номер|гражданств(?:о|а|e)?|citizenship|адрес(?:а|у|ом)?|address|email|e-mail|почт(?:а|у|e)?|телефон(?:а|у|ом)?|phone)$/iu;
+  /^(?:паспорт(?:а|у|ом)?|когда|родилась|номер|гражданств(?:о|а|e)?|citizenship|адрес(?:а|у|ом)?|address|email|e-mail|почт(?:а|у|e)?|телефон(?:а|у|ом)?|phone|договор(?:а|у|ом)?|подпис(?:ан|ан(?:а|о)?|ание)?|стади(?:я|и|ю|ей)?|статус(?:а|у|ом)?|contract|agreement|signature|клиент(?:а|у|ом)?)$/iu;
 
 function intakeFullName(item: ClientCaseIntakeItem): string {
   return [item.firstName, item.lastName]
@@ -171,6 +172,8 @@ export function asksPhoneQuery(query: string): boolean {
 }
 
 export function asksIntakeClientFact(query: string): boolean {
+  if (asksContractQuery(query)) return false;
+
   const tokens = nameTokensFromQuery(query);
   return (
     /паспорт/iu.test(query) ||

@@ -72,6 +72,10 @@ import {
   asksCitizenshipQuery,
   asksAddressQuery,
 } from "@/lib/ai/intake-client-lookup";
+import {
+  asksContractQuery,
+  lookupContractReply,
+} from "@/lib/ai/contract-lookup";
 import { normalizeComparable } from "@/lib/ai/search-normalize";
 import { buildWorkspaceSystemPrompt } from "@/lib/ai/workspace-prompt";
 import { buildWorkspaceContext } from "@/lib/ai/workspace-context";
@@ -281,6 +285,19 @@ function passportReplyFromResolvedContext(
   return passportReplyFromClientContext(crm);
 }
 
+function buildContractLookupDirectResult(
+  reply: string,
+  locale: AppLocale = "en",
+) {
+  return {
+    kind: "direct" as const,
+    reply,
+    sources: [translateWorkspaceSource(locale, "crm")],
+    pendingClientCandidates: [] as ClientContext[],
+    needsClientSelection: false,
+  };
+}
+
 function buildIntakeLookupDirectResult(
   reply: string,
   locale: AppLocale = "en",
@@ -464,6 +481,16 @@ async function prepareWorkspaceRequest(
   }
 
   if (
+    asksContractQuery(trimmed) &&
+    extractPersonNameTokens(trimmed).length > 0
+  ) {
+    const contractReply = await lookupContractReply(trimmed, locale);
+    if (contractReply) {
+      return buildContractLookupDirectResult(contractReply.reply, locale);
+    }
+  }
+
+  if (
     asksIntakeBirthDate(trimmed) &&
     extractPersonNameTokens(trimmed).length > 0
   ) {
@@ -533,6 +560,13 @@ async function prepareWorkspaceRequest(
         );
       }
     } else if (clientLookup.kind === "not_found") {
+      if (asksContractQuery(trimmed)) {
+        const contractReply = await lookupContractReply(trimmed, locale);
+        if (contractReply) {
+          return buildContractLookupDirectResult(contractReply.reply, locale);
+        }
+      }
+
       const intakeFact = await lookupIntakeClientFactReply(trimmed, locale);
       if (intakeFact?.found && intakeFact.caseId) {
         return buildIntakeLookupDirectResult(intakeFact.reply, locale);

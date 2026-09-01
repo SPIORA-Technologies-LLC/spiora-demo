@@ -1,4 +1,5 @@
 import { extractPersonNameTokens } from "@/lib/ai/name-matching";
+import { asksContractQuery } from "@/lib/ai/contract-lookup";
 
 export type WorkspaceQueryIntent = {
   /** Букинг/адрес конкретного клиента — ответ из CRM без широкого контекста */
@@ -48,11 +49,15 @@ export function detectWorkspaceIntent(query: string): WorkspaceQueryIntent {
   const hasClientName =
     extractPersonNameTokens(query).length > 0 ||
     /(?:клиент[а-я]*|у)\s+[\p{L}][\p{L}'-]{2,}/iu.test(query);
+
+  const asksContract = asksContractQuery(query);
+
   const fastClientLookup =
     hasClientName &&
     (lower.includes("букинг") ||
       lower.includes("адрес") ||
       lower.includes("статус") ||
+      asksContract ||
       asksPassportFromTable);
 
   const needsKb =

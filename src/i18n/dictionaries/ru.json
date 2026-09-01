@@ -12,7 +12,7 @@
     "teamChat": "Командный чат",
     "aiWorkspace": "AI Workspace",
     "knowledgeBase": "Корпоративная база данных",
-    "clientKnowledgeBase": "Клиентская база данных",
+    "clientKnowledgeBase": "Клиентская инфотека",
     "analytics": "Аналитика",
     "team": "Команда",
     "settings": "Настройки",
@@ -1824,7 +1824,7 @@
   "knowledgeBase": {
     "title": "Корпоративная база данных",
     "corporateTitle": "Корпоративная база данных",
-    "clientTitle": "Клиентская база данных",
+    "clientTitle": "Клиентская инфотека",
     "subtitle": "Инструкции и политики команды",
     "demoBadge": "Демонстрационные данные",
     "breadcrumbRoot": "Корпоративная база данных",

@@ -33,7 +33,7 @@ function buildSystemPrompt(locale: AppLocale): string {
     return `Ты — помощник клиента в личном кабинете ${branding.productName} (${branding.companyName}).
 
 Правила:
-- Отвечай только по материалам из клиентской базы знаний, переданным в контексте.
+- Отвечай только по материалам из клиентской инфотеки, переданным в контексте.
 - Если в контексте есть списки документов, требований или условий — перечисли их полностью, не сокращай и не говори, что списка нет.
 - Не выдумывай факты, сроки, цены и требования, которых нет в контексте.
 - Не запрашивай и не используй данные CRM, анкет других людей, внутренние заметки команды или корпоративную базу.
@@ -44,7 +44,7 @@ function buildSystemPrompt(locale: AppLocale): string {
   return `You are a client assistant in the ${branding.productName} client portal (${branding.companyName}).
 
 Rules:
-- Answer only from the client knowledge base materials provided in context.
+- Answer only from the client infotheca materials provided in context.
 - If the context includes document lists, requirements, or conditions, list them in full — do not say the list is missing.
 - Do not invent facts, deadlines, prices, or requirements that are not in the context.
 - Never use CRM data, other people's questionnaires, internal team notes, or the corporate knowledge base.
@@ -54,14 +54,14 @@ Rules:
 
 function sourceLabel(locale: AppLocale): string {
   return locale === "ru"
-    ? "Клиентская база данных"
-    : "Client knowledge base";
+    ? "Клиентская инфотека"
+    : "Client Infotheca";
 }
 
 function emptyKbFallback(locale: AppLocale): string {
   return locale === "ru"
-    ? "В клиентской базе данных пока нет материалов по этому вопросу. Напишите вашему специалисту — он поможет уточнить детали."
-    : "The client knowledge base does not have material on this yet. Please contact your specialist for details.";
+    ? "В клиентской инфотеке пока нет материалов по этому вопросу. Напишите вашему специалисту — он поможет уточнить детали."
+    : "The client infotheca does not have material on this yet. Please contact your specialist for details.";
 }
 
 function buildDemoKbReply(
@@ -70,11 +70,11 @@ function buildDemoKbReply(
 ): string {
   const snippet = kbText.replace(/\s+/g, " ").trim().slice(0, 700);
   if (locale === "ru") {
-    return `По материалам клиентской базы данных:\n\n${snippet}${
+    return `По материалам клиентской инфотеки:\n\n${snippet}${
       kbText.length > 700 ? "…" : ""
     }\n\n_Демо-режим: подключите AI API-ключ для полноценных ответов._`;
   }
-  return `From the client knowledge base:\n\n${snippet}${
+  return `From the client infotheca:\n\n${snippet}${
     kbText.length > 700 ? "…" : ""
   }\n\n_Demo mode: connect an AI API key for full answers._`;
 }
@@ -171,8 +171,8 @@ export async function runPortalAssistant(
     return {
       reply:
         locale === "ru"
-          ? "Напишите вопрос — я отвечу по материалам клиентской базы данных."
-          : "Ask a question and I will answer from the client knowledge base.",
+          ? "Напишите вопрос — я отвечу по материалам клиентской инфотеки."
+          : "Ask a question and I will answer from the client infotheca.",
       sources: [],
       demo: true,
     };
@@ -224,8 +224,8 @@ export async function* runPortalAssistantStream(
   if (prepared.kind === "empty") {
     yield { sources: [], demo: true };
     yield locale === "ru"
-      ? "Напишите вопрос — я отвечу по материалам клиентской базы данных."
-      : "Ask a question and I will answer from the client knowledge base.";
+      ? "Напишите вопрос — я отвечу по материалам клиентской инфотеки."
+      : "Ask a question and I will answer from the client infotheca.";
     return;
   }
 

@@ -12,7 +12,7 @@
     "teamChat": "Team Chat",
     "aiWorkspace": "AI Workspace",
     "knowledgeBase": "Corporate Database",
-    "clientKnowledgeBase": "Client Database",
+    "clientKnowledgeBase": "Client Infotheca",
     "analytics": "Analytics",
     "team": "Team",
     "settings": "Settings",
@@ -1824,7 +1824,7 @@
   "knowledgeBase": {
     "title": "Corporate Database",
     "corporateTitle": "Corporate Database",
-    "clientTitle": "Client Database",
+    "clientTitle": "Client Infotheca",
     "subtitle": "Team guides and policies",
     "demoBadge": "Demo data",
     "breadcrumbRoot": "Corporate Database",

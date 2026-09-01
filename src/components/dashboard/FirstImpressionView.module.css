@@ -479,6 +479,31 @@
   background: var(--gradient-brand-diag);
 }
 
+.activityFooter {
+  margin-top: 0.75rem;
+}
+
+.activityLoadMore {
+  font-family: Inter, sans-serif;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.75);
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 8px;
+  padding: 0.5rem 0.875rem;
+  cursor: pointer;
+}
+
+.activityLoadMore:hover:not(:disabled) {
+  color: var(--brand-orange);
+  border-color: rgba(var(--brand-orange-rgb), 0.45);
+}
+
+.activityLoadMore:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 @media (max-width: 900px) {
   .healthGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -405,7 +405,9 @@
         "documentUploaded": "{name} uploaded {fileName}",
         "calendarEvent": "{name} scheduled «{title}»",
         "empty": "No team activity recorded today yet.",
-        "emptyForDay": "No team activity recorded for this day."
+        "emptyForDay": "No team activity recorded for this day.",
+        "loadMore": "Show more ({shown} of {total})",
+        "loadingMore": "Loading…"
       }
     }
   },
@@ -2389,6 +2391,7 @@
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Task details…",
       "dueDateLabel": "Due date",
+      "datePlaceholder": "MM/DD/YYYY",
       "assigneesLabel": "Assignees",
       "assigneesHint": "Select one or more people. Assignees can update the task status.",
       "statusLabel": "Status",

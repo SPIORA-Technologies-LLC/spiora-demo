@@ -1,16 +1,12 @@
 import type { AppLocale } from "@/i18n/config";
 import { formatAppDate } from "@/i18n/format";
+import { formatQuestionnaireDate } from "@/lib/client-portal/questionnaire-date";
 
 export function formatTaskDate(iso: string | null, locale: AppLocale): string {
   if (!iso) return "—";
   const datePart = iso.slice(0, 10);
-  const [y, m, d] = datePart.split("-").map(Number);
-  if (!y || !m || !d) return iso;
-  return formatAppDate(new Date(y, m - 1, d), locale, {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) return iso;
+  return formatQuestionnaireDate(datePart, locale);
 }
 
 export function formatTaskDateTime(iso: string, locale: AppLocale): string {

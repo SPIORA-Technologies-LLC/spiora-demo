@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
-import { CalendarDateSelect } from "@/components/calendar/CalendarDateSelect";
+import { useId, useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { QuestionnaireDateField } from "@/components/client-portal/QuestionnaireDateField";
 import { Button } from "@/components/ui/Button";
 import { FilterSelect } from "@/components/ui/FilterSelect";
+import type { AppLocale } from "@/i18n/config";
 import type { Task, TaskStatus } from "@/lib/tasks/types";
 import { TaskAttachmentPicker } from "./TaskAttachments";
 import styles from "./TaskForm.module.css";
@@ -45,6 +46,8 @@ export function TaskForm({
   onCancel,
 }: TaskFormProps) {
   const t = useTranslations("tasks");
+  const locale = useLocale() as AppLocale;
+  const dueDateId = useId();
   const [values, setValues] = useState<TaskFormValues>({
     ...DEFAULT,
     ...initial,
@@ -109,10 +112,13 @@ export function TaskForm({
 
       <div className={styles.field}>
         <span className={styles.label}>{t("form.dueDateLabel")}</span>
-        <CalendarDateSelect
+        <QuestionnaireDateField
+          id={dueDateId}
           value={values.dueDate}
+          locale={locale}
+          placeholder={t("form.datePlaceholder")}
+          className={styles.input}
           onChange={(dueDate) => setValues({ ...values, dueDate })}
-          allowEmpty
         />
       </div>
 

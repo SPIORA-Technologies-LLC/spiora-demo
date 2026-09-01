@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import type { SessionUser } from "@/lib/auth/types";
 import type { CompanyHealthMetrics } from "@/lib/dashboard/company-health";
-import type { CommandCenterDailyBriefing } from "@/lib/dashboard/daily-briefing";
+import type {
+  BriefingActivityItem,
+  CommandCenterDailyBriefing,
+} from "@/lib/dashboard/daily-briefing";
 import { splitLlmSummaryParagraphs } from "@/lib/dashboard/daily-briefing-llm-format";
 import type { AppLocale } from "@/i18n/config";
 import { AskSpioraPanel } from "./AskSpioraPanel";
@@ -22,6 +25,11 @@ type FirstImpressionViewProps = {
   loading?: boolean;
   error?: string | null;
   onSelectDay: (dayKey: string) => void;
+  activityItems: BriefingActivityItem[];
+  activityTotal: number;
+  activityNextCursor: string | null;
+  activityLoadingMore?: boolean;
+  onLoadMoreActivity: () => void;
 };
 
 function toneClass(tone: "good" | "attention" | "critical"): string {
@@ -59,6 +67,11 @@ export function FirstImpressionView({
   loading = false,
   error = null,
   onSelectDay,
+  activityItems,
+  activityTotal,
+  activityNextCursor,
+  activityLoadingMore = false,
+  onLoadMoreActivity,
 }: FirstImpressionViewProps) {
   const t = useTranslations("commandCenter");
   const locale = useLocale() as AppLocale;
@@ -256,21 +269,40 @@ export function FirstImpressionView({
           <h2 id="team-activity-title" className={styles.panelTitle}>
             {t("activity.title")}
           </h2>
-          {briefing.activity.length > 0 ? (
-            <ul className={styles.activityList}>
-              {briefing.activity.map((item) => (
-                <li key={item.id} className={styles.activityItem}>
-                  <span className={styles.activityDot} aria-hidden />
-                  {item.href ? (
-                    <Link href={item.href} className={styles.activityLink}>
-                      {t(item.key, item.values ?? {})}
-                    </Link>
-                  ) : (
-                    <span>{t(item.key, item.values ?? {})}</span>
-                  )}
-                </li>
-              ))}
-            </ul>
+          {activityItems.length > 0 ? (
+            <>
+              <ul className={styles.activityList}>
+                {activityItems.map((item) => (
+                  <li key={item.id} className={styles.activityItem}>
+                    <span className={styles.activityDot} aria-hidden />
+                    {item.href ? (
+                      <Link href={item.href} className={styles.activityLink}>
+                        {t(item.key, item.values ?? {})}
+                      </Link>
+                    ) : (
+                      <span>{t(item.key, item.values ?? {})}</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {activityNextCursor ? (
+                <div className={styles.activityFooter}>
+                  <button
+                    type="button"
+                    className={styles.activityLoadMore}
+                    onClick={() => void onLoadMoreActivity()}
+                    disabled={activityLoadingMore || loading}
+                  >
+                    {activityLoadingMore
+                      ? t("daily.activity.loadingMore")
+                      : t("daily.activity.loadMore", {
+                          shown: activityItems.length,
+                          total: activityTotal,
+                        })}
+                  </button>
+                </div>
+              ) : null}
+            </>
           ) : (
             <p className={styles.summaryBody}>
               {isToday

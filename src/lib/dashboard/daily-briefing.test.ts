@@ -23,7 +23,8 @@ describe("Command Center daily briefing (Phase 1)", () => {
     assert.match(view, /briefing\.summary\.map/);
     assert.match(view, /CommandCenterDatePicker/);
     assert.match(view, /briefing\.priorities\.map/);
-    assert.match(view, /briefing\.activity\.map/);
+    assert.match(view, /activityItems\.map/);
+    assert.match(view, /onLoadMoreActivity/);
     assert.doesNotMatch(view, /PRIORITY_CARDS|AI_INSIGHTS|TEAM_ACTIVITY/);
     assert.match(view, /daily\.heroLead/);
     assert.match(view, /daily\.insightsTitle/);
@@ -60,5 +61,12 @@ describe("Command Center daily briefing (Phase 1)", () => {
   it("uses Moscow day key for today window", () => {
     const dayKey = getActivityDayKey(new Date("2026-09-01T10:00:00+03:00"));
     assert.match(dayKey, /^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("daily briefing exposes activity pagination metadata", () => {
+    const mod = read("src/lib/dashboard/daily-briefing.ts");
+    assert.match(mod, /activityNextCursor/);
+    assert.match(mod, /activityTotal/);
+    assert.match(mod, /paginatePlatformActivity/);
   });
 });

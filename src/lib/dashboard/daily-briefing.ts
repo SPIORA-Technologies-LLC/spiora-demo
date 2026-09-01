@@ -11,7 +11,10 @@ import {
   moscowDayEndIso,
   moscowDayStartIso,
 } from "@/lib/dashboard/activity-day";
-import { collectPlatformActivityEvents } from "@/lib/dashboard/platform-activity-feed";
+import {
+  collectPlatformActivityEvents,
+  paginatePlatformActivity,
+} from "@/lib/dashboard/platform-activity-feed";
 import { buildLlmDailySummary } from "@/lib/dashboard/daily-briefing-llm";
 import type { AppLocale } from "@/i18n/config";
 import {
@@ -78,6 +81,8 @@ export type CommandCenterDailyBriefing = {
   priorities: BriefingCard[];
   insights: BriefingCard[];
   activity: BriefingActivityItem[];
+  activityNextCursor: string | null;
+  activityTotal: number;
   hasActivityToday: boolean;
 };
 
@@ -413,17 +418,18 @@ export async function getCommandCenterDailyBriefing(
     documentsUploadedToday: documents.uploadedToday,
   };
 
-  const activity: BriefingActivityItem[] = activityEvents
-    .slice(0, BRIEFING_ACTIVITY_PREVIEW)
-    .map((event) => ({
-      id: event.id,
-      type: event.type,
-      at: event.at,
-      actor: event.actor,
-      key: event.key,
-      values: event.values,
-      href: event.href,
-    }));
+  const activityPage = paginatePlatformActivity(activityEvents, {
+    limit: BRIEFING_ACTIVITY_PREVIEW,
+  });
+  const activity: BriefingActivityItem[] = activityPage.items.map((event) => ({
+    id: event.id,
+    type: event.type,
+    at: event.at,
+    actor: event.actor,
+    key: event.key,
+    values: event.values,
+    href: event.href,
+  }));
 
   const hasActivityToday =
     activity.length > 0 ||
@@ -454,6 +460,8 @@ export async function getCommandCenterDailyBriefing(
     priorities: buildPriorities(metrics),
     insights: buildInsights(metrics),
     activity,
+    activityNextCursor: activityPage.nextCursor,
+    activityTotal: activityPage.total,
     hasActivityToday,
   };
 }

@@ -405,7 +405,9 @@
         "documentUploaded": "{name} загрузил(а) {fileName}",
         "calendarEvent": "{name} запланировал(а) «{title}»",
         "empty": "Активность команды за сегодня пока не зафиксирована.",
-        "emptyForDay": "Активность команды за этот день не зафиксирована."
+        "emptyForDay": "Активность команды за этот день не зафиксирована.",
+        "loadMore": "Показать ещё ({shown} из {total})",
+        "loadingMore": "Загрузка…"
       }
     }
   },
@@ -2389,6 +2391,7 @@
       "descriptionLabel": "Описание",
       "descriptionPlaceholder": "Детали задачи…",
       "dueDateLabel": "Срок выполнения",
+      "datePlaceholder": "ДД.ММ.ГГГГ",
       "assigneesLabel": "Исполнители",
       "assigneesHint": "Можно выбрать одного или нескольких. Назначенные смогут менять статус задачи.",
       "statusLabel": "Статус",

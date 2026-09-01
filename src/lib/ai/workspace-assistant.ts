@@ -21,6 +21,7 @@ import {
   isPassportNumberLookupQuery,
 } from "@/lib/ai/query-intent";
 import { extractPersonNameTokens } from "@/lib/ai/name-matching";
+import { resolveContextualClientQuery } from "@/lib/ai/client-history-context";
 import { extractPassportFromClientRecord } from "@/lib/ai/client-passport";
 import {
   formatPassportLookupReply,
@@ -388,6 +389,8 @@ async function prepareWorkspaceRequest(
     return { kind: "empty" };
   }
 
+  const lookupQuery = resolveContextualClientQuery(trimmed, history);
+
   const offTopicCategory = detectOffTopicCategory(trimmed);
   if (offTopicCategory) {
     return {
@@ -465,11 +468,11 @@ async function prepareWorkspaceRequest(
     }
   }
 
-  const intent = detectWorkspaceIntent(trimmed);
+  const intent = detectWorkspaceIntent(lookupQuery);
 
-  if (isPassportNumberLookupQuery(trimmed)) {
+  if (isPassportNumberLookupQuery(lookupQuery)) {
     const early = await resolvePassportLookupReply(
-      trimmed,
+      lookupQuery,
       null,
       null,
       undefined,
@@ -481,29 +484,29 @@ async function prepareWorkspaceRequest(
   }
 
   if (
-    asksContractQuery(trimmed)
+    asksContractQuery(lookupQuery)
   ) {
-    const contractReply = await lookupContractReply(trimmed, locale);
+    const contractReply = await lookupContractReply(lookupQuery, locale);
     if (contractReply) {
       return buildContractLookupDirectResult(contractReply.reply, locale);
     }
   }
 
   if (
-    asksIntakeBirthDate(trimmed) &&
-    extractPersonNameTokens(trimmed).length > 0
+    asksIntakeBirthDate(lookupQuery) &&
+    extractPersonNameTokens(lookupQuery).length > 0
   ) {
-    const intakeReply = await lookupIntakeClientFactReply(trimmed, locale);
+    const intakeReply = await lookupIntakeClientFactReply(lookupQuery, locale);
     if (intakeReply) {
       return buildIntakeLookupDirectResult(intakeReply.reply, locale);
     }
   }
 
   if (
-    asksIntakeClientFact(trimmed) &&
-    extractPersonNameTokens(trimmed).length > 0
+    asksIntakeClientFact(lookupQuery) &&
+    extractPersonNameTokens(lookupQuery).length > 0
   ) {
-    const directFact = await tryDirectClientFactAnswer(trimmed, locale);
+    const directFact = await tryDirectClientFactAnswer(lookupQuery, locale);
     if (directFact) {
       return buildPersonalDataDirectResult(directFact, locale);
     }
@@ -520,7 +523,7 @@ async function prepareWorkspaceRequest(
   if (followUp) {
     clientContext = followUpToClientContext(followUp);
   } else {
-    const aiSearch = await lookupClientsWithAiSearch(trimmed);
+    const aiSearch = await lookupClientsWithAiSearch(lookupQuery);
     const clientLookup = aiSearch.lookup;
     clientSearchIntentNote = formatClientSearchIntentForAi(aiSearch.intent);
     clientCandidatesTotalFound = aiSearch.foundClients;
@@ -559,26 +562,26 @@ async function prepareWorkspaceRequest(
         );
       }
     } else if (clientLookup.kind === "not_found") {
-      if (asksContractQuery(trimmed)) {
-        const contractReply = await lookupContractReply(trimmed, locale);
+      if (asksContractQuery(lookupQuery)) {
+        const contractReply = await lookupContractReply(lookupQuery, locale);
         if (contractReply) {
           return buildContractLookupDirectResult(contractReply.reply, locale);
         }
       }
 
-      const intakeFact = await lookupIntakeClientFactReply(trimmed, locale);
+      const intakeFact = await lookupIntakeClientFactReply(lookupQuery, locale);
       if (intakeFact?.found && intakeFact.caseId) {
         return buildIntakeLookupDirectResult(intakeFact.reply, locale);
       }
       if (
         intakeFact?.found &&
         !intakeFact.caseId &&
-        asksIntakeClientFact(trimmed)
+        asksIntakeClientFact(lookupQuery)
       ) {
         return buildIntakeLookupDirectResult(intakeFact.reply, locale);
       }
 
-      const fuzzy = await lookupFuzzyClientCandidates(trimmed, 10);
+      const fuzzy = await lookupFuzzyClientCandidates(lookupQuery, 10);
       if (fuzzy.length > 0 && aiSearch.intentType !== "list") {
         clientCandidates = fuzzy;
         candidateScenario = "not_found";
@@ -589,9 +592,9 @@ async function prepareWorkspaceRequest(
     }
   }
 
-  if (isPassportNumberLookupQuery(trimmed)) {
+  if (isPassportNumberLookupQuery(lookupQuery)) {
     const passportReply = await resolvePassportLookupReply(
-      trimmed,
+      lookupQuery,
       clientContext,
       clientCandidates,
       pendingForUi,
@@ -605,7 +608,7 @@ async function prepareWorkspaceRequest(
   }
 
   if (intent.fastClientLookup && !clientContext) {
-    const direct = await tryDirectBookingAnswer(trimmed);
+    const direct = await tryDirectBookingAnswer(lookupQuery);
     if (direct) {
       return {
         kind: "direct",
@@ -615,8 +618,8 @@ async function prepareWorkspaceRequest(
     }
   }
 
-  if (intent.needsEmigrantDesk && /статус/iu.test(trimmed)) {
-    const direct = await tryDirectEmigrantStatusAnswer(trimmed);
+  if (intent.needsEmigrantDesk && /статус/iu.test(lookupQuery)) {
+    const direct = await tryDirectEmigrantStatusAnswer(lookupQuery);
     if (direct) {
       return {
         kind: "direct",
@@ -628,7 +631,7 @@ async function prepareWorkspaceRequest(
 
   let context: Awaited<ReturnType<typeof buildWorkspaceContext>>;
   try {
-    context = await buildWorkspaceContext(trimmed, intent, locale);
+    context = await buildWorkspaceContext(lookupQuery, intent, locale);
   } catch (error) {
     console.error("[workspace-ai] context build failed", error);
     context = {

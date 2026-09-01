@@ -91,6 +91,15 @@ const QUERY_STOP_WORDS = new Set([
   "происходят",
   "случается",
   "случилось",
+  "как",
+  "обстоят",
+  "обстоит",
+  "обстоять",
+  "дела",
+  "договор",
+  "договора",
+  "договором",
+  "договоре",
 ]);
 
 const PHRASE_NOISE = new Set([
@@ -144,8 +153,20 @@ function isNameLikeToken(token: string): boolean {
   return token.length >= 2 && /^[\p{L}][\p{L}\p{N}'-]*$/u.test(token);
 }
 
+function trimNamePhrase(raw: string): string {
+  const parts: string[] = [];
+  for (const word of raw.split(/[^\p{L}\p{N}'-]+/u)) {
+    const token = normalizeText(word);
+    if (!token) continue;
+    if (QUERY_STOP_WORDS.has(token) || PHRASE_NOISE.has(token)) break;
+    parts.push(word);
+    if (parts.length >= 3) break;
+  }
+  return parts.join(" ");
+}
+
 function cleanNameTokens(raw: string): string[] {
-  return raw
+  return trimNamePhrase(raw)
     .split(/[^\p{L}\p{N}'-]+/u)
     .map((token) => normalizeText(token))
     .filter(
@@ -183,9 +204,10 @@ export function extractClientEntityFromQuery(
     const match = trimmed.match(pattern);
     if (!match?.[1]) continue;
 
-    const tokens = cleanNameTokens(match[1]);
+    const trimmedPhrase = trimNamePhrase(match[1]);
+    const tokens = cleanNameTokens(trimmedPhrase);
     if (tokens.length > 0) {
-      return buildExtraction(match[1], tokens);
+      return buildExtraction(trimmedPhrase, tokens);
     }
   }
 

@@ -11,6 +11,9 @@ import {
   rankIntakeFieldsForQuery,
 } from "@/lib/ai/intake-field-match";
 import {
+  morphNameMatch,
+} from "@/lib/ai/russian-name-morphology";
+import {
   scorePersonName,
   tokenizeSearchQuery,
 } from "@/lib/ai/name-matching";
@@ -45,9 +48,18 @@ function intakeFullName(item: ClientCaseIntakeItem): string {
 function tokenMatchesText(token: string, text: string): boolean {
   const lower = text.toLowerCase();
   if (token.length >= 2 && lower.includes(token)) return true;
+  if (morphNameMatch(token, text)) return true;
   const comparable = normalizeComparable(text);
   const tokenComparable = normalizeComparable(token);
   return tokenComparable.length >= 2 && comparable.includes(tokenComparable);
+}
+
+export function scoreIntakeClientForQuery(
+  item: ClientCaseIntakeItem,
+  query: string,
+): number {
+  const tokens = nameTokensFromQuery(query);
+  return scoreIntakeItem(item, tokens);
 }
 
 function scoreIntakeItem(item: ClientCaseIntakeItem, tokens: string[]): number {

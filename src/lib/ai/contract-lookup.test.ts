@@ -7,7 +7,7 @@ import {
 } from "@/lib/ai/contract-lookup";
 import { asksIntakeClientFact } from "@/lib/ai/intake-client-lookup";
 import { extractFieldHint } from "@/lib/ai/intake-field-match";
-import { extractPersonNameTokens } from "@/lib/ai/name-matching";
+import { extractPersonNameTokens, scorePersonName } from "@/lib/ai/name-matching";
 
 describe("contract-lookup", () => {
   it("detects contract signing status questions", () => {
@@ -62,5 +62,14 @@ describe("contract-lookup", () => {
       "zlata",
       "moroz",
     ]);
+  });
+
+  it("picks clear winner for genitive name query", () => {
+    const mayaScore = scorePersonName("Майя", "Петрова", ["петровой", "майи"]);
+    const alevtinaScore = scorePersonName("Алевтина", "Петрова", [
+      "петровой",
+      "майи",
+    ]);
+    assert.ok(mayaScore > alevtinaScore);
   });
 });

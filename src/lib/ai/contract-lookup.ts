@@ -3,6 +3,7 @@ import { extractPersonNameTokens } from "@/lib/ai/name-matching";
 import { normalizeComparable } from "@/lib/ai/search-normalize";
 import {
   rankIntakeClientsByQuery,
+  scoreIntakeClientForQuery,
 } from "@/lib/ai/intake-client-lookup";
 import { getEmployeeCaseDetail } from "@/lib/client-portal/case-service";
 import type { ClientCaseIntakeItem } from "@/lib/client-portal/case-types";
@@ -343,7 +344,9 @@ export async function lookupContractReply(
     ranked.length > 1 &&
     ranked[0] &&
     ranked[1] &&
-    ranked[0].id !== ranked[1].id
+    ranked[0].id !== ranked[1].id &&
+    scoreIntakeClientForQuery(ranked[0], query) ===
+      scoreIntakeClientForQuery(ranked[1], query)
   ) {
     const options = ranked
       .slice(0, 5)
@@ -358,7 +361,14 @@ export async function lookupContractReply(
     };
   }
 
-  if (ranked.length === 1) {
+  const topScore =
+    ranked.length > 0 ? scoreIntakeClientForQuery(ranked[0], query) : 0;
+  const secondScore =
+    ranked.length > 1 ? scoreIntakeClientForQuery(ranked[1], query) : 0;
+  const hasClearWinner =
+    ranked.length === 1 || topScore > secondScore;
+
+  if (hasClearWinner && ranked[0]) {
     const match = ranked[0];
     const detail = await getEmployeeCaseDetail(
       match.id,

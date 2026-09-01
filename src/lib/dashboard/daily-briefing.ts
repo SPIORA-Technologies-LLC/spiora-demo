@@ -16,6 +16,11 @@ import {
   paginatePlatformActivity,
 } from "@/lib/dashboard/platform-activity-feed";
 import { buildLlmDailySummary } from "@/lib/dashboard/daily-briefing-llm";
+import { getCommandCenterFinanceSnapshot } from "@/lib/dashboard/command-center-finance";
+import {
+  listPendingContractSignatures,
+  type PendingContractSignatureItem,
+} from "@/lib/dashboard/command-center-pending-signatures";
 import type { AppLocale } from "@/i18n/config";
 import {
   clampActivityAnchor,
@@ -69,7 +74,16 @@ export type DailyBriefingMetrics = {
   aiMessagesToday: number;
   documentsTotal: number;
   documentsUploadedToday: number;
+  contractsAwaitingClientSignature: number;
+  contractsAwaitingProviderSignature: number;
+  financeTotalDebtCents?: number;
+  financeClientsWithDebt?: number;
+  financeClientsUnpaid?: number;
+  financeClientsPartial?: number;
 };
+
+export type CommandCenterFinanceBriefing =
+  import("@/lib/dashboard/command-center-finance").CommandCenterFinanceSnapshot;
 
 export type CommandCenterDailyBriefing = {
   dayKey: string;
@@ -84,6 +98,8 @@ export type CommandCenterDailyBriefing = {
   activityNextCursor: string | null;
   activityTotal: number;
   hasActivityToday: boolean;
+  pendingSignatures: PendingContractSignatureItem[];
+  finance: CommandCenterFinanceBriefing | null;
 };
 
 export type CommandCenterDailyBriefingOptions = {
@@ -234,7 +250,11 @@ function buildSummary(metrics: DailyBriefingMetrics): BriefingLine[] {
   return lines;
 }
 
-function buildPriorities(metrics: DailyBriefingMetrics): BriefingCard[] {
+function buildPriorities(
+  metrics: DailyBriefingMetrics,
+  pendingSignatures: PendingContractSignatureItem[],
+): BriefingCard[] {
+  const pendingContracts = pendingSignatures.length;
   return [
     {
       id: "meetings",
@@ -271,10 +291,24 @@ function buildPriorities(metrics: DailyBriefingMetrics): BriefingCard[] {
       },
       href: "/clients/intake",
     },
+    {
+      id: "contracts",
+      tone: pendingContracts > 0 ? "attention" : "good",
+      key: "daily.priorities.pendingContracts",
+      values: {
+        total: pendingContracts,
+        awaitingClient: metrics.contractsAwaitingClientSignature,
+        awaitingProvider: metrics.contractsAwaitingProviderSignature,
+      },
+      href: "/clients/intake",
+    },
   ];
 }
 
-function buildInsights(metrics: DailyBriefingMetrics): BriefingCard[] {
+function buildInsights(
+  metrics: DailyBriefingMetrics,
+  pendingSignatures: PendingContractSignatureItem[],
+): BriefingCard[] {
   const items: BriefingCard[] = [];
 
   if (metrics.tasksOverdue > 0) {
@@ -331,8 +365,29 @@ function buildInsights(metrics: DailyBriefingMetrics): BriefingCard[] {
       href: "/clients/intake",
     });
   }
+  if (pendingSignatures.length > 0) {
+    items.push({
+      id: "contracts",
+      tone: "attention",
+      key: "daily.insights.pendingContracts",
+      values: { count: pendingSignatures.length },
+      href: "/clients/intake",
+    });
+  }
+  if ((metrics.financeClientsWithDebt ?? 0) > 0) {
+    items.push({
+      id: "finance-debt",
+      tone: "attention",
+      key: "daily.insights.financeDebt",
+      values: {
+        count: metrics.financeClientsWithDebt ?? 0,
+        debtEuros: Math.round((metrics.financeTotalDebtCents ?? 0) / 100),
+      },
+      href: "/finance",
+    });
+  }
 
-  return items.slice(0, 3);
+  return items.slice(0, 4);
 }
 
 export async function getCommandCenterDailyBriefing(
@@ -357,6 +412,8 @@ export async function getCommandCenterDailyBriefing(
     documents,
     aiMessagesToday,
     activityEvents,
+    pendingSignatures,
+    financeSnapshot,
   ] = await Promise.all([
     listAllClients(),
     listTasksForUser(user),
@@ -367,6 +424,8 @@ export async function getCommandCenterDailyBriefing(
     countDocuments(dayKey),
     countAiUserMessagesForDashboardDay(dayKey),
     collectPlatformActivityEvents(user, dayKey),
+    listPendingContractSignatures(),
+    getCommandCenterFinanceSnapshot(user),
   ]);
 
   const clients = clientsResult.items;
@@ -416,6 +475,20 @@ export async function getCommandCenterDailyBriefing(
     aiMessagesToday,
     documentsTotal: documents.total,
     documentsUploadedToday: documents.uploadedToday,
+    contractsAwaitingClientSignature: pendingSignatures.filter(
+      (item) => item.status === "awaiting_client_signature",
+    ).length,
+    contractsAwaitingProviderSignature: pendingSignatures.filter(
+      (item) => item.status === "client_signed",
+    ).length,
+    ...(financeSnapshot
+      ? {
+          financeTotalDebtCents: financeSnapshot.totalDebtCents,
+          financeClientsWithDebt: financeSnapshot.clientsWithDebt,
+          financeClientsUnpaid: financeSnapshot.clientsUnpaid,
+          financeClientsPartial: financeSnapshot.clientsPartial,
+        }
+      : {}),
   };
 
   const activityPage = paginatePlatformActivity(activityEvents, {
@@ -457,11 +530,13 @@ export async function getCommandCenterDailyBriefing(
     summary: buildSummary(metrics),
     llmSummary: llmResult.text,
     llmSummarySource: llmResult.source,
-    priorities: buildPriorities(metrics),
-    insights: buildInsights(metrics),
+    priorities: buildPriorities(metrics, pendingSignatures),
+    insights: buildInsights(metrics, pendingSignatures),
     activity,
     activityNextCursor: activityPage.nextCursor,
     activityTotal: activityPage.total,
     hasActivityToday,
+    pendingSignatures,
+    finance: financeSnapshot,
   };
 }

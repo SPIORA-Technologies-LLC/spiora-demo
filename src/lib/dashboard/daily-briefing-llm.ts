@@ -48,7 +48,9 @@ function buildSystemPrompt(locale: AppLocale): string {
 - Не упоминай JSON, поля или технические термины.
 - 2–4 коротких абзаца, спокойный деловой тон.
 - Если день был тихим — скажи об этом прямо.
-- Если есть просроченные задачи или pending approval — выдели это как приоритет.`;
+- Если есть просроченные задачи или задачи на проверке — выдели это как приоритет.
+- Пиши только по-русски. Не используй английские слова и латинские термины: intake, backlog, pending, approval, provider, contract и т.п.
+- Вместо них используй: «заявка», «заявки на рассмотрении», «очередь задач», «на проверке», «ожидает подписи клиента/компании», «договор».`;
   }
 
   return `You are an AI colleague on ${branding.productName} (${branding.companyName}).
@@ -64,6 +66,47 @@ Rules:
 - If overdue tasks or pending approvals exist, call them out as priorities.`;
 }
 
+function formatLlmMetrics(
+  metrics: DailyBriefingMetrics,
+  locale: AppLocale,
+): string {
+  if (locale === "en") {
+    return JSON.stringify(metrics, null, 2);
+  }
+
+  const lines = [
+    `Встречи сегодня: ${metrics.eventsToday}`,
+    `Встречи на неделе: ${metrics.eventsThisWeek}`,
+    `Просроченные задачи: ${metrics.tasksOverdue}`,
+    `Задачи на проверке: ${metrics.tasksPendingApproval}`,
+    `Задач закрыто сегодня: ${metrics.tasksCompletedToday}`,
+    `Задач создано сегодня: ${metrics.tasksCreatedToday}`,
+    `Клиентов в CRM: ${metrics.clientsTotal}`,
+    `Новых клиентов сегодня: ${metrics.clientsNewToday}`,
+    `Ожидающих приглашений: ${metrics.invitationsPending}`,
+    `Принято приглашений сегодня: ${metrics.invitationsAcceptedToday}`,
+    `Заявок на рассмотрении: ${metrics.intakeCasesTotal}`,
+    `Заявок подано сегодня: ${metrics.intakeSubmittedToday}`,
+    `Сообщений в чате сегодня: ${metrics.chatMessagesToday}`,
+    `AI-запросов сегодня: ${metrics.aiMessagesToday}`,
+    `Документов всего: ${metrics.documentsTotal}`,
+    `Документов загружено сегодня: ${metrics.documentsUploadedToday}`,
+    `Договоров ждут подписи клиента: ${metrics.contractsAwaitingClientSignature}`,
+    `Договоров ждут подписи компании: ${metrics.contractsAwaitingProviderSignature}`,
+  ];
+
+  if (metrics.financeTotalDebtCents != null) {
+    lines.push(
+      `Задолженность по договорам (евро): ${Math.round(metrics.financeTotalDebtCents / 100)}`,
+      `Клиентов с задолженностью: ${metrics.financeClientsWithDebt ?? 0}`,
+      `Клиентов без оплаты: ${metrics.financeClientsUnpaid ?? 0}`,
+      `Клиентов с частичной оплатой: ${metrics.financeClientsPartial ?? 0}`,
+    );
+  }
+
+  return lines.join("\n");
+}
+
 function buildUserPrompt(input: {
   dayKey: string;
   isToday: boolean;
@@ -75,10 +118,13 @@ function buildUserPrompt(input: {
       ? `День (Europe/Moscow): ${input.dayKey}. Сегодня: ${input.isToday ? "да" : "нет"}.`
       : `Day (Europe/Moscow): ${input.dayKey}. Is today: ${input.isToday ? "yes" : "no"}.`;
 
+  const aggregatesLabel =
+    input.locale === "ru" ? "Агрегаты дня:" : "Aggregates JSON:";
+
   return `${dayLabel}
 
-Aggregates JSON:
-${JSON.stringify(input.metrics, null, 2)}`;
+${aggregatesLabel}
+${formatLlmMetrics(input.metrics, input.locale)}`;
 }
 
 

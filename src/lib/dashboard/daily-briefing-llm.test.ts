@@ -20,7 +20,7 @@ describe("Command Center LLM daily summary (Phase 4)", () => {
 
     const llm = read("src/lib/dashboard/daily-briefing-llm.ts");
     assert.match(llm, /createChatCompletion/);
-    assert.match(llm, /JSON\.stringify\(input\.metrics/);
+    assert.match(llm, /formatLlmMetrics/);
     assert.match(llm, /metrics: DailyBriefingMetrics/);
     assert.doesNotMatch(llm, /collectPlatformActivityEvents|BriefingActivityItem/);
   });

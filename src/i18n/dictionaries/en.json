@@ -334,6 +334,23 @@
       "deadlines": "Upcoming deadlines",
       "schedule": "Review my schedule"
     },
+    "contracts": {
+      "title": "Contracts awaiting signature",
+      "empty": "No contracts are waiting for signature.",
+      "awaitingClient": "Awaiting client signature",
+      "awaitingProvider": "Awaiting company signature",
+      "agreementNumber": "Agreement {number}"
+    },
+    "finance": {
+      "title": "Finance overview",
+      "contractsTotal": "Contract total",
+      "received": "Received",
+      "debt": "Outstanding",
+      "clientsWithDebt": "Clients with debt: {count}",
+      "debtorsTitle": "Outstanding balances",
+      "viewAll": "Open Finance",
+      "emptyDebtors": "All contracted clients are fully paid."
+    },
     "companyHealth": {
       "title": "Work overview",
       "status": {
@@ -385,7 +402,8 @@
         "meetingsToday": "{count, plural, =0 {No meetings today} one {# meeting today} other {# meetings today}} · {week} this week",
         "overdueTasks": "{count, plural, =0 {No overdue tasks} one {# overdue task} other {# overdue tasks}}",
         "pendingApproval": "{count, plural, =0 {Nothing pending approval} one {# task pending approval} other {# tasks pending approval}}",
-        "portal": "{pendingInvites, plural, =0 {No pending invitations} one {# pending invitation} other {# pending invitations}} · {submitted, plural, =0 {no submissions today} one {# submission today} other {# submissions today}} · {intakeTotal} intake cases"
+        "portal": "{pendingInvites, plural, =0 {No pending invitations} one {# pending invitation} other {# pending invitations}} · {submitted, plural, =0 {no submissions today} one {# submission today} other {# submissions today}} · {intakeTotal} applications in review",
+        "pendingContracts": "{total, plural, =0 {No contracts awaiting signature} one {# contract awaiting signature} other {# contracts awaiting signature}} · {awaitingClient} client · {awaitingProvider} company"
       },
       "insights": {
         "overdueTasks": "{count, plural, one {# overdue task — open task list} other {# overdue tasks — open task list}}",
@@ -393,7 +411,9 @@
         "pendingInvites": "{count, plural, one {# invitation not yet accepted} other {# invitations not yet accepted}}",
         "meetingsToday": "{count, plural, one {# meeting on today's calendar} other {# meetings on today's calendar}}",
         "newClientsToday": "{count, plural, one {# new CRM client today} other {# new CRM clients today}}",
-        "intakeSubmitted": "{count, plural, one {# application submitted today} other {# applications submitted today}}"
+        "intakeSubmitted": "{count, plural, one {# application submitted today} other {# applications submitted today}}",
+        "pendingContracts": "{count, plural, one {# contract awaiting signature — open applications} other {# contracts awaiting signature — open applications}}",
+        "financeDebt": "{count, plural, one {# client with outstanding balance (~{debtEuros} €)} other {# clients with outstanding balance (~{debtEuros} €)}}"
       },
       "activity": {
         "chatMessage": "{name} sent a team chat message",

@@ -131,15 +131,31 @@ export async function listTeamMembers(): Promise<TeamMember[]> {
         const profileEmails = new Set(
           fromProfiles.map((member) => member.email.toLowerCase()),
         );
-        const custom = await listCustomTeamUsers();
-        const extras = custom
+        const builtInExtras = listTeamUsers()
           .filter(
             (user) =>
               !deleted.has(user.id) &&
               !profileEmails.has(user.email.toLowerCase()),
           )
           .map(({ id, email, name, role }) => ({ id, email, name, role }));
-        return [...fromProfiles, ...extras];
+        const custom = await listCustomTeamUsers();
+        const customExtras = custom
+          .filter(
+            (user) =>
+              !deleted.has(user.id) &&
+              !profileEmails.has(user.email.toLowerCase()),
+          )
+          .map(({ id, email, name, role }) => ({ id, email, name, role }));
+        const seen = new Set<string>();
+        const merged = [...fromProfiles, ...builtInExtras, ...customExtras].filter(
+          (member) => {
+            const key = member.email.toLowerCase();
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          },
+        );
+        return merged;
       }
     } catch (error) {
       console.error("[team] list members from profiles", error);

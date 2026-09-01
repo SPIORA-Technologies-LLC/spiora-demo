@@ -10,6 +10,7 @@ import type {
 } from "@/lib/dashboard/daily-briefing";
 import { splitLlmSummaryParagraphs } from "@/lib/dashboard/daily-briefing-llm-format";
 import type { AppLocale } from "@/i18n/config";
+import { formatEuroFromCents } from "@/lib/finance/money";
 import { AskSpioraPanel } from "./AskSpioraPanel";
 import { CommandCenterDatePicker } from "./CommandCenterDatePicker";
 import styles from "./FirstImpressionView.module.css";
@@ -74,6 +75,7 @@ export function FirstImpressionView({
   onLoadMoreActivity,
 }: FirstImpressionViewProps) {
   const t = useTranslations("commandCenter");
+  const tFinanceStatus = useTranslations("finance.status");
   const locale = useLocale() as AppLocale;
   const firstName = user.name.trim().split(/\s+/)[0] ?? user.name;
   const numberLocale = locale === "ru" ? "ru-RU" : "en-US";
@@ -147,8 +149,110 @@ export function FirstImpressionView({
         </section>
 
         <section
+          className={`${styles.panel} ${styles.contractsPanel} ${styles.fadeInUp}`}
+          style={{ animationDelay: "200ms" }}
+          aria-labelledby="pending-contracts-title"
+        >
+          <h2 id="pending-contracts-title" className={styles.panelTitle}>
+            {t("contracts.title")}
+          </h2>
+          {briefing.pendingSignatures.length > 0 ? (
+            <ul className={styles.contractsList}>
+              {briefing.pendingSignatures.map((item) => (
+                <li key={item.id} className={styles.contractsItem}>
+                  <Link href={item.href} className={styles.contractsLink}>
+                    <span className={styles.contractsClient}>{item.clientName}</span>
+                    <span className={styles.contractsMeta}>
+                      {t("contracts.agreementNumber", {
+                        number: item.agreementNumber,
+                      })}{" "}
+                      ·{" "}
+                      {item.status === "awaiting_client_signature"
+                        ? t("contracts.awaitingClient")
+                        : t("contracts.awaitingProvider")}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.summaryBody}>{t("contracts.empty")}</p>
+          )}
+        </section>
+
+        {briefing.finance ? (
+          <section
+            className={`${styles.panel} ${styles.financePanel} ${styles.fadeInUp}`}
+            style={{ animationDelay: "220ms" }}
+            aria-labelledby="command-center-finance-title"
+          >
+            <div className={styles.financeHead}>
+              <h2 id="command-center-finance-title" className={styles.panelTitle}>
+                {t("finance.title")}
+              </h2>
+              <Link href="/finance" className={styles.financeViewAll}>
+                {t("finance.viewAll")}
+              </Link>
+            </div>
+            <dl className={styles.financeKpis}>
+              <div>
+                <dt>{t("finance.contractsTotal")}</dt>
+                <dd>
+                  {formatEuroFromCents(
+                    briefing.finance.totalContractsCents,
+                    locale,
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>{t("finance.received")}</dt>
+                <dd>
+                  {formatEuroFromCents(
+                    briefing.finance.totalReceivedCents,
+                    locale,
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>{t("finance.debt")}</dt>
+                <dd>
+                  {formatEuroFromCents(briefing.finance.totalDebtCents, locale)}
+                </dd>
+              </div>
+            </dl>
+            <p className={styles.financeDebtSummary}>
+              {t("finance.clientsWithDebt", {
+                count: briefing.finance.clientsWithDebt,
+              })}
+            </p>
+            {briefing.finance.debtors.length > 0 ? (
+              <>
+                <h3 className={styles.financeSubTitle}>
+                  {t("finance.debtorsTitle")}
+                </h3>
+                <ul className={styles.financeDebtors}>
+                  {briefing.finance.debtors.map((debtor) => (
+                    <li key={debtor.clientExternalId}>
+                      <Link href={debtor.href} className={styles.financeDebtorLink}>
+                        <span>{debtor.clientName}</span>
+                        <span className={styles.financeDebtorMeta}>
+                          {formatEuroFromCents(debtor.balanceCents, locale)} ·{" "}
+                          {tFinanceStatus(debtor.paymentStatus)}
+                        </span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : (
+              <p className={styles.summaryBody}>{t("finance.emptyDebtors")}</p>
+            )}
+          </section>
+        ) : null}
+
+        <section
           className={`${styles.fadeInUp}`}
-          style={{ animationDelay: "160ms" }}
+          style={{ animationDelay: "240ms" }}
           aria-labelledby="priorities-title"
         >
           <h2 id="priorities-title" className={styles.sectionTitle}>

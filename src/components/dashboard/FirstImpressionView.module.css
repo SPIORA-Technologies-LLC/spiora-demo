@@ -504,6 +504,94 @@
   cursor: not-allowed;
 }
 
+.contractsPanel,
+.financePanel {
+  margin-bottom: 1.25rem;
+}
+
+.contractsList,
+.financeDebtors {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.contractsLink,
+.financeDebtorLink {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.contractsLink:hover,
+.financeDebtorLink:hover {
+  color: var(--brand-orange);
+}
+
+.contractsClient {
+  font-weight: 500;
+}
+
+.contractsMeta,
+.financeDebtorMeta {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.financeHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.financeViewAll {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: none;
+}
+
+.financeViewAll:hover {
+  color: var(--brand-orange);
+}
+
+.financeKpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  margin: 0 0 0.75rem;
+}
+
+.financeKpis dt {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.financeKpis dd {
+  margin: 0.15rem 0 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.financeDebtSummary {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.financeSubTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+}
+
 @media (max-width: 900px) {
   .healthGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

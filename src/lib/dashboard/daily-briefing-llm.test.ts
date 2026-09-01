@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import {
+  parseLlmSummaryBlocks,
   splitLlmSummaryParagraphs,
 } from "@/lib/dashboard/daily-briefing-llm-format.ts";
 import { translateMessage } from "@/i18n/messages.ts";
@@ -34,9 +35,23 @@ describe("Command Center LLM daily summary (Phase 4)", () => {
 
   it("FirstImpressionView prefers llmSummary over template lines", () => {
     const view = read("src/components/dashboard/FirstImpressionView.tsx");
-    assert.match(view, /splitLlmSummaryParagraphs/);
-    assert.match(view, /llmParagraphs/);
+    assert.match(view, /parseLlmSummaryBlocks/);
+    assert.match(view, /summarySubheading/);
     assert.match(view, /daily\.llmSummaryNote/);
+  });
+
+  it("parseLlmSummaryBlocks turns markdown titles into subheadings", () => {
+    const blocks = parseLlmSummaryBlocks(
+      "**Сводка на 1 сентября**\n\nСегодня спокойный день.\n\n**Текущая очередь:**\n\n11 заявок на рассмотрении.",
+    );
+    assert.equal(blocks[0]?.kind, "subheading");
+    assert.equal(blocks[0]?.kind === "subheading" ? blocks[0].text : "", "Сводка на 1 сентября");
+    assert.equal(blocks[1]?.kind, "paragraph");
+    assert.equal(blocks[2]?.kind, "subheading");
+    assert.equal(
+      blocks[2]?.kind === "subheading" ? blocks[2].text : "",
+      "Текущая очередь",
+    );
   });
 
   it("splitLlmSummaryParagraphs splits on blank lines", () => {

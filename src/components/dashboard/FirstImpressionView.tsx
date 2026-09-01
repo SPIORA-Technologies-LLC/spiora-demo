@@ -8,7 +8,9 @@ import type {
   BriefingActivityItem,
   CommandCenterDailyBriefing,
 } from "@/lib/dashboard/daily-briefing";
-import { splitLlmSummaryParagraphs } from "@/lib/dashboard/daily-briefing-llm-format";
+import {
+  parseLlmSummaryBlocks,
+} from "@/lib/dashboard/daily-briefing-llm-format";
 import type { AppLocale } from "@/i18n/config";
 import { formatEuroFromCents } from "@/lib/finance/money";
 import { AskSpioraPanel } from "./AskSpioraPanel";
@@ -81,8 +83,8 @@ export function FirstImpressionView({
   const numberLocale = locale === "ru" ? "ru-RU" : "en-US";
   const isToday = dayKey === todayKey;
   const formattedDay = formatBriefingDay(dayKey, locale);
-  const llmParagraphs = briefing.llmSummary
-    ? splitLlmSummaryParagraphs(briefing.llmSummary)
+  const llmBlocks = briefing.llmSummary
+    ? parseLlmSummaryBlocks(briefing.llmSummary)
     : [];
 
   return (
@@ -127,11 +129,20 @@ export function FirstImpressionView({
         <h2 id="executive-summary-title" className={styles.panelTitle}>
           {t("executiveSummary.title")}
         </h2>
-        {llmParagraphs.length > 0 ? (
+        {llmBlocks.length > 0 ? (
           <div className={styles.summaryBody}>
-            {llmParagraphs.map((paragraph) => (
-              <p key={paragraph.slice(0, 48)}>{paragraph}</p>
-            ))}
+            {llmBlocks.map((block, index) =>
+              block.kind === "subheading" ? (
+                <h3
+                  key={`sub-${index}-${block.text.slice(0, 32)}`}
+                  className={styles.summarySubheading}
+                >
+                  {block.text}
+                </h3>
+              ) : (
+                <p key={`p-${index}-${block.text.slice(0, 32)}`}>{block.text}</p>
+              ),
+            )}
             <p className={styles.llmSummaryNote}>{t("daily.llmSummaryNote")}</p>
           </div>
         ) : (

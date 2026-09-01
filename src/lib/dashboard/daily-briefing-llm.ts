@@ -47,6 +47,7 @@ function buildSystemPrompt(locale: AppLocale): string {
 - Не выдумывай имена клиентов, суммы, встречи или события, которых нет в цифрах.
 - Не упоминай JSON, поля или технические термины.
 - 2–4 коротких абзаца, спокойный деловой тон.
+- Для подзаголовков секций используй отдельную строку вида **Заголовок** (без другого markdown).
 - Если день был тихим — скажи об этом прямо.
 - Если есть просроченные задачи или задачи на проверке — выдели это как приоритет.
 - Пиши только по-русски. Не используй английские слова и латинские термины: intake, backlog, pending, approval, provider, contract и т.п.
@@ -62,6 +63,7 @@ Rules:
 - Do not invent client names, amounts, meetings, or events not implied by the numbers.
 - Do not mention JSON, field names, or technical terms.
 - 2–4 short paragraphs, calm operational tone.
+- Use standalone lines like **Section title** for section subheadings (no other markdown).
 - If the day was quiet, say so clearly.
 - If overdue tasks or pending approvals exist, call them out as priorities.`;
 }

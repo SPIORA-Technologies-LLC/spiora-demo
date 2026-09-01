@@ -369,6 +369,7 @@
         "loading": "Loading…",
         "error": "Could not load that day. Try again."
       },
+      "llmSummaryNote": "AI summary from daily metrics only — no client names or documents sent to the model.",
       "summary": {
         "empty": "No recorded activity yet today.",
         "eventsToday": "{count, plural, =0 {No meetings on today's calendar} one {# meeting on today's calendar} other {# meetings on today's calendar}}.",

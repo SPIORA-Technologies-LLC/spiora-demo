@@ -10,8 +10,9 @@ import {
   getActivityDayKey,
   getActivityRetentionCutoff,
 } from "@/lib/presence/daily-activity-logic";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
+import type { AppLocale } from "@/i18n/config";
 
 type DashboardPageProps = {
   searchParams: Promise<{ date?: string }>;
@@ -25,10 +26,11 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const { date } = await searchParams;
   const dayKey = resolveCommandCenterDayKey(date ?? null);
+  const locale = (await getLocale()) as AppLocale;
   const t = await getTranslations("commandCenter");
   const [health, briefing] = await Promise.all([
     getCompanyHealthMetrics(session),
-    getCommandCenterDailyBriefing(session, { dayKey }),
+    getCommandCenterDailyBriefing(session, { dayKey, locale }),
   ]);
 
   return (

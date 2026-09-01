@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import type { SessionUser } from "@/lib/auth/types";
 import type { CompanyHealthMetrics } from "@/lib/dashboard/company-health";
 import type { CommandCenterDailyBriefing } from "@/lib/dashboard/daily-briefing";
+import { splitLlmSummaryParagraphs } from "@/lib/dashboard/daily-briefing-llm-format";
 import type { AppLocale } from "@/i18n/config";
 import { AskSpioraPanel } from "./AskSpioraPanel";
 import { CommandCenterDatePicker } from "./CommandCenterDatePicker";
@@ -65,6 +66,9 @@ export function FirstImpressionView({
   const numberLocale = locale === "ru" ? "ru-RU" : "en-US";
   const isToday = dayKey === todayKey;
   const formattedDay = formatBriefingDay(dayKey, locale);
+  const llmParagraphs = briefing.llmSummary
+    ? splitLlmSummaryParagraphs(briefing.llmSummary)
+    : [];
 
   return (
     <div className={styles.page}>
@@ -105,9 +109,17 @@ export function FirstImpressionView({
           style={{ animationDelay: "80ms" }}
           aria-labelledby="executive-summary-title"
         >
-          <h2 id="executive-summary-title" className={styles.panelTitle}>
-            {t("executiveSummary.title")}
-          </h2>
+        <h2 id="executive-summary-title" className={styles.panelTitle}>
+          {t("executiveSummary.title")}
+        </h2>
+        {llmParagraphs.length > 0 ? (
+          <div className={styles.summaryBody}>
+            {llmParagraphs.map((paragraph) => (
+              <p key={paragraph.slice(0, 48)}>{paragraph}</p>
+            ))}
+            <p className={styles.llmSummaryNote}>{t("daily.llmSummaryNote")}</p>
+          </div>
+        ) : (
           <div className={styles.summaryBody}>
             {briefing.summary.map((line) => (
               <p
@@ -118,6 +130,7 @@ export function FirstImpressionView({
               </p>
             ))}
           </div>
+        )}
         </section>
 
         <section

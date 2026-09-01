@@ -12,6 +12,8 @@ import {
   moscowDayStartIso,
 } from "@/lib/dashboard/activity-day";
 import { collectPlatformActivityEvents } from "@/lib/dashboard/platform-activity-feed";
+import { buildLlmDailySummary } from "@/lib/dashboard/daily-briefing-llm";
+import type { AppLocale } from "@/i18n/config";
 import {
   clampActivityAnchor,
   getActivityDayKey,
@@ -70,6 +72,9 @@ export type CommandCenterDailyBriefing = {
   dayKey: string;
   metrics: DailyBriefingMetrics;
   summary: BriefingLine[];
+  /** LLM narrative from metrics-only aggregates; null when AI unavailable. */
+  llmSummary: string | null;
+  llmSummarySource: "llm" | "none";
   priorities: BriefingCard[];
   insights: BriefingCard[];
   activity: BriefingActivityItem[];
@@ -79,6 +84,9 @@ export type CommandCenterDailyBriefing = {
 export type CommandCenterDailyBriefingOptions = {
   /** Moscow calendar day (YYYY-MM-DD). Defaults to today; clamped to retention window. */
   dayKey?: string;
+  locale?: AppLocale;
+  /** When false, skip external LLM call (template summary only). Default true. */
+  includeLlm?: boolean;
 };
 
 /** Parse optional `date` query value; returns null when invalid. */
@@ -426,10 +434,23 @@ export async function getCommandCenterDailyBriefing(
     metrics.clientsNewToday > 0 ||
     metrics.documentsUploadedToday > 0;
 
+  const locale: AppLocale = options?.locale ?? "ru";
+  const includeLlm = options?.includeLlm !== false;
+  const llmResult = includeLlm
+    ? await buildLlmDailySummary({
+        metrics,
+        dayKey,
+        locale,
+        isToday,
+      })
+    : { text: null, source: "none" as const };
+
   return {
     dayKey,
     metrics,
     summary: buildSummary(metrics),
+    llmSummary: llmResult.text,
+    llmSummarySource: llmResult.source,
     priorities: buildPriorities(metrics),
     insights: buildInsights(metrics),
     activity,

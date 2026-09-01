@@ -220,6 +220,13 @@
   font-weight: 500;
 }
 
+.llmSummaryNote {
+  margin: 0.75rem 0 0;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.45;
+}
+
 .priorityGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

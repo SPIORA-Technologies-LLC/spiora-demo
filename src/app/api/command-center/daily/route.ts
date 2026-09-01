@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getRequestLocale } from "@/i18n/api-messages";
 import { getSession } from "@/lib/auth/session";
 import {
   getCommandCenterDailyBriefing,
@@ -21,8 +22,14 @@ export async function GET(request: Request) {
     );
   }
 
+  const includeLlm = url.searchParams.get("llm") !== "0";
+  const locale = await getRequestLocale();
   const dayKey = resolveCommandCenterDayKey(dateParam);
-  const briefing = await getCommandCenterDailyBriefing(session, { dayKey });
+  const briefing = await getCommandCenterDailyBriefing(session, {
+    dayKey,
+    locale,
+    includeLlm,
+  });
 
   return NextResponse.json({ dayKey, briefing });
 }

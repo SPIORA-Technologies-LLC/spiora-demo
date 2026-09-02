@@ -187,6 +187,13 @@
   backdrop-filter: blur(8px);
 }
 
+.minimizedStatus {
+  margin: 1rem 0 0;
+  color: #86efac;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
 @media (max-width: 640px) {
   .overlayChrome {
     top: 0.5rem;

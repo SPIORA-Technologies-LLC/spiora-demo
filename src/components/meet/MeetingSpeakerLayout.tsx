@@ -35,6 +35,7 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
   const [pinnedTrack, setPinnedTrack] = useState<
     ReturnType<typeof useTracks>[number] | null
   >(null);
+  const [filmstripOpen, setFilmstripOpen] = useState(true);
 
   const tracks = useTracks(
     [
@@ -75,6 +76,12 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
     setLastActiveSpeakerIdentity(next);
   }, [activeSpeakers]);
 
+  useEffect(() => {
+    if (cameraTracks.length > 0) {
+      setFilmstripOpen(true);
+    }
+  }, [cameraTracks.length]);
+
   const useGridLayout =
     !screenShareTrack &&
     !localIsSharing &&
@@ -83,7 +90,7 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
 
   const focusTrack = useMemo(
     () =>
-      useGridLayout
+      useGridLayout || localIsSharing
         ? null
         : resolveSpeakerFocusTrack({
             cameraTracks,
@@ -97,6 +104,7 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
       activeSpeakers,
       cameraTracks,
       lastActiveSpeakerIdentity,
+      localIsSharing,
       localParticipant.identity,
       pinnedTrack,
       screenShareTrack,
@@ -104,10 +112,12 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
     ],
   );
 
-  const carouselTracks = useMemo(
-    () => resolveSpeakerCarouselTracks(cameraTracks, focusTrack),
-    [cameraTracks, focusTrack],
-  );
+  const carouselTracks = useMemo(() => {
+    if (localIsSharing || screenShareTrack) {
+      return cameraTracks;
+    }
+    return resolveSpeakerCarouselTracks(cameraTracks, focusTrack);
+  }, [cameraTracks, focusTrack, localIsSharing, screenShareTrack]);
 
   function handleParticipantClick(event: ParticipantClickEvent) {
     if (!isTrackReference(event.track) || event.track.source !== Track.Source.Camera) {
@@ -116,34 +126,58 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
     setPinnedTrack(event.track);
   }
 
-  const filmstrip = carouselTracks.length > 0 ? (
-    <div
-      className={[
-        styles.filmstrip,
-        screenShareTrack ? styles.filmstripScreenShare : "",
-        compact ? styles.filmstripCompact : "",
-        screenShareTrack && compact ? styles.filmstripScreenShareCompact : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <div className={styles.filmstripRow} role="list">
-        {carouselTracks.map((track) => (
-          <ParticipantTile
-            key={getTrackReferenceId(track)}
-            trackRef={track}
-            className={[
-              styles.filmstripTile,
-              screenShareTrack ? styles.filmstripTileScreenShare : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            onParticipantClick={handleParticipantClick}
-          />
-        ))}
+  function renderFilmstripToggle() {
+    if (carouselTracks.length === 0) {
+      return null;
+    }
+
+    return (
+      <button
+        type="button"
+        className={styles.filmstripToggle}
+        onClick={() => setFilmstripOpen((open) => !open)}
+        aria-expanded={filmstripOpen}
+        aria-label={
+          filmstripOpen ? "Скрыть видео участников" : "Показать видео участников"
+        }
+      >
+        {filmstripOpen ? "Скрыть видео" : "Показать видео"}
+      </button>
+    );
+  }
+
+  const filmstrip =
+    carouselTracks.length > 0 && filmstripOpen ? (
+      <div
+        className={[
+          styles.filmstrip,
+          screenShareTrack || localIsSharing ? styles.filmstripScreenShare : "",
+          localIsSharing ? styles.filmstripScreenShareTop : "",
+          compact ? styles.filmstripCompact : "",
+          screenShareTrack && compact ? styles.filmstripScreenShareCompact : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <div className={styles.filmstripRow} role="list">
+          {carouselTracks.map((track) => (
+            <ParticipantTile
+              key={getTrackReferenceId(track)}
+              trackRef={track}
+              className={[
+                styles.filmstripTile,
+                screenShareTrack || localIsSharing
+                  ? styles.filmstripTileScreenShare
+                  : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              onParticipantClick={handleParticipantClick}
+            />
+          ))}
+        </div>
       </div>
-    </div>
-  ) : null;
+    ) : null;
 
   if (useGridLayout) {
     return (
@@ -173,9 +207,12 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
           .join(" ")}
       >
         <div className={styles.shareBanner}>
-          {screenShareTrack.participant.name ||
-            screenShareTrack.participant.identity}{" "}
-          демонстрирует экран
+          <span>
+            {screenShareTrack.participant.name ||
+              screenShareTrack.participant.identity}{" "}
+            демонстрирует экран
+          </span>
+          {renderFilmstripToggle()}
         </div>
 
         <div className={styles.speakerMainScreenShare}>
@@ -192,24 +229,46 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
     );
   }
 
+  if (localIsSharing) {
+    return (
+      <div
+        className={[
+          styles.speakerLayout,
+          compact ? styles.speakerLayoutCompact : "",
+          styles.speakerLayoutStacked,
+          styles.speakerLayoutLocalSharing,
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <div className={styles.shareBanner}>
+          <span>
+            Вы демонстрируете экран — участники видны в окошках сверху
+          </span>
+          {renderFilmstripToggle()}
+        </div>
+
+        {filmstrip}
+
+        <div className={styles.speakerMain}>
+          <div className={styles.localSharePlaceholder}>
+            Вы в эфире с демонстрацией экрана
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={[
         styles.speakerLayout,
         compact ? styles.speakerLayoutCompact : "",
         styles.speakerLayoutStacked,
-        localIsSharing ? styles.speakerLayoutLocalSharing : "",
       ]
         .filter(Boolean)
         .join(" ")}
     >
-      {localIsSharing ? (
-        <div className={styles.shareBanner}>
-          Вы демонстрируете экран — себе превью не показывается, чтобы не было
-          «зеркала»
-        </div>
-      ) : null}
-
       {filmstrip}
 
       <div className={styles.speakerMain}>
@@ -219,9 +278,7 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
             className={styles.speakerMainTile}
           />
         ) : (
-          <div className={styles.localSharePlaceholder}>
-            Вы в эфире с демонстрацией экрана
-          </div>
+          <div className={styles.localSharePlaceholder}>Ожидание участников…</div>
         )}
       </div>
     </div>

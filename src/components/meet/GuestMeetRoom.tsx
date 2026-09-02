@@ -1,17 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
   useParticipants,
+  useRoomContext,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { branding } from "@/config/branding";
 import { formatEventTimeRange } from "@/lib/calendar/format";
 import { CALENDAR_TIMEZONE } from "@/lib/calendar/constants";
 import type { CalendarEvent } from "@/lib/calendar/types";
+import {
+  clearGuestMeetingDockActive,
+  clearGuestMeetingDockNavigate,
+  isMeetingDockMode,
+  isMeetingMinimizedMode,
+  markGuestMeetingDockActive,
+  markGuestMeetingDockCredentials,
+  markGuestMeetingDockNavigate,
+  openGuestMeetingDockWindow,
+  readGuestMeetingDockNavigateToken,
+  readGuestMeetingDockSession,
+} from "@/lib/calendar/meeting-dock";
 import { GuestMeetingGate } from "./GuestMeetingGate";
+import { GuestMeetingDockGate } from "./GuestMeetingDockGate";
+import { GuestMeetingMinimizedView } from "./GuestMeetingMinimizedView";
 import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
 import { MeetingRecordingNotice } from "./MeetingRecordingNotice";
@@ -45,7 +61,12 @@ type ConnectState =
       admissionId: string;
       guestId: string;
     }
-  | { status: "ready"; credentials: GuestTokenPayload; displayName: string }
+  | {
+      status: "ready";
+      credentials: GuestTokenPayload;
+      displayName: string;
+      admissionId?: string;
+    }
   | { status: "error"; message: string }
   | { status: "left" }
   | { status: "rejected" };
@@ -96,7 +117,9 @@ type GuestMeetingStageProps = {
   inviteToken: string;
   displayName: string;
   guestId: string;
+  isDockMode: boolean;
   onLeave: () => void;
+  onMinimize: () => void;
 };
 
 function GuestMeetingStage({
@@ -104,34 +127,65 @@ function GuestMeetingStage({
   inviteToken,
   displayName,
   guestId,
+  isDockMode,
   onLeave,
+  onMinimize,
 }: GuestMeetingStageProps) {
+  const room = useRoomContext();
   const [participantsOpen, setParticipantsOpen] = useState(false);
   const participants = useParticipants();
+
+  const leaveMeeting = useCallback(async () => {
+    room.disconnect();
+    onLeave();
+  }, [onLeave, room]);
 
   return (
     <div className={styles.room}>
       <div className={styles.overlayChrome}>
         <div className={styles.overlayLeft}>
-          <span className={styles.guestBadge} title={event.title}>
-            Гость
-          </span>
+          {isDockMode ? (
+            <span className={meetStyles.dockBadge}>Окно встречи</span>
+          ) : (
+            <span className={styles.guestBadge} title={event.title}>
+              Гость
+            </span>
+          )}
         </div>
         <MeetingRecordingNotice inviteToken={inviteToken} />
         <div className={styles.overlayRight}>
+          {!isDockMode ? (
+            <button
+              type="button"
+              className={meetStyles.overlayPlatform}
+              onClick={onMinimize}
+              title="Свернуть встречу в отдельное окно и открыть другие вкладки"
+              aria-label="Свернуть встречу"
+            >
+              <i className="fa-solid fa-window-restore" aria-hidden="true" />
+            </button>
+          ) : null}
           <span className={styles.guestName}>{displayName}</span>
         </div>
       </div>
 
+      {isDockMode ? (
+        <div className={meetStyles.dockHint}>
+          Встреча в отдельном окне. Откройте нужный сайт в другой вкладке — звонок
+          продолжится здесь.
+        </div>
+      ) : null}
+
       <div className={meetStyles.stage}>
-        <MeetingSpeakerLayout />
+        <MeetingSpeakerLayout compact={isDockMode} />
       </div>
 
       <MeetingControlBar
         participantCount={participants.length}
         participantsOpen={participantsOpen}
         onToggleParticipants={() => setParticipantsOpen((open) => !open)}
-        onLeave={onLeave}
+        onLeave={leaveMeeting}
+        compact={isDockMode}
       />
 
       {participantsOpen ? (
@@ -185,11 +239,33 @@ export function GuestMeetRoom({
   inviteToken,
   requiresGuestPassword = false,
 }: GuestMeetRoomProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isDockMode = isMeetingDockMode(searchParams);
+  const isMinimizedMode = isMeetingMinimizedMode(searchParams);
+  const [bypassDockGate, setBypassDockGate] = useState(false);
+  const [dockChecked, setDockChecked] = useState(false);
+  const [dockSession, setDockSession] = useState(
+    null as ReturnType<typeof readGuestMeetingDockSession>,
+  );
   const [displayName, setDisplayName] = useState("");
   const [accessPassword, setAccessPassword] = useState("");
   const [connectState, setConnectState] = useState<ConnectState>({
     status: "lobby",
   });
+  const dockAutoConnectStartedRef = useRef(false);
+
+  useEffect(() => {
+    setDockSession(readGuestMeetingDockSession());
+    setDockChecked(true);
+  }, []);
+
+  const showDockGate =
+    dockChecked &&
+    !isDockMode &&
+    !isMinimizedMode &&
+    !bypassDockGate &&
+    dockSession?.inviteToken === inviteToken;
 
   const connectWithToken = useCallback(
     async (
@@ -207,10 +283,45 @@ export function GuestMeetRoom({
         status: "ready",
         credentials: payload,
         displayName: trimmed,
+        admissionId: admission?.admissionId,
       });
     },
     [inviteToken],
   );
+
+  useEffect(() => {
+    if (!isDockMode || connectState.status !== "lobby" || dockAutoConnectStartedRef.current) {
+      return;
+    }
+
+    dockAutoConnectStartedRef.current = true;
+    const stored = readGuestMeetingDockCredentials();
+    if (!stored || stored.inviteToken !== inviteToken) {
+      setConnectState({
+        status: "error",
+        message: "Не удалось восстановить подключение. Откройте ссылку заново.",
+      });
+      return;
+    }
+
+    setDisplayName(stored.displayName);
+    setConnectState({ status: "loading" });
+    void connectWithToken(
+      stored.displayName,
+      stored.accessPassword ?? "",
+      stored.admissionId && stored.guestId
+        ? { admissionId: stored.admissionId, guestId: stored.guestId }
+        : undefined,
+    ).catch((error) => {
+      setConnectState({
+        status: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Не удалось подключиться в окне встречи",
+      });
+    });
+  }, [connectState.status, connectWithToken, inviteToken, isDockMode]);
 
   const handleJoin = useCallback(async () => {
     const trimmed = displayName.trim();
@@ -338,12 +449,55 @@ export function GuestMeetRoom({
         "left",
       );
     }
+    clearGuestMeetingDockActive();
     setConnectState({ status: "left" });
   }, [connectState, inviteToken]);
 
   const handleDisconnected = useCallback(() => {
+    if (readGuestMeetingDockNavigateToken() === inviteToken) {
+      clearGuestMeetingDockNavigate();
+      router.replace(`/join/${encodeURIComponent(inviteToken)}?minimized=1`);
+      return;
+    }
+
     handleLeave();
-  }, [handleLeave]);
+  }, [handleLeave, inviteToken, router]);
+
+  const handleMinimize = useCallback(() => {
+    if (connectState.status !== "ready") {
+      return;
+    }
+
+    markGuestMeetingDockCredentials({
+      inviteToken,
+      displayName: connectState.displayName,
+      guestId: connectState.credentials.guestId,
+      accessPassword: accessPassword || undefined,
+      admissionId: connectState.admissionId,
+    });
+
+    const popup = openGuestMeetingDockWindow(inviteToken);
+    if (!popup) {
+      window.alert(
+        "Не удалось открыть окно встречи. Разрешите всплывающие окна для сайта и попробуйте снова.",
+      );
+      return;
+    }
+
+    markGuestMeetingDockActive({
+      inviteToken,
+      title: event.title,
+      openedAt: new Date().toISOString(),
+    });
+    markGuestMeetingDockNavigate(inviteToken);
+    router.replace(`/join/${encodeURIComponent(inviteToken)}?minimized=1`);
+  }, [accessPassword, connectState, event.title, inviteToken, router]);
+
+  if (isMinimizedMode && dockSession?.inviteToken === inviteToken) {
+    return (
+      <GuestMeetingMinimizedView event={event} inviteToken={inviteToken} />
+    );
+  }
 
   if (connectState.status === "left") {
     return <GuestMeetingGate variant="left" event={event} />;
@@ -357,11 +511,43 @@ export function GuestMeetRoom({
     return <GuestMeetingGate variant="waiting_room" event={event} />;
   }
 
+  if (!dockChecked) {
+    return (
+      <div className={styles.lobbyPage}>
+        <div className={styles.lobbyCard}>
+          <p>{branding.productName}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (showDockGate) {
+    return (
+      <div className={styles.lobbyPage}>
+        <GuestMeetingDockGate
+          inviteToken={inviteToken}
+          eventTitle={event.title}
+          onConnectHere={() => setBypassDockGate(true)}
+        />
+      </div>
+    );
+  }
+
   if (
     connectState.status === "lobby" ||
     connectState.status === "loading" ||
     connectState.status === "error"
   ) {
+    if (isDockMode && connectState.status === "lobby") {
+      return (
+        <div className={styles.lobbyPage}>
+          <div className={styles.lobbyCard}>
+            <p className={styles.lobbyTitle}>Подключение…</p>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className={styles.lobbyPage}>
         <div className={styles.lobbyCard}>
@@ -438,7 +624,14 @@ export function GuestMeetRoom({
   const { credentials } = connectState;
 
   return (
-    <div className={styles.page}>
+    <div
+      className={[
+        styles.page,
+        isDockMode ? meetStyles.pageDock : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <LiveKitRoom
         serverUrl={credentials.wsUrl}
         token={credentials.token}
@@ -454,7 +647,9 @@ export function GuestMeetRoom({
           inviteToken={inviteToken}
           displayName={connectState.displayName}
           guestId={credentials.guestId}
+          isDockMode={isDockMode}
           onLeave={handleLeave}
+          onMinimize={handleMinimize}
         />
       </LiveKitRoom>
     </div>

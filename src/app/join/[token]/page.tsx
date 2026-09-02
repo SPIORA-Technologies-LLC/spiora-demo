@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { GuestMeetRoom } from "@/components/meet/GuestMeetRoom";
 import { GuestMeetingGate } from "@/components/meet/GuestMeetingGate";
 import { resolveGuestMeetingPreview } from "@/lib/calendar/meeting-guest-handler";
@@ -27,10 +28,18 @@ export default async function GuestJoinPage({ params }: PageProps) {
   }
 
   return (
-    <GuestMeetRoom
-      event={sanitizeCalendarEventForClient(preview.event)}
-      inviteToken={token}
-      requiresGuestPassword={preview.requiresGuestPassword}
-    />
+    <Suspense
+      fallback={
+        <div style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+          Подключение…
+        </div>
+      }
+    >
+      <GuestMeetRoom
+        event={sanitizeCalendarEventForClient(preview.event)}
+        inviteToken={token}
+        requiresGuestPassword={preview.requiresGuestPassword}
+      />
+    </Suspense>
   );
 }

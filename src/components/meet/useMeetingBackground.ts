@@ -3,21 +3,24 @@
 import { useEffect, useRef } from "react";
 import { useLocalParticipant } from "@livekit/components-react";
 import { isLocalTrack, LocalVideoTrack } from "livekit-client";
-import {
-  BackgroundProcessor,
-  supportsBackgroundProcessors,
-  type BackgroundProcessorWrapper,
-} from "@livekit/track-processors";
 import { prepareMeetingBackgroundImageUrl } from "@/lib/calendar/prepare-meeting-background-image";
 import {
   type MeetingBackgroundId,
   resolveMeetingBackgroundMode,
 } from "@/lib/calendar/meeting-backgrounds";
+import {
+  createSmoothedBackgroundProcessor,
+  supportsSmoothedBackgroundProcessors,
+  type SmoothedBackgroundProcessorHandle,
+} from "./smoothed-background-processor";
 
 export function useMeetingBackground(selectedId: MeetingBackgroundId) {
   const { cameraTrack } = useLocalParticipant();
-  const processorRef = useRef<BackgroundProcessorWrapper | null>(null);
-  const supported = supportsBackgroundProcessors();
+  const processorRef = useRef<
+    (ReturnType<typeof createSmoothedBackgroundProcessor> &
+      SmoothedBackgroundProcessorHandle) | null
+  >(null);
+  const supported = supportsSmoothedBackgroundProcessors();
 
   useEffect(() => {
     if (!supported) {
@@ -45,7 +48,7 @@ export function useMeetingBackground(selectedId: MeetingBackgroundId) {
       }
 
       if (!processorRef.current) {
-        processorRef.current = BackgroundProcessor({ mode: "disabled" });
+        processorRef.current = createSmoothedBackgroundProcessor();
         if (!localVideoTrack.getProcessor()) {
           await localVideoTrack.setProcessor(processorRef.current);
         }

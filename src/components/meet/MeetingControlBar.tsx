@@ -2,6 +2,7 @@
 
 import { TrackToggle } from "@livekit/components-react";
 import { Track } from "livekit-client";
+import { MeetingBackgroundPicker } from "./MeetingBackgroundPicker";
 import { MeetingRecordingButton } from "./MeetingRecordingButton";
 import styles from "./MeetingControlBar.module.css";
 
@@ -47,6 +48,7 @@ export function MeetingControlBar({
         >
           <i className="fa-solid fa-video" aria-hidden="true" />
         </TrackToggle>
+        <MeetingBackgroundPicker />
         {hideScreenShare ? null : (
         <TrackToggle
           source={Track.Source.ScreenShare}

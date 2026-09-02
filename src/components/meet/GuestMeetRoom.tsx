@@ -22,6 +22,7 @@ import {
   markGuestMeetingDockCredentials,
   markGuestMeetingDockNavigate,
   openGuestMeetingDockWindow,
+  readGuestMeetingDockCredentials,
   readGuestMeetingDockNavigateToken,
   readGuestMeetingDockSession,
 } from "@/lib/calendar/meeting-dock";

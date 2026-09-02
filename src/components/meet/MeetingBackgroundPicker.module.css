@@ -1,0 +1,106 @@
+.wrap {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.65rem);
+  z-index: 20;
+  width: min(18rem, calc(100vw - 2rem));
+  padding: 0.75rem;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  background: rgba(17, 24, 39, 0.98);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+}
+
+.menuTitle {
+  margin: 0 0 0.65rem;
+  color: #e2e8f0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e2e8f0;
+  cursor: pointer;
+}
+
+.option:hover {
+  border-color: rgba(99, 102, 241, 0.45);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.optionActive {
+  border-color: rgba(99, 102, 241, 0.75);
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.35);
+}
+
+.preview {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: 0.35rem;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.previewImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.previewBlur {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 30% 35%, rgba(255, 255, 255, 0.35), transparent 55%),
+    linear-gradient(135deg, #334155 0%, #64748b 45%, #94a3b8 100%);
+  filter: blur(1px);
+}
+
+.previewNone {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  color: #94a3b8;
+  font-size: 1.1rem;
+}
+
+.optionLabel {
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.25;
+}
+
+@media (max-width: 640px) {
+  .menu {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(18rem, calc(100vw - 1.5rem));
+  }
+}

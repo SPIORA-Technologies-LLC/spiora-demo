@@ -120,6 +120,12 @@
   --lk-fg: #f8fafc;
 }
 
+.livekitRoom[data-ss-meeting-background-active="true"]
+  :global([data-lk-facing-mode="user"])
+  :global(.lk-participant-media-video[data-lk-local-participant="true"][data-lk-source="camera"]) {
+  transform: none !important;
+}
+
 .overlayChrome {
   position: absolute;
   z-index: 6;

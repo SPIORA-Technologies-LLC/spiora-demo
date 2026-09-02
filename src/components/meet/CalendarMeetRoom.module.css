@@ -35,7 +35,7 @@
 /* LiveKit mirrors the local camera for selfie view; with virtual background that
    also flips the background image (logo reads backwards). Disable mirror when
    blur or image background is active so text and edges stay stable. */
-[data-ss-meeting-room][data-ss-meeting-background-active="true"]
+.livekitRoom[data-ss-meeting-background-active="true"]
   :global([data-lk-facing-mode="user"])
   :global(.lk-participant-media-video[data-lk-local-participant="true"][data-lk-source="camera"]) {
   transform: none !important;

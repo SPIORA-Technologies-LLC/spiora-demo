@@ -1,15 +1,55 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { MEETING_BACKGROUND_PRESETS } from "@/lib/calendar/meeting-backgrounds";
 import { useMeetingBackgroundContext } from "./MeetingBackgroundContext";
 import barStyles from "./MeetingControlBar.module.css";
 import styles from "./MeetingBackgroundPicker.module.css";
 
+type MenuPosition = {
+  left: number;
+  bottom: number;
+  width: number;
+};
+
 export function MeetingBackgroundPicker() {
   const [open, setOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const { selectedId, selectBackground, supported } = useMeetingBackgroundContext();
+
+  useLayoutEffect(() => {
+    if (!open || !wrapRef.current) {
+      setMenuPosition(null);
+      return;
+    }
+
+    function updatePosition() {
+      const wrap = wrapRef.current;
+      if (!wrap) {
+        return;
+      }
+
+      const rect = wrap.getBoundingClientRect();
+      const width = Math.min(18 * 16, window.innerWidth - 24);
+      const centered = rect.left + rect.width / 2 - width / 2;
+      const left = Math.max(
+        12,
+        Math.min(centered, window.innerWidth - width - 12),
+      );
+      const bottom = Math.max(12, window.innerHeight - rect.top + 10);
+
+      setMenuPosition({ left, bottom, width });
+    }
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
 
   useEffect(() => {
     if (!open) {
@@ -62,22 +102,18 @@ export function MeetingBackgroundPicker() {
         <i className="fa-solid fa-image" aria-hidden="true" />
       </button>
 
-      {open ? (
-        <div className={styles.menu} role="menu" aria-label="Фон видео">
+      {open && menuPosition ? (
+        <div
+          className={styles.menu}
+          role="menu"
+          aria-label="Фон видео"
+          style={{
+            left: menuPosition.left,
+            bottom: menuPosition.bottom,
+            width: menuPosition.width,
+          }}
+        >
           <p className={styles.menuTitle}>Фон видео</p>
-
-          {selectedId !== "none" ? (
-            <button
-              type="button"
-              className={styles.clearButton}
-              role="menuitem"
-              onClick={() => pickBackground("none")}
-            >
-              <i className="fa-solid fa-ban" aria-hidden="true" />
-              Убрать фон
-            </button>
-          ) : null}
-
           <div className={styles.options}>
             {MEETING_BACKGROUND_PRESETS.map((preset) => (
               <button

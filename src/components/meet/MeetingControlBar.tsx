@@ -3,6 +3,7 @@
 import { TrackToggle } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { MeetingBackgroundPicker } from "./MeetingBackgroundPicker";
+import { MeetingChatToggle } from "./MeetingChat";
 import { MeetingRecordingButton } from "./MeetingRecordingButton";
 import styles from "./MeetingControlBar.module.css";
 
@@ -50,25 +51,26 @@ export function MeetingControlBar({
         </TrackToggle>
         <MeetingBackgroundPicker />
         {hideScreenShare ? null : (
-        <TrackToggle
-          source={Track.Source.ScreenShare}
-          showIcon={false}
-          className={styles.toggle}
-          aria-label="Поделиться экраном"
-          title={
-            compact
-              ? "Демонстрация — выберите основное окно браузера с платформой"
-              : "Поделиться экраном — выберите окно с платформой или другим сайтом"
-          }
-          captureOptions={{
-            audio: false,
-            selfBrowserSurface: "include",
-          }}
-        >
-          <i className="fa-solid fa-display" aria-hidden="true" />
-        </TrackToggle>
+          <TrackToggle
+            source={Track.Source.ScreenShare}
+            showIcon={false}
+            className={styles.toggle}
+            aria-label="Поделиться экраном"
+            title={
+              compact
+                ? "Демонстрация — выберите основное окно браузера с платформой"
+                : "Поделиться экраном — выберите окно с платформой или другим сайтом"
+            }
+            captureOptions={{
+              audio: false,
+              selfBrowserSurface: "include",
+            }}
+          >
+            <i className="fa-solid fa-display" aria-hidden="true" />
+          </TrackToggle>
         )}
         {eventId ? <MeetingRecordingButton eventId={eventId} /> : null}
+        <MeetingChatToggle />
         <button
           type="button"
           className={`${styles.toggle} ${participantsOpen ? styles.toggleActive : ""}`}

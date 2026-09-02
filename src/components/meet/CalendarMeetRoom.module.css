@@ -65,6 +65,7 @@
 }
 
 .overlayLeft,
+.overlayCenter,
 .overlayRight {
   display: flex;
   align-items: center;
@@ -73,12 +74,23 @@
   pointer-events: auto;
 }
 
+.overlayLeft {
+  grid-column: 1;
+  justify-self: start;
+}
+
+.overlayCenter {
+  grid-column: 2;
+  justify-self: center;
+}
+
 .overlayRight {
+  grid-column: 3;
+  justify-self: end;
   justify-content: flex-end;
 }
 
 .overlayChrome :global([role="status"]) {
-  justify-self: center;
   pointer-events: auto;
 }
 

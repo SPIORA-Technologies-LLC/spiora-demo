@@ -27,6 +27,7 @@ import {
 import type { CalendarEvent } from "@/lib/calendar/types";
 import { MeetingAccessGate, type MeetingAccessGateVariant } from "./MeetingAccessGate";
 import { MeetingBackgroundProvider } from "./MeetingBackgroundContext";
+import { MeetingChatPanel, MeetingChatProvider, MeetingChatToast } from "./MeetingChat";
 import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingDockGate } from "./MeetingDockGate";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
@@ -106,6 +107,10 @@ function MeetingStage({
 
   return (
     <div className={styles.room}>
+      <MeetingChatProvider
+        participantsOpen={participantsOpen}
+        onOpenChat={() => setParticipantsOpen(false)}
+      >
       <div className={styles.overlayChrome}>
         <div className={styles.overlayLeft}>
           {isDockMode ? (
@@ -122,17 +127,19 @@ function MeetingStage({
             </button>
           )}
         </div>
-        <MeetingRecordingNotice eventId={event.id} />
+        <div className={styles.overlayCenter}>
+          <MeetingRecordingNotice eventId={event.id} />
+        </div>
         <div className={styles.overlayRight}>
           {!isDockMode ? (
             <button
               type="button"
               className={styles.overlayPlatform}
               onClick={onWorkOnPlatform}
-              title="Открыть звонок в отдельном окне и работать на платформе"
-              aria-label="Работать на платформе"
+              title="Свернуть встречу в отдельное окно и работать на платформе"
+              aria-label="Свернуть встречу"
             >
-              <i className="fa-solid fa-desktop" aria-hidden="true" />
+              <i className="fa-solid fa-compress" aria-hidden="true" />
             </button>
           ) : null}
         </div>
@@ -165,6 +172,9 @@ function MeetingStage({
         compact={isDockMode}
       />
 
+      <MeetingChatToast />
+      <MeetingChatPanel />
+
       {participantsOpen ? (
         <MeetingParticipantPanel
           eventId={event.id}
@@ -173,6 +183,7 @@ function MeetingStage({
       ) : null}
 
       <RoomAudioRenderer />
+      </MeetingChatProvider>
     </div>
   );
 }

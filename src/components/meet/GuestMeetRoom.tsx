@@ -30,6 +30,7 @@ import { GuestMeetingGate } from "./GuestMeetingGate";
 import { GuestMeetingDockGate } from "./GuestMeetingDockGate";
 import { GuestMeetingMinimizedView } from "./GuestMeetingMinimizedView";
 import { MeetingBackgroundProvider } from "./MeetingBackgroundContext";
+import { MeetingChatPanel, MeetingChatProvider, MeetingChatToast } from "./MeetingChat";
 import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
 import { MeetingRecordingNotice } from "./MeetingRecordingNotice";
@@ -144,6 +145,10 @@ function GuestMeetingStage({
 
   return (
     <div className={styles.room}>
+      <MeetingChatProvider
+        participantsOpen={participantsOpen}
+        onOpenChat={() => setParticipantsOpen(false)}
+      >
       <div className={styles.overlayChrome}>
         <div className={styles.overlayLeft}>
           {isDockMode ? (
@@ -154,17 +159,19 @@ function GuestMeetingStage({
             </span>
           )}
         </div>
-        <MeetingRecordingNotice inviteToken={inviteToken} />
+        <div className={styles.overlayCenter}>
+          <MeetingRecordingNotice inviteToken={inviteToken} />
+        </div>
         <div className={styles.overlayRight}>
           {!isDockMode ? (
             <button
               type="button"
               className={meetStyles.overlayPlatform}
               onClick={onMinimize}
-              title="Свернуть встречу в отдельное окно и открыть другие вкладки"
+              title="Свернуть встречу в отдельное окно"
               aria-label="Свернуть встречу"
             >
-              <i className="fa-solid fa-window-restore" aria-hidden="true" />
+              <i className="fa-solid fa-compress" aria-hidden="true" />
             </button>
           ) : null}
           <span className={styles.guestName}>{displayName}</span>
@@ -190,6 +197,9 @@ function GuestMeetingStage({
         compact={isDockMode}
       />
 
+      <MeetingChatToast />
+      <MeetingChatPanel />
+
       {participantsOpen ? (
         <MeetingParticipantPanel onClose={() => setParticipantsOpen(false)} />
       ) : null}
@@ -201,6 +211,7 @@ function GuestMeetingStage({
         guestId={guestId}
         displayName={displayName}
       />
+      </MeetingChatProvider>
     </div>
   );
 }

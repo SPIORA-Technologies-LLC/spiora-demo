@@ -1,25 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import {
-  MEETING_BACKGROUND_PRESETS,
-  readStoredMeetingBackground,
-  storeMeetingBackground,
-  type MeetingBackgroundId,
-} from "@/lib/calendar/meeting-backgrounds";
-import { useMeetingBackground } from "./useMeetingBackground";
+import { MEETING_BACKGROUND_PRESETS } from "@/lib/calendar/meeting-backgrounds";
+import { useMeetingBackgroundContext } from "./MeetingBackgroundContext";
 import barStyles from "./MeetingControlBar.module.css";
 import styles from "./MeetingBackgroundPicker.module.css";
 
 export function MeetingBackgroundPicker() {
   const [open, setOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState<MeetingBackgroundId>("none");
   const wrapRef = useRef<HTMLDivElement>(null);
-  const { supported } = useMeetingBackground(selectedId);
-
-  useEffect(() => {
-    setSelectedId(readStoredMeetingBackground());
-  }, []);
+  const { selectedId, selectBackground, supported } = useMeetingBackgroundContext();
 
   useEffect(() => {
     if (!open) {
@@ -46,9 +36,8 @@ export function MeetingBackgroundPicker() {
     };
   }, [open]);
 
-  function selectBackground(id: MeetingBackgroundId) {
-    setSelectedId(id);
-    storeMeetingBackground(id);
+  function pickBackground(id: typeof selectedId) {
+    selectBackground(id);
     setOpen(false);
   }
 
@@ -76,6 +65,19 @@ export function MeetingBackgroundPicker() {
       {open ? (
         <div className={styles.menu} role="menu" aria-label="Фон видео">
           <p className={styles.menuTitle}>Фон видео</p>
+
+          {selectedId !== "none" ? (
+            <button
+              type="button"
+              className={styles.clearButton}
+              role="menuitem"
+              onClick={() => pickBackground("none")}
+            >
+              <i className="fa-solid fa-ban" aria-hidden="true" />
+              Убрать фон
+            </button>
+          ) : null}
+
           <div className={styles.options}>
             {MEETING_BACKGROUND_PRESETS.map((preset) => (
               <button
@@ -89,7 +91,7 @@ export function MeetingBackgroundPicker() {
                 ]
                   .filter(Boolean)
                   .join(" ")}
-                onClick={() => selectBackground(preset.id)}
+                onClick={() => pickBackground(preset.id)}
               >
                 <span className={styles.preview} aria-hidden="true">
                   {preset.preview ? (

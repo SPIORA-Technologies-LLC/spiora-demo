@@ -8,9 +8,9 @@ import {
   supportsBackgroundProcessors,
   type BackgroundProcessorWrapper,
 } from "@livekit/track-processors";
+import { prepareMeetingBackgroundImageUrl } from "@/lib/calendar/prepare-meeting-background-image";
 import {
   type MeetingBackgroundId,
-  resolveMeetingBackgroundImageUrl,
   resolveMeetingBackgroundMode,
 } from "@/lib/calendar/meeting-backgrounds";
 
@@ -63,9 +63,14 @@ export function useMeetingBackground(selectedId: MeetingBackgroundId) {
         return;
       }
 
+      const imagePath = await prepareMeetingBackgroundImageUrl(mode.imagePath);
+      if (cancelled) {
+        return;
+      }
+
       await processorRef.current.switchTo({
         mode: "virtual-background",
-        imagePath: resolveMeetingBackgroundImageUrl(mode.imagePath),
+        imagePath,
       });
     }
 

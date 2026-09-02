@@ -29,6 +29,7 @@ import {
 import { GuestMeetingGate } from "./GuestMeetingGate";
 import { GuestMeetingDockGate } from "./GuestMeetingDockGate";
 import { GuestMeetingMinimizedView } from "./GuestMeetingMinimizedView";
+import { MeetingBackgroundProvider } from "./MeetingBackgroundContext";
 import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
 import { MeetingRecordingNotice } from "./MeetingRecordingNotice";
@@ -642,16 +643,19 @@ export function GuestMeetRoom({
         options={MEETING_ROOM_OPTIONS}
         onDisconnected={handleDisconnected}
         className={styles.livekitRoom}
+        data-ss-meeting-room="true"
       >
-        <GuestMeetingStage
-          event={event}
-          inviteToken={inviteToken}
-          displayName={connectState.displayName}
-          guestId={credentials.guestId}
-          isDockMode={isDockMode}
-          onLeave={handleLeave}
-          onMinimize={handleMinimize}
-        />
+        <MeetingBackgroundProvider>
+          <GuestMeetingStage
+            event={event}
+            inviteToken={inviteToken}
+            displayName={connectState.displayName}
+            guestId={credentials.guestId}
+            isDockMode={isDockMode}
+            onLeave={handleLeave}
+            onMinimize={handleMinimize}
+          />
+        </MeetingBackgroundProvider>
       </LiveKitRoom>
     </div>
   );

@@ -26,6 +26,7 @@ import {
 } from "@/lib/calendar/meeting-dock";
 import type { CalendarEvent } from "@/lib/calendar/types";
 import { MeetingAccessGate, type MeetingAccessGateVariant } from "./MeetingAccessGate";
+import { MeetingBackgroundProvider } from "./MeetingBackgroundContext";
 import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingDockGate } from "./MeetingDockGate";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
@@ -378,13 +379,16 @@ export function CalendarMeetRoom({ event }: CalendarMeetRoomProps) {
         onConnected={handleConnected}
         onDisconnected={handleDisconnected}
         className={styles.livekitRoom}
+        data-ss-meeting-room="true"
       >
-        <MeetingStage
-          event={event}
-          onLeave={handleLeave}
-          isDockMode={isDockMode}
-          onWorkOnPlatform={handleWorkOnPlatform}
-        />
+        <MeetingBackgroundProvider>
+          <MeetingStage
+            event={event}
+            onLeave={handleLeave}
+            isDockMode={isDockMode}
+            onWorkOnPlatform={handleWorkOnPlatform}
+          />
+        </MeetingBackgroundProvider>
       </LiveKitRoom>
     </div>
   );

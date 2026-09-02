@@ -347,7 +347,7 @@ export async function notifyCalendarReminder(params: {
   offsetMinutes: ReminderOffsetMinutes;
   userId: string;
 }): Promise<Notification> {
-  const locale = await getRequestLocale();
+  const locale = await getRequestLocale().catch(() => "en" as const);
   const content = buildCalendarReminderNotificationContent(
     params.event,
     params.offsetMinutes,

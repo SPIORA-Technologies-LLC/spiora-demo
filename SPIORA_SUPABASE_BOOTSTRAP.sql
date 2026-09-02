@@ -256,7 +256,7 @@ create table if not exists calendar_reminder_deliveries (
   id text primary key,
   event_id text not null references calendar_events(id) on delete cascade,
   user_id text not null,
-  offset_minutes int not null check (offset_minutes in (1440, 60)),
+  offset_minutes int not null check (offset_minutes in (1440, 60, 10)),
   fire_at timestamptz not null,
   notification_id text,
   event_updated_at timestamptz not null,

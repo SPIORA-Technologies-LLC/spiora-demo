@@ -177,4 +177,44 @@ describe("runCalendarReminderCron", () => {
       { userId: "olivia-bennett", offsetMinutes: 10 },
     ]);
   });
+
+  it("continues after insert failures and reports failed count", async () => {
+    const now = new Date("2026-06-25T07:50:00.000Z");
+    let onDeliveryCalls = 0;
+
+    const result = await runCalendarReminderCron({
+      now,
+      deps: {
+        listEventsInRange: async () => [
+          event({
+            scope: "personal",
+            ownerUserId: "olivia-bennett",
+          }),
+        ],
+        listActiveUserIds: async () => ["olivia-bennett"],
+        tryInsertDelivery: async (input) => {
+          if (input.offsetMinutes === 10) {
+            throw new Error("check constraint");
+          }
+          return {
+            id: `delivery-${input.offsetMinutes}`,
+            eventId: input.eventId,
+            userId: input.userId,
+            offsetMinutes: input.offsetMinutes,
+            fireAt: input.fireAt,
+            notificationId: null,
+            eventUpdatedAt: input.eventUpdatedAt,
+            createdAt: now.toISOString(),
+          };
+        },
+        onDelivery: async () => {
+          onDeliveryCalls += 1;
+        },
+      },
+    });
+
+    assert.equal(result.sent, 1);
+    assert.equal(result.failed, 1);
+    assert.equal(onDeliveryCalls, 1);
+  });
 });

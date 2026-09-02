@@ -41,11 +41,12 @@ export function MeetingRecordingButton({ eventId }: MeetingRecordingButtonProps)
   }, [loadStatus]);
 
   const isRecording =
-    recording?.status === "active" ||
-    recording?.status === "starting" ||
-    recording?.status === "processing";
+    recording?.status === "active" || recording?.status === "starting";
+  const isSaving = loading || recording?.status === "processing";
 
   async function handleToggle() {
+    if (isSaving) return;
+
     setLoading(true);
     setError(null);
 
@@ -79,23 +80,33 @@ export function MeetingRecordingButton({ eventId }: MeetingRecordingButtonProps)
         type="button"
         className={`${styles.button} ${isRecording ? styles.buttonActive : ""}`}
         onClick={() => void handleToggle()}
-        disabled={loading}
-        aria-label={isRecording ? "Остановить запись" : "Начать запись"}
+        disabled={loading || isSaving}
+        aria-label={
+          isSaving
+            ? "Сохранение записи"
+            : isRecording
+              ? "Остановить запись"
+              : "Начать запись"
+        }
         title={
-          isRecording
-            ? "Остановить запись — все участники видят, что идёт запись"
-            : "Записать встречу (только для команды). Участники будут уведомлены."
+          isSaving
+            ? "Сохраняем запись встречи…"
+            : isRecording
+              ? "Остановить запись — все участники видят, что идёт запись"
+              : "Записать встречу (только для команды). Участники будут уведомлены."
         }
       >
         <i
           className={`fa-solid ${isRecording ? "fa-stop" : "fa-circle"}`}
           aria-hidden="true"
         />
-        {loading
-          ? "…"
-          : isRecording
-            ? "Стоп"
-            : "Запись"}
+        {isSaving
+          ? "Сохранение…"
+          : loading
+            ? "…"
+            : isRecording
+              ? "Стоп"
+              : "Запись"}
       </button>
       {error ? <span className={styles.error}>{error}</span> : null}
     </div>

@@ -6,6 +6,8 @@ import {
   handleStopMeetingRecording,
 } from "@/lib/calendar/meeting-recording-handler";
 
+export const maxDuration = 60;
+
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, context: RouteContext) {

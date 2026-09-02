@@ -33,10 +33,10 @@ describe("meeting recording notice metadata", () => {
     });
   });
 
-  it("treats starting/active/processing as visible recording states", () => {
+  it("treats only starting/active as visible recording states", () => {
     assert.equal(isMeetingRecordingActiveStatus("starting"), true);
     assert.equal(isMeetingRecordingActiveStatus("active"), true);
-    assert.equal(isMeetingRecordingActiveStatus("processing"), true);
+    assert.equal(isMeetingRecordingActiveStatus("processing"), false);
     assert.equal(isMeetingRecordingActiveStatus("complete"), false);
   });
 });

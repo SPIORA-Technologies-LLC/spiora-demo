@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   LiveKitRoom,
   RoomAudioRenderer,
   useParticipants,
+  useRoomContext,
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import {
@@ -85,9 +85,23 @@ function MeetingStage({
   isDockMode,
   onWorkOnPlatform,
 }: MeetingStageProps) {
+  const room = useRoomContext();
   const [participantsOpen, setParticipantsOpen] = useState(false);
   const participants = useParticipants();
   const pendingGuestAdmissions = usePendingGuestAdmissions(event.id);
+
+  const leaveMeeting = useCallback(async () => {
+    try {
+      await fetch(
+        `/api/calendar/events/${encodeURIComponent(event.id)}/meeting-recording`,
+        { method: "DELETE", keepalive: true },
+      );
+    } catch {
+      // Best-effort: stop egress and wait for save before disconnect.
+    }
+    room.disconnect();
+    onLeave();
+  }, [event.id, onLeave, room]);
 
   return (
     <div className={styles.room}>
@@ -96,14 +110,15 @@ function MeetingStage({
           {isDockMode ? (
             <span className={styles.dockBadge}>Окно звонка</span>
           ) : (
-            <Link
-              href={`/calendar?event=${encodeURIComponent(event.id)}`}
+            <button
+              type="button"
               className={styles.overlayBack}
               title="Выйти"
               aria-label="Выйти"
+              onClick={() => void leaveMeeting()}
             >
               ←
-            </Link>
+            </button>
           )}
         </div>
         <MeetingRecordingNotice eventId={event.id} />
@@ -145,7 +160,7 @@ function MeetingStage({
         pendingGuestCount={pendingGuestAdmissions.length}
         participantsOpen={participantsOpen}
         onToggleParticipants={() => setParticipantsOpen((open) => !open)}
-        onLeave={onLeave}
+        onLeave={leaveMeeting}
         compact={isDockMode}
       />
 

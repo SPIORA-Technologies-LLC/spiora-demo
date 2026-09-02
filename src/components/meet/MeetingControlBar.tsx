@@ -1,6 +1,6 @@
 "use client";
 
-import { TrackToggle, useRoomContext } from "@livekit/components-react";
+import { TrackToggle } from "@livekit/components-react";
 import { Track } from "livekit-client";
 import { MeetingRecordingButton } from "./MeetingRecordingButton";
 import styles from "./MeetingControlBar.module.css";
@@ -10,7 +10,7 @@ type MeetingControlBarProps = {
   participantCount: number;
   participantsOpen: boolean;
   onToggleParticipants: () => void;
-  onLeave: () => void;
+  onLeave: () => void | Promise<void>;
   compact?: boolean;
   hideScreenShare?: boolean;
   pendingGuestCount?: number;
@@ -26,24 +26,6 @@ export function MeetingControlBar({
   hideScreenShare = false,
   pendingGuestCount = 0,
 }: MeetingControlBarProps) {
-  const room = useRoomContext();
-
-  async function handleLeave() {
-    // Last participant leaving ends the meeting — stop egress and save recording.
-    if (eventId && participantCount <= 1) {
-      try {
-        await fetch(
-          `/api/calendar/events/${encodeURIComponent(eventId)}/meeting-recording`,
-          { method: "DELETE", keepalive: true },
-        );
-      } catch {
-        // best-effort; do not block leave
-      }
-    }
-    room.disconnect();
-    onLeave();
-  }
-
   return (
     <footer className={styles.bar}>
       <div className={styles.controls}>
@@ -102,7 +84,7 @@ export function MeetingControlBar({
       <button
         type="button"
         className={styles.leave}
-        onClick={handleLeave}
+        onClick={() => void onLeave()}
         aria-label="Покинуть встречу"
       >
         Покинуть

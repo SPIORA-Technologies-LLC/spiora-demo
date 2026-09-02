@@ -379,6 +379,25 @@ export async function handleStopMeetingRecording(
     return { status: 404, error: "No active recording" };
   }
 
+  if (active.status === "processing") {
+    const liveKitEnv = getLiveKitEnv();
+    if (!liveKitEnv) {
+      return { status: 503, error: "Meetings not configured" };
+    }
+
+    try {
+      const finalized = await finalizeRecordingAfterStop(
+        active,
+        liveKitEnv,
+        deps,
+      );
+      return { recording: finalized };
+    } catch (error) {
+      console.error("[meeting-recording] finalize retry failed", error);
+      return { recording: active };
+    }
+  }
+
   try {
     const egressClient = createEgressClient(liveKitEnv);
     await egressClient.stopEgress(active.egressId);
@@ -399,16 +418,21 @@ export async function handleStopMeetingRecording(
 
   await publishRecordingRoomNotice(eventId, liveKitEnv, { recording: false });
 
-  // Finalize in background so leave / Stop stay responsive (webhooks optional).
-  void finalizeRecordingAfterStop(active, liveKitEnv, deps).catch((error) => {
+  let finalized: CalendarMeetingRecording;
+  try {
+    finalized = await finalizeRecordingAfterStop(
+      { ...active, status: "processing" },
+      liveKitEnv,
+      deps,
+    );
+  } catch (error) {
     console.error("[meeting-recording] finalize after stop failed", error);
-  });
+    finalized =
+      (await deps.getRecordingById(active.id)) ??
+      ({ ...active, status: "processing" as const });
+  }
 
-  const processing =
-    (await deps.getRecordingById(active.id)) ??
-    ({ ...active, status: "processing" as const });
-
-  return { recording: processing };
+  return { recording: finalized };
 }
 
 export async function handleDeleteMeetingRecording(
@@ -464,7 +488,6 @@ export async function handleGetMeetingRecordingStatus(
 
   const active = await deps.getActiveByEvent(eventId);
 
-  // While processing, try to promote to complete (covers demo without webhooks).
   if (
     active?.status === "processing" &&
     active.egressId &&
@@ -472,9 +495,16 @@ export async function handleGetMeetingRecordingStatus(
   ) {
     const liveKitEnv = getLiveKitEnv();
     if (liveKitEnv) {
-      void finalizeRecordingAfterStop(active, liveKitEnv, deps).catch(() => {
-        // ignore; next poll retries
-      });
+      try {
+        const finalized = await finalizeRecordingAfterStop(
+          active,
+          liveKitEnv,
+          deps,
+        );
+        return { recording: finalized };
+      } catch {
+        return { recording: active };
+      }
     }
   }
 

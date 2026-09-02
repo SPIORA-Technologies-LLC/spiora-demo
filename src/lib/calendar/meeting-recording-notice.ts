@@ -41,5 +41,5 @@ export function parseMeetingRecordingRoomMetadata(
 export function isMeetingRecordingActiveStatus(
   status: string | null | undefined,
 ): boolean {
-  return status === "active" || status === "starting" || status === "processing";
+  return status === "active" || status === "starting";
 }

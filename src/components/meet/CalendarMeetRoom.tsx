@@ -30,6 +30,7 @@ import { MeetingBackgroundProvider } from "./MeetingBackgroundContext";
 import { MeetingChatPanel, MeetingChatProvider, MeetingChatToast } from "./MeetingChat";
 import { MeetingControlBar } from "./MeetingControlBar";
 import { MeetingDockGate } from "./MeetingDockGate";
+import { EnsureMeetingDockMedia } from "./EnsureMeetingDockMedia";
 import { MeetingParticipantPanel } from "./MeetingParticipantPanel";
 import { MeetingRecordingNotice } from "./MeetingRecordingNotice";
 import { MeetingSpeakerLayout } from "./MeetingSpeakerLayout";
@@ -78,7 +79,8 @@ type MeetingStageProps = {
   event: CalendarEvent;
   onLeave: () => void;
   isDockMode: boolean;
-  onWorkOnPlatform: () => void;
+  /** Returns true when the dock popup opened and the main room should disconnect. */
+  onWorkOnPlatform: () => boolean;
 };
 
 function MeetingStage({
@@ -105,12 +107,26 @@ function MeetingStage({
     onLeave();
   }, [event.id, onLeave, room]);
 
+  const minimizeToDock = useCallback(async () => {
+    if (!onWorkOnPlatform()) {
+      return;
+    }
+    try {
+      await room.localParticipant.setCameraEnabled(false);
+      await room.localParticipant.setMicrophoneEnabled(false);
+    } catch {
+      // Best-effort release before the dock takes the devices.
+    }
+    room.disconnect();
+  }, [onWorkOnPlatform, room]);
+
   return (
     <div className={styles.room}>
       <MeetingChatProvider
         participantsOpen={participantsOpen}
         onOpenChat={() => setParticipantsOpen(false)}
       >
+      <EnsureMeetingDockMedia enabled={isDockMode} />
       <div className={styles.overlayChrome}>
         <div className={styles.overlayLeft}>
           {isDockMode ? (
@@ -135,7 +151,7 @@ function MeetingStage({
             <button
               type="button"
               className={styles.overlayPlatform}
-              onClick={onWorkOnPlatform}
+              onClick={() => void minimizeToDock()}
               title="Свернуть встречу в отдельное окно и работать на платформе"
               aria-label="Свернуть встречу"
             >
@@ -302,7 +318,7 @@ export function CalendarMeetRoom({ event }: CalendarMeetRoomProps) {
       window.alert(
         "Не удалось открыть окно звонка. Разрешите всплывающие окна для платформы и попробуйте снова.",
       );
-      return;
+      return false;
     }
 
     markMeetingDockActive({
@@ -311,14 +327,8 @@ export function CalendarMeetRoom({ event }: CalendarMeetRoomProps) {
       openedAt: new Date().toISOString(),
     });
     markMeetingDockNavigate(event.id);
-
-    window.setTimeout(() => {
-      if (readMeetingDockNavigateEventId() === event.id) {
-        clearMeetingDockNavigate();
-        router.push("/dashboard");
-      }
-    }, 6000);
-  }, [event.id, event.title, router]);
+    return true;
+  }, [event.id, event.title]);
 
   useEffect(() => {
     function onBeforeUnload() {

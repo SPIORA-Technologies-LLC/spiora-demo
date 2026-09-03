@@ -29,6 +29,7 @@ import {
 import { GuestMeetingGate } from "./GuestMeetingGate";
 import { GuestMeetingDockGate } from "./GuestMeetingDockGate";
 import { GuestMeetingMinimizedView } from "./GuestMeetingMinimizedView";
+import { EnsureMeetingDockMedia } from "./EnsureMeetingDockMedia";
 import { MeetingBackgroundProvider } from "./MeetingBackgroundContext";
 import { MeetingChatPanel, MeetingChatProvider, MeetingChatToast } from "./MeetingChat";
 import { MeetingControlBar } from "./MeetingControlBar";
@@ -122,7 +123,8 @@ type GuestMeetingStageProps = {
   guestId: string;
   isDockMode: boolean;
   onLeave: () => void;
-  onMinimize: () => void;
+  /** Returns true when the dock popup opened and the main room should disconnect. */
+  onMinimize: () => boolean;
 };
 
 function GuestMeetingStage({
@@ -143,12 +145,26 @@ function GuestMeetingStage({
     onLeave();
   }, [onLeave, room]);
 
+  const minimizeToDock = useCallback(async () => {
+    if (!onMinimize()) {
+      return;
+    }
+    try {
+      await room.localParticipant.setCameraEnabled(false);
+      await room.localParticipant.setMicrophoneEnabled(false);
+    } catch {
+      // Best-effort release before the dock takes the devices.
+    }
+    room.disconnect();
+  }, [onMinimize, room]);
+
   return (
     <div className={styles.room}>
       <MeetingChatProvider
         participantsOpen={participantsOpen}
         onOpenChat={() => setParticipantsOpen(false)}
       >
+      <EnsureMeetingDockMedia enabled={isDockMode} />
       <div className={styles.overlayChrome}>
         <div className={styles.overlayLeft}>
           {isDockMode ? (
@@ -167,7 +183,7 @@ function GuestMeetingStage({
             <button
               type="button"
               className={meetStyles.overlayPlatform}
-              onClick={onMinimize}
+              onClick={() => void minimizeToDock()}
               title="Свернуть встречу в отдельное окно"
               aria-label="Свернуть встречу"
             >
@@ -478,7 +494,7 @@ export function GuestMeetRoom({
 
   const handleMinimize = useCallback(() => {
     if (connectState.status !== "ready") {
-      return;
+      return false;
     }
 
     markGuestMeetingDockCredentials({
@@ -494,7 +510,7 @@ export function GuestMeetRoom({
       window.alert(
         "Не удалось открыть окно встречи. Разрешите всплывающие окна для сайта и попробуйте снова.",
       );
-      return;
+      return false;
     }
 
     markGuestMeetingDockActive({
@@ -503,8 +519,8 @@ export function GuestMeetRoom({
       openedAt: new Date().toISOString(),
     });
     markGuestMeetingDockNavigate(inviteToken);
-    router.replace(`/join/${encodeURIComponent(inviteToken)}?minimized=1`);
-  }, [accessPassword, connectState, event.title, inviteToken, router]);
+    return true;
+  }, [accessPassword, connectState, event.title, inviteToken]);
 
   if (isMinimizedMode && dockSession?.inviteToken === inviteToken) {
     return (

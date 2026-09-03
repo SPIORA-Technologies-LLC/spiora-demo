@@ -85,7 +85,7 @@ export function MeetingSpeakerLayout({ compact = false }: { compact?: boolean })
   const useGridLayout =
     !screenShareTrack &&
     !localIsSharing &&
-    !compact &&
+    cameraTracks.length > 0 &&
     cameraTracks.length <= MEETING_GRID_MAX_PARTICIPANTS;
 
   const focusTrack = useMemo(

@@ -1,4 +1,9 @@
-export type MeetingBackgroundId = "none" | "blur" | "spiora-office";
+export type MeetingBackgroundId =
+  | "none"
+  | "blur"
+  | "spiora-office"
+  | "spiora-brand-wall"
+  | "spiora-desk";
 
 export type MeetingBackgroundPreset = {
   id: MeetingBackgroundId;
@@ -18,7 +23,27 @@ export const MEETING_BACKGROUND_PRESETS: MeetingBackgroundPreset[] = [
     preview: "/meeting-backgrounds/spiora-office.jpg",
     imagePath: "/meeting-backgrounds/spiora-office.jpg",
   },
+  {
+    id: "spiora-brand-wall",
+    label: "Стена Spiora",
+    preview: "/meeting-backgrounds/spiora-brand-wall.jpg",
+    imagePath: "/meeting-backgrounds/spiora-brand-wall.jpg",
+  },
+  {
+    id: "spiora-desk",
+    label: "Рабочее место",
+    preview: "/meeting-backgrounds/spiora-desk.jpg",
+    imagePath: "/meeting-backgrounds/spiora-desk.jpg",
+  },
 ];
+
+const MEETING_BACKGROUND_IDS = new Set(
+  MEETING_BACKGROUND_PRESETS.map((preset) => preset.id),
+);
+
+function isMeetingBackgroundId(value: string): value is MeetingBackgroundId {
+  return MEETING_BACKGROUND_IDS.has(value as MeetingBackgroundId);
+}
 
 export type MeetingBackgroundMode =
   | { type: "none" }
@@ -46,7 +71,7 @@ export function readStoredMeetingBackground(): MeetingBackgroundId {
   }
 
   const raw = sessionStorage.getItem(MEETING_BACKGROUND_STORAGE_KEY);
-  if (raw === "none" || raw === "blur" || raw === "spiora-office") {
+  if (raw && isMeetingBackgroundId(raw)) {
     return raw;
   }
 

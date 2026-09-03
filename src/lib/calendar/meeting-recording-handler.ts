@@ -19,7 +19,16 @@ import {
 } from "./handlers";
 import { getMeetingRoomName } from "./meeting";
 import { MeetingAccessError } from "./meeting-access";
-import { assertCanManageMeetingRecording, canViewMeetingRecording } from "./meeting-recording-access";
+import {
+  assertCanManageMeetingRecording,
+  assertCanStopMeetingRecording,
+  canViewMeetingRecording,
+} from "./meeting-recording-access";
+import {
+  collectLiveKitFileResults,
+  liveKitDurationToSeconds,
+  liveKitFileSizeToBytes,
+} from "./meeting-recording-duration";
 import { buildMeetingRecordingRoomMetadata } from "./meeting-recording-notice";
 import {
   buildMeetingRecordingStoragePath,
@@ -81,8 +90,8 @@ async function markRecordingCompleteAndNotify(
     return recording;
   }
 
-  const updated = await deps.updateRecording(recording.id, {
-    status: "complete",
+  const basePatch = {
+    status: "complete" as const,
     storagePath:
       patch.storagePath !== undefined
         ? patch.storagePath
@@ -99,16 +108,34 @@ async function markRecordingCompleteAndNotify(
         : recording.fileSizeBytes,
     endedAt: patch.endedAt ?? new Date().toISOString(),
     errorMessage: patch.errorMessage ?? null,
-  });
+  };
+
+  let updated: CalendarMeetingRecording | null = null;
+  try {
+    updated = await deps.updateRecording(recording.id, basePatch);
+  } catch (error) {
+    // Never lose a completed recording because of bad duration/size metadata.
+    console.error(
+      "[meeting-recording] complete update failed; retrying without metrics",
+      error,
+    );
+    updated = await deps.updateRecording(recording.id, {
+      status: "complete",
+      storagePath: basePatch.storagePath,
+      fileName: basePatch.fileName,
+      durationSeconds: null,
+      fileSizeBytes: null,
+      endedAt: basePatch.endedAt,
+      errorMessage: null,
+    });
+  }
 
   const finalRecording =
     updated ??
     ({
       ...recording,
-      ...patch,
+      ...basePatch,
       status: "complete" as const,
-      endedAt: patch.endedAt ?? new Date().toISOString(),
-      errorMessage: patch.errorMessage ?? null,
     } satisfies CalendarMeetingRecording);
 
   const notify = deps.notifyRecordingSaved ?? notifyMeetingRecordingSaved;
@@ -275,8 +302,21 @@ async function finalizeRecordingAfterStop(
   recording: CalendarMeetingRecording,
   liveKitEnv: NonNullable<ReturnType<typeof getLiveKitEnv>>,
   deps: MeetingRecordingDeps,
+  options: {
+    maxAttempts?: number;
+    delayMs?: number;
+    /** When false, do not mark complete unless LiveKit already finished. */
+    allowFallbackComplete?: boolean;
+  } = {},
 ): Promise<CalendarMeetingRecording> {
+  const maxAttempts = options.maxAttempts ?? 15;
+  const delayMs = options.delayMs ?? 1500;
+  const allowFallbackComplete = options.allowFallbackComplete !== false;
+
   if (!recording.egressId) {
+    if (!allowFallbackComplete) {
+      return recording;
+    }
     const updated = await deps.updateRecording(recording.id, {
       status: "complete",
       endedAt: new Date().toISOString(),
@@ -287,8 +327,8 @@ async function finalizeRecordingAfterStop(
 
   const egressClient = createEgressClient(liveKitEnv);
 
-  for (let attempt = 0; attempt < 15; attempt++) {
-    if (attempt > 0) await sleep(1500);
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (attempt > 0) await sleep(delayMs);
 
     try {
       const infos = await egressClient.listEgress({
@@ -298,11 +338,12 @@ async function finalizeRecordingAfterStop(
       if (!info) continue;
 
       if (info.status === EgressStatus.EGRESS_COMPLETE) {
+        const files = collectLiveKitFileResults(info);
         await handleLiveKitEgressWebhook(
           recording.egressId,
           info.status,
           info.error,
-          (info.fileResults ?? []).map((file) => ({
+          files.map((file) => ({
             filename: file.filename,
             size: file.size,
             duration: file.duration,
@@ -337,6 +378,10 @@ async function finalizeRecordingAfterStop(
     }
   }
 
+  if (!allowFallbackComplete) {
+    return recording;
+  }
+
   // Fallback when webhook/poll unavailable: trust planned S3 path from start.
   return markRecordingCompleteAndNotify(
     recording,
@@ -361,7 +406,7 @@ export async function handleStopMeetingRecording(
   }
 
   try {
-    assertCanManageMeetingRecording(session, eventResult.event);
+    assertCanStopMeetingRecording(session, eventResult.event);
   } catch (error) {
     if (error instanceof MeetingAccessError) {
       return { status: 403, error: error.message };
@@ -380,11 +425,6 @@ export async function handleStopMeetingRecording(
   }
 
   if (active.status === "processing") {
-    const liveKitEnv = getLiveKitEnv();
-    if (!liveKitEnv) {
-      return { status: 503, error: "Meetings not configured" };
-    }
-
     try {
       const finalized = await finalizeRecordingAfterStop(
         active,
@@ -478,7 +518,7 @@ export async function handleGetMeetingRecordingStatus(
   }
 
   try {
-    assertCanManageMeetingRecording(session, eventResult.event);
+    assertCanStopMeetingRecording(session, eventResult.event);
   } catch (error) {
     if (error instanceof MeetingAccessError) {
       return { status: 403, error: error.message };
@@ -489,7 +529,8 @@ export async function handleGetMeetingRecordingStatus(
   const active = await deps.getActiveByEvent(eventId);
 
   if (
-    active?.status === "processing" &&
+    active &&
+    (active.status === "processing" || active.status === "active") &&
     active.egressId &&
     getLiveKitEnv()
   ) {
@@ -500,6 +541,11 @@ export async function handleGetMeetingRecordingStatus(
           active,
           liveKitEnv,
           deps,
+          {
+            maxAttempts: active.status === "processing" ? 8 : 2,
+            delayMs: 500,
+            allowFallbackComplete: active.status === "processing",
+          },
         );
         return { recording: finalized };
       } catch {
@@ -522,20 +568,52 @@ export async function handleListMeetingRecordings(
     return { status: 503, error: "Meeting recordings not configured" };
   }
 
+  const liveKitEnv = getLiveKitEnv();
   const all = await deps.listRecordings();
   const visible: CalendarMeetingRecordingWithEvent[] = [];
 
   for (const item of all) {
-    if (item.status !== "complete" || !item.storagePath) {
+    let recording: CalendarMeetingRecordingWithEvent = item;
+
+    if (
+      liveKitEnv &&
+      recording.egressId &&
+      (recording.status === "processing" || recording.status === "active")
+    ) {
+      try {
+        const finalized = await finalizeRecordingAfterStop(
+          recording,
+          liveKitEnv,
+          deps,
+          { maxAttempts: 2, delayMs: 400, allowFallbackComplete: false },
+        );
+        recording = {
+          ...recording,
+          ...finalized,
+          eventTitle: item.eventTitle,
+          eventStartAt: item.eventStartAt,
+          linkedClientId: item.linkedClientId,
+          linkedClientName: item.linkedClientName,
+        };
+      } catch (error) {
+        console.error(
+          "[meeting-recording] list reclaim failed",
+          recording.id,
+          error,
+        );
+      }
+    }
+
+    if (recording.status !== "complete" || !recording.storagePath) {
       continue;
     }
 
-    const eventResult = await storeDeps.getEvent(item.eventId);
+    const eventResult = await storeDeps.getEvent(recording.eventId);
     if (!eventResult || !canViewEvent(session, eventResult)) {
       continue;
     }
 
-    visible.push(item);
+    visible.push(recording);
   }
 
   return { recordings: visible };
@@ -597,10 +675,11 @@ export async function handleLiveKitEgressWebhook(
       {
         storagePath,
         fileName: recording.fileName,
-        durationSeconds: file?.duration
-          ? Number(file.duration)
-          : recording.durationSeconds,
-        fileSizeBytes: file?.size ? Number(file.size) : recording.fileSizeBytes,
+        durationSeconds:
+          liveKitDurationToSeconds(file?.duration) ??
+          recording.durationSeconds,
+        fileSizeBytes:
+          liveKitFileSizeToBytes(file?.size) ?? recording.fileSizeBytes,
         endedAt: new Date().toISOString(),
         errorMessage: null,
       },

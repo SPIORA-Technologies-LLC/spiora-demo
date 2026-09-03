@@ -30,6 +30,7 @@ describe("handleLiveKitEgressWebhook recording notifications", () => {
   it("notifies once when egress completes", async () => {
     const current = recording();
     const notified: string[] = [];
+    let savedDuration: number | null | undefined;
 
     await handleLiveKitEgressWebhook(
       "eg-1",
@@ -38,11 +39,14 @@ describe("handleLiveKitEgressWebhook recording notifications", () => {
       [{ filename: "evt-video/rec-1.mp4", size: 1024, duration: 60 }],
       {
         insertRecording: async () => current,
-        updateRecording: async (_id, patch) => ({
-          ...current,
-          ...patch,
-          status: patch.status ?? current.status,
-        }),
+        updateRecording: async (_id, patch) => {
+          savedDuration = patch.durationSeconds;
+          return {
+            ...current,
+            ...patch,
+            status: patch.status ?? current.status,
+          };
+        },
         getRecordingById: async () => current,
         getActiveByEvent: async () => current,
         getByEgressId: async () => current,
@@ -54,6 +58,82 @@ describe("handleLiveKitEgressWebhook recording notifications", () => {
       },
     );
 
+    assert.deepEqual(notified, ["rec-1"]);
+    assert.equal(savedDuration, 60);
+  });
+
+  it("stores LiveKit nanosecond duration as seconds", async () => {
+    const current = recording();
+    let savedDuration: number | null | undefined;
+
+    await handleLiveKitEgressWebhook(
+      "eg-1",
+      EgressStatus.EGRESS_COMPLETE,
+      undefined,
+      [
+        {
+          filename: "evt-video/rec-1.mp4",
+          size: 5_000_000n,
+          duration: 600_000_000_000n,
+        },
+      ],
+      {
+        insertRecording: async () => current,
+        updateRecording: async (_id, patch) => {
+          savedDuration = patch.durationSeconds;
+          return {
+            ...current,
+            ...patch,
+            status: patch.status ?? current.status,
+          };
+        },
+        getRecordingById: async () => current,
+        getActiveByEvent: async () => current,
+        getByEgressId: async () => current,
+        listRecordings: async () => [],
+        deleteRecording: async () => undefined,
+        notifyRecordingSaved: async () => undefined,
+      },
+    );
+
+    assert.equal(savedDuration, 600);
+  });
+
+  it("still completes when duration update would overflow", async () => {
+    const current = recording();
+    let updates = 0;
+    const notified: string[] = [];
+
+    await handleLiveKitEgressWebhook(
+      "eg-1",
+      EgressStatus.EGRESS_COMPLETE,
+      undefined,
+      [{ filename: "evt-video/rec-1.mp4", size: 1024, duration: 60 }],
+      {
+        insertRecording: async () => current,
+        updateRecording: async (_id, patch) => {
+          updates += 1;
+          if (updates === 1 && patch.durationSeconds != null) {
+            throw new Error("integer out of range");
+          }
+          return {
+            ...current,
+            ...patch,
+            status: patch.status ?? current.status,
+          };
+        },
+        getRecordingById: async () => current,
+        getActiveByEvent: async () => current,
+        getByEgressId: async () => current,
+        listRecordings: async () => [],
+        deleteRecording: async () => undefined,
+        notifyRecordingSaved: async ({ recording: item }) => {
+          notified.push(item.id);
+        },
+      },
+    );
+
+    assert.equal(updates, 2);
     assert.deepEqual(notified, ["rec-1"]);
   });
 

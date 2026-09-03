@@ -96,7 +96,7 @@ function MeetingStage({
     try {
       await fetch(
         `/api/calendar/events/${encodeURIComponent(event.id)}/meeting-recording`,
-        { method: "DELETE", keepalive: true },
+        { method: "DELETE" },
       );
     } catch {
       // Best-effort: stop egress and wait for save before disconnect.

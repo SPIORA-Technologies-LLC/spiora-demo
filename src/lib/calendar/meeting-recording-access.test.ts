@@ -4,8 +4,10 @@ import type { SessionUser } from "@/lib/auth/types";
 import type { CalendarEvent, CalendarMeetingRecording } from "./types";
 import {
   assertCanManageMeetingRecording,
+  assertCanStopMeetingRecording,
   canViewMeetingRecording,
 } from "./meeting-recording-access";
+import { MeetingAccessError } from "./meeting-access";
 
 const manager: SessionUser = {
   id: "daniel-cooper",
@@ -69,6 +71,19 @@ describe("meeting recording access", () => {
         new Date("2026-06-25T08:10:00.000Z"),
       ),
     );
+  });
+
+  it("allows stopping a recording after the meeting window closes", () => {
+    assert.throws(
+      () =>
+        assertCanManageMeetingRecording(
+          manager,
+          event,
+          new Date("2026-06-25T10:00:00.000Z"),
+        ),
+      MeetingAccessError,
+    );
+    assert.doesNotThrow(() => assertCanStopMeetingRecording(manager, event));
   });
 
   it("allows viewing completed recordings for accessible events", () => {

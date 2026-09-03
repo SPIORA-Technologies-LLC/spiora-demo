@@ -71,6 +71,10 @@ export function findUserByEmail(email: string): TeamUser | undefined {
   return TEAM_USERS.find((u) => u.email.toLowerCase() === normalized);
 }
 
+export function getDemoOwnerUser(): TeamUser {
+  return TEAM_USERS.find((user) => user.role === "owner") ?? TEAM_USERS[0]!;
+}
+
 export function toSessionUser(user: TeamUser): SessionUser {
   return {
     id: user.id,

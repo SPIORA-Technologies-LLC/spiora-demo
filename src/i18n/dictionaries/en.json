@@ -64,6 +64,7 @@
     "forgotPasswordHint": "Forgot your password? Contact your platform administrator — they can reset it in Settings.",
     "forgotPasswordLink": "Forgot password?",
     "rateLimitExceeded": "Too many sign-in attempts. Please wait a minute and try again.",
+    "demoBypassSignIn": "Enter without sign-in",
     "continueWithGoogle": "Continue with Google",
     "googleAccessDenied": "Google sign-in is not available for this account. Contact your administrator.",
     "unsupportedCallback": "This sign-in link is no longer supported. Please try again from the login page.",

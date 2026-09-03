@@ -8,6 +8,7 @@ import { getProductDescription } from "@/config/branding";
 import type { BrandingLocale } from "@/config/branding";
 import { getSession } from "@/lib/auth/session";
 import { getClientSession } from "@/lib/client-portal/session";
+import { isDemoMode } from "@/lib/demo/demo-mode";
 import { isEmployeeMfaEnabled } from "@/lib/auth/mfa-config";
 import { needsMfaChallenge } from "@/lib/auth/mfa-aal";
 import { getEmployeeMfaAssurance } from "@/lib/auth/mfa-service";
@@ -81,6 +82,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           nextPath={nextPath}
           authError={authError}
           mfaReenroll={mfaReenroll}
+          demoBypassEnabled={isDemoMode()}
         />
         {process.env.NODE_ENV !== "production" ? <DemoCredentials /> : null}
       </div>

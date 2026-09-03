@@ -4,7 +4,10 @@ import { routing } from "@/i18n/config";
 import { canAccessPath } from "@/lib/auth/permissions";
 import { resolveSessionFromAuthUserId } from "@/lib/auth/middleware-session";
 import { getAuthProvider } from "@/lib/auth/provider";
-import { getSessionFromToken } from "@/lib/auth/session";
+import {
+  getDemoBypassSessionFromToken,
+  getSessionFromToken,
+} from "@/lib/auth/session";
 import { updateSupabaseAuthSession } from "@/lib/supabase/middleware-auth";
 import {
   isClientApiPath,
@@ -104,17 +107,19 @@ export async function middleware(request: NextRequest) {
   let authUserId: string | null = null;
   let mfaChallengeRequired = false;
   let clientMfaChallengeRequired = false;
+  const legacyToken = request.cookies.get("spiora_session")?.value;
 
-  if (provider === "supabase") {
+  session = await getDemoBypassSessionFromToken(legacyToken);
+
+  if (!session && provider === "supabase") {
     const refreshed = await updateSupabaseAuthSession(request);
     supabaseResponse = refreshed.response;
     authUserId = refreshed.user?.id ?? null;
     mfaChallengeRequired = refreshed.mfaChallengeRequired;
     clientMfaChallengeRequired = refreshed.clientMfaChallengeRequired;
     session = await resolveSessionFromAuthUserId(authUserId);
-  } else {
-    const token = request.cookies.get("spiora_session")?.value;
-    session = await getSessionFromToken(token);
+  } else if (!session) {
+    session = await getSessionFromToken(legacyToken);
   }
 
   // Hard API AAL2 gate (UX redirect alone is not enough).

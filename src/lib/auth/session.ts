@@ -107,6 +107,19 @@ export async function destroySession(): Promise<void> {
   cookieStore.delete(COOKIE_NAME);
 }
 
+export async function getDemoBypassSessionFromToken(
+  token: string | undefined,
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<UnifiedSessionUser | null> {
+  const demoModeEnabled =
+    env.SPIORA_DEMO_MODE?.trim().toLowerCase() === "true";
+  if (!demoModeEnabled || !token) {
+    return null;
+  }
+  const user = await verifySessionToken(token, env);
+  return user ? legacyToSessionUser(user) : null;
+}
+
 async function getLegacySession(): Promise<UnifiedSessionUser | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
@@ -120,6 +133,14 @@ async function getLegacySession(): Promise<UnifiedSessionUser | null> {
  * Provider switches here — consumers keep importing getSession().
  */
 export async function getSession(): Promise<SessionUser | null> {
+  const cookieStore = await cookies();
+  const demoBypass = await getDemoBypassSessionFromToken(
+    cookieStore.get(COOKIE_NAME)?.value,
+  );
+  if (demoBypass) {
+    return demoBypass;
+  }
+
   const provider = getAuthProvider();
 
   if (provider === "supabase") {

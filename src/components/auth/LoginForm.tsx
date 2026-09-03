@@ -2,7 +2,11 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { signInAction, type SignInState } from "@/app/login/actions";
+import {
+  demoBypassSignInAction,
+  signInAction,
+  type SignInState,
+} from "@/app/login/actions";
 import { resetMobileNavIntro } from "@/lib/layout/mobile-nav-intro";
 import styles from "@/app/login/login.module.css";
 
@@ -14,11 +18,21 @@ type LoginFormProps = {
   nextPath?: string;
   authError?: string | null;
   mfaReenroll?: boolean;
+  demoBypassEnabled?: boolean;
 };
 
-export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) {
+export function LoginForm({
+  nextPath,
+  authError,
+  mfaReenroll,
+  demoBypassEnabled = false,
+}: LoginFormProps) {
   const t = useTranslations("auth");
   const [state, formAction, pending] = useActionState(signInAction, initialState);
+  const [demoState, demoFormAction, demoPending] = useActionState(
+    demoBypassSignInAction,
+    initialState,
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
@@ -35,10 +49,11 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
   }, []);
 
   useEffect(() => {
-    if (!state.redirectTo) return;
+    const redirectTo = state.redirectTo || demoState.redirectTo;
+    if (!redirectTo) return;
     resetMobileNavIntro();
-    window.location.assign(state.redirectTo);
-  }, [state.redirectTo]);
+    window.location.assign(redirectTo);
+  }, [demoState.redirectTo, state.redirectTo]);
 
   async function continueWithGoogle() {
     if (pending || googleBusy) return;
@@ -71,7 +86,8 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
     }
   }
 
-  const bannerError = state.error || googleError || queryMessage;
+  const busy = pending || demoPending || googleBusy;
+  const bannerError = demoState.error || state.error || googleError || queryMessage;
 
   return (
     <div className={styles.authStack}>
@@ -98,7 +114,7 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
             placeholder="olivia@spiora.demo"
             autoComplete="email"
             required
-            disabled={pending || googleBusy}
+            disabled={busy}
           />
         </label>
         <label className={styles.label}>
@@ -111,7 +127,7 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
               placeholder="••••••••"
               autoComplete="current-password"
               required
-              disabled={pending || googleBusy}
+              disabled={busy}
             />
             <button
               type="button"
@@ -119,7 +135,7 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
               onClick={() => setShowPassword((v) => !v)}
               aria-label={showPassword ? t("hidePassword") : t("showPassword")}
               aria-pressed={showPassword}
-              disabled={pending || googleBusy}
+              disabled={busy}
             >
               {showPassword ? (
                 <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
@@ -146,14 +162,30 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
         <button
           type="submit"
           className={styles.submit}
-          disabled={pending || googleBusy}
+          disabled={busy}
         >
-          {pending ? t("signingIn") : t("signIn")}
+          {busy ? t("signingIn") : t("signIn")}
         </button>
         <p className={styles.forgotHint}>
           <a href="/forgot-password">{t("forgotPasswordLink")}</a>
         </p>
       </form>
+
+      {demoBypassEnabled ? (
+        <>
+          <p className={styles.orDivider}>{t("orDivider")}</p>
+          <form action={demoFormAction}>
+            {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
+            <button
+              type="submit"
+              className={styles.secondaryAction}
+              disabled={busy}
+            >
+              {demoPending ? t("signingIn") : t("demoBypassSignIn")}
+            </button>
+          </form>
+        </>
+      ) : null}
 
       <p className={styles.orDivider}>{t("orDivider")}</p>
 
@@ -161,7 +193,7 @@ export function LoginForm({ nextPath, authError, mfaReenroll }: LoginFormProps) 
         type="button"
         className={styles.googleButton}
         onClick={() => void continueWithGoogle()}
-        disabled={pending || googleBusy}
+        disabled={busy}
       >
         {googleBusy ? t("signingIn") : t("continueWithGoogle")}
       </button>

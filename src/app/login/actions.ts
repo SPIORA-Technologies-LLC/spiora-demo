@@ -4,12 +4,14 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { canAccessPath } from "@/lib/auth/permissions";
+import { isDemoMode } from "@/lib/demo/demo-mode";
 import { checkProductionSafeLoginRateLimit } from "@/lib/auth/login-rate-limit-store";
 import {
   createSession,
   destroySession,
 } from "@/lib/auth/session";
 import {
+  getDemoOwnerUser,
   toSessionUser,
 } from "@/lib/auth/users";
 import { verifyUserPassword } from "@/lib/auth/verify-password";
@@ -111,6 +113,27 @@ export async function signInAction(
 
   const destination = resolvePostLoginPath(nextPath, (path) =>
     canAccessPath(sessionUser.role, path),
+  );
+
+  return { redirectTo: withAppEntrySplash(destination) };
+}
+
+export async function demoBypassSignInAction(
+  _prevState: SignInState,
+  formData: FormData,
+): Promise<SignInState> {
+  const t = await getTranslations("auth");
+  const nextPath = String(formData.get("next") ?? "").trim();
+
+  if (!isDemoMode()) {
+    return { error: t("invalidCredentials") };
+  }
+
+  const user = toSessionUser(getDemoOwnerUser());
+  await createSession(user);
+
+  const destination = resolvePostLoginPath(nextPath, (path) =>
+    canAccessPath(user.role, path),
   );
 
   return { redirectTo: withAppEntrySplash(destination) };

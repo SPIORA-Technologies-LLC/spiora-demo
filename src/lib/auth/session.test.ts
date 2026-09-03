@@ -6,6 +6,7 @@ import {
   COOKIE_NAME,
   SESSION_TTL_SECONDS,
   createSessionToken,
+  getDemoBypassSessionFromToken,
   getAuthSecretState,
   getSessionCookieConfig,
   verifySessionToken,
@@ -50,6 +51,17 @@ describe("auth session", () => {
     const token = await createSessionToken(user);
     const session = await verifySessionToken(token, process.env);
     assert.deepEqual(session, user);
+  });
+
+  it("accepts bypass session in demo mode", async () => {
+    const token = await createSessionToken(user);
+    const session = await getDemoBypassSessionFromToken(token, {
+      AUTH_SECRET: "unit-test-secret",
+      NODE_ENV: "test",
+      SPIORA_DEMO_MODE: "true",
+    } as NodeJS.ProcessEnv);
+    assert.equal(session?.role, "owner");
+    assert.equal(session?.email, "olivia@spiora.demo");
   });
 
   it("rejects expired token", async () => {

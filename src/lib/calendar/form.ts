@@ -3,15 +3,20 @@ import {
   CALENDAR_DEFAULT_SEND_REMINDERS,
   CALENDAR_TIMEZONE,
 } from "./constants";
+import { buildTimeValue } from "./datetime-input";
 import type { CalendarExternalInvitee } from "./external-invitees";
-import { formatDateKey } from "./range";
+import { addDaysToDateKey, formatDateKey } from "./range";
 import type {
   CalendarEvent,
   CalendarEventType,
   CalendarScope,
   VideoInviteMode,
 } from "./types";
-import { formatTimeInZone, zonedDateTimeToUtc } from "./zoned-time";
+import { formatTimeInZone, getZonedParts, zonedDateTimeToUtc } from "./zoned-time";
+
+/** Matches CalendarTimeSelect minute options. */
+const DEFAULT_TIME_MINUTE_STEP = 5;
+const DEFAULT_EVENT_DURATION_MINUTES = 60;
 
 export type CalendarFormValues = {
   scope: CalendarScope;
@@ -50,11 +55,58 @@ function parseTimeValue(value: string): { hours: number; minutes: number } | nul
   return { hours, minutes };
 }
 
+/**
+ * Ceil local clock time to the next minute step so the start is not in the past
+ * and matches the time picker options. Caps at the last slot of the day.
+ */
+export function defaultStartEndTimes(
+  now: Date,
+  timeZone: string = CALENDAR_TIMEZONE,
+  minuteStep: number = DEFAULT_TIME_MINUTE_STEP,
+  durationMinutes: number = DEFAULT_EVENT_DURATION_MINUTES,
+): { startTime: string; endTime: string; endDayOffset: number } {
+  const { hour, minute } = getZonedParts(now, timeZone);
+  let startTotal = hour * 60 + minute;
+  const remainder = startTotal % minuteStep;
+  if (remainder !== 0) {
+    startTotal += minuteStep - remainder;
+  }
+  if (startTotal >= 24 * 60) {
+    startTotal = 24 * 60 - minuteStep;
+  }
+
+  const endTotal = startTotal + durationMinutes;
+  const endDayOffset = Math.floor(endTotal / (24 * 60));
+  const endWithinDay = endTotal % (24 * 60);
+
+  return {
+    startTime: buildTimeValue({
+      hours: Math.floor(startTotal / 60),
+      minutes: startTotal % 60,
+    }),
+    endTime: buildTimeValue({
+      hours: Math.floor(endWithinDay / 60),
+      minutes: endWithinDay % 60,
+    }),
+    endDayOffset,
+  };
+}
+
 export function defaultFormValues(
   anchorDate: Date,
   timeZone: string = CALENDAR_TIMEZONE,
+  now: Date = new Date(),
 ): CalendarFormValues {
   const dateKey = formatDateKey(anchorDate, timeZone);
+  const { startTime, endTime, endDayOffset } = defaultStartEndTimes(
+    now,
+    timeZone,
+  );
+  const endDate =
+    endDayOffset > 0
+      ? addDaysToDateKey(dateKey, endDayOffset, timeZone)
+      : dateKey;
+
   return {
     scope: "personal",
     eventType: CALENDAR_DEFAULT_EVENT_TYPE,
@@ -69,9 +121,9 @@ export function defaultFormValues(
     title: "",
     description: "",
     startDate: dateKey,
-    startTime: "10:00",
-    endDate: dateKey,
-    endTime: "11:00",
+    startTime,
+    endDate,
+    endTime,
     allDay: false,
     location: "",
     sendReminders: CALENDAR_DEFAULT_SEND_REMINDERS,

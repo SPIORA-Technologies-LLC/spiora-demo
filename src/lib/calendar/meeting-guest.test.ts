@@ -240,5 +240,18 @@ describe("mintGuestMeetingAccessToken", () => {
 
     assert.equal(minted.roomName, "spiora-cal-evt-video");
     assert.ok(minted.token.length > 20);
+
+    const payloadJson = Buffer.from(
+      minted.token.split(".")[1]!,
+      "base64url",
+    ).toString("utf8");
+    const payload = JSON.parse(payloadJson) as {
+      video?: { canPublishData?: boolean };
+      name?: string;
+      sub?: string;
+    };
+    assert.equal(payload.sub, "guest-test-id");
+    assert.equal(payload.name, "Anna Client");
+    assert.equal(payload.video?.canPublishData, true);
   });
 });

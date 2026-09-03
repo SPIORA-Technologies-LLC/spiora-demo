@@ -60,7 +60,8 @@ export async function mintMeetingAccessToken(
     room: roomName,
     canPublish: true,
     canSubscribe: true,
-    canPublishData: false,
+    // Required for in-meeting chat (LiveKit data packets / useChat).
+    canPublishData: true,
   });
 
   return {
@@ -92,7 +93,8 @@ export async function mintGuestMeetingAccessToken(
     room: roomName,
     canPublish: true,
     canSubscribe: true,
-    canPublishData: false,
+    // Required for in-meeting chat (LiveKit data packets / useChat).
+    canPublishData: true,
   });
 
   return {

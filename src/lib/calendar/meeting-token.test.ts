@@ -117,5 +117,14 @@ describe("mintMeetingAccessToken", () => {
       minted.expiresAt,
       new Date(now.getTime() + ttl * 1000).toISOString(),
     );
+
+    const payloadJson = Buffer.from(
+      minted.token.split(".")[1]!,
+      "base64url",
+    ).toString("utf8");
+    const payload = JSON.parse(payloadJson) as {
+      video?: { canPublishData?: boolean };
+    };
+    assert.equal(payload.video?.canPublishData, true);
   });
 });

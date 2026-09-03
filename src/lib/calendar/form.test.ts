@@ -42,17 +42,44 @@ function event(overrides: Partial<CalendarEvent> = {}): CalendarEvent {
 }
 
 describe("defaultFormValues", () => {
-  it("prefills anchor date and default times", () => {
-    const values = defaultFormValues(new Date("2026-06-20T12:00:00.000Z"));
+  it("prefills anchor date and current local times", () => {
+    // 12:07 UTC → 14:07 Europe/Zagreb (CEST) → ceil to 14:10, end 15:10
+    const values = defaultFormValues(
+      new Date("2026-06-20T12:00:00.000Z"),
+      "Europe/Zagreb",
+      new Date("2026-06-20T12:07:00.000Z"),
+    );
     assert.equal(values.scope, "personal");
     assert.equal(values.eventType, "general");
     assert.equal(values.startDate, "2026-06-20");
     assert.equal(values.endDate, "2026-06-20");
-    assert.equal(values.startTime, "10:00");
-    assert.equal(values.endTime, "11:00");
+    assert.equal(values.startTime, "14:10");
+    assert.equal(values.endTime, "15:10");
     assert.equal(values.sendReminders, true);
     assert.equal(values.guestWaitingRoom, false);
     assert.deepEqual(values.externalInvitees, []);
+  });
+
+  it("rolls end date when duration crosses midnight", () => {
+    // 20:50 UTC = 22:50 Zagreb → end 23:50 same day
+    const sameDay = defaultFormValues(
+      new Date("2026-06-20T12:00:00.000Z"),
+      "Europe/Zagreb",
+      new Date("2026-06-20T20:50:00.000Z"),
+    );
+    assert.equal(sameDay.startTime, "22:50");
+    assert.equal(sameDay.endTime, "23:50");
+    assert.equal(sameDay.endDate, "2026-06-20");
+
+    // 21:40 UTC = 23:40 Zagreb → end 00:40 next day
+    const nextDay = defaultFormValues(
+      new Date("2026-06-20T12:00:00.000Z"),
+      "Europe/Zagreb",
+      new Date("2026-06-20T21:40:00.000Z"),
+    );
+    assert.equal(nextDay.startTime, "23:40");
+    assert.equal(nextDay.endTime, "00:40");
+    assert.equal(nextDay.endDate, "2026-06-21");
   });
 });
 

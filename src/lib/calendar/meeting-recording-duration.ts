@@ -50,8 +50,13 @@ export type LiveKitFileResultLike = {
 
 /** Prefer fileResults; fall back to deprecated result.file when empty. */
 export function collectLiveKitFileResults(info: {
-  fileResults?: LiveKitFileResultLike[];
-  result?: { case: string; value?: LiveKitFileResultLike } | null;
+  fileResults?: LiveKitFileResultLike[] | null;
+  result?:
+    | {
+        case?: string;
+        value?: unknown;
+      }
+    | null;
 }): LiveKitFileResultLike[] {
   const fromResults = [...(info.fileResults ?? [])];
   if (fromResults.length > 0) {
@@ -59,7 +64,8 @@ export function collectLiveKitFileResults(info: {
   }
 
   if (info.result?.case === "file" && info.result.value) {
-    return [info.result.value];
+    const value = info.result.value as LiveKitFileResultLike;
+    return [value];
   }
 
   return [];

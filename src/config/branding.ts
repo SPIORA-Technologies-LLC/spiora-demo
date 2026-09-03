@@ -34,8 +34,8 @@ export const branding = {
   websiteUrl: "https://spiora.demo",
   /** Locale-specific Spiora presentation (sidebar «Знакомство со Spiora» / Overview). */
   productPresentationUrl: {
-    en: "https://gamma.app/docs/Spiora-presentation-in-English-z3irgedui9m9fgs",
-    ru: "https://gamma.app/docs/-msbuylfh7da9te1",
+    en: "/spiora-presentation-en.pdf",
+    ru: "/spiora-presentation-ru.pdf",
   },
   demoCompanyWebsiteUrl: "https://example.com/spiora",
   defaultLocale: "en" as BrandingLocale,

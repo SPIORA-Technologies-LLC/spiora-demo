@@ -32,7 +32,7 @@ export const branding = {
   faviconPath: "/icons/favicon-32x32.png",
   supportEmail: "support@spiora.demo",
   websiteUrl: "https://spiora.demo",
-  /** Locale-specific Spiora presentation (sidebar «Сайт Spiora»). */
+  /** Locale-specific Spiora presentation (sidebar «Знакомство со Spiora» / Overview). */
   productPresentationUrl: {
     en: "https://gamma.app/docs/Spiora-presentation-in-English-z3irgedui9m9fgs",
     ru: "https://gamma.app/docs/-msbuylfh7da9te1",

@@ -62,7 +62,11 @@ export function openMeetingDockWindow(eventId: string): Window | null {
 }
 
 export function focusMeetingDockWindow(eventId: string): Window | null {
-  const win = window.open("", getMeetingDockWindowName(eventId));
+  const win = window.open(
+    `/calendar/meet/${encodeURIComponent(eventId)}?dock=1`,
+    getMeetingDockWindowName(eventId),
+    "popup=yes,width=420,height=760,resizable=yes,scrollbars=no",
+  );
   win?.focus();
   return win;
 }
@@ -192,7 +196,11 @@ export function openGuestMeetingDockWindow(inviteToken: string): Window | null {
 }
 
 export function focusGuestMeetingDockWindow(inviteToken: string): Window | null {
-  const win = window.open("", getGuestMeetingDockWindowName(inviteToken));
+  const win = window.open(
+    `/join/${encodeURIComponent(inviteToken)}?dock=1`,
+    getGuestMeetingDockWindowName(inviteToken),
+    "popup=yes,width=420,height=760,resizable=yes,scrollbars=no",
+  );
   win?.focus();
   return win;
 }

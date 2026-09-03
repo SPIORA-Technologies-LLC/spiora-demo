@@ -118,7 +118,12 @@ export function FirstImpressionView({
       </header>
 
       <div
-        className={loading ? styles.contentLoading : undefined}
+        className={[
+          styles.contentStack,
+          loading ? styles.contentLoading : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
         aria-busy={loading}
       >
         <section

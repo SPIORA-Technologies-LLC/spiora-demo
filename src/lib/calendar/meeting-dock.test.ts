@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  focusGuestMeetingDockWindow,
+  focusMeetingDockWindow,
   getMeetingDockWindowName,
   getGuestMeetingDockWindowName,
   isMeetingDockMode,
@@ -84,6 +86,68 @@ describe("meeting dock helpers", () => {
       getGuestMeetingDockWindowName("invite-token-abc"),
       "ss-guest-meeting-invite-token-abc",
     );
+  });
+
+  it("reopens meeting dock window with the meeting URL", () => {
+    const originalWindow = globalThis.window;
+    let call: { url?: string; name?: string; features?: string } | null = null;
+    const popup = { focus() {} };
+
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        open(url?: string, name?: string, features?: string) {
+          call = { url, name, features };
+          return popup;
+        },
+      },
+    });
+
+    try {
+      const result = focusMeetingDockWindow("evt-42");
+      assert.equal(result, popup);
+      assert.deepEqual(call, {
+        url: "/calendar/meet/evt-42?dock=1",
+        name: "ss-meeting-evt-42",
+        features: "popup=yes,width=420,height=760,resizable=yes,scrollbars=no",
+      });
+    } finally {
+      Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: originalWindow,
+      });
+    }
+  });
+
+  it("reopens guest dock window with the join URL", () => {
+    const originalWindow = globalThis.window;
+    let call: { url?: string; name?: string; features?: string } | null = null;
+    const popup = { focus() {} };
+
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        open(url?: string, name?: string, features?: string) {
+          call = { url, name, features };
+          return popup;
+        },
+      },
+    });
+
+    try {
+      const result = focusGuestMeetingDockWindow("invite-token-abc");
+      assert.equal(result, popup);
+      assert.deepEqual(call, {
+        url: "/join/invite-token-abc?dock=1",
+        name: "ss-guest-meeting-invite-token-abc",
+        features: "popup=yes,width=420,height=760,resizable=yes,scrollbars=no",
+      });
+    } finally {
+      Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: originalWindow,
+      });
+    }
   });
 
   it("round-trips guest dock session metadata in sessionStorage", () => {
